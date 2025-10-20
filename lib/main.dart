@@ -1,0 +1,42 @@
+import 'package:flutter/material.dart';
+import 'package:get/get_navigation/get_navigation.dart';
+import 'package:get/instance_manager.dart';
+import 'package:isar/isar.dart';
+import 'package:mistpos/controllers/items_controller.dart';
+import 'package:mistpos/models/item_categories_model.dart';
+import 'package:mistpos/models/item_model.dart';
+import 'package:mistpos/screens/auth/screen_splash.dart';
+import 'package:path_provider/path_provider.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final dir = await getApplicationDocumentsDirectory();
+  await Isar.open([
+    ItemModelSchema,
+    ItemCategoryModelSchema,
+  ], directory: dir.path);
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return GetMaterialApp(
+      title: 'MistPos',
+      debugShowCheckedModeBanner: false,
+      initialBinding: BindingsBuilder(() {
+        Get.put(ItemsController());
+      }),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.light(
+          primary: Color.fromARGB(255, 20, 89, 180),
+          secondary: Colors.orange,
+          surface: const Color.fromARGB(248, 255, 255, 255),
+        ),
+      ),
+      home: const ScreenSplash(),
+    );
+  }
+}

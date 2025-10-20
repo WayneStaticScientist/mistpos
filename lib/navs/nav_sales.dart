@@ -1,0 +1,368 @@
+import 'dart:async';
+
+import 'package:get/get.dart';
+import 'package:exui/exui.dart';
+import 'package:flutter/material.dart';
+import 'package:iconify_flutter/icons/bx.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/controllers/items_controller.dart';
+import 'package:mistpos/models/item_model.dart';
+import 'package:mistpos/widgets/inputs/search_field.dart';
+import 'package:mistpos/widgets/layouts/cards_category.dart';
+import 'package:mistpos/widgets/layouts/cards_recent.dart';
+import 'package:mistpos/widgets/layouts/list_tile_item.dart';
+
+class NavSale extends StatefulWidget {
+  const NavSale({super.key});
+
+  @override
+  State<NavSale> createState() => _NavSaleState();
+}
+
+class _NavSaleState extends State<NavSale> {
+  final _itemsListController = Get.find<ItemsController>();
+  final TextEditingController _searchController = TextEditingController();
+  bool _inSearchMode = false;
+  String _searchTerm = "";
+  int _animationSpeed = 0;
+  double _leftPosition = 0.0; // Left position
+  double _topPosition = 1000.0; // Off-screen initial position
+  double _animatedOpacity = 0.0;
+  final GlobalKey _bottomBarKey = GlobalKey();
+
+  Timer? _debounce;
+  @override
+  void initState() {
+    super.initState();
+    _initializeTimer();
+  }
+
+  @override
+  dispose() {
+    _debounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                elevation: 0,
+                floating: true,
+                title: "MistPos".text(),
+                backgroundColor: Get.theme.scaffoldBackgroundColor,
+                actions: [IconButton(onPressed: () {}, icon: Iconify(Bx.cog))],
+              ),
+              SliverToBoxAdapter(
+                child: [
+                  Expanded(
+                    child: MistSearchField(controller: _searchController),
+                  ),
+                  12.gapWidth,
+                  Iconify(Bx.slider_alt)
+                      .padding(
+                        EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                      )
+                      .decoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(207),
+                          color: Get.isDarkMode ? Colors.black : Colors.white,
+                        ),
+                      ),
+                ].row().padding(EdgeInsets.all(14)),
+              ),
+              if (!_inSearchMode)
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 199,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        CardsRecent(
+                          label: "Shops List",
+                          quantity: 3,
+                          price: 123,
+                        ),
+                        14.gapWidth,
+                        CardsRecent(
+                          label: "Wadzaushe",
+                          quantity: 12,
+                          price: 34534,
+                        ),
+                        14.gapWidth,
+                        CardsRecent(label: "Lenard", quantity: 24, price: 3445),
+                        14.gapWidth,
+                        CardsRecent(label: "Tapiwa", quantity: 33, price: 4567),
+                      ],
+                    ),
+                  ).padding(EdgeInsets.symmetric(horizontal: 18)),
+                ),
+              SliverToBoxAdapter(child: SizedBox(height: 18)),
+              if (!_inSearchMode)
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 60,
+                    child:
+                        ListView(
+                              scrollDirection: Axis.horizontal,
+                              children: [
+                                Obx(
+                                  () => CardsCategory(
+                                    onTap: () => _changeCategory(""),
+                                    isSelected:
+                                        _itemsListController
+                                            .selectedCategory
+                                            .value ==
+                                        "",
+                                    category: "All",
+                                  ),
+                                ),
+                                Obx(
+                                  () => _itemsListController.categories
+                                      .map<Widget>((category) {
+                                        return CardsCategory(
+                                          onTap: () =>
+                                              _changeCategory(category.name),
+                                          category: category.name,
+                                          isSelected:
+                                              _itemsListController
+                                                  .selectedCategory
+                                                  .value ==
+                                              category.name,
+                                        ).sizedBox(height: 60);
+                                      })
+                                      .toList()
+                                      .row(mainAxisSize: MainAxisSize.min),
+                                ),
+                              ],
+                            )
+                            .sizedBox()
+                            .padding(EdgeInsets.symmetric(horizontal: 18))
+                            .decoratedBox(
+                              decoration: BoxDecoration(
+                                color: Get.isDarkMode
+                                    ? Colors.black
+                                    : Colors.white,
+                              ),
+                            ),
+                  ),
+                ),
+
+              Obx(
+                () => SliverList.builder(
+                  itemBuilder: (context, index) =>
+                      MistListTileItem(
+                            item: _itemsListController.cartItems[index],
+                          )
+                          .padding(EdgeInsets.symmetric(horizontal: 18))
+                          .decoratedBox(
+                            decoration: BoxDecoration(
+                              color: Get.isDarkMode
+                                  ? Colors.black
+                                  : Colors.white,
+                            ),
+                          )
+                          .onTapUp(
+                            (e) => _handleWidgetClick(
+                              e,
+                              _itemsListController.cartItems[index],
+                            ),
+                          ),
+                  itemCount: _itemsListController.cartItems.length,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // --- THE TARGET BUTTON (BOTTOM STACK) ---
+        Obx(
+          () => _itemsListController.checkOutItems.isNotEmpty
+              ? Positioned(
+                  bottom: 24,
+                  right: 24,
+                  left: 24,
+                  // 🎯 Attach the GlobalKey here to measure its position
+                  child: Container(
+                    key: _bottomBarKey,
+                    child:
+                        Row(
+                              children: [
+                                [
+                                  InkWell(
+                                    onTap: _showSelectedItems,
+                                    child:
+                                        "\$${_itemsListController.totalPrice.value.toStringAsFixed(2)}"
+                                            .text(
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black,
+                                              ),
+                                            )
+                                            .padding(
+                                              EdgeInsets.symmetric(
+                                                horizontal: 12,
+                                                vertical: 6,
+                                              ),
+                                            )
+                                            .decoratedBox(
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius:
+                                                    BorderRadius.circular(18),
+                                              ),
+                                            ),
+                                  ),
+                                  18.gapWidth,
+                                  "${_itemsListController.checkOutItems.length} items"
+                                      .text(
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                ].row().expanded1,
+                                12.gapWidth,
+                                "Checkout".text(
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            )
+                            .padding(EdgeInsets.all(18))
+                            .decoratedBox(
+                              decoration: BoxDecoration(
+                                color: Get.theme.colorScheme.primary,
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                            ),
+                  ),
+                )
+              : Positioned.fill(child: SizedBox.shrink()),
+        ),
+        AnimatedPositioned(
+          duration: Duration(milliseconds: _animationSpeed),
+          curve: Curves.easeIn,
+          top: _topPosition,
+          left: _leftPosition,
+          child: AnimatedOpacity(
+            opacity: _animatedOpacity,
+            duration: Duration(milliseconds: _animationSpeed),
+            child: Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: Get.theme.colorScheme.secondary.withAlpha(200),
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.add_shopping_cart, // 🛒 A clear "add to cart" icon
+                color: Colors.white,
+                size: 30,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ... (Your existing methods: _changeCategory, _initializeTimer) ...
+  _changeCategory(String name) {
+    _itemsListController.selectedCategory.value = name;
+    _itemsListController.loadCartItems();
+  }
+
+  void _initializeTimer() {
+    _debounce = Timer.periodic(Duration(milliseconds: 500), (timer) {
+      final searchTerm = _searchController.text;
+      if (_searchTerm != searchTerm) {
+        _searchTerm = searchTerm;
+        _itemsListController.searchItems(_searchTerm);
+      }
+      if (searchTerm.isNotEmpty && !_inSearchMode) {
+        setState(() {
+          _inSearchMode = true;
+        });
+      } else if (searchTerm.isEmpty && _inSearchMode) {
+        setState(() {
+          _inSearchMode = false;
+        });
+        _itemsListController.loadCartItems();
+      }
+    });
+  }
+
+  void _handleWidgetClick(TapUpDetails details, ItemModel model) async {
+    _itemsListController.addSelectedItem(model);
+
+    final RenderBox? renderBox =
+        _bottomBarKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+    final Offset bottomBarTopLeft = renderBox.localToGlobal(Offset.zero);
+    final double targetTopPosition = bottomBarTopLeft.dy;
+
+    final double clickX = details.globalPosition.dx;
+    final double clickY = details.globalPosition.dy;
+
+    setState(() {
+      _topPosition = clickY;
+      _leftPosition = clickX;
+      _animationSpeed = 0;
+      _animatedOpacity = 1;
+    });
+
+    Future.delayed(Duration(milliseconds: 50), () {
+      setState(() {
+        _topPosition = targetTopPosition;
+        _leftPosition = 50;
+        _animationSpeed = 400;
+        _animatedOpacity = 0;
+      });
+    });
+  }
+
+  void _showSelectedItems() {
+    Get.bottomSheet(
+      SizedBox(
+        width: double.infinity,
+        height: MediaQuery.of(context).size.height * 0.5,
+        child: SingleChildScrollView(
+          child: [
+            "Items".text(
+              textAlign: TextAlign.start,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Obx(
+              () => _itemsListController.checkOutItems
+                  .map<Widget>((e) {
+                    final count = e['count'] as int;
+                    final model = e['item'] as ItemModel;
+                    return ListTile(
+                      title: Text(model.name),
+                      leading: Text("x $count"),
+                      trailing: IconButton(
+                        onPressed: () =>
+                            _itemsListController.removeSelectedItem(e),
+                        icon: Icon(Icons.close),
+                      ),
+                    );
+                  })
+                  .toList()
+                  .column(mainAxisSize: MainAxisSize.min),
+            ),
+          ].column(crossAxisAlignment: CrossAxisAlignment.start),
+        ),
+      ).padding(EdgeInsets.all(14)),
+      backgroundColor: Get.theme.scaffoldBackgroundColor,
+    );
+  }
+}

@@ -1,0 +1,86 @@
+import 'package:exui/exui.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/lucide.dart';
+
+class MistFormInput extends StatefulWidget {
+  final String label;
+  final Widget? icon;
+  final bool? isPasswordField;
+  final Color? underLineColor;
+  final String? validateString;
+  final TextEditingController? controller;
+  final int? validLength;
+  const MistFormInput({
+    super.key,
+    required this.label,
+    this.icon,
+    this.isPasswordField,
+    this.underLineColor,
+    this.controller,
+    this.validateString,
+    this.validLength,
+  });
+
+  @override
+  State<MistFormInput> createState() => _MistFormInputState();
+}
+
+class _MistFormInputState extends State<MistFormInput> {
+  bool _isVisible = false;
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      validator: (value) =>
+          widget.validateString != null && (value == null || value.isEmpty)
+          ? (widget.validLength == null
+                ? widget.validateString
+                : 'Minimum ${widget.validLength} characters required')
+          : null,
+      controller: widget.controller,
+      obscureText: (widget.isPasswordField != null && widget.isPasswordField!)
+          ? !_isVisible
+          : false,
+      decoration: InputDecoration(
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(
+            left: 15.0,
+            right: 8.0,
+          ), // Adjust padding for a smaller icon
+          child: SizedBox(
+            width: 16, // Set the intended width for the smaller icon
+            height: 16, // Set the intended height for the smaller icon
+            child: Center(
+              child: widget.icon,
+            ), // Use Center to keep the small icon centered
+          ),
+        ),
+        label: widget.label.text(
+          style: TextStyle(
+            color: widget.underLineColor ?? Get.theme.colorScheme.primary,
+          ),
+        ),
+        suffixIcon: Iconify(_isVisible ? Lucide.eye_off : Lucide.eye)
+            .center()
+            .sizedBox(width: 12, height: 12)
+            .onTap(
+              () => setState(() {
+                _isVisible = !_isVisible;
+              }),
+            )
+            .visibleIf(widget.isPasswordField == true),
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(
+            color: widget.underLineColor ?? Get.theme.colorScheme.primary,
+          ),
+        ),
+        border: UnderlineInputBorder(
+          borderSide: BorderSide(
+            color: widget.underLineColor ?? Get.theme.colorScheme.primary,
+          ),
+        ),
+      ),
+    );
+  }
+}
