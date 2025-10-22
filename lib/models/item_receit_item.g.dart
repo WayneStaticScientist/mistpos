@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'item_saved_model.dart';
+part of 'item_receit_item.dart';
 
 // **************************************************************************
 // IsarEmbeddedGenerator
@@ -9,87 +9,74 @@ part of 'item_saved_model.dart';
 // coverage:ignore-file
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
 
-const ItemSavedModelSchema = Schema(
-  name: r'ItemSavedModel',
-  id: 6921338431040609099,
+const ItemReceitItemSchema = Schema(
+  name: r'ItemReceitItem',
+  id: -6421942727519692737,
   properties: {
     r'addenum': PropertySchema(
       id: 0,
       name: r'addenum',
       type: IsarType.double,
     ),
-    r'baseId': PropertySchema(
-      id: 1,
-      name: r'baseId',
-      type: IsarType.long,
-    ),
     r'count': PropertySchema(
-      id: 2,
+      id: 1,
       name: r'count',
       type: IsarType.long,
     ),
-    r'dataMap': PropertySchema(
-      id: 3,
-      name: r'dataMap',
-      type: IsarType.stringList,
+    r'name': PropertySchema(
+      id: 2,
+      name: r'name',
+      type: IsarType.string,
     ),
-    r'qouted': PropertySchema(
-      id: 4,
-      name: r'qouted',
+    r'price': PropertySchema(
+      id: 3,
+      name: r'price',
       type: IsarType.double,
     )
   },
-  estimateSize: _itemSavedModelEstimateSize,
-  serialize: _itemSavedModelSerialize,
-  deserialize: _itemSavedModelDeserialize,
-  deserializeProp: _itemSavedModelDeserializeProp,
+  estimateSize: _itemReceitItemEstimateSize,
+  serialize: _itemReceitItemSerialize,
+  deserialize: _itemReceitItemDeserialize,
+  deserializeProp: _itemReceitItemDeserializeProp,
 );
 
-int _itemSavedModelEstimateSize(
-  ItemSavedModel object,
+int _itemReceitItemEstimateSize(
+  ItemReceitItem object,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
-  bytesCount += 3 + object.dataMap.length * 3;
-  {
-    for (var i = 0; i < object.dataMap.length; i++) {
-      final value = object.dataMap[i];
-      bytesCount += value.length * 3;
-    }
-  }
+  bytesCount += 3 + object.name.length * 3;
   return bytesCount;
 }
 
-void _itemSavedModelSerialize(
-  ItemSavedModel object,
+void _itemReceitItemSerialize(
+  ItemReceitItem object,
   IsarWriter writer,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeDouble(offsets[0], object.addenum);
-  writer.writeLong(offsets[1], object.baseId);
-  writer.writeLong(offsets[2], object.count);
-  writer.writeStringList(offsets[3], object.dataMap);
-  writer.writeDouble(offsets[4], object.qouted);
+  writer.writeLong(offsets[1], object.count);
+  writer.writeString(offsets[2], object.name);
+  writer.writeDouble(offsets[3], object.price);
 }
 
-ItemSavedModel _itemSavedModelDeserialize(
+ItemReceitItem _itemReceitItemDeserialize(
   Id id,
   IsarReader reader,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = ItemSavedModel();
+  final object = ItemReceitItem();
   object.addenum = reader.readDouble(offsets[0]);
-  object.baseId = reader.readLong(offsets[1]);
-  object.count = reader.readLong(offsets[2]);
-  object.dataMap = reader.readStringList(offsets[3]) ?? [];
-  object.qouted = reader.readDouble(offsets[4]);
+  object.count = reader.readLong(offsets[1]);
+  object.name = reader.readString(offsets[2]);
+  object.price = reader.readDouble(offsets[3]);
   return object;
 }
 
-P _itemSavedModelDeserializeProp<P>(
+P _itemReceitItemDeserializeProp<P>(
   IsarReader reader,
   int propertyId,
   int offset,
@@ -101,19 +88,17 @@ P _itemSavedModelDeserializeProp<P>(
     case 1:
       return (reader.readLong(offset)) as P;
     case 2:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 3:
-      return (reader.readStringList(offset) ?? []) as P;
-    case 4:
       return (reader.readDouble(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
 
-extension ItemSavedModelQueryFilter
-    on QueryBuilder<ItemSavedModel, ItemSavedModel, QFilterCondition> {
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
+extension ItemReceitItemQueryFilter
+    on QueryBuilder<ItemReceitItem, ItemReceitItem, QFilterCondition> {
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
       addenumEqualTo(
     double value, {
     double epsilon = Query.epsilon,
@@ -127,7 +112,7 @@ extension ItemSavedModelQueryFilter
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
       addenumGreaterThan(
     double value, {
     bool include = false,
@@ -143,7 +128,7 @@ extension ItemSavedModelQueryFilter
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
       addenumLessThan(
     double value, {
     bool include = false,
@@ -159,7 +144,7 @@ extension ItemSavedModelQueryFilter
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
       addenumBetween(
     double lower,
     double upper, {
@@ -179,63 +164,7 @@ extension ItemSavedModelQueryFilter
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      baseIdEqualTo(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'baseId',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      baseIdGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'baseId',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      baseIdLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'baseId',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      baseIdBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'baseId',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
       countEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -245,7 +174,7 @@ extension ItemSavedModelQueryFilter
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
       countGreaterThan(
     int value, {
     bool include = false,
@@ -259,7 +188,7 @@ extension ItemSavedModelQueryFilter
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
       countLessThan(
     int value, {
     bool include = false,
@@ -273,7 +202,7 @@ extension ItemSavedModelQueryFilter
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
       countBetween(
     int lower,
     int upper, {
@@ -291,22 +220,22 @@ extension ItemSavedModelQueryFilter
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      dataMapElementEqualTo(
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+      nameEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'dataMap',
+        property: r'name',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      dataMapElementGreaterThan(
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+      nameGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -314,15 +243,15 @@ extension ItemSavedModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'dataMap',
+        property: r'name',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      dataMapElementLessThan(
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+      nameLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -330,15 +259,15 @@ extension ItemSavedModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'dataMap',
+        property: r'name',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      dataMapElementBetween(
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+      nameBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -347,7 +276,7 @@ extension ItemSavedModelQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'dataMap',
+        property: r'name',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -357,181 +286,92 @@ extension ItemSavedModelQueryFilter
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      dataMapElementStartsWith(
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+      nameStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'dataMap',
+        property: r'name',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      dataMapElementEndsWith(
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+      nameEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'dataMap',
+        property: r'name',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      dataMapElementContains(String value, {bool caseSensitive = true}) {
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+      nameContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r'dataMap',
+        property: r'name',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      dataMapElementMatches(String pattern, {bool caseSensitive = true}) {
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+      nameMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r'dataMap',
+        property: r'name',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      dataMapElementIsEmpty() {
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+      nameIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'dataMap',
+        property: r'name',
         value: '',
       ));
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      dataMapElementIsNotEmpty() {
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+      nameIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'dataMap',
+        property: r'name',
         value: '',
       ));
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      dataMapLengthEqualTo(int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'dataMap',
-        length,
-        true,
-        length,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      dataMapIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'dataMap',
-        0,
-        true,
-        0,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      dataMapIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'dataMap',
-        0,
-        false,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      dataMapLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'dataMap',
-        0,
-        true,
-        length,
-        include,
-      );
-    });
-  }
-
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      dataMapLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'dataMap',
-        length,
-        include,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      dataMapLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'dataMap',
-        lower,
-        includeLower,
-        upper,
-        includeUpper,
-      );
-    });
-  }
-
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      qoutedEqualTo(
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+      priceEqualTo(
     double value, {
     double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'qouted',
+        property: r'price',
         value: value,
         epsilon: epsilon,
       ));
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      qoutedGreaterThan(
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+      priceGreaterThan(
     double value, {
     bool include = false,
     double epsilon = Query.epsilon,
@@ -539,15 +379,15 @@ extension ItemSavedModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'qouted',
+        property: r'price',
         value: value,
         epsilon: epsilon,
       ));
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      qoutedLessThan(
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+      priceLessThan(
     double value, {
     bool include = false,
     double epsilon = Query.epsilon,
@@ -555,15 +395,15 @@ extension ItemSavedModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'qouted',
+        property: r'price',
         value: value,
         epsilon: epsilon,
       ));
     });
   }
 
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-      qoutedBetween(
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+      priceBetween(
     double lower,
     double upper, {
     bool includeLower = true,
@@ -572,7 +412,7 @@ extension ItemSavedModelQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'qouted',
+        property: r'price',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -583,5 +423,5 @@ extension ItemSavedModelQueryFilter
   }
 }
 
-extension ItemSavedModelQueryObject
-    on QueryBuilder<ItemSavedModel, ItemSavedModel, QFilterCondition> {}
+extension ItemReceitItemQueryObject
+    on QueryBuilder<ItemReceitItem, ItemReceitItem, QFilterCondition> {}

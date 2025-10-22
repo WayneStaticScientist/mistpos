@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 import 'package:mistpos/models/item_modifier_model.dart';
+import 'package:mistpos/models/item_receit_item.dart';
+import 'package:mistpos/models/item_receit_model.dart';
 import 'package:mistpos/models/item_saved_items_model.dart';
 import 'package:mistpos/models/item_saved_model.dart';
 import 'package:mistpos/utils/toast.dart';
@@ -14,15 +16,18 @@ class ItemsController extends GetxController {
   RxString selectedCategory = ''.obs;
   RxList<ItemModel> cartItems = <ItemModel>[].obs;
   RxList<ItemModifier> modifiers = <ItemModifier>[].obs;
+  RxList<ItemReceitModel> receits = <ItemReceitModel>[].obs;
   RxList<ItemCategoryModel> categories = <ItemCategoryModel>[].obs;
+  RxList<ItemSavedItemsModel> savedItems = <ItemSavedItemsModel>[].obs;
   RxList<Map<String, dynamic>> checkOutItems = <Map<String, dynamic>>[].obs;
-
   @override
   void onInit() {
     super.onInit();
     loadMofiers();
     loadCartItems();
     loadCategories();
+    loadSavedItems();
+    loadReceits();
   }
 
   void removeSelectedItem(Map<String, dynamic> e) async {
@@ -86,6 +91,7 @@ class ItemsController extends GetxController {
     double qouted = 0.0,
     double addenum = 0.0,
     Map<String, bool>? dataMap,
+    int restoreAmount = -1,
   }) async {
     if (model.trackStock) {
       final isar = Isar.getInstance();
@@ -103,7 +109,7 @@ class ItemsController extends GetxController {
         Toaster.showError("item is out of stock ");
         return;
       }
-      md.stockQuantity = md.stockQuantity - 1;
+      md.stockQuantity = md.stockQuantity + restoreAmount;
       await isar.writeTxn(() async {
         await isar.itemModels.put(md);
       });
@@ -182,6 +188,24 @@ class ItemsController extends GetxController {
     }
     final loadedCategories = isar.itemCategoryModels.where().findAllSync();
     categories.assignAll(loadedCategories);
+  }
+
+  void loadSavedItems() {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      return;
+    }
+    final loadedModels = isar.itemSavedItemsModels.where().findAllSync();
+    savedItems.assignAll(loadedModels);
+  }
+
+  void loadReceits() {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      return;
+    }
+    final r = isar.itemReceitModels.where().findAllSync();
+    receits.assignAll(r);
   }
 
   void loadMofiers() {
@@ -283,6 +307,7 @@ class ItemsController extends GetxController {
     });
     checkOutItems.clear();
     totalPrice.value = 0;
+    loadSavedItems();
   }
 
   void _calculatedTotalPrice() {
@@ -296,17 +321,100 @@ class ItemsController extends GetxController {
   }
 
   ItemSavedModel _getModel(Map<String, dynamic> e) {
-    final sm = ItemSavedModel();
     final model = e['item'] as ItemModel;
-    sm.baseId = model.id;
-    sm.dataMap = _compileList(e['dataMap'] as Map<String, bool>? ?? {});
-    sm.count = e['count'];
-    sm.addenum = e['addenum'] as double? ?? 0.0;
-    sm.qouted = e['qouted'] as double? ?? 0.0;
+    final sm = ItemSavedModel()
+      ..dataMap = _compileList(e['dataMap'] as Map<String, bool>? ?? {})
+      ..count = e['count']
+      ..addenum = e['addenum'] as double? ?? 0.0
+      ..qouted = e['qouted'] as double? ?? 0.0
+      ..baseId = model.id;
     return sm;
   }
 
   List<String> _compileList(Map<String, bool> map) {
     return map.keys.toList();
+  }
+
+  void unwrapToCart(ItemSavedItemsModel model) async {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      Toaster.showError('Database not initialized');
+      return;
+    }
+    try {
+      checkOutItems.clear();
+
+      final List<Map<String, dynamic>> newCheckOutItems = [];
+      for (var savedItem in model.dataMap) {
+        // 1. Retrieve the original ItemModel using the baseId
+        final ItemModel? originalItem = await isar.itemModels.get(
+          savedItem.baseId,
+        );
+
+        if (originalItem != null) {
+          newCheckOutItems.add({
+            'id': originalItem.id,
+            'item': originalItem, // <--- Correctly storing the ItemModel
+            "count": savedItem.count,
+            "addenum": savedItem.addenum,
+            "qouted": savedItem.qouted,
+            "dataMap": _decodeDataMap(savedItem.dataMap),
+          });
+        } else {
+          // Handle case where original item is not found (optional)
+          log(
+            'Warning: Original ItemModel not found for baseId: ${savedItem.baseId}',
+          );
+        }
+      }
+
+      checkOutItems.addAll(newCheckOutItems);
+
+      // Delete the saved item after successfully loading it
+      await isar.writeTxn(() async {
+        await isar.itemSavedItemsModels.delete(model.id);
+      });
+
+      _calculatedTotalPrice();
+      loadSavedItems();
+    } catch (e) {
+      Toaster.showError("Error ; $e");
+      log(e.toString());
+    }
+  }
+
+  Map<String, bool> _decodeDataMap(List<String> dataMap) {
+    Map<String, bool> data = {};
+    for (var e in dataMap) {
+      data[e] = true;
+    }
+    return data;
+  }
+
+  void addReceitFromItemModel(double payedAmount) {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      Toaster.showError('Database not initialized');
+      return;
+    }
+    final itemReceitModel = ItemReceitModel(
+      "admin",
+      items: checkOutItems.map((e) {
+        final model = e['item'] as ItemModel;
+        final receit = ItemReceitItem()
+          ..name = model.name
+          ..price = model.price + e['qouted'] as double? ?? 0.0
+          ..addenum = e['addenum'] as double? ?? 0.0
+          ..count = e['count'] ?? 0;
+        return receit;
+      }).toList(),
+      amount: totalPrice.value,
+      createdAt: DateTime.now(),
+    );
+    final allTheModels = ItemSavedItemsModel(
+      name: name,
+      dataMap: checkOutItems.map((e) => _getModel(e)).toList(),
+      createdAt: DateTime.now(),
+    );
   }
 }

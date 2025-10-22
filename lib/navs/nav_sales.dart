@@ -81,30 +81,28 @@ class _NavSaleState extends State<NavSale> {
                 ].row().padding(EdgeInsets.all(14)),
               ),
               if (!_inSearchMode)
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 199,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        CardsRecent(
-                          label: "Shops List",
-                          quantity: 3,
-                          price: 123,
-                        ),
-                        14.gapWidth,
-                        CardsRecent(
-                          label: "Wadzaushe",
-                          quantity: 12,
-                          price: 34534,
-                        ),
-                        14.gapWidth,
-                        CardsRecent(label: "Lenard", quantity: 24, price: 3445),
-                        14.gapWidth,
-                        CardsRecent(label: "Tapiwa", quantity: 33, price: 4567),
-                      ],
-                    ),
-                  ).padding(EdgeInsets.symmetric(horizontal: 18)),
+                Obx(
+                  () => _itemsListController.savedItems.isNotEmpty
+                      ? SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: 199,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemBuilder: (BuildContext context, int index) {
+                                return CardsRecent(
+                                  savedModel:
+                                      _itemsListController.savedItems[index],
+                                ).onTap(
+                                  () => _itemsListController.unwrapToCart(
+                                    _itemsListController.savedItems[index],
+                                  ),
+                                );
+                              },
+                              itemCount: _itemsListController.savedItems.length,
+                            ),
+                          ).padding(EdgeInsets.symmetric(horizontal: 18)),
+                        )
+                      : SliverToBoxAdapter(child: SizedBox.shrink()),
                 ),
               SliverToBoxAdapter(child: SizedBox(height: 18)),
               if (!_inSearchMode)

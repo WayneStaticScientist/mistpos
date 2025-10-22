@@ -20,6 +20,7 @@ class ScreenEditManualCart extends StatefulWidget {
 class _ScreenEditManualCartState extends State<ScreenEditManualCart> {
   final _itemsListController = Get.find<ItemsController>();
   late int count = widget.map['count'] as int;
+  late int track = widget.map['count'] as int;
   double price = 0;
   late double floatAmount = widget.map['qouted'] as double? ?? 0.0;
   late final Map<String, bool> dataMap =
@@ -189,6 +190,7 @@ class _ScreenEditManualCartState extends State<ScreenEditManualCart> {
       dataMap: dataMap,
       addenum: addenum,
       qouted: floatAmount,
+      restoreAmount: track - count,
     );
     Get.back();
   }
