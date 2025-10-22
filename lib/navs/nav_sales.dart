@@ -2,15 +2,19 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
+import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/models/item_model.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/screens/basic/screen_checkout.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
-import 'package:mistpos/widgets/layouts/cards_category.dart';
 import 'package:mistpos/widgets/layouts/cards_recent.dart';
+import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/widgets/layouts/list_tile_item.dart';
+import 'package:mistpos/widgets/layouts/cards_category.dart';
+import 'package:mistpos/screens/basic/screen_manual_cart.dart';
+import 'package:mistpos/screens/basic/screen_edit_manual_cart.dart';
 
 class NavSale extends StatefulWidget {
   const NavSale({super.key});
@@ -172,80 +176,21 @@ class _NavSaleState extends State<NavSale> {
                               e,
                               _itemsListController.cartItems[index],
                             ),
+                          )
+                          .padding(
+                            EdgeInsets.only(
+                              bottom:
+                                  index ==
+                                      _itemsListController.cartItems.length - 1
+                                  ? 300
+                                  : 0,
+                            ),
                           ),
                   itemCount: _itemsListController.cartItems.length,
                 ),
               ),
             ],
           ),
-        ),
-
-        // --- THE TARGET BUTTON (BOTTOM STACK) ---
-        Obx(
-          () => _itemsListController.checkOutItems.isNotEmpty
-              ? Positioned(
-                  bottom: 24,
-                  right: 24,
-                  left: 24,
-                  // 🎯 Attach the GlobalKey here to measure its position
-                  child: Container(
-                    key: _bottomBarKey,
-                    child:
-                        Row(
-                              children: [
-                                [
-                                  InkWell(
-                                    onTap: _showSelectedItems,
-                                    child:
-                                        "\$${_itemsListController.totalPrice.value.toStringAsFixed(2)}"
-                                            .text(
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black,
-                                              ),
-                                            )
-                                            .padding(
-                                              EdgeInsets.symmetric(
-                                                horizontal: 12,
-                                                vertical: 6,
-                                              ),
-                                            )
-                                            .decoratedBox(
-                                              decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius:
-                                                    BorderRadius.circular(18),
-                                              ),
-                                            ),
-                                  ),
-                                  18.gapWidth,
-                                  "${_itemsListController.checkOutItems.length} items"
-                                      .text(
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                ].row().expanded1,
-                                12.gapWidth,
-                                "Checkout".text(
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            )
-                            .padding(EdgeInsets.all(18))
-                            .decoratedBox(
-                              decoration: BoxDecoration(
-                                color: Get.theme.colorScheme.primary,
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                            ),
-                  ),
-                )
-              : Positioned.fill(child: SizedBox.shrink()),
         ),
         AnimatedPositioned(
           duration: Duration(milliseconds: _animationSpeed),
@@ -270,6 +215,70 @@ class _NavSaleState extends State<NavSale> {
               ),
             ),
           ),
+        ),
+        // --- THE TARGET BUTTON (BOTTOM STACK) ---
+        Obx(
+          () => _itemsListController.checkOutItems.isNotEmpty
+              ? Positioned(
+                  bottom: 24,
+                  right: 24,
+                  left: 24,
+                  // 🎯 Attach the GlobalKey here to measure its position
+                  child: Container(
+                    key: _bottomBarKey,
+                    child:
+                        Row(
+                              children: [
+                                [
+                                  "\$${_itemsListController.totalPrice.value.toStringAsFixed(2)}"
+                                      .text(
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      )
+                                      .textButton(
+                                        onPressed: _showSelectedItems,
+                                        style: TextButton.styleFrom(
+                                          backgroundColor:
+                                              Get.theme.colorScheme.onPrimary,
+                                          foregroundColor:
+                                              Get.theme.colorScheme.primary,
+                                        ),
+                                      ),
+                                  18.gapWidth,
+                                  "${_itemsListController.checkOutItems.length} items"
+                                      .text(
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                ].row().expanded1,
+                                12.gapWidth,
+                                "Checkout"
+                                    .text(
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
+                                    .textButton(
+                                      onPressed: () =>
+                                          Get.to(() => ScreenCheckout()),
+                                    ),
+                              ],
+                            )
+                            .padding(EdgeInsets.all(18))
+                            .decoratedBox(
+                              decoration: BoxDecoration(
+                                color: Get.theme.colorScheme.primary,
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                            ),
+                  ),
+                )
+              : Positioned.fill(child: SizedBox.shrink()),
         ),
       ],
     );
@@ -302,6 +311,11 @@ class _NavSaleState extends State<NavSale> {
   }
 
   void _handleWidgetClick(TapUpDetails details, ItemModel model) async {
+    if (model.price == 0 ||
+        (model.modifierIds != null && model.modifierIds!.isNotEmpty)) {
+      Get.to(() => ScreenManualCart(item: model));
+      return;
+    }
     _itemsListController.addSelectedItem(model);
 
     final RenderBox? renderBox =
@@ -346,15 +360,17 @@ class _NavSaleState extends State<NavSale> {
                   .map<Widget>((e) {
                     final count = e['count'] as int;
                     final model = e['item'] as ItemModel;
-                    return ListTile(
-                      title: Text(model.name),
-                      leading: Text("x $count"),
-                      trailing: IconButton(
-                        onPressed: () =>
-                            _itemsListController.removeSelectedItem(e),
-                        icon: Icon(Icons.close),
+                    return Card(
+                      child: ListTile(
+                        title: Text(model.name),
+                        leading: Text("x $count"),
+                        trailing: IconButton(
+                          onPressed: () =>
+                              _itemsListController.removeSelectedItem(e),
+                          icon: Icon(Icons.close),
+                        ),
                       ),
-                    );
+                    ).onTap(() => Get.to(() => ScreenEditManualCart(map: e)));
                   })
                   .toList()
                   .column(mainAxisSize: MainAxisSize.min),

@@ -57,7 +57,7 @@ class _MistListTileItemState extends State<MistListTileItem> {
         widget.item.shape!,
         size: 48,
         color: widget.item.color != null
-            ? Color(int.parse('0xff${widget.item.color!}'))
+            ? Color(int.parse('${widget.item.color!}'))
             : Get.theme.colorScheme.primary,
       );
     }

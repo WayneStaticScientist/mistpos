@@ -50,6 +50,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
   late final _reorderLevelController = TextEditingController(
     text: widget.model.lowStockThreshold.toString(),
   );
+  late final List<int> _modifiers = widget.model.modifierIds ?? [];
 
   bool _isLoading = false;
   @override
@@ -267,6 +268,34 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
                   "Modifiers".text(
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
+                  ..._itemsController.modifiers.map<Widget>(
+                    (mod) => ListTile(
+                      onTap: () => setState(() {
+                        setState(() {
+                          if (_modifiers.contains(mod.id)) {
+                            _modifiers.remove(mod.id);
+                          } else {
+                            _modifiers.add(mod.id);
+                          }
+                        });
+                      }),
+                      contentPadding: EdgeInsets.zero,
+                      title: mod.name.text(),
+                      trailing: Switch(
+                        value: _modifiers.contains(mod.id),
+                        onChanged: (val) {
+                          setState(() {
+                            if (_modifiers.contains(mod.id)) {
+                              _modifiers.remove(mod.id);
+                            } else {
+                              _modifiers.add(mod.id);
+                            }
+                          });
+                        },
+                        activeColor: Get.theme.colorScheme.primary,
+                      ),
+                    ),
+                  ),
                 ]
                 .column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -420,6 +449,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
     } else {
       price = cost;
     }
+    widget.model.modifierIds = _modifiers;
     widget.model.price = price;
     widget.model.cost = cost;
     widget.model.name = _itemNameController.text;

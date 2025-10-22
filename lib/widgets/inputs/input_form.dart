@@ -11,6 +11,7 @@ class MistFormInput extends StatefulWidget {
   final Color? underLineColor;
   final String? validateString;
   final TextEditingController? controller;
+  final TextInputType? keyboardType;
   final int? validLength;
   const MistFormInput({
     super.key,
@@ -21,6 +22,7 @@ class MistFormInput extends StatefulWidget {
     this.controller,
     this.validateString,
     this.validLength,
+    this.keyboardType,
   });
 
   @override
@@ -42,20 +44,23 @@ class _MistFormInputState extends State<MistFormInput> {
       obscureText: (widget.isPasswordField != null && widget.isPasswordField!)
           ? !_isVisible
           : false,
+      keyboardType: widget.keyboardType,
       decoration: InputDecoration(
-        prefixIcon: Padding(
-          padding: const EdgeInsets.only(
-            left: 15.0,
-            right: 8.0,
-          ), // Adjust padding for a smaller icon
-          child: SizedBox(
-            width: 16, // Set the intended width for the smaller icon
-            height: 16, // Set the intended height for the smaller icon
-            child: Center(
-              child: widget.icon,
-            ), // Use Center to keep the small icon centered
-          ),
-        ),
+        prefixIcon: widget.icon != null
+            ? Padding(
+                padding: const EdgeInsets.only(
+                  left: 15.0,
+                  right: 8.0,
+                ), // Adjust padding for a smaller icon
+                child: SizedBox(
+                  width: 16, // Set the intended width for the smaller icon
+                  height: 16, // Set the intended height for the smaller icon
+                  child: Center(
+                    child: widget.icon,
+                  ), // Use Center to keep the small icon centered
+                ),
+              )
+            : null,
         label: widget.label.text(
           style: TextStyle(
             color: widget.underLineColor ?? Get.theme.colorScheme.primary,

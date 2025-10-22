@@ -8,6 +8,7 @@ import 'package:mistpos/navs/items_navs/nav_items_list.dart';
 import 'package:mistpos/navs/items_navs/nav_category_list.dart';
 import 'package:mistpos/navs/items_navs/nav_modifiers_list.dart';
 import 'package:mistpos/navs/items_navs/nav_discounts_list.dart';
+import 'package:mistpos/screens/basic/screen_add_modifier.dart';
 
 class NavItems extends StatefulWidget {
   final GlobalKey<ScaffoldState>? scaffoldKey;
@@ -118,7 +119,7 @@ class _NavItemsState extends State<NavItems> {
     } else if (_selectedIndex == 1) {
       Get.to(() => ScreenAddCategory());
     } else if (_selectedIndex == 2) {
-      // Add Modifier
+      Get.to(() => ScreenAddModifier());
     } else if (_selectedIndex == 3) {
       // Add Discount
     }

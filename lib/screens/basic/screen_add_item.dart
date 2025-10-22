@@ -38,7 +38,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
 
   final _initialStockController = TextEditingController();
   final _reorderLevelController = TextEditingController();
-
+  final List<int> _modifiers = [];
   bool _isLoading = false;
   String? _selectedCategory;
   bool _isTrackingInventory = false;
@@ -148,7 +148,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
                     underLineColor: Colors.grey.withAlpha(200),
                     controller: _itemPriceController,
                   ),
-                  "Leaving this blank will default to item cost".text(
+                  "Leaving this blank will make it price on sale".text(
                     style: TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                   14.gapHeight,
@@ -251,6 +251,34 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
             [
                   "Modifiers".text(
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  ..._itemsController.modifiers.map<Widget>(
+                    (mod) => ListTile(
+                      onTap: () => setState(() {
+                        setState(() {
+                          if (_modifiers.contains(mod.id)) {
+                            _modifiers.remove(mod.id);
+                          } else {
+                            _modifiers.add(mod.id);
+                          }
+                        });
+                      }),
+                      contentPadding: EdgeInsets.zero,
+                      title: mod.name.text(),
+                      trailing: Switch(
+                        value: _modifiers.contains(mod.id),
+                        onChanged: (val) {
+                          setState(() {
+                            if (_modifiers.contains(mod.id)) {
+                              _modifiers.remove(mod.id);
+                            } else {
+                              _modifiers.add(mod.id);
+                            }
+                          });
+                        },
+                        activeColor: Get.theme.colorScheme.primary,
+                      ),
+                    ),
                   ),
                 ]
                 .column(
@@ -398,12 +426,8 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
     setState(() {
       _isLoading = true;
     });
-    double price = 0;
-    if (_itemPriceController.text.isNotEmpty) {
-      price = double.tryParse(_itemPriceController.text.trim()) ?? 0.0;
-    } else {
-      price = cost;
-    }
+    double price = double.tryParse(_itemPriceController.text.trim()) ?? 0.0;
+
     final soldBy = _soldByGroup.value as String;
     final itemModel = ItemModel(
       name: _itemNameController.text.trim(),
@@ -411,6 +435,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
       price: price,
       cost: cost,
       soldBy: soldBy,
+      modifierIds: _modifiers,
       sku: _itemSKUController.text.trim(),
       barcode: _itemBarcodeController.text.trim(),
       trackStock: _isTrackingInventory,

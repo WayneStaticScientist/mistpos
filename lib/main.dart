@@ -5,6 +5,8 @@ import 'package:isar/isar.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/models/item_categories_model.dart';
 import 'package:mistpos/models/item_model.dart';
+import 'package:mistpos/models/item_modifier_model.dart';
+import 'package:mistpos/models/item_saved_items_model.dart';
 import 'package:mistpos/screens/auth/screen_splash.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -13,7 +15,9 @@ void main() async {
   final dir = await getApplicationDocumentsDirectory();
   await Isar.open([
     ItemModelSchema,
+    ItemModifierSchema,
     ItemCategoryModelSchema,
+    ItemSavedItemsModelSchema,
   ], directory: dir.path);
   runApp(const MyApp());
 }
