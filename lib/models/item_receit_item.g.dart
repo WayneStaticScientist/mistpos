@@ -18,20 +18,30 @@ const ItemReceitItemSchema = Schema(
       name: r'addenum',
       type: IsarType.double,
     ),
-    r'count': PropertySchema(
+    r'baseId': PropertySchema(
       id: 1,
+      name: r'baseId',
+      type: IsarType.long,
+    ),
+    r'count': PropertySchema(
+      id: 2,
       name: r'count',
       type: IsarType.long,
     ),
     r'name': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'name',
       type: IsarType.string,
     ),
     r'price': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'price',
       type: IsarType.double,
+    ),
+    r'refunded': PropertySchema(
+      id: 5,
+      name: r'refunded',
+      type: IsarType.bool,
     )
   },
   estimateSize: _itemReceitItemEstimateSize,
@@ -57,9 +67,11 @@ void _itemReceitItemSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeDouble(offsets[0], object.addenum);
-  writer.writeLong(offsets[1], object.count);
-  writer.writeString(offsets[2], object.name);
-  writer.writeDouble(offsets[3], object.price);
+  writer.writeLong(offsets[1], object.baseId);
+  writer.writeLong(offsets[2], object.count);
+  writer.writeString(offsets[3], object.name);
+  writer.writeDouble(offsets[4], object.price);
+  writer.writeBool(offsets[5], object.refunded);
 }
 
 ItemReceitItem _itemReceitItemDeserialize(
@@ -70,9 +82,11 @@ ItemReceitItem _itemReceitItemDeserialize(
 ) {
   final object = ItemReceitItem();
   object.addenum = reader.readDouble(offsets[0]);
-  object.count = reader.readLong(offsets[1]);
-  object.name = reader.readString(offsets[2]);
-  object.price = reader.readDouble(offsets[3]);
+  object.baseId = reader.readLong(offsets[1]);
+  object.count = reader.readLong(offsets[2]);
+  object.name = reader.readString(offsets[3]);
+  object.price = reader.readDouble(offsets[4]);
+  object.refunded = reader.readBool(offsets[5]);
   return object;
 }
 
@@ -88,9 +102,13 @@ P _itemReceitItemDeserializeProp<P>(
     case 1:
       return (reader.readLong(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 3:
+      return (reader.readString(offset)) as P;
+    case 4:
       return (reader.readDouble(offset)) as P;
+    case 5:
+      return (reader.readBool(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -160,6 +178,62 @@ extension ItemReceitItemQueryFilter
         upper: upper,
         includeUpper: includeUpper,
         epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+      baseIdEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'baseId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+      baseIdGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'baseId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+      baseIdLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'baseId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+      baseIdBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'baseId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -418,6 +492,16 @@ extension ItemReceitItemQueryFilter
         upper: upper,
         includeUpper: includeUpper,
         epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+      refundedEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'refunded',
+        value: value,
       ));
     });
   }

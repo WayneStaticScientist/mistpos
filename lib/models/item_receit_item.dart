@@ -7,5 +7,7 @@ class ItemReceitItem {
   late int count;
   late double price;
   late double addenum;
+  bool refunded = false;
+  int baseId = 0;
   ItemReceitItem();
 }

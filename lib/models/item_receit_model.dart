@@ -6,13 +6,19 @@ part 'item_receit_model.g.dart';
 class ItemReceitModel {
   Id id = Isar.autoIncrement;
   final String cashier;
-  final double amount;
+  final String payment;
+  final double change;
+  double amount;
+  double total;
   DateTime createdAt;
   List<ItemReceitItem> items = [];
-  ItemReceitModel(
-    this.cashier, {
+  ItemReceitModel({
     required this.items,
+    required this.total,
     required this.amount,
+    required this.change,
+    required this.cashier,
+    required this.payment,
     required this.createdAt,
   });
 }

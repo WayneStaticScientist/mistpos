@@ -37,6 +37,9 @@ class MistMainNavigationView extends StatelessWidget {
           ListTile(
             leading: Iconify(Bx.receipt),
             title: Text('Receipts'),
+            tileColor: selectedNav == 'receipts'
+                ? Colors.grey.withAlpha(50)
+                : null,
             onTap: () => onTap('receipts'),
           ),
           ListTile(

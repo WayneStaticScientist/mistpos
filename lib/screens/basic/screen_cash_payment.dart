@@ -26,6 +26,7 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
   double change = 0.0;
   Timer? _debounce;
   String _debounceCache = "";
+  bool _savingReceit = false;
   @override
   void initState() {
     super.initState();
@@ -89,8 +90,11 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
       bottomNavigationBar: SafeArea(
         child: "Pay"
             .text()
-            .elevatedButton(
-              onPressed: () {},
+            .elevatedIconButton(
+              icon: _savingReceit
+                  ? CircularProgressIndicator(color: Colors.white)
+                  : Iconify(Carbon.money, color: Colors.white),
+              onPressed: _pay,
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.all(20),
                 backgroundColor: change >= 0.0
@@ -185,6 +189,32 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
         });
       }
       Toaster.showError("failed to save payment : $e");
+    }
+  }
+
+  void _pay() async {
+    final amount = double.tryParse(_amountController.text);
+    if (amount == null) {
+      Toaster.showError("invalid amount");
+      return;
+    }
+    if (amount < _itemsListController.totalPrice.value) {
+      Toaster.showError("not enough funds");
+      return;
+    }
+    setState(() {
+      _savingReceit = true;
+    });
+    final state = await _itemsListController.addReceitFromItemModel(
+      amount,
+      "cash",
+    );
+    setState(() {
+      _savingReceit = false;
+    });
+    if (state) {
+      Get.back();
+      Toaster.showSuccess("payment done");
     }
   }
 }

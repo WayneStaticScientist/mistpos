@@ -2,14 +2,14 @@ import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
-import 'package:mistpos/models/item_modifier_model.dart';
-import 'package:mistpos/models/item_receit_item.dart';
-import 'package:mistpos/models/item_receit_model.dart';
-import 'package:mistpos/models/item_saved_items_model.dart';
-import 'package:mistpos/models/item_saved_model.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/item_model.dart';
+import 'package:mistpos/models/item_saved_model.dart';
+import 'package:mistpos/models/item_receit_item.dart';
+import 'package:mistpos/models/item_receit_model.dart';
+import 'package:mistpos/models/item_modifier_model.dart';
 import 'package:mistpos/models/item_categories_model.dart';
+import 'package:mistpos/models/item_saved_items_model.dart';
 
 class ItemsController extends GetxController {
   RxDouble totalPrice = RxDouble(0);
@@ -28,6 +28,17 @@ class ItemsController extends GetxController {
     loadCategories();
     loadSavedItems();
     loadReceits();
+  }
+
+  @override
+  void dispose() {
+    if (checkOutItems.isNotEmpty) {
+      DateTime now = DateTime.now();
+      saveItem(
+        "${now.day}-${now.month}-${now.year} : ${now.hour}:${now.minute}",
+      );
+    }
+    super.dispose();
   }
 
   void removeSelectedItem(Map<String, dynamic> e) async {
@@ -204,7 +215,7 @@ class ItemsController extends GetxController {
     if (isar == null) {
       return;
     }
-    final r = isar.itemReceitModels.where().findAllSync();
+    final r = isar.itemReceitModels.where().sortByCreatedAtDesc().findAllSync();
     receits.assignAll(r);
   }
 
@@ -287,6 +298,24 @@ class ItemsController extends GetxController {
     } catch (e) {
       log('Error adding modifier: $e');
       Toaster.showError('Failed to add modifier');
+    }
+    return false;
+  }
+
+  Future<bool> deleteModifiers(List<int> id) async {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      Toaster.showError('Database not initialized');
+      return false;
+    }
+    try {
+      await isar.writeTxn(() async {
+        await isar.itemModifiers.deleteAll(id);
+      });
+      loadMofiers();
+      return true;
+    } catch (e) {
+      Toaster.showError('Failed to delete modifier');
     }
     return false;
   }
@@ -391,30 +420,86 @@ class ItemsController extends GetxController {
     return data;
   }
 
-  void addReceitFromItemModel(double payedAmount) {
-    final isar = Isar.getInstance();
-    if (isar == null) {
-      Toaster.showError('Database not initialized');
-      return;
+  Future<bool> addReceitFromItemModel(
+    double payedAmount,
+    String payment,
+  ) async {
+    try {
+      final isar = Isar.getInstance();
+      if (isar == null) {
+        Toaster.showError('Database not initialized');
+        return false;
+      }
+      final itemReceitModel = ItemReceitModel(
+        cashier: "admin",
+        payment: payment,
+        amount: payedAmount,
+        items: checkOutItems.map((e) {
+          final model = e['item'] as ItemModel;
+          final receit = ItemReceitItem()
+            ..name = model.name
+            ..baseId = model.id
+            ..price = model.price + e['qouted'] as double? ?? 0.0
+            ..addenum = e['addenum'] as double? ?? 0.0
+            ..count = e['count'] ?? 0;
+          return receit;
+        }).toList(),
+        change: payedAmount - totalPrice.value,
+        createdAt: DateTime.now(),
+        total: totalPrice.value,
+      );
+      await isar.writeTxn(() async {
+        await isar.itemReceitModels.put(itemReceitModel);
+      });
+      checkOutItems.clear();
+      totalPrice.value = 0;
+      loadReceits();
+      return true;
+    } catch (e) {
+      Toaster.showError("There was error : $e");
+      return false;
     }
-    final itemReceitModel = ItemReceitModel(
-      "admin",
-      items: checkOutItems.map((e) {
-        final model = e['item'] as ItemModel;
-        final receit = ItemReceitItem()
-          ..name = model.name
-          ..price = model.price + e['qouted'] as double? ?? 0.0
-          ..addenum = e['addenum'] as double? ?? 0.0
-          ..count = e['count'] ?? 0;
-        return receit;
-      }).toList(),
-      amount: totalPrice.value,
-      createdAt: DateTime.now(),
-    );
-    final allTheModels = ItemSavedItemsModel(
-      name: name,
-      dataMap: checkOutItems.map((e) => _getModel(e)).toList(),
-      createdAt: DateTime.now(),
-    );
+  }
+
+  Future<ItemReceitModel?> refundItem(
+    ItemReceitModel model,
+    ItemReceitItem e,
+    int count,
+    int index,
+  ) async {
+    try {
+      final isar = Isar.getInstance();
+      if (isar == null) {
+        Toaster.showError("database not initialized");
+        return null;
+      }
+      e.count = e.count - count;
+      e.refunded = true;
+      model.total = model.total - (e.price + e.addenum) * count;
+      model.amount = model.amount + (e.price + e.addenum) * count;
+      if (e.count < 0) {
+        Toaster.showError("$count should be less than ${e.count}");
+        return null;
+      }
+      model.items[index] = e;
+      await isar.writeTxn(() async {
+        await isar.itemReceitModels.put(model);
+      });
+      final itemModel = await isar.itemModels.get(e.baseId);
+      if (itemModel == null) {
+        Toaster.showError("item not found");
+        return null;
+      }
+      if (itemModel.trackStock) {
+        itemModel.stockQuantity = itemModel.stockQuantity + count;
+        await isar.writeTxn(() async {
+          await isar.itemModels.put(itemModel);
+        });
+      }
+      return model;
+    } catch (e) {
+      Toaster.showError("There was error : $e");
+      return null;
+    }
   }
 }
