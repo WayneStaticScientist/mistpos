@@ -8,5 +8,6 @@ class ItemSavedModel {
   late double addenum;
   late int count;
   late int baseId;
+  late double cost;
   ItemSavedModel();
 }

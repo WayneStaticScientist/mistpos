@@ -23,18 +23,23 @@ const ItemSavedModelSchema = Schema(
       name: r'baseId',
       type: IsarType.long,
     ),
-    r'count': PropertySchema(
+    r'cost': PropertySchema(
       id: 2,
+      name: r'cost',
+      type: IsarType.double,
+    ),
+    r'count': PropertySchema(
+      id: 3,
       name: r'count',
       type: IsarType.long,
     ),
     r'dataMap': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'dataMap',
       type: IsarType.stringList,
     ),
     r'qouted': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'qouted',
       type: IsarType.double,
     )
@@ -69,9 +74,10 @@ void _itemSavedModelSerialize(
 ) {
   writer.writeDouble(offsets[0], object.addenum);
   writer.writeLong(offsets[1], object.baseId);
-  writer.writeLong(offsets[2], object.count);
-  writer.writeStringList(offsets[3], object.dataMap);
-  writer.writeDouble(offsets[4], object.qouted);
+  writer.writeDouble(offsets[2], object.cost);
+  writer.writeLong(offsets[3], object.count);
+  writer.writeStringList(offsets[4], object.dataMap);
+  writer.writeDouble(offsets[5], object.qouted);
 }
 
 ItemSavedModel _itemSavedModelDeserialize(
@@ -83,9 +89,10 @@ ItemSavedModel _itemSavedModelDeserialize(
   final object = ItemSavedModel();
   object.addenum = reader.readDouble(offsets[0]);
   object.baseId = reader.readLong(offsets[1]);
-  object.count = reader.readLong(offsets[2]);
-  object.dataMap = reader.readStringList(offsets[3]) ?? [];
-  object.qouted = reader.readDouble(offsets[4]);
+  object.cost = reader.readDouble(offsets[2]);
+  object.count = reader.readLong(offsets[3]);
+  object.dataMap = reader.readStringList(offsets[4]) ?? [];
+  object.qouted = reader.readDouble(offsets[5]);
   return object;
 }
 
@@ -101,10 +108,12 @@ P _itemSavedModelDeserializeProp<P>(
     case 1:
       return (reader.readLong(offset)) as P;
     case 2:
-      return (reader.readLong(offset)) as P;
+      return (reader.readDouble(offset)) as P;
     case 3:
-      return (reader.readStringList(offset) ?? []) as P;
+      return (reader.readLong(offset)) as P;
     case 4:
+      return (reader.readStringList(offset) ?? []) as P;
+    case 5:
       return (reader.readDouble(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -231,6 +240,72 @@ extension ItemSavedModelQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
+      costEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'cost',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
+      costGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'cost',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
+      costLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'cost',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
+      costBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'cost',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
       ));
     });
   }

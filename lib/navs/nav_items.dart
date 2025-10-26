@@ -1,11 +1,13 @@
 import 'package:get/get.dart';
+import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:mistpos/screens/basic/screen_add_category.dart';
+import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/screens/basic/screen_add_item.dart';
 import 'package:mistpos/navs/items_navs/nav_items_list.dart';
 import 'package:mistpos/navs/items_navs/nav_category_list.dart';
+import 'package:mistpos/screens/basic/screen_add_category.dart';
 import 'package:mistpos/navs/items_navs/nav_modifiers_list.dart';
 import 'package:mistpos/navs/items_navs/nav_discounts_list.dart';
 import 'package:mistpos/screens/basic/screen_add_modifier.dart';
@@ -26,6 +28,7 @@ class _NavItemsState extends State<NavItems> {
     NavModifiersList(),
     NavDiscountsList(),
   ];
+  final _itemsController = Get.find<ItemsController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,6 +49,17 @@ class _NavItemsState extends State<NavItems> {
               fontWeight: FontWeight.w600,
             ),
             iconTheme: IconThemeData(color: Get.theme.colorScheme.onPrimary),
+
+            actions: [
+              Obx(
+                () => _itemsController.deleting.value
+                    ? CircularProgressIndicator(color: Colors.white)
+                          .center()
+                          .sizedBox(width: 16, height: 16)
+                          .padding(EdgeInsets.symmetric(horizontal: 8))
+                    : SizedBox.shrink(),
+              ),
+            ],
           ),
           _navOptions.elementAt(_selectedIndex),
         ],

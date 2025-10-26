@@ -6,9 +6,11 @@ import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
+import 'package:mistpos/models/item_receit_item.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 
 class ScreenCashPayment extends StatefulWidget {
@@ -19,6 +21,7 @@ class ScreenCashPayment extends StatefulWidget {
 }
 
 class _ScreenCashPaymentState extends State<ScreenCashPayment> {
+  final _userController = Get.find<UserController>();
   final _itemsListController = Get.find<ItemsController>();
   bool _loading = false;
 
@@ -27,6 +30,7 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
   Timer? _debounce;
   String _debounceCache = "";
   bool _savingReceit = false;
+  List<ItemReceitItem> _rejects = [];
   @override
   void initState() {
     super.initState();
@@ -54,38 +58,39 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
         ],
       ),
       body: SingleChildScrollView(
-        child:
-            [
-              "Cash Payment".text(),
-              CurrenceConverter.getCurrenceFloatInStrings(
-                _itemsListController.totalPrice.value,
-              ).text(
-                style: TextStyle(
-                  fontSize: 42,
-                  fontWeight: FontWeight.bold,
-                  color: Get.theme.colorScheme.primary,
+        child: _rejects.isEmpty
+            ? [
+                "Cash Payment".text(),
+                CurrenceConverter.getCurrenceFloatInStrings(
+                  _itemsListController.totalPrice.value,
+                ).text(
+                  style: TextStyle(
+                    fontSize: 42,
+                    fontWeight: FontWeight.bold,
+                    color: Get.theme.colorScheme.primary,
+                  ),
                 ),
-              ),
-              18.gapHeight,
-              MistFormInput(
-                label: "Amount Payed",
-                controller: _amountController,
-                keyboardType: TextInputType.number,
-              ),
-              18.gapHeight,
-              (change < 0.0)
-                  ? "Not Enough Funds".text(
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  : "Change ${CurrenceConverter.getCurrenceFloatInStrings(change)}"
-                        .text(),
-            ].column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-            ),
+                18.gapHeight,
+                MistFormInput(
+                  label: "Amount Payed",
+                  controller: _amountController,
+                  keyboardType: TextInputType.number,
+                ),
+                18.gapHeight,
+                (change < 0.0)
+                    ? "Not Enough Funds".text(
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : "Change ${CurrenceConverter.getCurrenceFloatInStrings(change)}"
+                          .text(),
+              ].column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+              )
+            : _listRejects(),
       ).center().padding(EdgeInsets.all(30)),
       bottomNavigationBar: SafeArea(
         child: "Pay"
@@ -208,13 +213,53 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
     final state = await _itemsListController.addReceitFromItemModel(
       amount,
       "cash",
+      allowOfflinePurchase:
+          _userController.user.value != null &&
+          _userController.user.value!.allowOfflinePurchase,
     );
     setState(() {
       _savingReceit = false;
     });
-    if (state) {
+    if (state.success) {
+      if (state.rejects != null && state.rejects!.isNotEmpty) {
+        setState(() {
+          _rejects = state.rejects!;
+        });
+        return;
+      }
       Get.back();
       Toaster.showSuccess("payment done");
     }
+  }
+
+  Widget _listRejects() {
+    return [
+      "Reject Notice".text(
+        style: TextStyle(
+          fontSize: 32,
+          color: Colors.red,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      14.gapHeight,
+      "Your payment has rejected the following items but others have proceeded payment"
+          .text(),
+      22.gapHeight,
+      ..._rejects.map(
+        (e) => ListTile(
+          leading: Text(e.count.toString()),
+          title: Text(e.name),
+          trailing: Text(
+            CurrenceConverter.getCurrenceFloatInStrings(
+              (e.price + e.addenum) * e.count,
+            ),
+          ),
+          subtitle: Text(e.rejectedReason, overflow: TextOverflow.ellipsis),
+        ),
+      ),
+    ].column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+    );
   }
 }

@@ -4,14 +4,17 @@ import 'package:get/get_navigation/get_navigation.dart';
 import 'package:get/instance_manager.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/models/user_model.dart';
 
 class MistMainNavigationView extends StatelessWidget {
   final Function(String value) onTap;
+  final User? user;
   final String selectedNav;
   const MistMainNavigationView({
     super.key,
     required this.onTap,
     required this.selectedNav,
+    this.user,
   });
 
   @override
@@ -22,8 +25,18 @@ class MistMainNavigationView extends StatelessWidget {
         children: <Widget>[
           DrawerHeader(
             decoration: BoxDecoration(color: Get.theme.colorScheme.primary),
-            child: 'MistPos'.text(
-              style: TextStyle(color: Colors.white, fontSize: 24),
+            child: ListTile(
+              title: ((user != null) ? user!.fullName.split(" ").first : "User")
+                  .text(style: TextStyle(color: Colors.white)),
+              subtitle: (user != null ? user!.company : "Company").text(
+                style: TextStyle(fontSize: 9, color: Colors.white),
+              ),
+              trailing: "Till ${user?.till ?? 1}".text(
+                style: TextStyle(fontSize: 12, color: Colors.white),
+              ),
+              leading: CircleAvatar(
+                child: Iconify(Bx.user, color: Colors.white),
+              ),
             ),
           ),
           ListTile(

@@ -22,8 +22,13 @@ const ItemCategoryModelSchema = CollectionSchema(
       name: r'color',
       type: IsarType.long,
     ),
-    r'name': PropertySchema(
+    r'hexId': PropertySchema(
       id: 1,
+      name: r'hexId',
+      type: IsarType.string,
+    ),
+    r'name': PropertySchema(
+      id: 2,
       name: r'name',
       type: IsarType.string,
     )
@@ -62,6 +67,7 @@ int _itemCategoryModelEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 + object.hexId.length * 3;
   bytesCount += 3 + object.name.length * 3;
   return bytesCount;
 }
@@ -73,7 +79,8 @@ void _itemCategoryModelSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeLong(offsets[0], object.color);
-  writer.writeString(offsets[1], object.name);
+  writer.writeString(offsets[1], object.hexId);
+  writer.writeString(offsets[2], object.name);
 }
 
 ItemCategoryModel _itemCategoryModelDeserialize(
@@ -84,7 +91,8 @@ ItemCategoryModel _itemCategoryModelDeserialize(
 ) {
   final object = ItemCategoryModel(
     color: reader.readLongOrNull(offsets[0]),
-    name: reader.readString(offsets[1]),
+    hexId: reader.readStringOrNull(offsets[1]) ?? '',
+    name: reader.readString(offsets[2]),
   );
   object.id = id;
   return object;
@@ -100,6 +108,8 @@ P _itemCategoryModelDeserializeProp<P>(
     case 0:
       return (reader.readLongOrNull(offset)) as P;
     case 1:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 2:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -377,6 +387,142 @@ extension ItemCategoryModelQueryFilter
   }
 
   QueryBuilder<ItemCategoryModel, ItemCategoryModel, QAfterFilterCondition>
+      hexIdEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemCategoryModel, ItemCategoryModel, QAfterFilterCondition>
+      hexIdGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemCategoryModel, ItemCategoryModel, QAfterFilterCondition>
+      hexIdLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemCategoryModel, ItemCategoryModel, QAfterFilterCondition>
+      hexIdBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'hexId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemCategoryModel, ItemCategoryModel, QAfterFilterCondition>
+      hexIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemCategoryModel, ItemCategoryModel, QAfterFilterCondition>
+      hexIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemCategoryModel, ItemCategoryModel, QAfterFilterCondition>
+      hexIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemCategoryModel, ItemCategoryModel, QAfterFilterCondition>
+      hexIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'hexId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemCategoryModel, ItemCategoryModel, QAfterFilterCondition>
+      hexIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hexId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemCategoryModel, ItemCategoryModel, QAfterFilterCondition>
+      hexIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'hexId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemCategoryModel, ItemCategoryModel, QAfterFilterCondition>
       idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -592,6 +738,20 @@ extension ItemCategoryModelQuerySortBy
   }
 
   QueryBuilder<ItemCategoryModel, ItemCategoryModel, QAfterSortBy>
+      sortByHexId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hexId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemCategoryModel, ItemCategoryModel, QAfterSortBy>
+      sortByHexIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hexId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemCategoryModel, ItemCategoryModel, QAfterSortBy>
       sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -619,6 +779,20 @@ extension ItemCategoryModelQuerySortThenBy
       thenByColorDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'color', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemCategoryModel, ItemCategoryModel, QAfterSortBy>
+      thenByHexId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hexId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemCategoryModel, ItemCategoryModel, QAfterSortBy>
+      thenByHexIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hexId', Sort.desc);
     });
   }
 
@@ -659,6 +833,13 @@ extension ItemCategoryModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<ItemCategoryModel, ItemCategoryModel, QDistinct> distinctByHexId(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'hexId', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<ItemCategoryModel, ItemCategoryModel, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -678,6 +859,12 @@ extension ItemCategoryModelQueryProperty
   QueryBuilder<ItemCategoryModel, int?, QQueryOperations> colorProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'color');
+    });
+  }
+
+  QueryBuilder<ItemCategoryModel, String, QQueryOperations> hexIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'hexId');
     });
   }
 

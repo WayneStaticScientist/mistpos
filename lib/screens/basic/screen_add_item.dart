@@ -427,7 +427,6 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
       _isLoading = true;
     });
     double price = double.tryParse(_itemPriceController.text.trim()) ?? 0.0;
-
     final soldBy = _soldByGroup.value as String;
     final itemModel = ItemModel(
       name: _itemNameController.text.trim(),
@@ -445,7 +444,10 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
       shape: _selectedIcon,
       avatar: "",
     );
-    final response = await _itemsController.createItem(itemModel);
+    final response = await _itemsController.createItem(
+      itemModel,
+      update: false,
+    );
     if (!mounted) return;
     setState(() {
       _isLoading = false;

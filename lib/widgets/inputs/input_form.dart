@@ -8,6 +8,7 @@ class MistFormInput extends StatefulWidget {
   final String label;
   final Widget? icon;
   final bool? isPasswordField;
+  final bool? enabled;
   final Color? underLineColor;
   final String? validateString;
   final TextEditingController? controller;
@@ -23,6 +24,7 @@ class MistFormInput extends StatefulWidget {
     this.validateString,
     this.validLength,
     this.keyboardType,
+    this.enabled,
   });
 
   @override
@@ -41,6 +43,7 @@ class _MistFormInputState extends State<MistFormInput> {
                 : 'Minimum ${widget.validLength} characters required')
           : null,
       controller: widget.controller,
+      enabled: widget.enabled,
       obscureText: (widget.isPasswordField != null && widget.isPasswordField!)
           ? !_isVisible
           : false,

@@ -137,6 +137,7 @@ class _ScreenAddCategoryState extends State<ScreenAddCategory> {
         name: _itemNameController.text,
         color: _selectedColor.toARGB32(),
       ),
+      update: false,
     );
     if (mounted) {
       setState(() {

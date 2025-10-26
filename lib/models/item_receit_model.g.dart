@@ -37,19 +37,29 @@ const ItemReceitModelSchema = CollectionSchema(
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
-    r'items': PropertySchema(
+    r'hexId': PropertySchema(
       id: 4,
+      name: r'hexId',
+      type: IsarType.string,
+    ),
+    r'items': PropertySchema(
+      id: 5,
       name: r'items',
       type: IsarType.objectList,
       target: r'ItemReceitItem',
     ),
     r'payment': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'payment',
       type: IsarType.string,
     ),
+    r'synced': PropertySchema(
+      id: 7,
+      name: r'synced',
+      type: IsarType.bool,
+    ),
     r'total': PropertySchema(
-      id: 6,
+      id: 8,
       name: r'total',
       type: IsarType.double,
     )
@@ -75,6 +85,7 @@ int _itemReceitModelEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.cashier.length * 3;
+  bytesCount += 3 + object.hexId.length * 3;
   bytesCount += 3 + object.items.length * 3;
   {
     final offsets = allOffsets[ItemReceitItem]!;
@@ -98,14 +109,16 @@ void _itemReceitModelSerialize(
   writer.writeString(offsets[1], object.cashier);
   writer.writeDouble(offsets[2], object.change);
   writer.writeDateTime(offsets[3], object.createdAt);
+  writer.writeString(offsets[4], object.hexId);
   writer.writeObjectList<ItemReceitItem>(
-    offsets[4],
+    offsets[5],
     allOffsets,
     ItemReceitItemSchema.serialize,
     object.items,
   );
-  writer.writeString(offsets[5], object.payment);
-  writer.writeDouble(offsets[6], object.total);
+  writer.writeString(offsets[6], object.payment);
+  writer.writeBool(offsets[7], object.synced);
+  writer.writeDouble(offsets[8], object.total);
 }
 
 ItemReceitModel _itemReceitModelDeserialize(
@@ -119,17 +132,19 @@ ItemReceitModel _itemReceitModelDeserialize(
     cashier: reader.readString(offsets[1]),
     change: reader.readDouble(offsets[2]),
     createdAt: reader.readDateTime(offsets[3]),
+    hexId: reader.readString(offsets[4]),
     items: reader.readObjectList<ItemReceitItem>(
-          offsets[4],
+          offsets[5],
           ItemReceitItemSchema.deserialize,
           allOffsets,
           ItemReceitItem(),
         ) ??
         [],
-    payment: reader.readString(offsets[5]),
-    total: reader.readDouble(offsets[6]),
+    payment: reader.readString(offsets[6]),
+    total: reader.readDouble(offsets[8]),
   );
   object.id = id;
+  object.synced = reader.readBool(offsets[7]);
   return object;
 }
 
@@ -149,6 +164,8 @@ P _itemReceitModelDeserializeProp<P>(
     case 3:
       return (reader.readDateTime(offset)) as P;
     case 4:
+      return (reader.readString(offset)) as P;
+    case 5:
       return (reader.readObjectList<ItemReceitItem>(
             offset,
             ItemReceitItemSchema.deserialize,
@@ -156,9 +173,11 @@ P _itemReceitModelDeserializeProp<P>(
             ItemReceitItem(),
           ) ??
           []) as P;
-    case 5:
-      return (reader.readString(offset)) as P;
     case 6:
+      return (reader.readString(offset)) as P;
+    case 7:
+      return (reader.readBool(offset)) as P;
+    case 8:
       return (reader.readDouble(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -585,6 +604,142 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      hexIdEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      hexIdGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      hexIdLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      hexIdBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'hexId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      hexIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      hexIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      hexIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      hexIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'hexId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      hexIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hexId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      hexIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'hexId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
       idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -866,6 +1021,16 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      syncedEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'synced',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
       totalEqualTo(
     double value, {
     double epsilon = Query.epsilon,
@@ -1000,6 +1165,19 @@ extension ItemReceitModelQuerySortBy
     });
   }
 
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortByHexId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hexId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+      sortByHexIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hexId', Sort.desc);
+    });
+  }
+
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortByPayment() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'payment', Sort.asc);
@@ -1010,6 +1188,19 @@ extension ItemReceitModelQuerySortBy
       sortByPaymentDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'payment', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortBySynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'synced', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+      sortBySyncedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'synced', Sort.desc);
     });
   }
 
@@ -1082,6 +1273,19 @@ extension ItemReceitModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenByHexId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hexId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+      thenByHexIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hexId', Sort.desc);
+    });
+  }
+
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -1104,6 +1308,19 @@ extension ItemReceitModelQuerySortThenBy
       thenByPaymentDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'payment', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenBySynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'synced', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+      thenBySyncedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'synced', Sort.desc);
     });
   }
 
@@ -1149,10 +1366,23 @@ extension ItemReceitModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QDistinct> distinctByHexId(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'hexId', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<ItemReceitModel, ItemReceitModel, QDistinct> distinctByPayment(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'payment', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QDistinct> distinctBySynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'synced');
     });
   }
 
@@ -1196,6 +1426,12 @@ extension ItemReceitModelQueryProperty
     });
   }
 
+  QueryBuilder<ItemReceitModel, String, QQueryOperations> hexIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'hexId');
+    });
+  }
+
   QueryBuilder<ItemReceitModel, List<ItemReceitItem>, QQueryOperations>
       itemsProperty() {
     return QueryBuilder.apply(this, (query) {
@@ -1206,6 +1442,12 @@ extension ItemReceitModelQueryProperty
   QueryBuilder<ItemReceitModel, String, QQueryOperations> paymentProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'payment');
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, bool, QQueryOperations> syncedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'synced');
     });
   }
 

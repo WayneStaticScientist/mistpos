@@ -4,13 +4,14 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:mistpos/screens/basic/screen_checkout.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/widgets/layouts/cards_recent.dart';
 import 'package:mistpos/controllers/items_controller.dart';
+import 'package:mistpos/screens/basic/screen_checkout.dart';
 import 'package:mistpos/widgets/layouts/list_tile_item.dart';
 import 'package:mistpos/widgets/layouts/cards_category.dart';
 import 'package:mistpos/screens/basic/screen_manual_cart.dart';
@@ -33,18 +34,21 @@ class _NavSaleState extends State<NavSale> {
   double _topPosition = 1000.0; // Off-screen initial position
   double _animatedOpacity = 0.0;
   final GlobalKey _bottomBarKey = GlobalKey();
+  final _scrollController = ScrollController();
 
   Timer? _debounce;
   @override
   void initState() {
     super.initState();
     _initializeTimer();
+    _scrollController.addListener(_scrollListener);
   }
 
   @override
   dispose() {
     _debounce?.cancel();
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -54,13 +58,38 @@ class _NavSaleState extends State<NavSale> {
       children: [
         Positioned.fill(
           child: CustomScrollView(
+            controller: _scrollController,
             slivers: [
               SliverAppBar(
                 elevation: 0,
                 floating: true,
                 title: "MistPos".text(),
                 backgroundColor: Get.theme.scaffoldBackgroundColor,
-                actions: [IconButton(onPressed: () {}, icon: Iconify(Bx.cog))],
+                actions: [
+                  Obx(
+                    () => (_itemsListController.syncingItems.value)
+                        ? IconButton(
+                            onPressed: () {},
+                            icon: const CircularProgressIndicator(
+                              strokeWidth: 3,
+                            ).sizedBox(height: 16, width: 16),
+                          )
+                        : SizedBox.shrink(),
+                  ),
+                  Obx(
+                    () =>
+                        (_itemsListController
+                            .syncingItemsFailed
+                            .value
+                            .isNotEmpty)
+                        ? IconButton(
+                            onPressed: _displayError,
+                            icon: Iconify(Bx.error, color: Colors.red),
+                          )
+                        : SizedBox.shrink(),
+                  ),
+                  IconButton(onPressed: () {}, icon: Iconify(Bx.cog)),
+                ],
               ),
               SliverToBoxAdapter(
                 child: [
@@ -156,36 +185,55 @@ class _NavSaleState extends State<NavSale> {
                 ),
 
               Obx(
-                () => SliverList.builder(
-                  itemBuilder: (context, index) =>
-                      MistListTileItem(
-                            item: _itemsListController.cartItems[index],
-                          )
-                          .padding(EdgeInsets.symmetric(horizontal: 18))
-                          .decoratedBox(
-                            decoration: BoxDecoration(
-                              color: Get.isDarkMode
-                                  ? Colors.black
-                                  : Colors.white,
-                            ),
-                          )
-                          .onTapUp(
-                            (e) => _handleWidgetClick(
-                              e,
-                              _itemsListController.cartItems[index],
-                            ),
-                          )
-                          .padding(
-                            EdgeInsets.only(
-                              bottom:
-                                  index ==
-                                      _itemsListController.cartItems.length - 1
-                                  ? 300
-                                  : 0,
-                            ),
-                          ),
-                  itemCount: _itemsListController.cartItems.length,
-                ),
+                () => _itemsListController.cartItems.isNotEmpty
+                    ? SliverList.builder(
+                        itemBuilder: (context, index) =>
+                            index >= _itemsListController.cartItems.length
+                            ? _makeLastList()
+                            : MistListTileItem(
+                                    item: _itemsListController.cartItems[index],
+                                  )
+                                  .padding(EdgeInsets.symmetric(horizontal: 18))
+                                  .decoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: Get.isDarkMode
+                                          ? Colors.black
+                                          : Colors.white,
+                                    ),
+                                  )
+                                  .onTapUp(
+                                    (e) => _handleWidgetClick(
+                                      e,
+                                      _itemsListController.cartItems[index],
+                                    ),
+                                  )
+                                  .padding(
+                                    EdgeInsets.only(
+                                      bottom:
+                                          index ==
+                                              _itemsListController
+                                                      .cartItems
+                                                      .length -
+                                                  1
+                                          ? 100
+                                          : 0,
+                                    ),
+                                  ),
+                        itemCount: _itemsListController.cartItems.length + 1,
+                      )
+                    : SliverFillRemaining(
+                        child:
+                            [
+                                  Iconify(Bx.cart_alt),
+                                  12.gapHeight,
+                                  "no items".text(),
+                                ]
+                                .column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                )
+                                .center(),
+                      ),
               ),
             ],
           ),
@@ -221,7 +269,6 @@ class _NavSaleState extends State<NavSale> {
                   bottom: 24,
                   right: 24,
                   left: 24,
-                  // 🎯 Attach the GlobalKey here to measure its position
                   child: Container(
                     key: _bottomBarKey,
                     child:
@@ -309,13 +356,16 @@ class _NavSaleState extends State<NavSale> {
   }
 
   void _handleWidgetClick(TapUpDetails details, ItemModel model) async {
+    if (_itemsListController.syncingItems.value) {
+      Toaster.showError("items syncing please wait");
+      return;
+    }
     if (model.price == 0 ||
         (model.modifierIds != null && model.modifierIds!.isNotEmpty)) {
       Get.to(() => ScreenManualCart(item: model));
       return;
     }
     _itemsListController.addSelectedItem(model);
-
     final RenderBox? renderBox =
         _bottomBarKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null) return;
@@ -378,5 +428,32 @@ class _NavSaleState extends State<NavSale> {
       ).padding(EdgeInsets.all(14)),
       backgroundColor: Get.theme.scaffoldBackgroundColor,
     );
+  }
+
+  void _displayError() {
+    Toaster.showError(_itemsListController.syncingItemsFailed.value);
+  }
+
+  void _scrollListener() {
+    if (_scrollController.offset >=
+            _scrollController.position.maxScrollExtent &&
+        !_scrollController.position.outOfRange &&
+        _itemsListController.itemsPage.value <
+            _itemsListController.totalPages.value) {
+      _itemsListController.loadCartItems(
+        page: _itemsListController.itemsPage.value + 1,
+        search: _searchTerm,
+      );
+    }
+  }
+
+  Widget _makeLastList() {
+    if (_itemsListController.itemsPage.value <
+        _itemsListController.totalPages.value) {
+      return [
+        CircularProgressIndicator().sizedBox(width: 20, height: 20),
+      ].row(mainAxisAlignment: MainAxisAlignment.center);
+    }
+    return SizedBox.shrink();
   }
 }

@@ -7,5 +7,17 @@ class ItemCategoryModel {
   @Index(unique: true)
   String name;
   int? color;
-  ItemCategoryModel({required this.name, this.color});
+  String hexId;
+  ItemCategoryModel({required this.name, this.color, this.hexId = ''});
+  Map<String, dynamic> toJson() {
+    return {"name": name, "color": color, "hexId": hexId};
+  }
+
+  factory ItemCategoryModel.fromJson(Map<String, dynamic> json) {
+    return ItemCategoryModel(
+      color: json["color"] as int?,
+      name: json["name"] as String? ?? "",
+      hexId: json["_id"] as String? ?? "",
+    );
+  }
 }

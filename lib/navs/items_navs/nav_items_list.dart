@@ -1,8 +1,7 @@
-import 'package:exui/material.dart';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
+import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/screens/basic/screen_edit_item.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/item_model.dart';
@@ -11,6 +10,7 @@ import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/widgets/buttons/card_buttons.dart';
 import 'package:mistpos/widgets/layouts/list_tile_item.dart';
+import 'package:mistpos/screens/basic/screen_edit_item.dart';
 
 class NavItemsList extends StatefulWidget {
   const NavItemsList({super.key});
@@ -24,15 +24,19 @@ class _NavItemsListState extends State<NavItemsList> {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => SliverList.builder(
-        itemBuilder: (context, index) => InkWell(
-          onTap: () => _openEditor(_itemsController.cartItems[index]),
-          onLongPress: () =>
-              _openDeleteDialog(_itemsController.cartItems[index]),
-          child: MistListTileItem(item: _itemsController.cartItems[index]),
-        ),
-        itemCount: _itemsController.cartItems.length,
-      ),
+      () => _itemsController.cartItems.isEmpty
+          ? _emptyWidget()
+          : SliverList.builder(
+              itemBuilder: (context, index) => InkWell(
+                onTap: () => _openEditor(_itemsController.cartItems[index]),
+                onLongPress: () =>
+                    _openDeleteDialog(_itemsController.cartItems[index]),
+                child: MistListTileItem(
+                  item: _itemsController.cartItems[index],
+                ),
+              ),
+              itemCount: _itemsController.cartItems.length,
+            ),
     );
   }
 
@@ -106,11 +110,31 @@ class _NavItemsListState extends State<NavItemsList> {
           'delete'.text().textButton(
             onPressed: () {
               Get.back();
-              _itemsController.deleteItems([cartItem.id]);
+              _itemsController.deleteItem(cartItem.hexId);
             },
           ),
         ],
       ),
+    );
+  }
+
+  Widget _emptyWidget() {
+    return SliverFillRemaining(
+      child:
+          [
+                Iconify(
+                  Bx.no_entry,
+                  size: 60,
+                  color: Get.theme.colorScheme.primary,
+                ),
+                18.gapHeight,
+                "No Items click new to add one".text(),
+              ]
+              .column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+              )
+              .center(),
     );
   }
 }

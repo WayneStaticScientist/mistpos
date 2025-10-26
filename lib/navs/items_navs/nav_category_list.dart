@@ -22,25 +22,43 @@ class _NavCategoryListState extends State<NavCategoryList> {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => SliverList.builder(
-        itemBuilder: (context, index) {
-          final item = _itemsController.categories[index];
-          return InkWell(
-            onTap: () => _openEditor(item),
-            child: Card(
-              child: ListTile(
-                title: Text(item.name),
-                leading: CircleAvatar(
-                  backgroundColor: item.color == null
-                      ? Get.theme.colorScheme.primary
-                      : Color(int.parse('${item.color!}')),
-                ),
-              ),
+      () => _itemsController.categories.isEmpty
+          ? SliverFillRemaining(
+              child:
+                  [
+                        Iconify(
+                          Carbon.no_ticket,
+                          size: 60,
+                          color: Get.theme.colorScheme.primary,
+                        ),
+                        18.gapHeight,
+                        "No Categories click new to add one".text(),
+                      ]
+                      .column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                      )
+                      .center(),
+            )
+          : SliverList.builder(
+              itemBuilder: (context, index) {
+                final item = _itemsController.categories[index];
+                return InkWell(
+                  onTap: () => _openEditor(item),
+                  child: Card(
+                    child: ListTile(
+                      title: Text(item.name),
+                      leading: CircleAvatar(
+                        backgroundColor: item.color == null
+                            ? Get.theme.colorScheme.primary
+                            : Color(int.parse('${item.color!}')),
+                      ),
+                    ),
+                  ),
+                );
+              },
+              itemCount: _itemsController.categories.length,
             ),
-          );
-        },
-        itemCount: _itemsController.categories.length,
-      ),
     );
   }
 
@@ -78,7 +96,7 @@ class _NavCategoryListState extends State<NavCategoryList> {
           "delete".text().textButton(
             onPressed: () {
               Get.back();
-              _itemsController.deleteCategories([model.id]);
+              _itemsController.deleteCategory(model.hexId);
             },
           ),
         ],
