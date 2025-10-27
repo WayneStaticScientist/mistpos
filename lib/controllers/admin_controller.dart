@@ -69,4 +69,37 @@ class AdminController extends GetxController {
     fetchEmployees();
     return true;
   }
+
+  RxBool updatingEmployee = RxBool(false);
+  Future<bool> updateEmployee(Map<String, dynamic> data) async {
+    if (addingEmployee.value) {
+      Toaster.showError("Adding employee please wait");
+      return false;
+    }
+    updatingEmployee.value = true;
+    final result = await Net.put("/admin/employee", data: data);
+    updatingEmployee.value = false;
+    if (result.hasError) {
+      Toaster.showError(result.response);
+      return false;
+    }
+    fetchEmployees();
+    return true;
+  }
+
+  Future<bool> deleteEmployee(String id) async {
+    if (addingEmployee.value) {
+      Toaster.showError("Adding employee please wait");
+      return false;
+    }
+    updatingEmployee.value = true;
+    final result = await Net.delete("/admin/employee/$id");
+    updatingEmployee.value = false;
+    if (result.hasError) {
+      Toaster.showError(result.response);
+      return false;
+    }
+    fetchEmployees();
+    return true;
+  }
 }

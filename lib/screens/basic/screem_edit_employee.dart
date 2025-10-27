@@ -1,41 +1,53 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
-import 'package:pinput/pinput.dart';
+import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:pinput/pinput.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/models/employee_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:mistpos/widgets/buttons/mist_form_button.dart';
 
-class ScreenAddEmployee extends StatefulWidget {
-  const ScreenAddEmployee({super.key});
+class ScreemEditEmployee extends StatefulWidget {
+  final EmployeeModel employeeModel;
+  const ScreemEditEmployee({super.key, required this.employeeModel});
 
   @override
-  State<ScreenAddEmployee> createState() => _ScreenAddEmployeeState();
+  State<ScreemEditEmployee> createState() => _ScreemEditEmployeeState();
 }
 
-class _ScreenAddEmployeeState extends State<ScreenAddEmployee> {
+class _ScreemEditEmployeeState extends State<ScreemEditEmployee> {
   String _pin = "";
-  String _role = "cashier";
+  late String _role = widget.employeeModel.role;
   final _formKey = GlobalKey<FormState>();
   final _roles = ['cashier', 'manager', 'admin'];
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
+  late final _nameController = TextEditingController(
+    text: widget.employeeModel.fullName,
+  );
+  late final _emailController = TextEditingController(
+    text: widget.employeeModel.email,
+  );
   final _adminController = Get.find<AdminController>();
-  final _tillNumberController = TextEditingController();
+  late final _tillNumberController = TextEditingController(
+    text: widget.employeeModel.till.toString(),
+  );
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Get.theme.colorScheme.primary,
         foregroundColor: Get.theme.colorScheme.onPrimary,
-        title: Text("Add Employee"),
+        title: Text("Edit ${widget.employeeModel.fullName}"),
         leading: IconButton(
           onPressed: () => Get.back(),
           icon: Icon(Icons.chevron_left),
         ),
+        actions: [
+          IconButton(onPressed: _deleteEmployee, icon: Icon(Icons.delete)),
+        ],
       ),
       body: Form(
         key: _formKey,
@@ -113,13 +125,14 @@ class _ScreenAddEmployeeState extends State<ScreenAddEmployee> {
                       _pin = pin;
                     }),
                   ),
+                  "If you live pin blank , it wont be updated".text(),
                   24.gapHeight,
                   Obx(
                     () => MistFormButton(
-                      icon: Icon(Icons.add),
-                      isLoading: _adminController.addingEmployee.value,
-                      label: "Add Employee",
-                      onTap: _addEmployCall,
+                      icon: Icon(Icons.update),
+                      isLoading: _adminController.updatingEmployee.value,
+                      label: "Update Employee",
+                      onTap: _updateEmployee,
                     ).sizedBox(width: double.infinity),
                   ),
                 ]
@@ -140,14 +153,11 @@ class _ScreenAddEmployeeState extends State<ScreenAddEmployee> {
     );
   }
 
-  _addEmployCall() async {
+  _updateEmployee() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    if (_pin.trim().isEmpty) {
-      Toaster.showError("pin is required");
-      return;
-    }
+
     if (_role.trim().isEmpty) {
       Toaster.showError("role is required");
       return;
@@ -172,8 +182,9 @@ class _ScreenAddEmployeeState extends State<ScreenAddEmployee> {
       Toaster.showError("Full Name  is required e.g John Doe");
       return;
     }
-    final result = await _adminController.addEmployee({
+    final result = await _adminController.updateEmployee({
       "user": {
+        "_id": widget.employeeModel.id,
         "fullName": _nameController.text.trim(),
         "email": _emailController.text,
         "role": _role,
@@ -183,7 +194,31 @@ class _ScreenAddEmployeeState extends State<ScreenAddEmployee> {
     });
     if (result) {
       Get.back();
-      Toaster.showSuccess("employee added succesfully");
+      Toaster.showSuccess("employee updated succesfully");
     }
+  }
+
+  void _deleteEmployee() {
+    Get.defaultDialog(
+      title: "Delete ${widget.employeeModel.fullName}?",
+      middleText: "Are you sure to delete this employee?Its irrevisible",
+      actions: [
+        "close".text().textButton(onPressed: () => Get.back()),
+        "delete"
+            .text(style: TextStyle(color: Colors.red))
+            .textButton(
+              onPressed: () async {
+                Get.back();
+                final response = await _adminController.deleteEmployee(
+                  widget.employeeModel.id,
+                );
+                if (response && mounted) {
+                  Get.back();
+                  Toaster.showSuccess("Employee deleted");
+                }
+              },
+            ),
+      ],
+    );
   }
 }

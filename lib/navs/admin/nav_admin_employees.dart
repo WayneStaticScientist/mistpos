@@ -7,6 +7,7 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/screens/basic/screem_edit_employee.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class NavAdminEmployees extends StatefulWidget {
@@ -81,6 +82,8 @@ class _NavAdminEmployeesState extends State<NavAdminEmployees> {
         : _adminController.employees
               .map(
                 (e) => ListTile(
+                  onTap: () =>
+                      Get.to(() => ScreemEditEmployee(employeeModel: e)),
                   leading: CircleAvatar(
                     backgroundColor: Get.theme.colorScheme.primary,
                     child: Iconify(
@@ -92,6 +95,10 @@ class _NavAdminEmployeesState extends State<NavAdminEmployees> {
                   subtitle: _userController.user.value?.hexId == e.id
                       ? "You".text()
                       : e.role.text(),
+                  trailing: IconButton(
+                    onPressed: () {},
+                    icon: Icon(Icons.chevron_right),
+                  ),
                 ),
               )
               .toList()
