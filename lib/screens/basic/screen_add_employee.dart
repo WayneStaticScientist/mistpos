@@ -100,7 +100,7 @@ class _ScreenAddEmployeeState extends State<ScreenAddEmployee> {
                         color: Colors.grey.withAlpha(200),
                       ),
                       underLineColor: Colors.grey.withAlpha(200),
-                      controller: _emailController,
+                      controller: _tillNumberController,
                     ),
                   ],
                   24.gapHeight,
