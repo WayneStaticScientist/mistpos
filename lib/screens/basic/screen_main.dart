@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/models/user_model.dart';
+import 'package:mistpos/navs/nav_admin.dart';
 import 'package:mistpos/navs/nav_items.dart';
 import 'package:mistpos/navs/nav_receits.dart';
 import 'package:mistpos/navs/nav_sales.dart';
@@ -24,6 +25,7 @@ class _ScreenMainState extends State<ScreenMain> {
   late final _listNavs = {
     'sales': NavSale(),
     "receipts": NavReceits(),
+    "admin": NavAdmin(scaffoldKey: _scaffoldKey),
     "items": NavItems(scaffoldKey: _scaffoldKey),
   };
   @override

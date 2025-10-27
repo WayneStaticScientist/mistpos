@@ -5,6 +5,7 @@ import 'package:get/instance_manager.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/user_model.dart';
+import 'package:mistpos/screens/basic/screen_dashboard.dart';
 
 class MistMainNavigationView extends StatelessWidget {
   final Function(String value) onTap;
@@ -72,7 +73,10 @@ class MistMainNavigationView extends StatelessWidget {
           ListTile(
             leading: Iconify(Bx.bar_chart),
             title: Text('Dashboard'),
-            onTap: () => onTap('dashboard'),
+            onTap: () {
+              Get.back();
+              Get.to(() => ScreenDashboard());
+            },
           ),
           ListTile(
             leading: Iconify(Bx.help_circle),

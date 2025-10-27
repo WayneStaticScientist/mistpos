@@ -21,7 +21,7 @@ class _NavModifiersListState extends State<NavModifiersList> {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => SliverList.builder(
+      () => ListView.builder(
         itemBuilder: (context, index) =>
             Card(
                   child: ListTile(

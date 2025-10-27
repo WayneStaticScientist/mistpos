@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/item_model.dart';
@@ -54,12 +55,33 @@ class _NavSaleState extends State<NavSale> {
 
   @override
   Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth > 600) {
+          return Row(
+            children: [
+              SizedBox(width: 600, child: _buildNormalFlowLayout()),
+              Expanded(child: _selectedItemsList()),
+            ],
+          );
+        }
+        return _buildNormalFlowLayout();
+      },
+    );
+  }
+
+  _buildNormalFlowLayout() {
     return Stack(
       children: [
         Positioned.fill(
           child: CustomScrollView(
             controller: _scrollController,
             slivers: [
+              /*
+              ==================================================================================
+                  THE APP TOB BAR
+              ==================================================================================
+              */
               SliverAppBar(
                 elevation: 0,
                 floating: true,
@@ -91,6 +113,11 @@ class _NavSaleState extends State<NavSale> {
                   IconButton(onPressed: () {}, icon: Iconify(Bx.cog)),
                 ],
               ),
+              /*
+            ==============================================================================
+            THE SAVED ITEMS LISTS
+            ==============================================================================            
+            */
               SliverToBoxAdapter(
                 child: [
                   Expanded(
@@ -133,108 +160,20 @@ class _NavSaleState extends State<NavSale> {
                         )
                       : SliverToBoxAdapter(child: SizedBox.shrink()),
                 ),
+              /*
+                ============================================================================================
+                THE APP CATEGORIES
+                ============================================================================================
+                */
               SliverToBoxAdapter(child: SizedBox(height: 18)),
-              if (!_inSearchMode)
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 60,
-                    child:
-                        ListView(
-                              scrollDirection: Axis.horizontal,
-                              children: [
-                                Obx(
-                                  () => CardsCategory(
-                                    onTap: () => _changeCategory(""),
-                                    isSelected:
-                                        _itemsListController
-                                            .selectedCategory
-                                            .value ==
-                                        "",
-                                    category: "All",
-                                  ),
-                                ),
-                                Obx(
-                                  () => _itemsListController.categories
-                                      .map<Widget>((category) {
-                                        return CardsCategory(
-                                          onTap: () =>
-                                              _changeCategory(category.name),
-                                          category: category.name,
-                                          isSelected:
-                                              _itemsListController
-                                                  .selectedCategory
-                                                  .value ==
-                                              category.name,
-                                        ).sizedBox(height: 60);
-                                      })
-                                      .toList()
-                                      .row(mainAxisSize: MainAxisSize.min),
-                                ),
-                              ],
-                            )
-                            .sizedBox()
-                            .padding(EdgeInsets.symmetric(horizontal: 18))
-                            .decoratedBox(
-                              decoration: BoxDecoration(
-                                color: Get.isDarkMode
-                                    ? Colors.black
-                                    : Colors.white,
-                              ),
-                            ),
-                  ),
-                ),
+              if (!_inSearchMode) _buidCategoriesLayout(),
 
-              Obx(
-                () => _itemsListController.cartItems.isNotEmpty
-                    ? SliverList.builder(
-                        itemBuilder: (context, index) =>
-                            index >= _itemsListController.cartItems.length
-                            ? _makeLastList()
-                            : MistListTileItem(
-                                    item: _itemsListController.cartItems[index],
-                                  )
-                                  .padding(EdgeInsets.symmetric(horizontal: 18))
-                                  .decoratedBox(
-                                    decoration: BoxDecoration(
-                                      color: Get.isDarkMode
-                                          ? Colors.black
-                                          : Colors.white,
-                                    ),
-                                  )
-                                  .onTapUp(
-                                    (e) => _handleWidgetClick(
-                                      e,
-                                      _itemsListController.cartItems[index],
-                                    ),
-                                  )
-                                  .padding(
-                                    EdgeInsets.only(
-                                      bottom:
-                                          index ==
-                                              _itemsListController
-                                                      .cartItems
-                                                      .length -
-                                                  1
-                                          ? 100
-                                          : 0,
-                                    ),
-                                  ),
-                        itemCount: _itemsListController.cartItems.length + 1,
-                      )
-                    : SliverFillRemaining(
-                        child:
-                            [
-                                  Iconify(Bx.cart_alt),
-                                  12.gapHeight,
-                                  "no items".text(),
-                                ]
-                                .column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                )
-                                .center(),
-                      ),
-              ),
+              /*
+              ===============================================================================================
+              The items LIST 
+              ===============================================================================================
+            */
+              _buidItemList(),
             ],
           ),
         ),
@@ -329,10 +268,141 @@ class _NavSaleState extends State<NavSale> {
     );
   }
 
-  // ... (Your existing methods: _changeCategory, _initializeTimer) ...
-  _changeCategory(String name) {
-    _itemsListController.selectedCategory.value = name;
-    _itemsListController.loadCartItems();
+  _buidCategoriesLayout() {
+    return SliverToBoxAdapter(
+      child: SizedBox(
+        height: 60,
+        child:
+            ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    Obx(
+                      () => CardsCategory(
+                        onTap: () => _changeCategory(""),
+                        isSelected:
+                            _itemsListController.selectedCategory.value == "",
+                        category: "All",
+                      ),
+                    ),
+                    Obx(
+                      () => _itemsListController.categories
+                          .map<Widget>((category) {
+                            return CardsCategory(
+                              onTap: () => _changeCategory(category.hexId),
+                              category: category.name,
+                              isSelected:
+                                  _itemsListController.selectedCategory.value ==
+                                  category.hexId,
+                            ).sizedBox(height: 60);
+                          })
+                          .toList()
+                          .row(mainAxisSize: MainAxisSize.min),
+                    ),
+                  ],
+                )
+                .sizedBox()
+                .padding(EdgeInsets.symmetric(horizontal: 18))
+                .decoratedBox(
+                  decoration: BoxDecoration(
+                    color: Get.isDarkMode ? Colors.black : Colors.white,
+                  ),
+                ),
+      ),
+    );
+  }
+
+  _buidItemList() {
+    return Obx(
+      () => _itemsListController.cartItems.isNotEmpty
+          ? SliverList.builder(
+              itemBuilder: (context, index) =>
+                  index >= _itemsListController.cartItems.length
+                  ? _makeLastList()
+                  : MistListTileItem(
+                          item: _itemsListController.cartItems[index],
+                        )
+                        .padding(EdgeInsets.symmetric(horizontal: 18))
+                        .decoratedBox(
+                          decoration: BoxDecoration(
+                            color: Get.isDarkMode ? Colors.black : Colors.white,
+                          ),
+                        )
+                        .onTapUp(
+                          (e) => _handleWidgetClick(
+                            e,
+                            _itemsListController.cartItems[index],
+                          ),
+                        )
+                        .padding(
+                          EdgeInsets.only(
+                            bottom:
+                                index ==
+                                    _itemsListController.cartItems.length - 1
+                                ? 100
+                                : 0,
+                          ),
+                        ),
+              itemCount: _itemsListController.cartItems.length + 1,
+            )
+          : SliverFillRemaining(
+              child: [Iconify(Bx.cart_alt), 12.gapHeight, "no items".text()]
+                  .column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                  )
+                  .center(),
+            ),
+    );
+  }
+
+  _selectedItemsList() {
+    return SafeArea(
+      child: Obx(
+        () => [
+          SingleChildScrollView(
+            child: _itemsListController.checkOutItems
+                .map<Widget>((e) {
+                  final count = e['count'] as int;
+                  final model = e['item'] as ItemModel;
+                  return ListTile(
+                    title: Text(model.name, style: TextStyle(fontSize: 24)),
+                    leading: Text("x $count"),
+                    onTap: () => Get.to(() => ScreenEditManualCart(map: e)),
+                    subtitle: Text(
+                      CurrenceConverter.getCurrenceFloatInStrings(model.price),
+                    ),
+                    trailing: CurrenceConverter.getCurrenceFloatInStrings(
+                      model.price * count,
+                    ).text(style: TextStyle(fontSize: 24)),
+                  );
+                })
+                .toList()
+                .column(),
+          ).expanded1,
+          12.gapHeight,
+          ListTile(
+            tileColor: Colors.green,
+            textColor: Colors.white,
+            title: Text(
+              "Total",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+            ),
+            trailing: CurrenceConverter.getCurrenceFloatInStrings(
+              _itemsListController.totalPrice.value,
+            ).text(style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+          ),
+        ].column(mainAxisSize: MainAxisSize.max),
+      ),
+    );
+  }
+
+  _changeCategory(String id) {
+    _itemsListController.selectedCategory.value = id;
+    _itemsListController.loadCartItems(
+      search: _searchTerm,
+      page: 1,
+      category: id,
+    );
   }
 
   void _initializeTimer() {
@@ -340,7 +410,7 @@ class _NavSaleState extends State<NavSale> {
       final searchTerm = _searchController.text;
       if (_searchTerm != searchTerm) {
         _searchTerm = searchTerm;
-        _itemsListController.searchItems(_searchTerm);
+        _itemsListController.loadCartItems(search: _searchTerm, page: 1);
       }
       if (searchTerm.isNotEmpty && !_inSearchMode) {
         setState(() {
@@ -350,7 +420,7 @@ class _NavSaleState extends State<NavSale> {
         setState(() {
           _inSearchMode = false;
         });
-        _itemsListController.loadCartItems();
+        _itemsListController.loadCartItems(page: 1);
       }
     });
   }

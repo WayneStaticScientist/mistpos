@@ -26,7 +26,7 @@ class _NavItemsListState extends State<NavItemsList> {
     return Obx(
       () => _itemsController.cartItems.isEmpty
           ? _emptyWidget()
-          : SliverList.builder(
+          : ListView.builder(
               itemBuilder: (context, index) => InkWell(
                 onTap: () => _openEditor(_itemsController.cartItems[index]),
                 onLongPress: () =>
@@ -119,22 +119,15 @@ class _NavItemsListState extends State<NavItemsList> {
   }
 
   Widget _emptyWidget() {
-    return SliverFillRemaining(
-      child:
-          [
-                Iconify(
-                  Bx.no_entry,
-                  size: 60,
-                  color: Get.theme.colorScheme.primary,
-                ),
-                18.gapHeight,
-                "No Items click new to add one".text(),
-              ]
-              .column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-              )
-              .center(),
-    );
+    return [
+          Iconify(Bx.no_entry, size: 60, color: Get.theme.colorScheme.primary),
+          18.gapHeight,
+          "No Items click new to add one".text(),
+        ]
+        .column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+        )
+        .center();
   }
 }

@@ -43,37 +43,17 @@ class ItemsController extends GetxController {
   }
 
   void removeSelectedItem(Map<String, dynamic> e) async {
-    final isar = Isar.getInstance();
-    if (isar == null) {
-      Toaster.showError('Database not initialized');
-      return;
-    }
-    final count = e['count'] as int;
     final model = e['item'] as ItemModel;
-
     int indexOfSelected = checkOutItems.indexWhere((e) {
       final lmodel = e['item'] as ItemModel;
       return lmodel.id == model.id;
     });
-
     if (indexOfSelected < 0) {
       Toaster.showError("something went wrong");
       return;
     }
     checkOutItems.removeAt(indexOfSelected);
-    int indexOfModel = cartItems.indexWhere((e) => e.id == model.id);
-    if (indexOfModel < 0) {
-      Toaster.showError("Item error found");
-      return;
-    }
-    final mdl = cartItems[indexOfModel];
-    cartItems[indexOfModel] = mdl;
-    if (mdl.trackStock) {
-      mdl.stockQuantity = mdl.stockQuantity + count;
-      await isar.writeTxn(() async {
-        await isar.itemModels.put(mdl);
-      });
-    }
+    _calculatedTotalPrice();
   }
 
   Future<void> removeAllSelected() async {
@@ -81,16 +61,6 @@ class ItemsController extends GetxController {
     if (isar == null) {
       Toaster.showError('Database not initialized');
       return;
-    }
-    for (var e in checkOutItems) {
-      final count = e['count'] as int;
-      final model = e['item'] as ItemModel;
-      model.stockQuantity = model.stockQuantity + count;
-      if (model.trackStock) {
-        await isar.writeTxn(() async {
-          await isar.itemModels.put(model);
-        });
-      }
     }
     checkOutItems.clear();
     totalPrice.value = 0;
@@ -105,29 +75,6 @@ class ItemsController extends GetxController {
     Map<String, bool>? dataMap,
     int restoreAmount = -1,
   }) async {
-    if (model.trackStock) {
-      final isar = Isar.getInstance();
-      if (isar == null) {
-        Toaster.showError("failed to init database");
-        return;
-      }
-      int indexOfModel = cartItems.indexWhere((d) => d.id == model.id);
-      if (indexOfModel < 0) {
-        Toaster.showError("item not found");
-        return;
-      }
-      final md = cartItems[indexOfModel];
-      if (md.stockQuantity <= 0) {
-        Toaster.showError("item is out of stock ");
-        return;
-      }
-      md.stockQuantity = md.stockQuantity + restoreAmount;
-      await isar.writeTxn(() async {
-        await isar.itemModels.put(md);
-      });
-      cartItems[indexOfModel] = md;
-      model = md;
-    }
     final dataFound = checkOutItems.indexWhere((e) {
       final id = e['id'];
       if (id is int) {
@@ -160,6 +107,10 @@ class ItemsController extends GetxController {
 
   RxBool creatingItem = RxBool(false);
   Future<bool> createItem(ItemModel item, {update = true}) async {
+    if (syncingItems.value == true) {
+      Toaster.showError("syncing items please wait");
+      return false;
+    }
     try {
       dynamic response;
       if (update) {
@@ -200,9 +151,12 @@ class ItemsController extends GetxController {
     ItemCategoryModel category, {
     update = true,
   }) async {
+    if (categoriesSyncing.value == true) {
+      Toaster.showError("categories syncing please wait");
+      return false;
+    }
     try {
       dynamic response;
-      log("The id sent is ${category.hexId}");
       if (update) {
         response = await Net.put(
           "/admin/category/${category.hexId}",
@@ -223,6 +177,8 @@ class ItemsController extends GetxController {
       }
       await isar.writeTxn(() async {
         if (update) {
+          category.name = obj.name;
+          category.color = obj.color;
           await isar.itemCategoryModels.put(category);
         } else {
           await isar.itemCategoryModels.put(obj);
@@ -238,12 +194,42 @@ class ItemsController extends GetxController {
   }
 
   void loadCategories() {
+    if (categoriesSyncing.value) return;
     final isar = Isar.getInstance();
     if (isar == null) {
       return;
     }
     final loadedCategories = isar.itemCategoryModels.where().findAllSync();
     categories.assignAll(loadedCategories);
+    loadCategoriesAsync();
+  }
+
+  RxBool categoriesSyncing = RxBool(false);
+  RxString categoriesSyncingFailed = RxString("");
+  void loadCategoriesAsync() async {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      return;
+    }
+    categoriesSyncing.value = true;
+    categoriesSyncingFailed.value = "";
+    final response = await Net.get("/cashier/categories");
+    if (response.hasError) {
+      categoriesSyncing.value = false;
+      categoriesSyncingFailed.value = response.response;
+      return;
+    }
+    List<dynamic> list = response.body['list'] as List<dynamic>? ?? [];
+    List<ItemCategoryModel> models = list
+        .map((e) => ItemCategoryModel.fromJson(e))
+        .toList();
+    await isar.writeTxn(() async {
+      await isar.itemCategoryModels.where().deleteAll();
+      await isar.itemCategoryModels.putAll(models);
+    });
+    final loadedCategories = isar.itemCategoryModels.where().findAllSync();
+    categories.assignAll(loadedCategories);
+    categoriesSyncing.value = false;
   }
 
   void loadSavedItems() {
@@ -274,33 +260,41 @@ class ItemsController extends GetxController {
   }
 
   RxInt page = RxInt(1);
-  void loadCartItems({int page = 1, String search = ""}) {
+  void loadCartItems({int page = 1, String search = "", String category = ""}) {
     final isar = Isar.getInstance();
     if (isar == null) {
       return;
     }
     if (page > 1) {
-      syncCartItemsOnBackground(page: page, search: search);
+      syncCartItemsOnBackground(page: page, search: search, category: category);
       return;
     }
     if (selectedCategory.value.isNotEmpty) {
       final loadedItems = isar.itemModels
           .filter()
           .categoryEqualTo(selectedCategory.value)
+          .nameContains(search)
           .findAllSync();
       cartItems.assignAll(loadedItems);
     } else {
-      final loadedItems = isar.itemModels.where().findAllSync();
+      final loadedItems = isar.itemModels
+          .filter()
+          .nameContains(search)
+          .findAllSync();
       cartItems.assignAll(loadedItems);
     }
-    syncCartItemsOnBackground(page: page, search: search);
+    syncCartItemsOnBackground(page: page, search: search, category: category);
   }
 
   RxBool syncingItems = RxBool(false);
   RxInt itemsPage = RxInt(1);
   RxInt totalPages = RxInt(2);
   RxString syncingItemsFailed = RxString("");
-  void syncCartItemsOnBackground({int page = 1, String search = ""}) async {
+  void syncCartItemsOnBackground({
+    int page = 1,
+    String search = "",
+    String category = "",
+  }) async {
     if (syncingItems.value) return;
     final isar = Isar.getInstance();
     if (isar == null) {
@@ -309,26 +303,23 @@ class ItemsController extends GetxController {
     syncingItems.value = true;
     syncingItemsFailed.value = "";
     final response = await Net.get(
-      "/cashier/products?page=$page&search=$search",
+      "/cashier/products?page=$page&search=$search&category=$category",
     );
     syncingItems.value = false;
     if (response.hasError) {
       syncingItemsFailed.value = response.response;
       return;
     }
-    log(response.body.toString());
     totalPages.value = response.body['totalPages'];
     itemsPage.value = response.body['currentPage'] as int;
-    final itemList = response.body['list'] as List<dynamic>?;
-    if (itemList == null) {
-      return;
-    }
+    final itemList = response.body['list'] as List<dynamic>? ?? [];
     syncingItems.value = true;
-    List<ItemModel> models = itemList
-        .map((e) => ItemModel.fromJson((e)))
-        .toList();
+    List<ItemModel> models = itemList.map((e) {
+      return ItemModel.fromJson((e));
+    }).toList();
+
     await isar.writeTxn(() async {
-      await isar.itemModels.deleteAll(cartItems.map((e) => e.id).toList());
+      await isar.itemModels.where().deleteAll();
       if (itemsPage.value > 1) {
         await isar.itemModels.putAll(cartItems);
       }
@@ -336,7 +327,7 @@ class ItemsController extends GetxController {
     });
     final loadedItems = isar.itemModels.where().findAllSync();
     cartItems.assignAll(loadedItems);
-    syncingItems.value = true;
+    syncingItems.value = false;
   }
 
   void searchItems(String searchTerm) {

@@ -23,24 +23,21 @@ class _NavCategoryListState extends State<NavCategoryList> {
   Widget build(BuildContext context) {
     return Obx(
       () => _itemsController.categories.isEmpty
-          ? SliverFillRemaining(
-              child:
-                  [
-                        Iconify(
-                          Carbon.no_ticket,
-                          size: 60,
-                          color: Get.theme.colorScheme.primary,
-                        ),
-                        18.gapHeight,
-                        "No Categories click new to add one".text(),
-                      ]
-                      .column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                      )
-                      .center(),
-            )
-          : SliverList.builder(
+          ? [
+                  Iconify(
+                    Carbon.no_ticket,
+                    size: 60,
+                    color: Get.theme.colorScheme.primary,
+                  ),
+                  18.gapHeight,
+                  "No Categories click new to add one".text(),
+                ]
+                .column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                )
+                .center()
+          : ListView.builder(
               itemBuilder: (context, index) {
                 final item = _itemsController.categories[index];
                 return InkWell(

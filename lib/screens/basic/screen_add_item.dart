@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
@@ -30,10 +28,10 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
   final _itemsController = Get.find<ItemsController>();
 
   final _formKey = GlobalKey<FormState>();
-  final _itemNameController = TextEditingController();
-  final _itemPriceController = TextEditingController();
-  final _itemCostController = TextEditingController();
   final _itemSKUController = TextEditingController();
+  final _itemNameController = TextEditingController();
+  final _itemCostController = TextEditingController();
+  final _itemPriceController = TextEditingController();
   final _itemBarcodeController = TextEditingController();
 
   final _initialStockController = TextEditingController();
@@ -96,10 +94,12 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
                     underLineColor: Colors.grey.withAlpha(200),
                     controller: _itemNameController,
                   ),
-                  14.gapHeight,
+                  24.gapHeight,
                   Obx(
                     () => DropdownButton(
                       value: _selectedCategory,
+                      isDense: true,
+                      isExpanded: true,
                       onChanged: (value) {
                         setState(() {
                           _selectedCategory = value;
@@ -118,16 +118,16 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
                           }
                           final category = _itemsController.categories[index];
                           return DropdownMenuItem(
-                            value: category.name,
+                            value: category.hexId,
                             child: Text(category.name),
                           );
                         },
                       ),
                       hint: Text("Select Category"),
-                    ),
+                    ).sizedBox(width: double.infinity),
                   ),
 
-                  18.gapHeight,
+                  24.gapHeight,
                   "Sold By".text(
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
@@ -328,7 +328,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
                 ),
           ],
         ),
-      ),
+      ).constrained(maxWidth: 600).center(),
     );
   }
 
@@ -351,17 +351,24 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
             child: Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               final categoryName = categoryNameController.text.trim();
               if (categoryName.isEmpty) {
                 Toaster.showError('Category name cannot be empty');
                 return;
               }
-              log('Adding category: $categoryName');
-              _itemsController.createCategory(
-                ItemCategoryModel(name: categoryName),
-              );
               Get.back();
+              setState(() {
+                _isLoading = true;
+              });
+              await _itemsController.createCategory(
+                ItemCategoryModel(name: categoryName),
+                update: false,
+              );
+              if (!mounted) return;
+              setState(() {
+                _isLoading = false;
+              });
             },
             child: Text('Add'),
           ),

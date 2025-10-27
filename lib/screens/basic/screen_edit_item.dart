@@ -112,7 +112,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
                     () => DropdownButton(
                       value:
                           _itemsController.categories.any(
-                            (e) => e.name == widget.model.category,
+                            (e) => e.hexId == widget.model.category,
                           )
                           ? widget.model.category
                           : null,
@@ -134,7 +134,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
                           }
                           final category = _itemsController.categories[index];
                           return DropdownMenuItem(
-                            value: category.name,
+                            value: category.hexId,
                             child: Text(category.name),
                           );
                         },
@@ -344,7 +344,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
                 ),
           ],
         ),
-      ),
+      ).constrained(maxWidth: 600).center(),
     );
   }
 
@@ -422,7 +422,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
                 iconPath,
                 size: 40,
                 color: widget.model.shape == iconPath
-                    ? Color(int.parse('0xff${widget.model.color!}'))
+                    ? Color(int.parse('0x${widget.model.color!}'))
                     : Colors.grey,
               ).padding(EdgeInsets.all(4)),
             ),

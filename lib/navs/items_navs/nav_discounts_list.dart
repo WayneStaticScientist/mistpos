@@ -10,7 +10,7 @@ class NavDiscountsList extends StatefulWidget {
 class _NavDiscountsListState extends State<NavDiscountsList> {
   @override
   Widget build(BuildContext context) {
-    return SliverList.list(
+    return ListView(
       children: [
         ListTile(leading: Icon(Icons.discount), title: Text('Discount 1')),
         ListTile(leading: Icon(Icons.discount), title: Text('Discount 2')),

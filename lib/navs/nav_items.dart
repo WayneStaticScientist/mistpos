@@ -32,38 +32,31 @@ class _NavItemsState extends State<NavItems> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            leading: DrawerButton(
-              onPressed: () => widget.scaffoldKey?.currentState?.openDrawer(),
-            ),
-            pinned: true,
-            floating: true,
-            snap: true,
-            title: Text('Items'),
-            backgroundColor: Get.theme.colorScheme.primary,
-            titleTextStyle: TextStyle(
-              color: Get.theme.colorScheme.onPrimary,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
-            iconTheme: IconThemeData(color: Get.theme.colorScheme.onPrimary),
+      appBar: AppBar(
+        leading: DrawerButton(
+          onPressed: () => widget.scaffoldKey?.currentState?.openDrawer(),
+        ),
+        title: Text('Items'),
+        backgroundColor: Get.theme.colorScheme.primary,
+        titleTextStyle: TextStyle(
+          color: Get.theme.colorScheme.onPrimary,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
+        iconTheme: IconThemeData(color: Get.theme.colorScheme.onPrimary),
 
-            actions: [
-              Obx(
-                () => _itemsController.deleting.value
-                    ? CircularProgressIndicator(color: Colors.white)
-                          .center()
-                          .sizedBox(width: 16, height: 16)
-                          .padding(EdgeInsets.symmetric(horizontal: 8))
-                    : SizedBox.shrink(),
-              ),
-            ],
+        actions: [
+          Obx(
+            () => _itemsController.deleting.value
+                ? CircularProgressIndicator(color: Colors.white)
+                      .center()
+                      .sizedBox(width: 16, height: 16)
+                      .padding(EdgeInsets.symmetric(horizontal: 8))
+                : SizedBox.shrink(),
           ),
-          _navOptions.elementAt(_selectedIndex),
         ],
       ),
+      body: _navOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) {

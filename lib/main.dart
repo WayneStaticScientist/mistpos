@@ -3,6 +3,7 @@ import 'package:get/get_navigation/get_navigation.dart';
 import 'package:get/instance_manager.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:isar/isar.dart';
+import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/models/item_categories_model.dart';
@@ -40,6 +41,7 @@ class MyApp extends StatelessWidget {
       initialBinding: BindingsBuilder(() {
         Get.put(UserController());
         Get.put(ItemsController());
+        Get.put(AdminController());
       }),
       theme: ThemeData(
         useMaterial3: true,
