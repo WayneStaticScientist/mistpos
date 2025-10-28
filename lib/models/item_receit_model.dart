@@ -25,6 +25,7 @@ class ItemReceitModel {
     required this.payment,
     required this.createdAt,
     this.customerId,
+    this.synced = false,
   });
   Map<String, dynamic> toJson() {
     return {
@@ -47,6 +48,7 @@ class ItemReceitModel {
                 .map((e) => ItemReceitItem.fromJson(e))
                 .toList()
           : [],
+      synced: data['synced'] ?? false,
       hexId: data['_id'],
       total: (data['total'] as num?)?.toDouble() ?? 0.0,
       amount: (data['amount'] as num?)?.toDouble() ?? 0.0,

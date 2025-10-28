@@ -1,34 +1,33 @@
+import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:exui/exui.dart';
 import 'package:get/get.dart';
-import 'package:flutter/material.dart';
-import 'package:mistpos/utils/toast.dart';
-import 'package:iconify_flutter/icons/bx.dart';
-import 'package:mistpos/models/customer_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:mistpos/widgets/inputs/search_field.dart';
-import 'package:mistpos/controllers/items_controller.dart';
-import 'package:mistpos/screens/basic/screen_add_customer.dart';
+import 'package:iconify_flutter/icons/bx.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:mistpos/controllers/inventory_controller.dart';
+import 'package:mistpos/models/supplier_model.dart';
+import 'package:mistpos/screens/inventory/screen_add_supplier.dart';
+import 'package:mistpos/widgets/inputs/search_field.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-class ScreensListCustomers extends StatefulWidget {
-  const ScreensListCustomers({super.key});
+class ScreenSelectSupplier extends StatefulWidget {
+  const ScreenSelectSupplier({super.key});
 
   @override
-  State<ScreensListCustomers> createState() => _ScreensListCustomersState();
+  State<ScreenSelectSupplier> createState() => _ScreenSelectSupplierState();
 }
 
-class _ScreensListCustomersState extends State<ScreensListCustomers> {
+class _ScreenSelectSupplierState extends State<ScreenSelectSupplier> {
   final _refreshController = RefreshController();
-  final _itemsController = Get.find<ItemsController>();
+  final _iventoryController = Get.find<InventoryController>();
   final TextEditingController _searchController = TextEditingController();
   String _searchTerm = "";
   Timer? _debounce;
   @override
   void initState() {
-    _itemsController.loadCustomers();
+    _iventoryController.loadSuppliers();
     _initializeTimer();
     super.initState();
   }
@@ -44,13 +43,13 @@ class _ScreensListCustomersState extends State<ScreensListCustomers> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: "Customers".text(),
+        title: "Select Supplier".text(),
         backgroundColor: Get.theme.colorScheme.primary,
         foregroundColor: Get.theme.colorScheme.onPrimary,
       ),
       body: [
         MistSearchField(
-          label: "Search Customers",
+          label: "Search Suppliers",
           controller: _searchController,
         ),
         Expanded(
@@ -58,51 +57,50 @@ class _ScreensListCustomersState extends State<ScreensListCustomers> {
             controller: _refreshController,
             enablePullUp: true,
             onRefresh: () async {
-              _itemsController.loadCustomers(page: 1, search: _searchTerm);
+              _iventoryController.loadSuppliers(page: 1, search: _searchTerm);
               _refreshController.refreshCompleted();
             },
             child: Obx(
-              () => ListView.builder(
-                itemBuilder: (context, index) {
-                  if (index < _itemsController.customers.length) {
-                    return _buildTile(_itemsController.customers[index]);
-                  }
-                  return _buildLoader();
-                },
-                itemCount: _itemsController.customers.length + 1,
-              ),
+              () => _iventoryController.suppliers.isEmpty
+                  ? "No suppliers found . Click + to add new supplier".text()
+                  : ListView.builder(
+                      itemBuilder: (context, index) {
+                        if (index < _iventoryController.suppliers.length) {
+                          return _buildTile(
+                            _iventoryController.suppliers[index],
+                          );
+                        }
+                        return _buildLoader();
+                      },
+                      itemCount: _iventoryController.suppliers.length + 1,
+                    ),
             ),
           ),
         ),
       ].column().padding(EdgeInsets.all(14)),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addCustomer,
-        child: Iconify(Bx.plus, color: Colors.white),
+        onPressed: () => Get.to(() => ScreenAddSupplier()),
+        child: Icon(Icons.add, color: Colors.white),
       ),
     );
   }
 
-  void _addCustomer() {
-    Get.to(() => ScreenAddCustomer());
-  }
-
-  Widget _buildTile(CustomerModel model) {
+  Widget _buildTile(SupplierModel model) {
     return ListTile(
       onTap: () {
-        _itemsController.selectedCustomer.value = model;
+        _iventoryController.selectedSupplier.value = model;
         Get.back();
-        Toaster.showSuccess("selected ${model.fullName}");
       },
       leading: CircleAvatar(child: Iconify(Bx.user, color: Colors.white)),
-      title: model.fullName.text(),
-      subtitle: model.email.text(),
+      title: model.name.text(),
+      subtitle: model.email?.text(),
     );
   }
 
   Widget _buildLoader() {
-    if (_itemsController.customerPage >=
-        _itemsController.customerTotalPages.value) {
-      return ['No more customers'.text()]
+    if (_iventoryController.supplierPage >=
+        _iventoryController.supplierPage.value) {
+      return ['No more Suppliers'.text()]
           .row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -127,7 +125,7 @@ class _ScreensListCustomersState extends State<ScreensListCustomers> {
       final searchTerm = _searchController.text;
       if (_searchTerm != searchTerm) {
         _searchTerm = searchTerm;
-        _itemsController.loadCustomers(search: _searchTerm, page: 1);
+        _iventoryController.loadSuppliers(search: _searchTerm, page: 1);
       }
     });
   }

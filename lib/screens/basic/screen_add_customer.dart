@@ -34,7 +34,7 @@ class _ScreenAddCustomerState extends State<ScreenAddCustomer> {
       appBar: AppBar(
         backgroundColor: Get.theme.colorScheme.primary,
         foregroundColor: Get.theme.colorScheme.onPrimary,
-        title: Text("Add Employee"),
+        title: Text("Add Customer"),
         leading: IconButton(
           onPressed: () => Get.back(),
           icon: Icon(Icons.chevron_left),
@@ -116,11 +116,14 @@ class _ScreenAddCustomerState extends State<ScreenAddCustomer> {
                   ),
 
                   24.gapHeight,
-                  MistFormButton(
-                    icon: Icon(Icons.add),
-                    label: "Add Customer",
-                    onTap: _addCustomerCall,
-                  ).sizedBox(width: double.infinity),
+                  Obx(
+                    () => MistFormButton(
+                      isLoading: _itemsController.addCustomerSyncing.value,
+                      icon: Icon(Icons.add),
+                      label: "Add Customer",
+                      onTap: _addCustomerCall,
+                    ).sizedBox(width: double.infinity),
+                  ),
                 ]
                 .column(
                   crossAxisAlignment: CrossAxisAlignment.start,

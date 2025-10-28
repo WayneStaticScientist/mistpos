@@ -10,8 +10,8 @@ import 'package:mistpos/models/item_receit_item.dart';
 import 'package:mistpos/services/network_wrapper.dart';
 import 'package:mistpos/models/item_receit_model.dart';
 import 'package:mistpos/models/item_modifier_model.dart';
-import 'package:mistpos/models/item_saved_items_model.dart';
 import 'package:mistpos/models/item_categories_model.dart';
+import 'package:mistpos/models/item_saved_items_model.dart';
 
 class ItemsController extends GetxController {
   RxDouble totalPrice = RxDouble(0);
@@ -66,6 +66,7 @@ class ItemsController extends GetxController {
       return;
     }
     checkOutItems.clear();
+    selectedCustomer.value = null;
     totalPrice.value = 0;
     loadCartItems();
   }
@@ -454,6 +455,7 @@ class ItemsController extends GetxController {
       await isar.itemSavedItemsModels.put(allTheModels);
     });
     checkOutItems.clear();
+    selectedCustomer.value = null;
     totalPrice.value = 0;
     loadSavedItems();
   }
@@ -560,6 +562,7 @@ class ItemsController extends GetxController {
         cashier: "admin",
         payment: payment,
         amount: payedAmount,
+        customerId: selectedCustomer.value?.hexId,
         items: checkOutItems.map((e) {
           final model = e['item'] as ItemModel;
           final receit = ItemReceitItem()
@@ -608,6 +611,7 @@ class ItemsController extends GetxController {
         });
       }
       checkOutItems.clear();
+      selectedCustomer.value = null;
       totalPrice.value = 0;
       loadReceits();
       return (success: true, rejects: rejects);
@@ -678,7 +682,10 @@ class ItemsController extends GetxController {
       return false;
     }
     addCustomerSyncing.value = true;
-    final response = await Net.post("/cashier/customer", data: model.toJson());
+    final response = await Net.post(
+      "/cashier/customer",
+      data: {"user": model.toJson()},
+    );
     addCustomerSyncing.value = false;
     if (response.hasError) {
       Toaster.showError(response.response);

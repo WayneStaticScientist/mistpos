@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/screens/basic/screen_view_selected_customer.dart';
 import 'package:mistpos/screens/basic/screens_select_customers.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
@@ -111,10 +112,19 @@ class _NavSaleState extends State<NavSale> {
                           )
                         : SizedBox.shrink(),
                   ),
-                  IconButton(
-                    onPressed: () => Get.to(() => ScreensListCustomers()),
-                    icon: Iconify(Bx.user_plus),
-                  ),
+                  Obx(() {
+                    bool selected =
+                        _itemsListController.selectedCustomer.value != null;
+                    return IconButton(
+                      onPressed: () => selected
+                          ? Get.to(() => ScreenViewSelectedCustomer())
+                          : Get.to(() => ScreensListCustomers()),
+                      icon: Iconify(
+                        selected ? Bx.user_check : Bx.user_plus,
+                        color: selected ? Colors.green : null,
+                      ),
+                    );
+                  }),
                   IconButton(onPressed: () {}, icon: Iconify(Bx.cog)),
                 ],
               ),

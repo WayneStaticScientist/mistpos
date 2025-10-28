@@ -6,14 +6,15 @@ import 'package:iconify_flutter/icons/bx.dart';
 
 class MistSearchField extends StatelessWidget {
   final TextEditingController? controller;
-  const MistSearchField({super.key, this.controller});
+  final String? label;
+  const MistSearchField({super.key, this.controller, this.label});
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
-        hint: "Search Menu".text(style: TextStyle(color: Colors.grey)),
+        hint: (label ?? "Search").text(style: TextStyle(color: Colors.grey)),
         fillColor: Get.isDarkMode ? Colors.black : Colors.white,
         filled: true,
         prefixIcon: SizedBox(

@@ -7,7 +7,7 @@ class CustomerModel {
   final String email;
   final String city;
   final String notes;
-  final int points;
+  final double points;
   final int visits;
   final String company;
   final String country;
@@ -49,15 +49,15 @@ class CustomerModel {
       email: data['email'],
       city: data['city'] ?? '',
       notes: data['notes'] ?? '',
-      points: data['points'] ?? 0,
+      points: (data['points'] as num?)?.toDouble() ?? 0,
       visits: data['visits'] ?? 0,
       company: data['company'],
       country: data['country'] ?? 0,
       address: data['address'] ?? '',
       fullName: data['fullName'],
       phoneNumber: data['phoneNumber'] ?? '',
-      purchaseValue: (['purchaseValue'] as num?)?.toDouble() ?? 0.0,
-      inboundProfit: (['inboundProfit'] as num?)?.toDouble() ?? 0.0,
+      purchaseValue: (data['purchaseValue'] as num?)?.toDouble() ?? 0.0,
+      inboundProfit: (data['inboundProfit'] as num?)?.toDouble() ?? 0.0,
       hexId: data['_id'],
     );
   }

@@ -1,7 +1,9 @@
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
+import 'package:mistpos/screens/basic/screen_inventory_management.dart';
 
 class MistAdminDashboard extends StatefulWidget {
   final String userName;
@@ -100,6 +102,7 @@ class _MistAdminDashboardState extends State<MistAdminDashboard> {
             ],
           ),
           ListTile(
+            onTap: () => Get.to(() => ScreenInventoryManagement()),
             leading: Iconify(Carbon.workspace, color: Colors.grey),
             title: "Inventory Management".text(),
           ),

@@ -70,7 +70,7 @@ const CustomerModelSchema = CollectionSchema(
     r'points': PropertySchema(
       id: 10,
       name: r'points',
-      type: IsarType.long,
+      type: IsarType.double,
     ),
     r'purchaseValue': PropertySchema(
       id: 11,
@@ -131,7 +131,7 @@ void _customerModelSerialize(
   writer.writeDouble(offsets[7], object.inboundProfit);
   writer.writeString(offsets[8], object.notes);
   writer.writeString(offsets[9], object.phoneNumber);
-  writer.writeLong(offsets[10], object.points);
+  writer.writeDouble(offsets[10], object.points);
   writer.writeDouble(offsets[11], object.purchaseValue);
   writer.writeLong(offsets[12], object.visits);
 }
@@ -153,7 +153,7 @@ CustomerModel _customerModelDeserialize(
     inboundProfit: reader.readDouble(offsets[7]),
     notes: reader.readString(offsets[8]),
     phoneNumber: reader.readString(offsets[9]),
-    points: reader.readLong(offsets[10]),
+    points: reader.readDouble(offsets[10]),
     purchaseValue: reader.readDouble(offsets[11]),
     visits: reader.readLong(offsets[12]),
   );
@@ -189,7 +189,7 @@ P _customerModelDeserializeProp<P>(
     case 9:
       return (reader.readString(offset)) as P;
     case 10:
-      return (reader.readLong(offset)) as P;
+      return (reader.readDouble(offset)) as P;
     case 11:
       return (reader.readDouble(offset)) as P;
     case 12:
@@ -1639,49 +1639,58 @@ extension CustomerModelQueryFilter
   }
 
   QueryBuilder<CustomerModel, CustomerModel, QAfterFilterCondition>
-      pointsEqualTo(int value) {
+      pointsEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'points',
         value: value,
+        epsilon: epsilon,
       ));
     });
   }
 
   QueryBuilder<CustomerModel, CustomerModel, QAfterFilterCondition>
       pointsGreaterThan(
-    int value, {
+    double value, {
     bool include = false,
+    double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
         property: r'points',
         value: value,
+        epsilon: epsilon,
       ));
     });
   }
 
   QueryBuilder<CustomerModel, CustomerModel, QAfterFilterCondition>
       pointsLessThan(
-    int value, {
+    double value, {
     bool include = false,
+    double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
         property: r'points',
         value: value,
+        epsilon: epsilon,
       ));
     });
   }
 
   QueryBuilder<CustomerModel, CustomerModel, QAfterFilterCondition>
       pointsBetween(
-    int lower,
-    int upper, {
+    double lower,
+    double upper, {
     bool includeLower = true,
     bool includeUpper = true,
+    double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
@@ -1690,6 +1699,7 @@ extension CustomerModelQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+        epsilon: epsilon,
       ));
     });
   }
@@ -2326,7 +2336,7 @@ extension CustomerModelQueryProperty
     });
   }
 
-  QueryBuilder<CustomerModel, int, QQueryOperations> pointsProperty() {
+  QueryBuilder<CustomerModel, double, QQueryOperations> pointsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'points');
     });

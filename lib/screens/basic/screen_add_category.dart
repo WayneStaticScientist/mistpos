@@ -121,7 +121,7 @@ class _ScreenAddCategoryState extends State<ScreenAddCategory> {
                 ),
           ],
         ),
-      ).constrained(maxWidth: 600),
+      ).constrained(maxWidth: 600).center(),
     );
   }
 

@@ -4,6 +4,7 @@ import 'package:get/instance_manager.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:isar/isar.dart';
 import 'package:mistpos/controllers/admin_controller.dart';
+import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/models/item_categories_model.dart';
@@ -42,6 +43,7 @@ class MyApp extends StatelessWidget {
         Get.put(UserController());
         Get.put(ItemsController());
         Get.put(AdminController());
+        Get.put(InventoryController());
       }),
       theme: ThemeData(
         useMaterial3: true,
