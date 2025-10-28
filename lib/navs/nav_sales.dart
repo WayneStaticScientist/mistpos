@@ -4,11 +4,12 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/utils/currence_converter.dart';
+import 'package:mistpos/screens/basic/screens_select_customers.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/widgets/layouts/cards_recent.dart';
 import 'package:mistpos/controllers/items_controller.dart';
@@ -109,6 +110,10 @@ class _NavSaleState extends State<NavSale> {
                             icon: Iconify(Bx.error, color: Colors.red),
                           )
                         : SizedBox.shrink(),
+                  ),
+                  IconButton(
+                    onPressed: () => Get.to(() => ScreensListCustomers()),
+                    icon: Iconify(Bx.user_plus),
                   ),
                   IconButton(onPressed: () {}, icon: Iconify(Bx.cog)),
                 ],

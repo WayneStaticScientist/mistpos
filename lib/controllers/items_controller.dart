@@ -4,20 +4,23 @@ import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/item_model.dart';
+import 'package:mistpos/models/customer_model.dart';
 import 'package:mistpos/models/item_saved_model.dart';
 import 'package:mistpos/models/item_receit_item.dart';
 import 'package:mistpos/services/network_wrapper.dart';
 import 'package:mistpos/models/item_receit_model.dart';
 import 'package:mistpos/models/item_modifier_model.dart';
-import 'package:mistpos/models/item_categories_model.dart';
 import 'package:mistpos/models/item_saved_items_model.dart';
+import 'package:mistpos/models/item_categories_model.dart';
 
 class ItemsController extends GetxController {
   RxDouble totalPrice = RxDouble(0);
   RxString selectedCategory = ''.obs;
   RxList<ItemModel> cartItems = <ItemModel>[].obs;
   RxList<ItemModifier> modifiers = <ItemModifier>[].obs;
+  RxList<CustomerModel> customers = <CustomerModel>[].obs;
   RxList<ItemReceitModel> receits = <ItemReceitModel>[].obs;
+  Rx<CustomerModel?> selectedCustomer = Rx<CustomerModel?>(null);
   RxList<ItemCategoryModel> categories = <ItemCategoryModel>[].obs;
   RxList<ItemSavedItemsModel> savedItems = <ItemSavedItemsModel>[].obs;
   RxList<Map<String, dynamic>> checkOutItems = <Map<String, dynamic>>[].obs;
@@ -666,5 +669,44 @@ class ItemsController extends GetxController {
       Toaster.showError("There was error : $e");
       return null;
     }
+  }
+
+  RxBool addCustomerSyncing = RxBool(false);
+  Future<bool> addCustomer(CustomerModel model) async {
+    if (addCustomerSyncing.value) {
+      Toaster.showError("syncing customer please wait");
+      return false;
+    }
+    addCustomerSyncing.value = true;
+    final response = await Net.post("/cashier/customer", data: model.toJson());
+    addCustomerSyncing.value = false;
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return false;
+    }
+    loadCustomers();
+    return true;
+  }
+
+  RxBool syncingCustomers = RxBool(false);
+  RxString syncingCustomersFailed = RxString("");
+  RxInt customerPage = RxInt(1);
+  RxInt customerTotalPages = RxInt(2);
+  void loadCustomers({String search = '', int page = 1}) async {
+    if (syncingCustomers.value) return;
+    syncingCustomers.value = true;
+    syncingCustomersFailed.value = "";
+    final response = await Net.get(
+      "/cashier/customers?page=$page&search=$search",
+    );
+    syncingCustomers.value = false;
+    if (response.hasError) {
+      syncingCustomersFailed.value = response.response;
+      return;
+    }
+    customerTotalPages.value = response.body['totalPages'] ?? 0;
+    customerPage.value = response.body['currentPage'] as int;
+    final list = response.body['list'] as List<dynamic>? ?? [];
+    customers.value = list.map((e) => CustomerModel.fromJson(e)).toList();
   }
 }

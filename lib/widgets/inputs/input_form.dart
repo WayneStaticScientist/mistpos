@@ -8,6 +8,7 @@ class MistFormInput extends StatefulWidget {
   final String label;
   final Widget? icon;
   final bool? isPasswordField;
+  final int? maxLines;
   final bool? enabled;
   final Color? underLineColor;
   final String? validateString;
@@ -25,6 +26,7 @@ class MistFormInput extends StatefulWidget {
     this.validLength,
     this.keyboardType,
     this.enabled,
+    this.maxLines = 1,
   });
 
   @override
@@ -36,6 +38,7 @@ class _MistFormInputState extends State<MistFormInput> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      maxLines: widget.maxLines,
       validator: (value) =>
           widget.validateString != null && (value == null || value.isEmpty)
           ? (widget.validLength == null

@@ -19,6 +19,3 @@ subprojects {
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
-buildscript {
-    ext.kotlin_version = '1.8.0'
-}

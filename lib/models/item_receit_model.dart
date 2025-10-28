@@ -13,6 +13,7 @@ class ItemReceitModel {
   bool synced = false;
   DateTime createdAt;
   String hexId = "";
+  String? customerId;
   List<ItemReceitItem> items = [];
   ItemReceitModel({
     required this.items,
@@ -23,9 +24,11 @@ class ItemReceitModel {
     required this.cashier,
     required this.payment,
     required this.createdAt,
+    this.customerId,
   });
   Map<String, dynamic> toJson() {
     return {
+      "customerId": customerId,
       "cashier": cashier,
       "payment": payment,
       "change": change,
@@ -38,6 +41,7 @@ class ItemReceitModel {
 
   factory ItemReceitModel.fromJson(Map<String, dynamic> data) {
     return ItemReceitModel(
+      customerId: data['customerId'],
       items: data['items'] != null
           ? (data['items'] as List<dynamic>)
                 .map((e) => ItemReceitItem.fromJson(e))
