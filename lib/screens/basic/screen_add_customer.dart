@@ -1,11 +1,13 @@
-import 'package:country_picker/country_picker.dart';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/models/customer_model.dart';
+import 'package:country_picker/country_picker.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
+import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/widgets/buttons/mist_form_button.dart';
 
 class ScreenAddCustomer extends StatefulWidget {
@@ -24,6 +26,7 @@ class _ScreenAddCustomerState extends State<ScreenAddCustomer> {
   final _notesController = TextEditingController();
   final _addressController = TextEditingController();
   final _countryController = TextEditingController();
+  final _itemsController = Get.find<ItemsController>();
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +157,26 @@ class _ScreenAddCustomerState extends State<ScreenAddCustomer> {
     if (_nameController.text.trim().split(" ").length < 2) {
       Toaster.showError("Full Name  is required e.g John Doe");
       return;
+    }
+    final customer = CustomerModel(
+      email: _emailController.text.trim(),
+      fullName: _nameController.text.trim(),
+      phoneNumber: _phoneController.text.trim(),
+      city: _cityController.text.trim(),
+      notes: _notesController.text.trim(),
+      country: _countryController.text.trim(),
+      points: 0,
+      visits: 0,
+      company: "",
+      address: _addressController.text.trim(),
+      purchaseValue: 0,
+      inboundProfit: 0,
+      hexId: "",
+    );
+    final response = await _itemsController.addCustomer(customer);
+    if (response && mounted) {
+      Get.back();
+      Toaster.showSuccess("Customer added successfully");
     }
   }
 }
