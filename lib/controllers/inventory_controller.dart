@@ -233,7 +233,7 @@ class InventoryController extends GetxController {
     if (stockAdjustOrdersLoading.value) return;
     stockAdjustOrdersLoading.value = true;
     final response = await Net.get(
-      "/admin/inventory/stock-adjusts?page=$page&search=$search&status=$status&supplier=$supplier",
+      "/admin/inventory/stock-adjusts?page=$page&search=$search&status=$status",
     );
     stockAdjustOrdersLoading.value = false;
     if (response.hasError) {
