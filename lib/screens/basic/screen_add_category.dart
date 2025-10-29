@@ -1,14 +1,14 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
-import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/utils/color_list.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/models/item_categories_model.dart';
 import 'package:mistpos/controllers/items_controller.dart';
+import 'package:mistpos/widgets/buttons/mist_loaded_icon_button.dart';
 
 class ScreenAddCategory extends StatefulWidget {
   const ScreenAddCategory({super.key});
@@ -29,26 +29,11 @@ class _ScreenAddCategoryState extends State<ScreenAddCategory> {
       appBar: AppBar(
         title: Text("New Category"),
         actions: [
-          "Save"
-              .text()
-              .elevatedIconButton(
-                icon: _isLoading
-                    ? Padding(
-                        padding: EdgeInsets.all(2),
-                        child: SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      )
-                    : SizedBox.shrink(),
-                onPressed: _saveItem,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Get.theme.colorScheme.onPrimary,
-                  foregroundColor: Get.theme.colorScheme.primary,
-                ),
-              )
-              .padding(EdgeInsets.only(right: 12)),
+          MistLoadIconButton(
+            label: 'Save',
+            isLoading: _isLoading,
+            onPressed: _saveItem,
+          ),
         ],
       ),
       body: Form(

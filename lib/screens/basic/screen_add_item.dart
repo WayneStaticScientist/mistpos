@@ -8,6 +8,7 @@ import 'package:mistpos/utils/icons_list.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/widgets/buttons/mist_loaded_icon_button.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/models/item_categories_model.dart';
@@ -54,26 +55,11 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
           fontWeight: FontWeight.w600,
         ),
         actions: [
-          "Save"
-              .text()
-              .elevatedIconButton(
-                icon: _isLoading
-                    ? Padding(
-                        padding: EdgeInsets.all(2),
-                        child: SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      )
-                    : SizedBox.shrink(),
-                onPressed: _saveItem,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Get.theme.colorScheme.onPrimary,
-                  foregroundColor: Get.theme.colorScheme.primary,
-                ),
-              )
-              .padding(EdgeInsets.only(right: 12)),
+          MistLoadIconButton(
+            label: 'Save',
+            isLoading: _isLoading,
+            onPressed: _saveItem,
+          ),
         ],
         iconTheme: IconThemeData(color: Get.theme.colorScheme.onPrimary),
       ),

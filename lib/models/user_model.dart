@@ -47,6 +47,7 @@ class User {
       'email': email,
       'company': company,
       'country': country,
+      'password': password,
       'fullName': fullName,
       'pinnedInput': pinnedInput,
     };

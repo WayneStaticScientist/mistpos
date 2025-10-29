@@ -40,6 +40,7 @@ class SupplierModel {
 
   Map<String, dynamic> toJson() {
     return {
+      "id": id,
       'name': name,
       'city': city,
       'notes': notes,

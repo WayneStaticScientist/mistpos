@@ -614,6 +614,7 @@ class ItemsController extends GetxController {
       selectedCustomer.value = null;
       totalPrice.value = 0;
       loadReceits();
+      syncCartItemsOnBackground();
       return (success: true, rejects: rejects);
     } catch (e) {
       log("There was error $e");

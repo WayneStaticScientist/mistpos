@@ -1,15 +1,15 @@
-import 'package:exui/exui.dart';
-import 'package:exui/material.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:iconify_flutter/icons/bx.dart';
-import 'package:mistpos/controllers/items_controller.dart';
-import 'package:mistpos/models/item_modifier_model.dart';
-import 'package:mistpos/models/modifier_embedder.dart';
+import 'package:exui/exui.dart';
+import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
-import 'package:mistpos/widgets/buttons/mist_default.dart';
+import 'package:iconify_flutter/icons/bx.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/models/modifier_embedder.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
+import 'package:mistpos/models/item_modifier_model.dart';
+import 'package:mistpos/controllers/items_controller.dart';
+import 'package:mistpos/widgets/buttons/mist_default.dart';
+import 'package:mistpos/widgets/buttons/mist_loaded_icon_button.dart';
 
 class ScreenAddModifier extends StatefulWidget {
   const ScreenAddModifier({super.key});
@@ -33,26 +33,11 @@ class _ScreenAddModifierState extends State<ScreenAddModifier> {
       appBar: AppBar(
         title: Text("Add Modifier"),
         actions: [
-          "Save"
-              .text()
-              .elevatedIconButton(
-                icon: _isLoading
-                    ? Padding(
-                        padding: EdgeInsets.all(2),
-                        child: SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      )
-                    : SizedBox.shrink(),
-                onPressed: _saveItem,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Get.theme.colorScheme.onPrimary,
-                  foregroundColor: Get.theme.colorScheme.primary,
-                ),
-              )
-              .padding(EdgeInsets.only(right: 12)),
+          MistLoadIconButton(
+            label: 'Save',
+            isLoading: _isLoading,
+            onPressed: _saveItem,
+          ),
         ],
       ),
       body: Form(
