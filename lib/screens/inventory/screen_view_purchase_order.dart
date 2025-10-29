@@ -1,7 +1,8 @@
-import 'package:exui/material.dart';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
+import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/icons/fa.dart';
 import 'package:mistpos/models/supplier_model.dart';
@@ -9,11 +10,11 @@ import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/models/purchase_order_model.dart';
-import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/widgets/layouts/card_overview.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/widgets/buttons/mist_loaded_icon_button.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:mistpos/screens/inventory/screen_edit_purchase_order.dart';
 
 class ScreenViewPurchaseOrder extends StatefulWidget {
   final PurchaseOrderModel model;
@@ -86,7 +87,7 @@ class _ScreenViewPurchaseOrderState extends State<ScreenViewPurchaseOrder> {
         ],
       ).constrained(maxWidth: ScreenSizes.maxWidth).center(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: _editPurchaseOrder,
         child: Icon(Icons.edit),
       ),
     );
@@ -302,5 +303,19 @@ class _ScreenViewPurchaseOrderState extends State<ScreenViewPurchaseOrder> {
       Get.back();
       Toaster.showSuccess("Order Updated");
     }
+  }
+
+  void _editPurchaseOrder() {
+    if (widget.model.status == "accepted") {
+      Toaster.showError("cant edit already sent inventory object");
+      return;
+    }
+    if (model == null) {
+      Toaster.showError("Supplier not Loaded ? Supplier has to load first");
+      return;
+    }
+    _inventory.selectedSupplier.value = model;
+    _inventory.selectedInvItems.value = widget.model.inventoryItems;
+    Get.to(() => ScreenEditPurchaseOrder(model: widget.model));
   }
 }

@@ -2,11 +2,13 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/controllers/user_controller.dart';
-import 'package:mistpos/screens/inventory/screen_add_supplier.dart';
 import 'package:mistpos/widgets/layouts/inventory_nav_bar.dart';
+import 'package:mistpos/screens/inventory/screen_add_supplier.dart';
 import 'package:mistpos/navs/admin/nav_inventory_purchase_order.dart';
 import 'package:mistpos/navs/admin/nav_inventory_suppliers_list.dart';
+import 'package:mistpos/navs/admin/nav_inventory_stock_adjustments.dart';
 import 'package:mistpos/screens/inventory/screen_add_purchase_order.dart';
+import 'package:mistpos/screens/inventory/screen_add_stockadjustments.dart';
 
 class ScreenInventoryManagement extends StatefulWidget {
   const ScreenInventoryManagement({super.key});
@@ -19,8 +21,9 @@ class ScreenInventoryManagement extends StatefulWidget {
 class _ScreenInventoryManagementState extends State<ScreenInventoryManagement> {
   final _userController = Get.find<UserController>();
   final navs = {
-    "Purchase Orders": const NavInventoryPurchaseOrder(),
     "Suppliers": NavInventorySuppliersList(),
+    "Stock Adjustments": NavInventoryStockAdjustments(),
+    "Purchase Orders": const NavInventoryPurchaseOrder(),
   };
   String _selectedIndex = "Purchase Orders";
 
@@ -57,6 +60,9 @@ class _ScreenInventoryManagementState extends State<ScreenInventoryManagement> {
     }
     if (_selectedIndex == "Suppliers") {
       Get.to(() => ScreenAddSupplier());
+    }
+    if (_selectedIndex == "Stock Adjustments") {
+      Get.to(() => ScreenAddStockadjustments());
     }
   }
 }

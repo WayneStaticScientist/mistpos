@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:mistpos/models/purchase_order_model.dart';
+import 'package:mistpos/models/stock_adjustment_model.dart';
 import 'package:mistpos/models/supplier_model.dart';
 import 'package:mistpos/services/network_wrapper.dart';
 import 'package:mistpos/utils/toast.dart';
@@ -13,6 +14,7 @@ class InvItem {
   double amount;
   String sku;
   String barcode;
+  int inStock = 1;
   InvItem({
     required this.id,
     required this.name,
@@ -21,6 +23,7 @@ class InvItem {
     required this.amount,
     required this.sku,
     required this.barcode,
+    this.inStock = 1,
   });
   Map<String, dynamic> toMap() {
     return {
@@ -30,6 +33,7 @@ class InvItem {
       "cost": cost,
       "amount": amount,
       "barcode": barcode,
+      "inStock": inStock,
       "quantity": quantity,
     };
   }
@@ -43,6 +47,7 @@ class InvItem {
       amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
       sku: data['sku'] ?? '',
       barcode: data['barcode'] ?? '',
+      inStock: data['inStock'] ?? 0,
     );
   }
 }
@@ -76,13 +81,14 @@ class InventoryController extends GetxController {
     }
     selectedInvItems.add(
       InvItem(
-        id: model.hexId,
-        name: model.name,
-        cost: model.cost,
         quantity: 1,
-        amount: model.cost,
         sku: model.sku,
+        id: model.hexId,
+        cost: model.cost,
+        name: model.name,
+        amount: model.cost,
         barcode: model.barcode,
+        inStock: model.stockQuantity,
       ),
     );
   }
@@ -128,6 +134,8 @@ class InventoryController extends GetxController {
       Toaster.showError(response.response);
       return false;
     }
+    selectedSupplier.value = null;
+    selectedInvItems.clear();
     loadPurchaseOrders(page: 1);
     return true;
   }
@@ -183,7 +191,61 @@ class InventoryController extends GetxController {
       Toaster.showError(response.response);
       return false;
     }
+    selectedSupplier.value = null;
+    selectedInvItems.clear();
     loadPurchaseOrders();
     return true;
+  }
+
+  Future<({bool status, List<InvItem> rejects})> addInventoryStockAdjustment(
+    Map<String, dynamic> data,
+  ) async {
+    List<InvItem> rejects = [];
+    final response = await Net.post(
+      "/admin/inventory/stock-adjust",
+      data: data,
+    );
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return (status: false, rejects: rejects);
+    }
+    if (response.body['rejects'] != null) {
+      rejects = (response.body['rejects'] as List<dynamic>)
+          .map((e) => InvItem.fromJson(e))
+          .toList();
+    }
+    selectedSupplier.value = null;
+    selectedInvItems.clear();
+    loadStockAdjustments(page: 1);
+    return (status: true, rejects: rejects);
+  }
+
+  RxList<StockAdjustmentModel> stockerOrders = RxList<StockAdjustmentModel>([]);
+  RxInt stockAdjustOrderPage = RxInt(1);
+  RxInt stockAdjustOrderTotalPages = RxInt(1);
+  RxBool stockAdjustOrdersLoading = RxBool(false);
+  void loadStockAdjustments({
+    int page = 1,
+    String search = '',
+    String status = '',
+    String supplier = '',
+  }) async {
+    if (stockAdjustOrdersLoading.value) return;
+    stockAdjustOrdersLoading.value = true;
+    final response = await Net.get(
+      "/admin/inventory/stock-adjusts?page=$page&search=$search&status=$status&supplier=$supplier",
+    );
+    stockAdjustOrdersLoading.value = false;
+    if (response.hasError) {
+      return;
+    }
+    stockAdjustOrderPage.value = response.body['currentPage'];
+    stockAdjustOrderTotalPages.value = response.body['totalPages'];
+    if (response.body['list'] != null) {
+      List<dynamic> list = response.body['list'];
+      stockerOrders.value = list
+          .map((e) => StockAdjustmentModel.fromJson(e))
+          .toList();
+    }
   }
 }

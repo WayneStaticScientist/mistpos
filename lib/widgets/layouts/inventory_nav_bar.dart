@@ -1,5 +1,6 @@
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
+import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 
@@ -37,6 +38,14 @@ class _MistInventoryNavBarState extends State<MistInventoryNavBar> {
             title: "Purchase Orders".text(),
             onTap: () => widget.onTap("Purchase Orders"),
             tileColor: widget.selectedTile == "Purchase Orders"
+                ? Colors.grey.withAlpha(50)
+                : null,
+          ),
+          ListTile(
+            leading: Iconify(Bx.cart, color: Colors.purpleAccent),
+            title: "Stock Adjustments".text(),
+            onTap: () => widget.onTap("Stock Adjustments"),
+            tileColor: widget.selectedTile == "Stock Adjustments"
                 ? Colors.grey.withAlpha(50)
                 : null,
           ),
