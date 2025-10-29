@@ -249,10 +249,12 @@ class _ScreenAddPurchaseOrderState extends State<ScreenAddPurchaseOrder> {
     final order = PurchaseOrderModel(
       status: s,
       senderId: '',
+      company: '',
       expectedDate: _expectDate!,
       notes: _notesController.text,
       inventoryItems: _inventory.selectedInvItems,
       sellerId: _inventory.selectedSupplier.value!.id ?? "",
+      id: '',
     );
     final response = await _inventory.addInventoryPurchaseOrder(order.toJson());
     if (!mounted) return;

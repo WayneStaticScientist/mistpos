@@ -3,17 +3,21 @@ import 'package:mistpos/controllers/inventory_controller.dart';
 class PurchaseOrderModel {
   DateTime expectedDate;
   String notes;
+  String id;
   String sellerId;
   List<InvItem> inventoryItems;
   String senderId;
   String status;
+  String company;
   PurchaseOrderModel({
     required this.notes,
+    required this.id,
     required this.status,
     required this.sellerId,
     required this.senderId,
     required this.expectedDate,
     required this.inventoryItems,
+    required this.company,
   });
   // =========================================================
   // 1. toJson() - CONVERT DART OBJECT TO JSON MAP
@@ -26,6 +30,7 @@ class PurchaseOrderModel {
       'sellerId': sellerId,
       'status': status,
       'senderId': senderId,
+      'company': company,
       'inventoryItems': inventoryItems.map((item) => item.toMap()).toList(),
     };
   }
@@ -44,6 +49,8 @@ class PurchaseOrderModel {
       sellerId: json['sellerId'] as String,
       senderId: json['senderId'] as String,
       inventoryItems: items,
+      id: json['_id'],
+      company: json['company'],
     );
   }
 }

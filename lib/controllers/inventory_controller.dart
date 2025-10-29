@@ -173,4 +173,17 @@ class InventoryController extends GetxController {
       message: "",
     );
   }
+
+  Future<bool> updatePurchaseOrder(PurchaseOrderModel model) async {
+    final response = await Net.put(
+      "/admin/inventory/purchase-order/${model.id}",
+      data: model.toJson(),
+    );
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return false;
+    }
+    loadPurchaseOrders();
+    return true;
+  }
 }
