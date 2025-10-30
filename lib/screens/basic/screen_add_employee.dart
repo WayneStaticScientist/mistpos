@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
+import 'package:mistpos/utils/permissions.dart';
+import 'package:mistpos/widgets/layouts/chips.dart';
 import 'package:pinput/pinput.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
@@ -25,6 +27,7 @@ class _ScreenAddEmployeeState extends State<ScreenAddEmployee> {
   final _emailController = TextEditingController();
   final _adminController = Get.find<AdminController>();
   final _tillNumberController = TextEditingController();
+  final _selectedPermissions = <String>[];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -103,6 +106,27 @@ class _ScreenAddEmployeeState extends State<ScreenAddEmployee> {
                       controller: _tillNumberController,
                     ),
                   ],
+                  if (_role == "manager") ...[
+                    32.gapHeight,
+                    "Select Manager Permissions".text(),
+                    Wrap(
+                      children: UserPermissions.permissions.map((e) {
+                        final selected = _selectedPermissions.contains(e.value);
+                        return MistChip(
+                          label: e.name,
+                          selected: selected,
+                        ).onTap(() {
+                          setState(() {
+                            if (selected) {
+                              _selectedPermissions.remove(e.value);
+                            } else {
+                              _selectedPermissions.add(e.value);
+                            }
+                          });
+                        });
+                      }).toList(),
+                    ),
+                  ],
                   24.gapHeight,
                   "User Pin".text(
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
@@ -179,6 +203,7 @@ class _ScreenAddEmployeeState extends State<ScreenAddEmployee> {
         "role": _role,
         "pin": _pin,
         "till": tillNumber,
+        'permissions': _selectedPermissions,
       },
     });
     if (result) {

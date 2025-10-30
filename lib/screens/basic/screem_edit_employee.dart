@@ -4,7 +4,9 @@ import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
 import 'package:mistpos/utils/toast.dart';
+import 'package:mistpos/utils/permissions.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/widgets/layouts/chips.dart';
 import 'package:mistpos/models/employee_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
@@ -34,12 +36,14 @@ class _ScreemEditEmployeeState extends State<ScreemEditEmployee> {
   late final _tillNumberController = TextEditingController(
     text: widget.employeeModel.till.toString(),
   );
+  late final _selectedPermissions = widget.employeeModel.permissions;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Get.theme.colorScheme.primary,
-        foregroundColor: Get.theme.colorScheme.onPrimary,
+        foregroundColor: Colors.white,
         title: Text("Edit ${widget.employeeModel.fullName}"),
         leading: IconButton(
           onPressed: () => Get.back(),
@@ -115,7 +119,29 @@ class _ScreemEditEmployeeState extends State<ScreemEditEmployee> {
                       controller: _tillNumberController,
                     ),
                   ],
+                  if (_role == "manager") ...[
+                    32.gapHeight,
+                    "Select Manager Permissions".text(),
+                    Wrap(
+                      children: UserPermissions.permissions.map((e) {
+                        final selected = _selectedPermissions.contains(e.value);
+                        return MistChip(
+                          label: e.name,
+                          selected: selected,
+                        ).onTap(() {
+                          setState(() {
+                            if (selected) {
+                              _selectedPermissions.remove(e.value);
+                            } else {
+                              _selectedPermissions.add(e.value);
+                            }
+                          });
+                        });
+                      }).toList(),
+                    ),
+                  ],
                   24.gapHeight,
+
                   "User Pin".text(
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
@@ -190,6 +216,7 @@ class _ScreemEditEmployeeState extends State<ScreemEditEmployee> {
         "role": _role,
         "pin": _pin,
         "till": tillNumber,
+        "permissions": _selectedPermissions,
       },
     });
     if (result) {

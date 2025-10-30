@@ -13,7 +13,7 @@ import 'package:mistpos/widgets/buttons/mist_loaded_icon_button.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/models/item_categories_model.dart';
-import 'package:radio_group_v2/widgets/views/radio_group.dart';
+import 'package:radio_group_v2/widgets/views/radio_group.dart' as rg;
 import 'package:radio_group_v2/utils/radio_group_decoration.dart';
 import 'package:radio_group_v2/widgets/view_models/radio_group_controller.dart';
 
@@ -128,11 +128,11 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
                   "Sold By".text(
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
-                  RadioGroup(
+                  rg.RadioGroup(
                     controller: _soldByGroup,
                     values: SellingMethods.methods,
                     indexOfDefault: selectedIndex < 0 ? 0 : selectedIndex,
-                    orientation: RadioGroupOrientation.horizontal,
+                    orientation: rg.RadioGroupOrientation.horizontal,
                     decoration: RadioGroupDecoration(
                       spacing: 10.0,
                       activeColor: Get.theme.colorScheme.primary,
@@ -210,7 +210,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
                           widget.model.trackStock = val;
                         });
                       },
-                      activeColor: Get.theme.colorScheme.primary,
+                      activeThumbColor: Get.theme.colorScheme.primary,
                     ),
                   ),
                   if (widget.model.trackStock) ...[
@@ -273,7 +273,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
                             }
                           });
                         },
-                        activeColor: Get.theme.colorScheme.primary,
+                        activeThumbColor: Get.theme.colorScheme.primary,
                       ),
                     ),
                   ),
@@ -298,11 +298,11 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
                   "Sold By".text(
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
-                  RadioGroup(
+                  rg.RadioGroup(
                     controller: _itemRepresentation,
                     values: ["Icons And Color", "Image Only"],
                     indexOfDefault: 0,
-                    orientation: RadioGroupOrientation.horizontal,
+                    orientation: rg.RadioGroupOrientation.horizontal,
                     decoration: RadioGroupDecoration(
                       spacing: 10.0,
                       activeColor: Get.theme.colorScheme.primary,

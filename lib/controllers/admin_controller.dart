@@ -1,6 +1,5 @@
-import 'dart:developer';
-
 import 'package:get/get.dart';
+import 'package:mistpos/models/average_profit_model.dart';
 import 'package:mistpos/models/employee_model.dart';
 import 'package:mistpos/services/network_wrapper.dart';
 import 'package:mistpos/models/sales_stats_model.dart';
@@ -12,9 +11,18 @@ class AdminController extends GetxController {
   RxInt totalProducts = RxInt(0);
   Rx<StatsProductModel?> statsPoducts = Rx<StatsProductModel?>(null);
   Rx<StatsSalesModel?> statsSales = Rx<StatsSalesModel?>(null);
-  void getAdminStats() async {
+  void getAdminStats({DateTime? startDate, DateTime? endDate}) async {
     loading.value = true;
-    final result = await Net.get("/admin/stats");
+    final date = DateTime.now();
+    if (endDate == null ||
+        (endDate.day == date.day &&
+            endDate.month == date.month &&
+            endDate.year == date.year)) {
+      endDate = DateTime(date.year, date.month, date.day, 23, 59, 59, 999);
+    }
+    final result = await Net.get(
+      "/admin/stats?startDate=${startDate?.toIso8601String() ?? ''}&endDate=${endDate.toIso8601String()}",
+    );
     if (result.hasError) {
       loading.value = false;
       return;
@@ -42,7 +50,6 @@ class AdminController extends GetxController {
       loadingEmployess.value = false;
       return;
     }
-    log("resultss ${results.body}");
     if (results.body['list'] != null) {
       List<dynamic> usersList = results.body['list'];
       employees.assignAll(
@@ -99,5 +106,29 @@ class AdminController extends GetxController {
     }
     fetchEmployees();
     return true;
+  }
+
+  RxBool loadingWeeklyProfits = RxBool(false);
+  RxString weeklyProfitsFailed = RxString("");
+  RxList<AverageProfitModel> weeklyProfits = RxList<AverageProfitModel>([]);
+  void getWeeklyProfits({DateTime? endDate}) async {
+    if (loadingWeeklyProfits.value) return;
+    endDate ??= DateTime.now();
+    loadingWeeklyProfits.value = true;
+    weeklyProfitsFailed.value = "";
+    final reponse = await Net.get(
+      "/admin/stats/daily?endDate=${endDate.toIso8601String()}",
+    );
+    loadingWeeklyProfits.value = false;
+    if (reponse.hasError) {
+      weeklyProfitsFailed.value = reponse.response;
+      return;
+    }
+    if (reponse.body['list'] != null) {
+      List<dynamic> list = reponse.body['list'];
+      weeklyProfits.value = list
+          .map((e) => AverageProfitModel.fromJson(e))
+          .toList();
+    }
   }
 }
