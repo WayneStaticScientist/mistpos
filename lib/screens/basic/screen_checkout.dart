@@ -1,13 +1,13 @@
+import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/screens/basic/screen_card_payment.dart';
 import 'package:mistpos/screens/basic/screen_cash_payment.dart';
-import 'package:mistpos/utils/currence_converter.dart';
 
 class ScreenCheckout extends StatefulWidget {
   const ScreenCheckout({super.key});
@@ -42,7 +42,7 @@ class _ScreenCheckoutState extends State<ScreenCheckout> {
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.symmetric(horizontal: 65),
                         backgroundColor: Get.theme.colorScheme.primary,
-                        foregroundColor: Get.theme.colorScheme.onPrimary,
+                        foregroundColor: Colors.white,
                       ),
                     ),
                 18.gapHeight,
@@ -54,7 +54,7 @@ class _ScreenCheckoutState extends State<ScreenCheckout> {
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.symmetric(horizontal: 65),
                         backgroundColor: Get.theme.colorScheme.primary,
-                        foregroundColor: Get.theme.colorScheme.onPrimary,
+                        foregroundColor: Colors.white,
                       ),
                     ),
               ].column(

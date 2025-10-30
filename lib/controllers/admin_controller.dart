@@ -58,8 +58,6 @@ class AdminController extends GetxController {
       Toaster.showError("Adding employee please wait");
       return false;
     }
-    ;
-    addingEmployee.value = true;
     final result = await Net.post("/admin/employee", data: data);
     addingEmployee.value = false;
     if (result.hasError) {

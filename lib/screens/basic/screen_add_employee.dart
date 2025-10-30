@@ -30,7 +30,7 @@ class _ScreenAddEmployeeState extends State<ScreenAddEmployee> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Get.theme.colorScheme.primary,
-        foregroundColor: Get.theme.colorScheme.onPrimary,
+        foregroundColor: Colors.white,
         title: Text("Add Employee"),
         leading: IconButton(
           onPressed: () => Get.back(),

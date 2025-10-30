@@ -5,11 +5,13 @@ import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:mistpos/navs/admin/nav_admin_employees.dart';
 import 'package:mistpos/navs/admin/nav_admin_overview.dart';
+import 'package:mistpos/navs/admin/screen_list_customers.dart';
 import 'package:mistpos/navs/items_navs/nav_category_list.dart';
 import 'package:mistpos/navs/items_navs/nav_items_list.dart';
 import 'package:mistpos/navs/items_navs/nav_discounts_list.dart';
 import 'package:mistpos/navs/items_navs/nav_modifiers_list.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
+import 'package:mistpos/screens/basic/screen_add_customer.dart';
 import 'package:mistpos/screens/basic/screen_add_employee.dart';
 import 'package:mistpos/widgets/layouts/receits_layout_view.dart';
 import 'package:mistpos/widgets/layouts/mist_admin_dashboard.dart';
@@ -32,6 +34,7 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     "Modifiers": NavModifiersList(),
     "Discounts": NavDiscountsList(),
     "Employees": NavAdminEmployees(),
+    "Customers": NavListCustomers(),
   };
 
   @override
@@ -62,8 +65,12 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
         ],
       ),
       drawer: isLargeScreen ? null : _makeDrawer(true),
-      floatingActionButton: ["Employees"].contains(_selectedIndex)
-          ? FloatingActionButton(onPressed: _add, child: Icon(Icons.add))
+      floatingActionButton: ["Employees", "Customers"].contains(_selectedIndex)
+          ? FloatingActionButton(
+              onPressed: _add,
+              elevation: 0,
+              child: Icon(Icons.add, color: Colors.white),
+            )
           : SizedBox.shrink(),
     );
   }
@@ -71,6 +78,9 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
   void _add() {
     if (_selectedIndex == "Employees") {
       Get.to(() => ScreenAddEmployee());
+    }
+    if (_selectedIndex == "Customers") {
+      Get.to(() => ScreenAddCustomer());
     }
   }
 

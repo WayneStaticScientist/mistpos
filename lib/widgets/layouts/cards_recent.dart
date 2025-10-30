@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/models/item_saved_items_model.dart';
+import 'package:mistpos/themes/app_theme.dart';
 
 class CardsRecent extends StatelessWidget {
   final ItemSavedItemsModel savedModel;
@@ -38,7 +39,8 @@ class CardsRecent extends StatelessWidget {
         .padding(EdgeInsets.all(29))
         .decoratedBox(
           decoration: BoxDecoration(
-            color: Get.isDarkMode ? Colors.black : Colors.white,
+            color: AppTheme.surface.withAlpha(100),
+            borderRadius: BorderRadius.circular(30),
           ),
         )
         .sizedBox(height: 60, width: 200);

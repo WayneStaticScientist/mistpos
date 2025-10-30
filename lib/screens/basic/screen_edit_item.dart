@@ -9,6 +9,7 @@ import 'package:mistpos/utils/icons_list.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/widgets/buttons/mist_loaded_icon_button.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/models/item_categories_model.dart';
@@ -50,7 +51,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
   late final _reorderLevelController = TextEditingController(
     text: widget.model.lowStockThreshold.toString(),
   );
-  late final List<int> _modifiers = widget.model.modifierIds ?? [];
+  late final List<String> _modifiers = widget.model.modifiers ?? [];
 
   bool _isLoading = false;
   @override
@@ -61,34 +62,14 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
       appBar: AppBar(
         backgroundColor: Get.theme.colorScheme.primary,
         title: Text('Edit ${widget.model.name}'),
-        titleTextStyle: TextStyle(
-          color: Get.theme.colorScheme.onPrimary,
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-        ),
+        foregroundColor: Colors.white,
         actions: [
-          "Save"
-              .text()
-              .elevatedIconButton(
-                icon: _isLoading
-                    ? Padding(
-                        padding: EdgeInsets.all(2),
-                        child: SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      )
-                    : SizedBox.shrink(),
-                onPressed: _saveItem,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Get.theme.colorScheme.onPrimary,
-                  foregroundColor: Get.theme.colorScheme.primary,
-                ),
-              )
-              .padding(EdgeInsets.only(right: 12)),
+          MistLoadIconButton(
+            label: "Save",
+            isLoading: _isLoading,
+            onPressed: _saveItem,
+          ),
         ],
-        iconTheme: IconThemeData(color: Get.theme.colorScheme.onPrimary),
       ),
       body: Form(
         key: _formKey,
@@ -272,23 +253,23 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
                     (mod) => ListTile(
                       onTap: () => setState(() {
                         setState(() {
-                          if (_modifiers.contains(mod.id)) {
-                            _modifiers.remove(mod.id);
+                          if (_modifiers.contains(mod.hexId)) {
+                            _modifiers.remove(mod.hexId);
                           } else {
-                            _modifiers.add(mod.id);
+                            _modifiers.add(mod.hexId);
                           }
                         });
                       }),
                       contentPadding: EdgeInsets.zero,
                       title: mod.name.text(),
                       trailing: Switch(
-                        value: _modifiers.contains(mod.id),
+                        value: _modifiers.contains(mod.hexId),
                         onChanged: (val) {
                           setState(() {
-                            if (_modifiers.contains(mod.id)) {
-                              _modifiers.remove(mod.id);
+                            if (_modifiers.contains(mod.hexId)) {
+                              _modifiers.remove(mod.hexId);
                             } else {
-                              _modifiers.add(mod.id);
+                              _modifiers.add(mod.hexId);
                             }
                           });
                         },
@@ -449,7 +430,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
     } else {
       price = cost;
     }
-    widget.model.modifierIds = _modifiers;
+    widget.model.modifiers = _modifiers;
     widget.model.price = price;
     widget.model.cost = cost;
     widget.model.name = _itemNameController.text;

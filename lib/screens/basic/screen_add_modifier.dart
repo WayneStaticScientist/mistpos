@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
@@ -83,7 +84,9 @@ class _ScreenAddModifierState extends State<ScreenAddModifier> {
                     ...options.map<Widget>(
                       (e) => ListTile(
                         title: "${e['key']}".text(),
-                        subtitle: "${e['value']}".text(),
+                        subtitle: CurrenceConverter.getCurrenceFloatInStrings(
+                          (e['value'] as num?)?.toDouble() ?? 0.0,
+                        ).text(),
                         onTap: () => _editOption(e),
                         trailing: IconButton(
                           onPressed: () => _removeOption(e),

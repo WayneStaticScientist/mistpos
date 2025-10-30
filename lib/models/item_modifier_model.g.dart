@@ -17,14 +17,19 @@ const ItemModifierSchema = CollectionSchema(
   name: r'ItemModifier',
   id: 4545784885093040720,
   properties: {
-    r'list': PropertySchema(
+    r'hexId': PropertySchema(
       id: 0,
+      name: r'hexId',
+      type: IsarType.string,
+    ),
+    r'list': PropertySchema(
+      id: 1,
       name: r'list',
       type: IsarType.objectList,
       target: r'ModifierEmbedder',
     ),
     r'name': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'name',
       type: IsarType.string,
     )
@@ -63,6 +68,7 @@ int _itemModifierEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 + object.hexId.length * 3;
   bytesCount += 3 + object.list.length * 3;
   {
     final offsets = allOffsets[ModifierEmbedder]!;
@@ -82,13 +88,14 @@ void _itemModifierSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
+  writer.writeString(offsets[0], object.hexId);
   writer.writeObjectList<ModifierEmbedder>(
-    offsets[0],
+    offsets[1],
     allOffsets,
     ModifierEmbedderSchema.serialize,
     object.list,
   );
-  writer.writeString(offsets[1], object.name);
+  writer.writeString(offsets[2], object.name);
 }
 
 ItemModifier _itemModifierDeserialize(
@@ -98,14 +105,15 @@ ItemModifier _itemModifierDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = ItemModifier(
+    hexId: reader.readStringOrNull(offsets[0]) ?? '',
     list: reader.readObjectList<ModifierEmbedder>(
-          offsets[0],
+          offsets[1],
           ModifierEmbedderSchema.deserialize,
           allOffsets,
           ModifierEmbedder(),
         ) ??
         [],
-    name: reader.readString(offsets[1]),
+    name: reader.readString(offsets[2]),
   );
   object.id = id;
   return object;
@@ -119,6 +127,8 @@ P _itemModifierDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 1:
       return (reader.readObjectList<ModifierEmbedder>(
             offset,
             ModifierEmbedderSchema.deserialize,
@@ -126,7 +136,7 @@ P _itemModifierDeserializeProp<P>(
             ModifierEmbedder(),
           ) ??
           []) as P;
-    case 1:
+    case 2:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -272,6 +282,140 @@ extension ItemModifierQueryWhere
 
 extension ItemModifierQueryFilter
     on QueryBuilder<ItemModifier, ItemModifier, QFilterCondition> {
+  QueryBuilder<ItemModifier, ItemModifier, QAfterFilterCondition> hexIdEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModifier, ItemModifier, QAfterFilterCondition>
+      hexIdGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModifier, ItemModifier, QAfterFilterCondition> hexIdLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModifier, ItemModifier, QAfterFilterCondition> hexIdBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'hexId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModifier, ItemModifier, QAfterFilterCondition>
+      hexIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModifier, ItemModifier, QAfterFilterCondition> hexIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModifier, ItemModifier, QAfterFilterCondition> hexIdContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModifier, ItemModifier, QAfterFilterCondition> hexIdMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'hexId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModifier, ItemModifier, QAfterFilterCondition>
+      hexIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hexId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModifier, ItemModifier, QAfterFilterCondition>
+      hexIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'hexId',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<ItemModifier, ItemModifier, QAfterFilterCondition> idEqualTo(
       Id value) {
     return QueryBuilder.apply(this, (query) {
@@ -564,6 +708,18 @@ extension ItemModifierQueryLinks
 
 extension ItemModifierQuerySortBy
     on QueryBuilder<ItemModifier, ItemModifier, QSortBy> {
+  QueryBuilder<ItemModifier, ItemModifier, QAfterSortBy> sortByHexId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hexId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModifier, ItemModifier, QAfterSortBy> sortByHexIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hexId', Sort.desc);
+    });
+  }
+
   QueryBuilder<ItemModifier, ItemModifier, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -579,6 +735,18 @@ extension ItemModifierQuerySortBy
 
 extension ItemModifierQuerySortThenBy
     on QueryBuilder<ItemModifier, ItemModifier, QSortThenBy> {
+  QueryBuilder<ItemModifier, ItemModifier, QAfterSortBy> thenByHexId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hexId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModifier, ItemModifier, QAfterSortBy> thenByHexIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hexId', Sort.desc);
+    });
+  }
+
   QueryBuilder<ItemModifier, ItemModifier, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -606,6 +774,13 @@ extension ItemModifierQuerySortThenBy
 
 extension ItemModifierQueryWhereDistinct
     on QueryBuilder<ItemModifier, ItemModifier, QDistinct> {
+  QueryBuilder<ItemModifier, ItemModifier, QDistinct> distinctByHexId(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'hexId', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<ItemModifier, ItemModifier, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -619,6 +794,12 @@ extension ItemModifierQueryProperty
   QueryBuilder<ItemModifier, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<ItemModifier, String, QQueryOperations> hexIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'hexId');
     });
   }
 

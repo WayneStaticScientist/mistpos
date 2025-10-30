@@ -1,47 +1,46 @@
+import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
-import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/models/customer_model.dart';
 import 'package:mistpos/utils/currence_converter.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/utils/toast.dart';
 
-class ScreenViewSelectedCustomer extends StatefulWidget {
-  const ScreenViewSelectedCustomer({super.key});
+class ScreenViewCustomer extends StatefulWidget {
+  final CustomerModel model;
+  const ScreenViewCustomer({super.key, required this.model});
 
   @override
-  State<ScreenViewSelectedCustomer> createState() =>
-      _ScreenViewSelectedCustomerState();
+  State<ScreenViewCustomer> createState() => _ScreenViewCustomerState();
 }
 
-class _ScreenViewSelectedCustomerState
-    extends State<ScreenViewSelectedCustomer> {
+class _ScreenViewCustomerState extends State<ScreenViewCustomer> {
   final _itemsController = Get.find<ItemsController>();
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final selectedCustomer = _itemsController.selectedCustomer.value;
-      return Scaffold(
-        appBar: AppBar(
-          title: (selectedCustomer?.fullName ?? "No Customer Selected").text(),
-          backgroundColor: Get.theme.colorScheme.primary,
-          foregroundColor: Colors.white,
-          actions: [
-            IconButton(
-              onPressed: _removeCustomer,
-              icon: Iconify(Bx.x, color: Colors.white),
+    final selectedCustomer = widget.model;
+    return Scaffold(
+      appBar: AppBar(
+        title: (selectedCustomer.fullName).text(),
+        backgroundColor: Get.theme.colorScheme.primary,
+        foregroundColor: Colors.white,
+        actions: [
+          Obx(
+            () => IconButton(
+              onPressed: _deleteCustomer,
+              icon: _itemsController.deletingCustomer.value
+                  ? CircularProgressIndicator(color: Colors.white)
+                  : Iconify(Carbon.delete, color: Colors.white),
             ),
-          ],
-        ),
-        body: selectedCustomer == null
-            ? "No selected customer ?".text().center()
-            : _buildLayoutDetails(selectedCustomer),
-      );
-    });
+          ),
+        ],
+      ),
+      body: _buildLayoutDetails(selectedCustomer),
+    );
   }
 
   Widget _buildLayoutDetails(CustomerModel selectedCustomer) {
@@ -128,23 +127,24 @@ class _ScreenViewSelectedCustomerState
     );
   }
 
-  void _removeCustomer() {
-    if (_itemsController.selectedCustomer.value == null) return;
+  void _deleteCustomer() {
+    if (_itemsController.deletingCustomer.value) return;
     Get.defaultDialog(
-      title: "Remove",
-      content:
-          "Remove ${_itemsController.selectedCustomer.value!.fullName} from the ticker"
-              .text(),
+      title: "Delete",
+      content: "Delete ${widget.model.fullName}!Its not reversible".text(),
       actions: [
         "no".text().textButton(onPressed: () => Get.back()),
-        "yes".text().textButton(
-          onPressed: () {
-            Get.back();
-            _itemsController.selectedCustomer.value = null;
-            Toaster.showSuccess("removed customer");
-          },
-        ),
+        "yes".text().textButton(onPressed: () => _delete(widget.model)),
       ],
     );
+  }
+
+  void _delete(CustomerModel model) async {
+    final result = await _itemsController.deleteCustomer(model);
+    if (!mounted) return;
+    if (result) {
+      Get.back();
+      Toaster.showSuccess("customer deleted");
+    }
   }
 }

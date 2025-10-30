@@ -1,26 +1,25 @@
 import 'dart:async';
 
-import 'package:exui/exui.dart';
 import 'package:get/get.dart';
+import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/customer_model.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/screens/basic/screen_view_customer.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:mistpos/widgets/loaders/small_loader.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/controllers/items_controller.dart';
-import 'package:mistpos/screens/basic/screen_add_customer.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
-class ScreensListCustomers extends StatefulWidget {
-  const ScreensListCustomers({super.key});
+class NavListCustomers extends StatefulWidget {
+  const NavListCustomers({super.key});
 
   @override
-  State<ScreensListCustomers> createState() => _ScreensListCustomersState();
+  State<NavListCustomers> createState() => _NavListCustomersState();
 }
 
-class _ScreensListCustomersState extends State<ScreensListCustomers> {
+class _NavListCustomersState extends State<NavListCustomers> {
   final _refreshController = RefreshController();
   final _itemsController = Get.find<ItemsController>();
   final TextEditingController _searchController = TextEditingController();
@@ -42,58 +41,35 @@ class _ScreensListCustomersState extends State<ScreensListCustomers> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: "Customers".text(),
-        backgroundColor: Get.theme.colorScheme.primary,
-        foregroundColor: Colors.white,
-      ),
-      body: [
-        MistSearchField(
-          label: "Search Customers",
-          controller: _searchController,
-        ),
-        Expanded(
-          child: SmartRefresher(
-            controller: _refreshController,
-            enablePullUp: true,
-            onRefresh: () async {
-              _itemsController.loadCustomers(page: 1, search: _searchTerm);
-              _refreshController.refreshCompleted();
-            },
-            child: Obx(
-              () => ListView.builder(
-                itemBuilder: (context, index) {
-                  if (index < _itemsController.customers.length) {
-                    return _buildTile(_itemsController.customers[index]);
-                  }
-                  return _buildLoader();
-                },
-                itemCount: _itemsController.customers.length + 1,
-              ),
+    return [
+      MistSearchField(label: "Search Customers", controller: _searchController),
+      Expanded(
+        child: SmartRefresher(
+          controller: _refreshController,
+          enablePullUp: true,
+          onRefresh: () async {
+            _itemsController.loadCustomers(page: 1, search: _searchTerm);
+            _refreshController.refreshCompleted();
+          },
+          child: Obx(
+            () => ListView.builder(
+              itemBuilder: (context, index) {
+                if (index < _itemsController.customers.length) {
+                  return _buildTile(_itemsController.customers[index]);
+                }
+                return _buildLoader();
+              },
+              itemCount: _itemsController.customers.length + 1,
             ),
           ),
         ),
-      ].column().padding(EdgeInsets.all(14)),
-      floatingActionButton: FloatingActionButton(
-        elevation: 0,
-        onPressed: _addCustomer,
-        child: Iconify(Bx.plus, color: Colors.white),
       ),
-    );
-  }
-
-  void _addCustomer() {
-    Get.to(() => ScreenAddCustomer());
+    ].column().padding(EdgeInsets.all(14));
   }
 
   Widget _buildTile(CustomerModel model) {
     return ListTile(
-      onTap: () {
-        _itemsController.selectedCustomer.value = model;
-        Get.back();
-        Toaster.showSuccess("selected ${model.fullName}");
-      },
+      onTap: () => Get.to(() => ScreenViewCustomer(model: model)),
       leading: CircleAvatar(child: Iconify(Bx.user, color: Colors.white)),
       title: model.fullName.text(),
       subtitle: model.email.text(),
@@ -110,7 +86,12 @@ class _ScreensListCustomersState extends State<ScreensListCustomers> {
           )
           .padding(EdgeInsets.all(14));
     }
-    return [MistLoader1()]
+    return [
+          LoadingAnimationWidget.staggeredDotsWave(
+            color: Colors.white,
+            size: 200,
+          ),
+        ]
         .row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,

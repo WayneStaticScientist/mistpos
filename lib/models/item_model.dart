@@ -16,7 +16,6 @@ class ItemModel {
   String category;
   String barcode;
   bool trackStock;
-  List<int>? modifierIds;
   List<String>? modifiers;
   int stockQuantity;
   int lowStockThreshold;
@@ -36,7 +35,6 @@ class ItemModel {
     required this.color,
     required this.shape,
     required this.avatar,
-    this.modifierIds,
     this.syncOnline = false,
     this.hexId = "",
     this.modifiers,
@@ -56,7 +54,6 @@ class ItemModel {
       "color": color,
       "shape": shape,
       "avatar": avatar,
-      "modifierIds": modifierIds,
       "syncOnline": syncOnline,
       "modifiers": modifiers,
     };
@@ -75,7 +72,9 @@ class ItemModel {
       barcode: json["barcode"] as String? ?? "",
       category: json["category"] as String? ?? "",
       lowStockThreshold: json["lowStockThreshold"],
-      modifiers: json["modifiers"] as List<String>?,
+      modifiers: (json["modifiers"] as List<dynamic>?)
+          ?.map((e) => e.toString())
+          .toList(),
       cost: (json["cost"] as num?)?.toDouble() ?? 0.0,
       trackStock: json["trackStock"] as bool? ?? false,
       price: (json["price"] as num?)?.toDouble() ?? 0.0,

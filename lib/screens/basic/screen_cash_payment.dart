@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:mistpos/models/item_receit_item.dart';
@@ -50,10 +51,16 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
       appBar: AppBar(
         title: "Cash Payment".text(),
         actions: [
-          IconButton(onPressed: _cancelPayment, icon: Iconify(Carbon.close)),
+          IconButton(
+            onPressed: _cancelPayment,
+            icon: Iconify(Carbon.close, color: AppTheme.color),
+          ),
           IconButton(
             onPressed: _savePayment,
-            icon: _loading ? CircularProgressIndicator() : Iconify(Carbon.save),
+
+            icon: _loading
+                ? CircularProgressIndicator()
+                : Iconify(Carbon.save, color: AppTheme.color),
           ),
         ],
       ),
@@ -105,7 +112,7 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
                 backgroundColor: change >= 0.0
                     ? Get.theme.colorScheme.primary
                     : Colors.red,
-                foregroundColor: Get.theme.colorScheme.onPrimary,
+                foregroundColor: Colors.white,
               ),
             )
             .padding(EdgeInsets.all(12)),

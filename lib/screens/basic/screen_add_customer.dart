@@ -33,7 +33,7 @@ class _ScreenAddCustomerState extends State<ScreenAddCustomer> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Get.theme.colorScheme.primary,
-        foregroundColor: Get.theme.colorScheme.onPrimary,
+        foregroundColor: Colors.white,
         title: Text("Add Customer"),
         leading: IconButton(
           onPressed: () => Get.back(),

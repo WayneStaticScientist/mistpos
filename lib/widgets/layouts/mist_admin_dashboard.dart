@@ -118,6 +118,10 @@ class _MistAdminDashboardState extends State<MistAdminDashboard> {
           ListTile(
             leading: Iconify(Carbon.person_favorite, color: Colors.teal),
             title: "Customers".text(),
+            onTap: () => widget.onTap("Customers"),
+            tileColor: widget.selectedTile == "Customers"
+                ? Colors.grey.withAlpha(50)
+                : null,
           ),
         ],
       ),

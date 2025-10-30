@@ -65,7 +65,7 @@ class _ScreenEditManualCartState extends State<ScreenEditManualCart> {
             ),
           ].row(mainAxisAlignment: MainAxisAlignment.spaceBetween),
           18.gapHeight,
-          if (item.modifierIds != null && item.modifierIds!.isNotEmpty)
+          if (item.modifiers != null && item.modifiers!.isNotEmpty)
             _generatedModifiers(),
           if (item.price == 0) ...[
             18.gapHeight,
@@ -120,17 +120,17 @@ class _ScreenEditManualCartState extends State<ScreenEditManualCart> {
         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
       18.gapHeight,
-      ...item.modifierIds!.map<Widget>((e) => _makeModifierTab(e)),
+      ...item.modifiers!.map<Widget>((e) => _makeModifierTab(e)),
     ].column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
     );
   }
 
-  Widget _makeModifierTab(int id) {
+  Widget _makeModifierTab(String id) {
     try {
       final modifier = _itemsListController.modifiers.firstWhere(
-        (element) => element.id == id,
+        (element) => element.hexId == id,
       );
       return [
         modifier.name.text(

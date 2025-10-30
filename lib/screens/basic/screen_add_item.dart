@@ -12,6 +12,7 @@ import 'package:mistpos/widgets/buttons/mist_loaded_icon_button.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/models/item_categories_model.dart';
+import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:radio_group_v2/widgets/views/radio_group.dart';
 import 'package:radio_group_v2/utils/radio_group_decoration.dart';
 import 'package:radio_group_v2/widgets/view_models/radio_group_controller.dart';
@@ -37,7 +38,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
 
   final _initialStockController = TextEditingController();
   final _reorderLevelController = TextEditingController();
-  final List<int> _modifiers = [];
+  final List<String> _modifiers = [];
   bool _isLoading = false;
   String? _selectedCategory;
   bool _isTrackingInventory = false;
@@ -48,12 +49,8 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Get.theme.colorScheme.primary,
+        foregroundColor: Colors.white,
         title: Text('Add Item'),
-        titleTextStyle: TextStyle(
-          color: Get.theme.colorScheme.onPrimary,
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-        ),
         actions: [
           MistLoadIconButton(
             label: 'Save',
@@ -61,7 +58,6 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
             onPressed: _saveItem,
           ),
         ],
-        iconTheme: IconThemeData(color: Get.theme.colorScheme.onPrimary),
       ),
       body: Form(
         key: _formKey,
@@ -80,7 +76,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
                     underLineColor: Colors.grey.withAlpha(200),
                     controller: _itemNameController,
                   ),
-                  24.gapHeight,
+                  32.gapHeight,
                   Obx(
                     () => DropdownButton(
                       value: _selectedCategory,
@@ -238,27 +234,32 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
                   "Modifiers".text(
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
+                  Obx(
+                    () => _itemsController.modifiersLoading.value
+                        ? MistLoader1()
+                        : SizedBox.shrink(),
+                  ),
                   ..._itemsController.modifiers.map<Widget>(
                     (mod) => ListTile(
                       onTap: () => setState(() {
                         setState(() {
-                          if (_modifiers.contains(mod.id)) {
-                            _modifiers.remove(mod.id);
+                          if (_modifiers.contains(mod.hexId)) {
+                            _modifiers.remove(mod.hexId);
                           } else {
-                            _modifiers.add(mod.id);
+                            _modifiers.add(mod.hexId);
                           }
                         });
                       }),
                       contentPadding: EdgeInsets.zero,
                       title: mod.name.text(),
                       trailing: Switch(
-                        value: _modifiers.contains(mod.id),
+                        value: _modifiers.contains(mod.hexId),
                         onChanged: (val) {
                           setState(() {
-                            if (_modifiers.contains(mod.id)) {
-                              _modifiers.remove(mod.id);
+                            if (_modifiers.contains(mod.hexId)) {
+                              _modifiers.remove(mod.hexId);
                             } else {
-                              _modifiers.add(mod.id);
+                              _modifiers.add(mod.hexId);
                             }
                           });
                         },
@@ -427,7 +428,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
       price: price,
       cost: cost,
       soldBy: soldBy,
-      modifierIds: _modifiers,
+      modifiers: _modifiers,
       sku: _itemSKUController.text.trim(),
       barcode: _itemBarcodeController.text.trim(),
       trackStock: _isTrackingInventory,

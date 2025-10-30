@@ -52,53 +52,48 @@ const ItemModelSchema = CollectionSchema(
       name: r'lowStockThreshold',
       type: IsarType.long,
     ),
-    r'modifierIds': PropertySchema(
-      id: 7,
-      name: r'modifierIds',
-      type: IsarType.longList,
-    ),
     r'modifiers': PropertySchema(
-      id: 8,
+      id: 7,
       name: r'modifiers',
       type: IsarType.stringList,
     ),
     r'name': PropertySchema(
-      id: 9,
+      id: 8,
       name: r'name',
       type: IsarType.string,
     ),
     r'price': PropertySchema(
-      id: 10,
+      id: 9,
       name: r'price',
       type: IsarType.double,
     ),
     r'shape': PropertySchema(
-      id: 11,
+      id: 10,
       name: r'shape',
       type: IsarType.string,
     ),
     r'sku': PropertySchema(
-      id: 12,
+      id: 11,
       name: r'sku',
       type: IsarType.string,
     ),
     r'soldBy': PropertySchema(
-      id: 13,
+      id: 12,
       name: r'soldBy',
       type: IsarType.string,
     ),
     r'stockQuantity': PropertySchema(
-      id: 14,
+      id: 13,
       name: r'stockQuantity',
       type: IsarType.long,
     ),
     r'syncOnline': PropertySchema(
-      id: 15,
+      id: 14,
       name: r'syncOnline',
       type: IsarType.bool,
     ),
     r'trackStock': PropertySchema(
-      id: 16,
+      id: 15,
       name: r'trackStock',
       type: IsarType.bool,
     )
@@ -132,12 +127,6 @@ int _itemModelEstimateSize(
   bytesCount += 3 + object.barcode.length * 3;
   bytesCount += 3 + object.category.length * 3;
   bytesCount += 3 + object.hexId.length * 3;
-  {
-    final value = object.modifierIds;
-    if (value != null) {
-      bytesCount += 3 + value.length * 8;
-    }
-  }
   {
     final list = object.modifiers;
     if (list != null) {
@@ -175,16 +164,15 @@ void _itemModelSerialize(
   writer.writeDouble(offsets[4], object.cost);
   writer.writeString(offsets[5], object.hexId);
   writer.writeLong(offsets[6], object.lowStockThreshold);
-  writer.writeLongList(offsets[7], object.modifierIds);
-  writer.writeStringList(offsets[8], object.modifiers);
-  writer.writeString(offsets[9], object.name);
-  writer.writeDouble(offsets[10], object.price);
-  writer.writeString(offsets[11], object.shape);
-  writer.writeString(offsets[12], object.sku);
-  writer.writeString(offsets[13], object.soldBy);
-  writer.writeLong(offsets[14], object.stockQuantity);
-  writer.writeBool(offsets[15], object.syncOnline);
-  writer.writeBool(offsets[16], object.trackStock);
+  writer.writeStringList(offsets[7], object.modifiers);
+  writer.writeString(offsets[8], object.name);
+  writer.writeDouble(offsets[9], object.price);
+  writer.writeString(offsets[10], object.shape);
+  writer.writeString(offsets[11], object.sku);
+  writer.writeString(offsets[12], object.soldBy);
+  writer.writeLong(offsets[13], object.stockQuantity);
+  writer.writeBool(offsets[14], object.syncOnline);
+  writer.writeBool(offsets[15], object.trackStock);
 }
 
 ItemModel _itemModelDeserialize(
@@ -201,16 +189,15 @@ ItemModel _itemModelDeserialize(
     cost: reader.readDouble(offsets[4]),
     hexId: reader.readStringOrNull(offsets[5]) ?? "",
     lowStockThreshold: reader.readLong(offsets[6]),
-    modifierIds: reader.readLongList(offsets[7]),
-    modifiers: reader.readStringList(offsets[8]),
-    name: reader.readString(offsets[9]),
-    price: reader.readDouble(offsets[10]),
-    shape: reader.readStringOrNull(offsets[11]),
-    sku: reader.readString(offsets[12]),
-    soldBy: reader.readString(offsets[13]),
-    stockQuantity: reader.readLong(offsets[14]),
-    syncOnline: reader.readBoolOrNull(offsets[15]) ?? false,
-    trackStock: reader.readBool(offsets[16]),
+    modifiers: reader.readStringList(offsets[7]),
+    name: reader.readString(offsets[8]),
+    price: reader.readDouble(offsets[9]),
+    shape: reader.readStringOrNull(offsets[10]),
+    sku: reader.readString(offsets[11]),
+    soldBy: reader.readString(offsets[12]),
+    stockQuantity: reader.readLong(offsets[13]),
+    syncOnline: reader.readBoolOrNull(offsets[14]) ?? false,
+    trackStock: reader.readBool(offsets[15]),
   );
   object.id = id;
   return object;
@@ -238,24 +225,22 @@ P _itemModelDeserializeProp<P>(
     case 6:
       return (reader.readLong(offset)) as P;
     case 7:
-      return (reader.readLongList(offset)) as P;
-    case 8:
       return (reader.readStringList(offset)) as P;
-    case 9:
+    case 8:
       return (reader.readString(offset)) as P;
-    case 10:
+    case 9:
       return (reader.readDouble(offset)) as P;
-    case 11:
+    case 10:
       return (reader.readStringOrNull(offset)) as P;
+    case 11:
+      return (reader.readString(offset)) as P;
     case 12:
       return (reader.readString(offset)) as P;
     case 13:
-      return (reader.readString(offset)) as P;
-    case 14:
       return (reader.readLong(offset)) as P;
-    case 15:
+    case 14:
       return (reader.readBoolOrNull(offset) ?? false) as P;
-    case 16:
+    case 15:
       return (reader.readBool(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1128,169 +1113,6 @@ extension ItemModelQueryFilter
         upper: upper,
         includeUpper: includeUpper,
       ));
-    });
-  }
-
-  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
-      modifierIdsIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'modifierIds',
-      ));
-    });
-  }
-
-  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
-      modifierIdsIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'modifierIds',
-      ));
-    });
-  }
-
-  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
-      modifierIdsElementEqualTo(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'modifierIds',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
-      modifierIdsElementGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'modifierIds',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
-      modifierIdsElementLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'modifierIds',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
-      modifierIdsElementBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'modifierIds',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
-      modifierIdsLengthEqualTo(int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'modifierIds',
-        length,
-        true,
-        length,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
-      modifierIdsIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'modifierIds',
-        0,
-        true,
-        0,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
-      modifierIdsIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'modifierIds',
-        0,
-        false,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
-      modifierIdsLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'modifierIds',
-        0,
-        true,
-        length,
-        include,
-      );
-    });
-  }
-
-  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
-      modifierIdsLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'modifierIds',
-        length,
-        include,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
-      modifierIdsLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'modifierIds',
-        lower,
-        includeLower,
-        upper,
-        includeUpper,
-      );
     });
   }
 
@@ -2643,12 +2465,6 @@ extension ItemModelQueryWhereDistinct
     });
   }
 
-  QueryBuilder<ItemModel, ItemModel, QDistinct> distinctByModifierIds() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'modifierIds');
-    });
-  }
-
   QueryBuilder<ItemModel, ItemModel, QDistinct> distinctByModifiers() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'modifiers');
@@ -2755,12 +2571,6 @@ extension ItemModelQueryProperty
   QueryBuilder<ItemModel, int, QQueryOperations> lowStockThresholdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'lowStockThreshold');
-    });
-  }
-
-  QueryBuilder<ItemModel, List<int>?, QQueryOperations> modifierIdsProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'modifierIds');
     });
   }
 

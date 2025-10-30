@@ -7,6 +7,24 @@ class ItemModifier {
   Id id = Isar.autoIncrement;
   @Index()
   String name;
+  String hexId;
   List<ModifierEmbedder> list;
-  ItemModifier({required this.name, required this.list});
+  ItemModifier({required this.name, required this.list, this.hexId = ''});
+  Map<String, dynamic> toJson() {
+    return {'name': name, 'list': list.map((m) => m.toJson()).toList()};
+  }
+
+  factory ItemModifier.fromJson(Map<String, dynamic> json) {
+    final listRaw = json['list'] as List<dynamic>? ?? <dynamic>[];
+    final parsedList = listRaw.map((e) {
+      return ModifierEmbedder.fromJson(e);
+    }).toList();
+
+    final instance = ItemModifier(
+      hexId: json['_id'],
+      name: json['name'] as String,
+      list: parsedList.cast<ModifierEmbedder>(),
+    );
+    return instance;
+  }
 }

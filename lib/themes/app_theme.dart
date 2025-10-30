@@ -23,6 +23,6 @@ class AppTheme {
   static var color = Get.isDarkMode ? Colors.white : Colors.black;
 
   static var surface = Get.isDarkMode
-      ? const Color.fromARGB(255, 55, 55, 55)
+      ? const Color.fromARGB(255, 55, 55, 55).withAlpha(100)
       : Colors.white;
 }

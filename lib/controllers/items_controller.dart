@@ -24,15 +24,6 @@ class ItemsController extends GetxController {
   RxList<ItemCategoryModel> categories = <ItemCategoryModel>[].obs;
   RxList<ItemSavedItemsModel> savedItems = <ItemSavedItemsModel>[].obs;
   RxList<Map<String, dynamic>> checkOutItems = <Map<String, dynamic>>[].obs;
-  @override
-  void onInit() {
-    super.onInit();
-    loadMofiers();
-    loadCartItems();
-    loadCategories();
-    loadSavedItems();
-    loadReceits();
-  }
 
   @override
   void dispose() {
@@ -126,7 +117,6 @@ class ItemsController extends GetxController {
         response = await Net.post("/admin/product", data: item.toJson());
       }
       if (response.hasError) {
-        log(response.response);
         Toaster.showError(response.response);
         return false;
       }
@@ -146,6 +136,7 @@ class ItemsController extends GetxController {
       loadCartItems();
       return true;
     } catch (e) {
+      log("Error $e");
       Toaster.showError('Failed to create item');
       return false;
     }
@@ -254,9 +245,27 @@ class ItemsController extends GetxController {
     receits.assignAll(r);
   }
 
-  void loadMofiers() {
+  RxBool modifiersLoading = RxBool(false);
+  void loadMofiers({int page = 1, String search = ''}) async {
+    if (modifiersLoading.value) return;
+    modifiersLoading.value = true;
     final isar = Isar.getInstance();
     if (isar == null) {
+      return;
+    }
+    final response = await Net.get(
+      "/cashier/modifiers?page=$page&search=$search",
+    );
+    modifiersLoading.value = false;
+    if (!response.hasError) {
+      final list = response.body['list'] as List<dynamic>?;
+      if (list != null) {
+        modifiers.value = list.map((e) => ItemModifier.fromJson(e)).toList();
+      }
+      await isar.writeTxn(() async {
+        await isar.itemModifiers.where().deleteAll();
+        await isar.itemModifiers.putAll(modifiers);
+      });
       return;
     }
     final loadedModifiers = isar.itemModifiers.where().findAllSync();
@@ -404,6 +413,12 @@ class ItemsController extends GetxController {
   }
 
   Future<bool> createModifier(ItemModifier modefier) async {
+    final net = await Net.post("/admin/modifier", data: modefier.toJson());
+    if (net.hasError) {
+      Toaster.showError(net.response);
+      return false;
+    }
+    final update = ItemModifier.fromJson(net.body['update']);
     final isar = Isar.getInstance();
     if (isar == null) {
       Toaster.showError('Database not initialized');
@@ -411,12 +426,11 @@ class ItemsController extends GetxController {
     }
     try {
       await isar.writeTxn(() async {
-        await isar.itemModifiers.put(modefier);
+        await isar.itemModifiers.put(update);
       });
       loadMofiers();
       return true;
     } catch (e) {
-      log('Error adding modifier: $e');
       Toaster.showError('Failed to add modifier');
     }
     return false;
@@ -466,7 +480,7 @@ class ItemsController extends GetxController {
       final addenum = item['addenum'] as double? ?? 0.0;
       final qouted = item['qouted'] as double? ?? 0.0;
       final model = item['item'] as ItemModel;
-      return prev + count * model.price + addenum + qouted;
+      return prev + count * (model.price + addenum + qouted);
     });
   }
 
@@ -617,7 +631,6 @@ class ItemsController extends GetxController {
       syncCartItemsOnBackground();
       return (success: true, rejects: rejects);
     } catch (e) {
-      log("There was error $e");
       Toaster.showError("There was error : $e");
       return (success: false, rejects: rejects);
     }
@@ -716,5 +729,18 @@ class ItemsController extends GetxController {
     customerPage.value = response.body['currentPage'] as int;
     final list = response.body['list'] as List<dynamic>? ?? [];
     customers.value = list.map((e) => CustomerModel.fromJson(e)).toList();
+  }
+
+  RxBool deletingCustomer = RxBool(false);
+  Future<bool> deleteCustomer(CustomerModel model) async {
+    deletingCustomer.value = true;
+    final response = await Net.delete("/admin/customer/${model.hexId}");
+    deletingCustomer.value = false;
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return false;
+    }
+    loadCustomers();
+    return true;
   }
 }

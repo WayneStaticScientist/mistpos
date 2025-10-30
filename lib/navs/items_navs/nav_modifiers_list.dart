@@ -4,6 +4,7 @@ import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/models/item_modifier_model.dart';
 import 'package:mistpos/controllers/items_controller.dart';
@@ -21,25 +22,31 @@ class _NavModifiersListState extends State<NavModifiersList> {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => ListView.builder(
-        itemBuilder: (context, index) =>
-            Card(
-                  child: ListTile(
-                    onLongPress: () =>
-                        _deleteDialog(_itemListController.modifiers[index]),
-                    title: Text(_itemListController.modifiers[index].name),
-                    trailing: Iconify(Bx.chevron_right),
-                    subtitle: Text(
-                      "${_itemListController.modifiers[index].list.length} options",
-                    ),
-                  ),
-                )
-                .onTap(
-                  () => _editModifier(_itemListController.modifiers[index]),
-                )
-                .padding(EdgeInsets.all(10)),
-        itemCount: _itemListController.modifiers.length,
-      ),
+      () => _itemListController.modifiers.isEmpty
+          ? _createEmpytLayout()
+          : ListView.builder(
+              itemBuilder: (context, index) =>
+                  Card(
+                        child: ListTile(
+                          onLongPress: () => _deleteDialog(
+                            _itemListController.modifiers[index],
+                          ),
+                          title: Text(
+                            _itemListController.modifiers[index].name,
+                          ),
+                          trailing: Iconify(Bx.chevron_right),
+                          subtitle: Text(
+                            "${_itemListController.modifiers[index].list.length} options",
+                          ),
+                        ),
+                      )
+                      .onTap(
+                        () =>
+                            _editModifier(_itemListController.modifiers[index]),
+                      )
+                      .padding(EdgeInsets.all(10)),
+              itemCount: _itemListController.modifiers.length,
+            ),
     );
   }
 
@@ -68,5 +75,18 @@ class _NavModifiersListState extends State<NavModifiersList> {
     if (response) {
       Toaster.showSuccess("modifier deleted");
     }
+  }
+
+  _createEmpytLayout() {
+    return [
+          Iconify(Bx.no_entry, color: AppTheme.color, size: 30),
+          18.gapHeight,
+          "No modifiers found , click + to add one".text(),
+        ]
+        .column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+        )
+        .center();
   }
 }

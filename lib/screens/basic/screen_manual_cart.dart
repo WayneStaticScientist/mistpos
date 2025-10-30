@@ -2,12 +2,14 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/controllers/items_controller.dart';
+import 'package:mistpos/widgets/loaders/small_loader.dart';
 
 class ScreenManualCart extends StatefulWidget {
   final ItemModel item;
@@ -26,11 +28,15 @@ class _ScreenManualCartState extends State<ScreenManualCart> {
   final priceTextController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    price = count * widget.item.price + floatAmount;
+    price = count * (widget.item.price + floatAmount);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.item.name),
-        actions: ["$price".text().padding(EdgeInsets.only(right: 14))],
+        actions: [
+          CurrenceConverter.getCurrenceFloatInStrings(
+            price,
+          ).text().padding(EdgeInsets.only(right: 14)),
+        ],
       ),
       body: ListView(
         padding: EdgeInsets.all(14),
@@ -55,8 +61,8 @@ class _ScreenManualCartState extends State<ScreenManualCart> {
             ),
           ].row(mainAxisAlignment: MainAxisAlignment.spaceBetween),
           18.gapHeight,
-          if (widget.item.modifierIds != null &&
-              widget.item.modifierIds!.isNotEmpty)
+          if (widget.item.modifiers != null &&
+              widget.item.modifiers!.isNotEmpty)
             _generatedModifiers(),
           if (widget.item.price == 0) ...[
             18.gapHeight,
@@ -79,7 +85,7 @@ class _ScreenManualCartState extends State<ScreenManualCart> {
                 onPressed: _addToCart,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Get.theme.colorScheme.primary,
-                  foregroundColor: Get.theme.colorScheme.onPrimary,
+                  foregroundColor: Colors.white,
                 ),
               )
               .padding(EdgeInsets.all(12)),
@@ -106,22 +112,26 @@ class _ScreenManualCartState extends State<ScreenManualCart> {
   }
 
   Widget _generatedModifiers() {
-    return [
-      "Modifiers".text(
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-      ),
-      18.gapHeight,
-      ...widget.item.modifierIds!.map<Widget>((e) => _makeModifierTab(e)),
-    ].column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Obx(
+      () =>
+          [
+            "Modifiers".text(
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            if (_itemsListController.modifiersLoading.value) MistLoader1(),
+            18.gapHeight,
+            ...widget.item.modifiers!.map<Widget>((e) => _makeModifierTab(e)),
+          ].column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+          ),
     );
   }
 
-  Widget _makeModifierTab(int id) {
+  Widget _makeModifierTab(String id) {
     try {
       final modifier = _itemsListController.modifiers.firstWhere(
-        (element) => element.id == id,
+        (element) => element.hexId == id,
       );
       return [
         modifier.name.text(

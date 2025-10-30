@@ -4,9 +4,9 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/utils/currence_converter.dart';
@@ -236,7 +236,9 @@ class _NavSaleState extends State<NavSale> {
                         Row(
                               children: [
                                 [
-                                  "\$${_itemsListController.totalPrice.value.toStringAsFixed(2)}"
+                                  CurrenceConverter.getCurrenceFloatInStrings(
+                                        _itemsListController.totalPrice.value,
+                                      )
                                       .text(
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
@@ -246,8 +248,7 @@ class _NavSaleState extends State<NavSale> {
                                       .textButton(
                                         onPressed: _showSelectedItems,
                                         style: TextButton.styleFrom(
-                                          backgroundColor:
-                                              Get.theme.colorScheme.onPrimary,
+                                          backgroundColor: Colors.white,
                                           foregroundColor:
                                               Get.theme.colorScheme.primary,
                                         ),
@@ -294,39 +295,32 @@ class _NavSaleState extends State<NavSale> {
     return SliverToBoxAdapter(
       child: SizedBox(
         height: 40,
-        child:
-            ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    Obx(
-                      () => CardsCategory(
-                        onTap: () => _changeCategory(""),
-                        isSelected:
-                            _itemsListController.selectedCategory.value == "",
-                        category: "All",
-                      ),
-                    ),
-                    Obx(
-                      () => _itemsListController.categories
-                          .map<Widget>((category) {
-                            return CardsCategory(
-                              onTap: () => _changeCategory(category.hexId),
-                              category: category.name,
-                              isSelected:
-                                  _itemsListController.selectedCategory.value ==
-                                  category.hexId,
-                            ).sizedBox(height: 60);
-                          })
-                          .toList()
-                          .row(mainAxisSize: MainAxisSize.min),
-                    ),
-                  ],
-                )
-                .sizedBox()
-                .padding(EdgeInsets.symmetric(horizontal: 18))
-                .decoratedBox(
-                  decoration: BoxDecoration(color: AppTheme.surface),
-                ),
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: [
+            Obx(
+              () => CardsCategory(
+                onTap: () => _changeCategory(""),
+                isSelected: _itemsListController.selectedCategory.value == "",
+                category: "All",
+              ),
+            ),
+            Obx(
+              () => _itemsListController.categories
+                  .map<Widget>((category) {
+                    return CardsCategory(
+                      onTap: () => _changeCategory(category.hexId),
+                      category: category.name,
+                      isSelected:
+                          _itemsListController.selectedCategory.value ==
+                          category.hexId,
+                    ).sizedBox(height: 60);
+                  })
+                  .toList()
+                  .row(mainAxisSize: MainAxisSize.min),
+            ),
+          ],
+        ).sizedBox().padding(EdgeInsets.symmetric(horizontal: 18)),
       ),
     );
   }
@@ -342,9 +336,6 @@ class _NavSaleState extends State<NavSale> {
                           item: _itemsListController.cartItems[index],
                         )
                         .padding(EdgeInsets.symmetric(horizontal: 18))
-                        .decoratedBox(
-                          decoration: BoxDecoration(color: AppTheme.surface),
-                        )
                         .onTapUp(
                           (e) => _handleWidgetClick(
                             e,
@@ -373,10 +364,7 @@ class _NavSaleState extends State<NavSale> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                       )
-                      .center()
-                      .decoratedBox(
-                        decoration: BoxDecoration(color: AppTheme.surface),
-                      ),
+                      .center(),
             ),
     );
   }
@@ -457,7 +445,7 @@ class _NavSaleState extends State<NavSale> {
       return;
     }
     if (model.price == 0 ||
-        (model.modifierIds != null && model.modifierIds!.isNotEmpty)) {
+        (model.modifiers != null && model.modifiers!.isNotEmpty)) {
       Get.to(() => ScreenManualCart(item: model));
       return;
     }
