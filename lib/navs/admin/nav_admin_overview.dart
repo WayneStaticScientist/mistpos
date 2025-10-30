@@ -21,6 +21,7 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
   final _adminController = Get.find<AdminController>();
   DateTime? _startDate;
   DateTime? _endDate = DateTime.now();
+  DateTime _weeklyRange = DateTime.now();
   @override
   void initState() {
     super.initState();
@@ -29,6 +30,8 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
 
   @override
   Widget build(BuildContext context) {
+    final weeklyStartDay = _weeklyRange.subtract(Duration(days: 6));
+
     return ListView(
       children: [
         18.gapHeight,
@@ -137,36 +140,49 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
                 ].column(crossAxisAlignment: CrossAxisAlignment.start)
               : SizedBox(),
         ),
+        44.gapHeight,
+        18.gapHeight,
+        SingleChildScrollView(
+          child:
+              [
+                    "Pick Range".text().textButton(onPressed: _pickWeek),
+                    18.gapWidth,
+                    "${weeklyStartDay.day}/${weeklyStartDay.month}/${weeklyStartDay.year}"
+                        .text(),
+                    18.gapWidth,
+                    "-".text(),
+                    18.gapWidth,
+                    _endDate == null
+                        ? "To day".text()
+                        : "${_weeklyRange.day}/${_weeklyRange.month}/${_weeklyRange.year}"
+                              .text(),
+                  ]
+                  .row()
+                  .onTap(_pickWeek)
+                  .decoratedBox(
+                    decoration: BoxDecoration(color: AppTheme.surface),
+                  ),
+        ),
+        18.gapHeight,
         "Weekly Profits".text(
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
+        18.gapHeight,
         _getWeeklyProfitsBarChart(),
         32.gapHeight,
         "Weekly Sales".text(
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
+        18.gapHeight,
         _getWeeklySalesChart(),
         32.gapHeight,
         "Weekly Visitors".text(
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
+        18.gapHeight,
         _getWeeklyVisitorsChart(),
       ],
     ).sizedBox(width: double.infinity);
-  }
-
-  void _pickdateRange() async {
-    final date = await showRangePickerDialog(
-      context: context,
-      minDate: DateTime(2021, 1, 1),
-      maxDate: DateTime.now(),
-    );
-    if (date == null) return;
-    setState(() {
-      _startDate = date.start;
-      _endDate = date.end;
-    });
-    _adminController.getAdminStats(startDate: _startDate, endDate: _endDate);
   }
 
   _getWeeklyProfitsBarChart() {
@@ -317,32 +333,80 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
               ),
             ),
           ],
+
+          // 2. Configure Titles (Axes)
           titlesData: FlTitlesData(
             show: true,
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
                 getTitlesWidget: (value, meta) {
-                  return Text(list[value.toInt()].date);
+                  final int index = value.toInt();
+                  if (index >= 0 && index < list.length) {
+                    return Text(list[index].date);
+                  }
+                  return Container();
                 },
               ),
             ),
+
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                reservedSize: 80,
+                reservedSize: 40,
+                interval: 1.0,
                 getTitlesWidget: (value, meta) {
-                  return Text(CurrenceConverter.getCurrenceFloatk(value));
+                  if (value.toInt() > 0) {
+                    return Text(
+                      value.toInt().toString(),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    );
+                  }
+                  // Return an empty container for 0 or non-integer values
+                  return Container();
                 },
               ), // Y-axis labels
             ),
+
             topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
             rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
+
+          // 3. Grid and Border
           gridData: FlGridData(show: true),
           borderData: FlBorderData(show: false), // Hide the chart border
         ),
       ).sizedBox(height: 200, width: double.infinity);
     });
+  }
+
+  void _pickdateRange() async {
+    final date = await showRangePickerDialog(
+      context: context,
+      minDate: DateTime(2021, 1, 1),
+      maxDate: DateTime.now(),
+    );
+    if (date == null) return;
+    setState(() {
+      _startDate = date.start;
+      _endDate = date.end;
+    });
+    _adminController.getAdminStats(startDate: _startDate, endDate: _endDate);
+  }
+
+  void _pickWeek() async {
+    final date = await showDatePicker(
+      context: context,
+      firstDate: DateTime(2021, 1, 1),
+      lastDate: DateTime.now(),
+    );
+    if (date == null) return;
+    setState(() {
+      _weeklyRange = date;
+    });
+    _adminController.getWeeklyProfits(endDate: _weeklyRange);
   }
 }

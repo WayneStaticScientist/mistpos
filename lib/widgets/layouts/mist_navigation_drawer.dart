@@ -6,6 +6,7 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/screens/basic/screen_dashboard.dart';
+import 'package:mistpos/screens/basic/screen_settings_page.dart';
 import 'package:mistpos/themes/app_theme.dart';
 
 class MistMainNavigationView extends StatelessWidget {
@@ -68,7 +69,7 @@ class MistMainNavigationView extends StatelessWidget {
           ListTile(
             leading: Iconify(Bx.cog, color: AppTheme.color),
             title: Text('Settings'),
-            onTap: () => onTap('settings'),
+            onTap: () => Get.to(() => ScreenSettingsPage()),
           ),
           Dialog(),
           ListTile(

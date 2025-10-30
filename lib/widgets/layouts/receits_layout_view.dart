@@ -6,6 +6,7 @@ import 'package:grouped_list/grouped_list.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/models/item_receit_model.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/screens/basic/screen_receit_view.dart';
@@ -46,14 +47,13 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
   }
 
   _buildItem(ItemReceitModel receit) {
-    return Card(
-      child: ListTile(
-        leading: Iconify(Carbon.receipt),
-        title: CurrenceConverter.getCurrenceFloatInStrings(receit.total).text(),
-        trailing: Text(receit.id.toString()),
-        subtitle: Text("${receit.createdAt.hour}:${receit.createdAt.minute}"),
-        onTap: () => Get.to(() => ScreenReceitView(receitModel: receit)),
-      ),
+    return ListTile(
+      tileColor: Colors.grey.withAlpha(20),
+      leading: Iconify(Carbon.receipt, color: AppTheme.color),
+      title: CurrenceConverter.getCurrenceFloatInStrings(receit.total).text(),
+      trailing: Text(receit.id.toString()),
+      subtitle: Text("${receit.createdAt.hour}:${receit.createdAt.minute}"),
+      onTap: () => Get.to(() => ScreenReceitView(receitModel: receit)),
     ).padding(EdgeInsets.symmetric(horizontal: 10));
   }
 }
