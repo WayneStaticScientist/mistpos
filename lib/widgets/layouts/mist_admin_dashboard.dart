@@ -1,6 +1,7 @@
+import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:mistpos/screens/basic/screen_inventory_management.dart';
@@ -29,7 +30,7 @@ class _MistAdminDashboardState extends State<MistAdminDashboard> {
       child: ListView(
         children: [
           ListTile(
-            leading: Iconify(Carbon.user_avatar),
+            leading: Iconify(Carbon.user_avatar, color: AppTheme.color),
             title: widget.userName.text(),
             subtitle: widget.userEmail.text(style: TextStyle(fontSize: 12)),
           ),

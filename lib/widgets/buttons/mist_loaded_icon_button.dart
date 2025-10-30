@@ -32,7 +32,7 @@ class MistLoadIconButton extends StatelessWidget {
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
             backgroundColor: Get.theme.colorScheme.onPrimary,
-            foregroundColor: Get.theme.colorScheme.primary,
+            foregroundColor: Colors.white,
           ),
         )
         .padding(EdgeInsets.only(right: 12));

@@ -40,7 +40,7 @@ class _ScreenEditPurchaseOrderState extends State<ScreenEditPurchaseOrder> {
       appBar: AppBar(
         title: "Edit Purchase Order".text(),
         backgroundColor: Get.theme.colorScheme.primary,
-        foregroundColor: Get.theme.colorScheme.onPrimary,
+        foregroundColor: Colors.white,
         actions: [
           if (widget.model.status != "accepted") ...[
             MistLoadIconButton(

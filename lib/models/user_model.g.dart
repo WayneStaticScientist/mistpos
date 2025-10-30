@@ -22,48 +22,53 @@ const UserSchema = CollectionSchema(
       name: r'allowOfflinePurchase',
       type: IsarType.bool,
     ),
-    r'company': PropertySchema(
+    r'companies': PropertySchema(
       id: 1,
+      name: r'companies',
+      type: IsarType.stringList,
+    ),
+    r'company': PropertySchema(
+      id: 2,
       name: r'company',
       type: IsarType.string,
     ),
     r'country': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'country',
       type: IsarType.string,
     ),
     r'email': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'email',
       type: IsarType.string,
     ),
     r'fullName': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'fullName',
       type: IsarType.string,
     ),
     r'hexId': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'hexId',
       type: IsarType.string,
     ),
     r'password': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'password',
       type: IsarType.string,
     ),
     r'pinnedInput': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'pinnedInput',
       type: IsarType.bool,
     ),
     r'role': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'role',
       type: IsarType.string,
     ),
     r'till': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'till',
       type: IsarType.long,
     )
@@ -88,6 +93,13 @@ int _userEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 + object.companies.length * 3;
+  {
+    for (var i = 0; i < object.companies.length; i++) {
+      final value = object.companies[i];
+      bytesCount += value.length * 3;
+    }
+  }
   bytesCount += 3 + object.company.length * 3;
   bytesCount += 3 + object.country.length * 3;
   bytesCount += 3 + object.email.length * 3;
@@ -110,15 +122,16 @@ void _userSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeBool(offsets[0], object.allowOfflinePurchase);
-  writer.writeString(offsets[1], object.company);
-  writer.writeString(offsets[2], object.country);
-  writer.writeString(offsets[3], object.email);
-  writer.writeString(offsets[4], object.fullName);
-  writer.writeString(offsets[5], object.hexId);
-  writer.writeString(offsets[6], object.password);
-  writer.writeBool(offsets[7], object.pinnedInput);
-  writer.writeString(offsets[8], object.role);
-  writer.writeLong(offsets[9], object.till);
+  writer.writeStringList(offsets[1], object.companies);
+  writer.writeString(offsets[2], object.company);
+  writer.writeString(offsets[3], object.country);
+  writer.writeString(offsets[4], object.email);
+  writer.writeString(offsets[5], object.fullName);
+  writer.writeString(offsets[6], object.hexId);
+  writer.writeString(offsets[7], object.password);
+  writer.writeBool(offsets[8], object.pinnedInput);
+  writer.writeString(offsets[9], object.role);
+  writer.writeLong(offsets[10], object.till);
 }
 
 User _userDeserialize(
@@ -129,15 +142,16 @@ User _userDeserialize(
 ) {
   final object = User(
     allowOfflinePurchase: reader.readBoolOrNull(offsets[0]) ?? true,
-    company: reader.readString(offsets[1]),
-    country: reader.readString(offsets[2]),
-    email: reader.readString(offsets[3]),
-    fullName: reader.readString(offsets[4]),
-    hexId: reader.readStringOrNull(offsets[5]) ?? '',
-    password: reader.readStringOrNull(offsets[6]),
-    pinnedInput: reader.readBool(offsets[7]),
-    role: reader.readString(offsets[8]),
-    till: reader.readLong(offsets[9]),
+    companies: reader.readStringList(offsets[1]) ?? [],
+    company: reader.readString(offsets[2]),
+    country: reader.readString(offsets[3]),
+    email: reader.readString(offsets[4]),
+    fullName: reader.readString(offsets[5]),
+    hexId: reader.readStringOrNull(offsets[6]) ?? '',
+    password: reader.readStringOrNull(offsets[7]),
+    pinnedInput: reader.readBool(offsets[8]),
+    role: reader.readString(offsets[9]),
+    till: reader.readLong(offsets[10]),
   );
   object.id = id;
   return object;
@@ -153,7 +167,7 @@ P _userDeserializeProp<P>(
     case 0:
       return (reader.readBoolOrNull(offset) ?? true) as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringList(offset) ?? []) as P;
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
@@ -161,14 +175,16 @@ P _userDeserializeProp<P>(
     case 4:
       return (reader.readString(offset)) as P;
     case 5:
-      return (reader.readStringOrNull(offset) ?? '') as P;
-    case 6:
-      return (reader.readStringOrNull(offset)) as P;
-    case 7:
-      return (reader.readBool(offset)) as P;
-    case 8:
       return (reader.readString(offset)) as P;
+    case 6:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 7:
+      return (reader.readStringOrNull(offset)) as P;
+    case 8:
+      return (reader.readBool(offset)) as P;
     case 9:
+      return (reader.readString(offset)) as P;
+    case 10:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -270,6 +286,220 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
         property: r'allowOfflinePurchase',
         value: value,
       ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companiesElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'companies',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companiesElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'companies',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companiesElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'companies',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companiesElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'companies',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companiesElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'companies',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companiesElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'companies',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companiesElementContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'companies',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companiesElementMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'companies',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companiesElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'companies',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companiesElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'companies',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companiesLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'companies',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companiesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'companies',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companiesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'companies',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companiesLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'companies',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companiesLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'companies',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companiesLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'companies',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
     });
   }
 
@@ -1569,6 +1799,12 @@ extension UserQueryWhereDistinct on QueryBuilder<User, User, QDistinct> {
     });
   }
 
+  QueryBuilder<User, User, QDistinct> distinctByCompanies() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'companies');
+    });
+  }
+
   QueryBuilder<User, User, QDistinct> distinctByCompany(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1641,6 +1877,12 @@ extension UserQueryProperty on QueryBuilder<User, User, QQueryProperty> {
   QueryBuilder<User, bool, QQueryOperations> allowOfflinePurchaseProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'allowOfflinePurchase');
+    });
+  }
+
+  QueryBuilder<User, List<String>, QQueryOperations> companiesProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'companies');
     });
   }
 

@@ -154,10 +154,10 @@ ItemReceitModel _itemReceitModelDeserialize(
         ) ??
         [],
     payment: reader.readString(offsets[7]),
+    synced: reader.readBoolOrNull(offsets[8]) ?? false,
     total: reader.readDouble(offsets[9]),
   );
   object.id = id;
-  object.synced = reader.readBool(offsets[8]);
   return object;
 }
 
@@ -191,7 +191,7 @@ P _itemReceitModelDeserializeProp<P>(
     case 7:
       return (reader.readString(offset)) as P;
     case 8:
-      return (reader.readBool(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 9:
       return (reader.readDouble(offset)) as P;
     default:

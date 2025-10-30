@@ -1,8 +1,8 @@
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/themes/app_theme.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
 
 class MistSearchField extends StatelessWidget {
   final TextEditingController? controller;
@@ -15,7 +15,7 @@ class MistSearchField extends StatelessWidget {
       controller: controller,
       decoration: InputDecoration(
         hint: (label ?? "Search").text(style: TextStyle(color: Colors.grey)),
-        fillColor: Get.isDarkMode ? Colors.black : Colors.white,
+        fillColor: AppTheme.surface,
         filled: true,
         prefixIcon: SizedBox(
           height: 14,

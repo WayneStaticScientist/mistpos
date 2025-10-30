@@ -50,7 +50,7 @@ class _ScreenViewPurchaseOrderState extends State<ScreenViewPurchaseOrder> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        foregroundColor: Get.theme.colorScheme.onPrimary,
+        foregroundColor: Colors.white,
         backgroundColor: Get.theme.colorScheme.primary,
         title: "Purchase Order".text(),
         actions: [

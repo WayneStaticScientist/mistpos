@@ -24,7 +24,7 @@ class MistFormButton extends StatelessWidget {
             color: isLoading == true ? Colors.white70 : Colors.white,
           ),
         )
-        .outlinedIconButton(
+        .filledIconButton(
           onPressed: isLoading == true ? null : onTap,
           icon: isLoading == true
               ? const CircularProgressIndicator(
@@ -32,7 +32,7 @@ class MistFormButton extends StatelessWidget {
                   strokeWidth: 2,
                 )
               : icon,
-          style: OutlinedButton.styleFrom(
+          style: FilledButton.styleFrom(
             iconColor: Colors.white,
             backgroundColor: Get.theme.colorScheme.primary,
             minimumSize: Size(250, 50),

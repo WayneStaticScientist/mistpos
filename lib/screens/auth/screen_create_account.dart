@@ -110,14 +110,15 @@ class _ScreenCreateAccountState extends State<ScreenCreateAccount> {
       return;
     }
     final user = User(
-      fullName: _fullNameController.text,
-      email: _emailController.text,
-      company: _businessNameController.text,
-      country: _countryController.text,
-      password: _passwordController.text,
       till: 1,
       role: 'admin',
+      companies: [],
       pinnedInput: false,
+      email: _emailController.text,
+      country: _countryController.text,
+      fullName: _fullNameController.text,
+      password: _passwordController.text,
+      company: _businessNameController.text,
     );
     _userController.registerUser(user);
   }

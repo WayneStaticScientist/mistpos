@@ -45,7 +45,7 @@ class _ScreenSelectSupplierState extends State<ScreenSelectSupplier> {
       appBar: AppBar(
         title: "Select Supplier".text(),
         backgroundColor: Get.theme.colorScheme.primary,
-        foregroundColor: Get.theme.colorScheme.onPrimary,
+        foregroundColor: Colors.white,
       ),
       body: [
         MistSearchField(
@@ -79,6 +79,7 @@ class _ScreenSelectSupplierState extends State<ScreenSelectSupplier> {
         ),
       ].column().padding(EdgeInsets.all(14)),
       floatingActionButton: FloatingActionButton(
+        elevation: 0,
         onPressed: () => Get.to(() => ScreenAddSupplier()),
         child: Icon(Icons.add, color: Colors.white),
       ),

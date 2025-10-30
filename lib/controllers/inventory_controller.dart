@@ -248,4 +248,27 @@ class InventoryController extends GetxController {
           .toList();
     }
   }
+
+  Future<({bool status, List<InvItem> rejects})> addInventoryTransferOrder(
+    Map<String, dynamic> data,
+  ) async {
+    List<InvItem> rejects = [];
+    final response = await Net.post(
+      "/admin/inventory/transfer-order",
+      data: data,
+    );
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return (status: false, rejects: rejects);
+    }
+    if (response.body['rejects'] != null) {
+      rejects = (response.body['rejects'] as List<dynamic>)
+          .map((e) => InvItem.fromJson(e))
+          .toList();
+    }
+    selectedSupplier.value = null;
+    selectedInvItems.clear();
+    loadStockAdjustments(page: 1);
+    return (status: true, rejects: rejects);
+  }
 }

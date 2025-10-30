@@ -20,7 +20,7 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
       children: [
         18.gapHeight,
         "Product Overview".text(
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
         18.gapHeight,
         Obx(
@@ -51,14 +51,13 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
         ),
         18.gapHeight,
         "Sales Overview".text(
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
         18.gapHeight,
         Obx(
           () => ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              18.gapWidth,
               CardOverview(
                 label: "Profit ",
                 value: CurrenceConverter.getCurrenceFloatInStrings(
@@ -84,18 +83,21 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
             ],
           ).sizedBox(height: 110, width: double.infinity),
         ),
-        18.gapHeight,
-        "Active Cashiers".text(
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        18.gapHeight,
+
         Obx(
-          () => _adminController.statsSales.value?.cashiers != null
+          () =>
+              _adminController.statsSales.value?.cashiers != null &&
+                  _adminController.statsSales.value!.cashiers.isNotEmpty
               ? [
+                  18.gapHeight,
+                  "Active Cashiers".text(
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                  18.gapHeight,
                   ..._adminController.statsSales.value!.cashiers.map(
                     (e) => Card(child: ListTile(title: e.name.text())),
                   ),
-                ].column()
+                ].column(crossAxisAlignment: CrossAxisAlignment.start)
               : SizedBox(),
         ),
       ],

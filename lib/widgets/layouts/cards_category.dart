@@ -23,6 +23,7 @@ class CardsCategory extends StatelessWidget {
                   category.text(
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
+                      fontSize: 10,
                       color: isSelected == true ? Colors.white : null,
                     ),
                   ),
@@ -31,8 +32,8 @@ class CardsCategory extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                 )
-                .padding(EdgeInsets.all(14))
-                .sizedBox(height: 30, width: 100),
+                .padding(EdgeInsets.all(2))
+                .sizedBox(height: 10, width: 50),
       ),
     );
   }

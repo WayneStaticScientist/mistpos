@@ -9,6 +9,7 @@ import 'package:mistpos/navs/items_navs/nav_category_list.dart';
 import 'package:mistpos/navs/items_navs/nav_items_list.dart';
 import 'package:mistpos/navs/items_navs/nav_discounts_list.dart';
 import 'package:mistpos/navs/items_navs/nav_modifiers_list.dart';
+import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:mistpos/screens/basic/screen_add_employee.dart';
 import 'package:mistpos/widgets/layouts/receits_layout_view.dart';
 import 'package:mistpos/widgets/layouts/mist_admin_dashboard.dart';
@@ -42,29 +43,25 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
   String _selectedIndex = "Overview";
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final bool isLargeScreen = screenWidth > (ScreenSizes.maxWidth);
     return Scaffold(
       appBar: AppBar(
         title: _selectedIndex.text(style: TextStyle(color: Colors.white)),
         backgroundColor: Get.theme.colorScheme.primary,
         iconTheme: IconThemeData(color: Colors.white),
       ),
-      body: Padding(
-        padding: EdgeInsetsGeometry.all(9),
-        child: navs[_selectedIndex] ?? SizedBox.shrink(),
+      body: Row(
+        children: [
+          if (isLargeScreen)
+            SizedBox(width: ScreenSizes.navMaxWidth, child: _makeDrawer(false)),
+          Padding(
+            padding: EdgeInsetsGeometry.all(9),
+            child: navs[_selectedIndex] ?? SizedBox.shrink(),
+          ).expanded1,
+        ],
       ),
-      drawer: Obx(
-        () => MistAdminDashboard(
-          userName: _userController.user.value?.fullName ?? "User",
-          userEmail: _userController.user.value?.email ?? "Email",
-          selectedTile: _selectedIndex,
-          onTap: (String label) {
-            setState(() {
-              _selectedIndex = label;
-            });
-            Navigator.pop(context);
-          },
-        ),
-      ),
+      drawer: isLargeScreen ? null : _makeDrawer(true),
       floatingActionButton: ["Employees"].contains(_selectedIndex)
           ? FloatingActionButton(onPressed: _add, child: Icon(Icons.add))
           : SizedBox.shrink(),
@@ -75,5 +72,21 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     if (_selectedIndex == "Employees") {
       Get.to(() => ScreenAddEmployee());
     }
+  }
+
+  _makeDrawer(bool r) {
+    return Obx(
+      () => MistAdminDashboard(
+        userName: _userController.user.value?.fullName ?? "User",
+        userEmail: _userController.user.value?.email ?? "Email",
+        selectedTile: _selectedIndex,
+        onTap: (String label) {
+          setState(() {
+            _selectedIndex = label;
+          });
+          if (r) Get.back();
+        },
+      ),
+    );
   }
 }

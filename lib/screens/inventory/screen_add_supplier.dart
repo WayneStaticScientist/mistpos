@@ -36,7 +36,7 @@ class _ScreenAddSupplierState extends State<ScreenAddSupplier> {
       appBar: AppBar(
         title: "New Supplier".text(),
         backgroundColor: Get.theme.colorScheme.primary,
-        foregroundColor: Get.theme.colorScheme.onPrimary,
+        foregroundColor: Colors.white,
       ),
       body: Form(
         key: _formKey,

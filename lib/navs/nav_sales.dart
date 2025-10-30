@@ -4,8 +4,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/screens/basic/screen_view_selected_customer.dart';
-import 'package:mistpos/screens/basic/screens_select_customers.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/item_model.dart';
@@ -19,6 +18,8 @@ import 'package:mistpos/widgets/layouts/list_tile_item.dart';
 import 'package:mistpos/widgets/layouts/cards_category.dart';
 import 'package:mistpos/screens/basic/screen_manual_cart.dart';
 import 'package:mistpos/screens/basic/screen_edit_manual_cart.dart';
+import 'package:mistpos/screens/basic/screens_select_customers.dart';
+import 'package:mistpos/screens/basic/screen_view_selected_customer.dart';
 
 class NavSale extends StatefulWidget {
   const NavSale({super.key});
@@ -59,11 +60,14 @@ class _NavSaleState extends State<NavSale> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth > 600) {
+        if (constraints.maxWidth > 700) {
           return Row(
             children: [
-              SizedBox(width: 600, child: _buildNormalFlowLayout()),
-              Expanded(child: _selectedItemsList()),
+              Expanded(child: _buildNormalFlowLayout()),
+              SizedBox(
+                width: constraints.maxWidth * 0.5,
+                child: _selectedItemsList(),
+              ),
             ],
           );
         }
@@ -121,11 +125,14 @@ class _NavSaleState extends State<NavSale> {
                           : Get.to(() => ScreensListCustomers()),
                       icon: Iconify(
                         selected ? Bx.user_check : Bx.user_plus,
-                        color: selected ? Colors.green : null,
+                        color: selected ? Colors.green : AppTheme.color,
                       ),
                     );
                   }),
-                  IconButton(onPressed: () {}, icon: Iconify(Bx.cog)),
+                  IconButton(
+                    onPressed: () {},
+                    icon: Iconify(Bx.cog, color: AppTheme.color),
+                  ),
                 ],
               ),
               /*
@@ -139,14 +146,14 @@ class _NavSaleState extends State<NavSale> {
                     child: MistSearchField(controller: _searchController),
                   ),
                   12.gapWidth,
-                  Iconify(Bx.slider_alt)
+                  Iconify(Bx.slider_alt, color: AppTheme.color)
                       .padding(
                         EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                       )
                       .decoratedBox(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(207),
-                          color: Get.isDarkMode ? Colors.black : Colors.white,
+                          color: AppTheme.surface,
                         ),
                       ),
                 ].row().padding(EdgeInsets.all(14)),
@@ -286,7 +293,7 @@ class _NavSaleState extends State<NavSale> {
   _buidCategoriesLayout() {
     return SliverToBoxAdapter(
       child: SizedBox(
-        height: 60,
+        height: 40,
         child:
             ListView(
                   scrollDirection: Axis.horizontal,
@@ -318,9 +325,7 @@ class _NavSaleState extends State<NavSale> {
                 .sizedBox()
                 .padding(EdgeInsets.symmetric(horizontal: 18))
                 .decoratedBox(
-                  decoration: BoxDecoration(
-                    color: Get.isDarkMode ? Colors.black : Colors.white,
-                  ),
+                  decoration: BoxDecoration(color: AppTheme.surface),
                 ),
       ),
     );
@@ -338,9 +343,7 @@ class _NavSaleState extends State<NavSale> {
                         )
                         .padding(EdgeInsets.symmetric(horizontal: 18))
                         .decoratedBox(
-                          decoration: BoxDecoration(
-                            color: Get.isDarkMode ? Colors.black : Colors.white,
-                          ),
+                          decoration: BoxDecoration(color: AppTheme.surface),
                         )
                         .onTapUp(
                           (e) => _handleWidgetClick(
@@ -360,12 +363,20 @@ class _NavSaleState extends State<NavSale> {
               itemCount: _itemsListController.cartItems.length + 1,
             )
           : SliverFillRemaining(
-              child: [Iconify(Bx.cart_alt), 12.gapHeight, "no items".text()]
-                  .column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                  )
-                  .center(),
+              child:
+                  [
+                        Iconify(Bx.cart_alt, color: AppTheme.color),
+                        12.gapHeight,
+                        "no items".text(),
+                      ]
+                      .column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                      )
+                      .center()
+                      .decoratedBox(
+                        decoration: BoxDecoration(color: AppTheme.surface),
+                      ),
             ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/themes/app_theme.dart';
 
 class MistInventoryNavBar extends StatefulWidget {
   final String userName;
@@ -28,7 +29,7 @@ class _MistInventoryNavBarState extends State<MistInventoryNavBar> {
       child: ListView(
         children: [
           ListTile(
-            leading: Iconify(Carbon.user_avatar),
+            leading: Iconify(Carbon.user_avatar, color: AppTheme.color),
             title: widget.userName.text(),
             subtitle: widget.userEmail.text(style: TextStyle(fontSize: 12)),
           ),
@@ -54,6 +55,14 @@ class _MistInventoryNavBarState extends State<MistInventoryNavBar> {
             title: "Suppliers".text(),
             onTap: () => widget.onTap("Suppliers"),
             tileColor: widget.selectedTile == "Suppliers"
+                ? Colors.grey.withAlpha(50)
+                : null,
+          ),
+          ListTile(
+            leading: Iconify(Carbon.study_transfer, color: Colors.green),
+            title: "Transfer Orders".text(),
+            onTap: () => widget.onTap("Transfer Orders"),
+            tileColor: widget.selectedTile == "Transfer Orders"
                 ? Colors.grey.withAlpha(50)
                 : null,
           ),

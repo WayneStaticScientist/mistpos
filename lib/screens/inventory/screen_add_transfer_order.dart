@@ -4,30 +4,29 @@ import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
-import 'package:mistpos/inventory/constants.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
+import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/models/transfer_order_model.dart';
 import 'package:mistpos/widgets/buttons/card_buttons.dart';
-import 'package:mistpos/models/stock_adjustment_model.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/widgets/buttons/mist_loaded_icon_button.dart';
 import 'package:mistpos/screens/inventory/screen_select_purchase_order_items.dart';
 
-class ScreenAddStockadjustments extends StatefulWidget {
-  const ScreenAddStockadjustments({super.key});
+class ScreenAddTransferOrder extends StatefulWidget {
+  const ScreenAddTransferOrder({super.key});
 
   @override
-  State<ScreenAddStockadjustments> createState() =>
-      _ScreenAddStockadjustmentsState();
+  State<ScreenAddTransferOrder> createState() => _ScreenAddTransferOrderState();
 }
 
-class _ScreenAddStockadjustmentsState extends State<ScreenAddStockadjustments> {
+class _ScreenAddTransferOrderState extends State<ScreenAddTransferOrder> {
   bool _isLoading = false;
   final _formKey = GlobalKey<FormState>();
+  final _user = Get.find<UserController>();
   final _notesController = TextEditingController();
   final _inventory = Get.find<InventoryController>();
-  String _reason = "add";
+  String? _toStore;
   List<InvItem> _rejects = [];
   @override
   void initState() {
@@ -38,12 +37,12 @@ class _ScreenAddStockadjustmentsState extends State<ScreenAddStockadjustments> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: "New Stock Adjustment".text(),
+        title: "New Transfer Order".text(),
         backgroundColor: Get.theme.colorScheme.primary,
         foregroundColor: Colors.white,
         actions: [
           MistLoadIconButton(
-            label: "Adjust",
+            label: "Add",
             onPressed: () => _save(),
             isLoading: _isLoading,
           ),
@@ -57,35 +56,37 @@ class _ScreenAddStockadjustmentsState extends State<ScreenAddStockadjustments> {
                 padding: EdgeInsets.all(5),
                 children: [
                   [
-                        "Adjustment Information".text(
+                        "Transfer Information".text(
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         24.gapHeight,
-                        "Reason".text(),
+                        "Transfer Items to which store".text(),
                         8.gapHeight,
                         DropdownButton(
-                          value: _reason,
+                          value: _toStore,
                           isDense: true,
                           isExpanded: true,
                           onChanged: (value) {
                             setState(() {
-                              _reason = value ?? 'add';
+                              _toStore = value;
                             });
                           },
                           items: List.generate(
-                            Inventory.adjustStockReasons.length,
+                            _user.user.value!.companies.length,
                             (index) {
-                              final data = Inventory.adjustStockReasons[index];
                               return DropdownMenuItem(
-                                value: (data['value'] ?? ''),
-                                child: (data['label'] ?? '').text(),
+                                value: (_user.user.value!.companies[index]),
+                                child: (_user.user.value!.companies[index])
+                                    .text(),
                               );
                             },
                           ),
-                          hint: Text("Select Category"),
+                          hint: Text(
+                            "Select Which store you want to transfer ",
+                          ),
                         ).sizedBox(width: double.infinity),
                         18.gapHeight,
                         MistFormInput(
@@ -136,15 +137,10 @@ class _ScreenAddStockadjustmentsState extends State<ScreenAddStockadjustments> {
                                         () => _showBottomBar(e),
                                       ),
                                       leading: CircleAvatar(
-                                        child: _getPrefix(e.quantity).text(),
+                                        child: "${(e.quantity)}".text(),
                                       ),
                                       subtitle: "in stock ${e.inStock}".text(),
                                       title: e.name.text(),
-                                      trailing: _reason == "add"
-                                          ? CurrenceConverter.getCurrenceFloatInStrings(
-                                              e.quantity * e.cost,
-                                            ).text()
-                                          : null,
                                     );
                                   },
                                 ),
@@ -197,9 +193,7 @@ class _ScreenAddStockadjustmentsState extends State<ScreenAddStockadjustments> {
     Get.defaultDialog(
       title: itemInv.name,
       content: [
-        if (_reason == 'add')
-          MistFormInput(label: 'Cost', controller: proposedCostsPrice),
-        MistFormInput(label: _getTitle(), controller: proposedQuantity),
+        MistFormInput(label: "Quantinty", controller: proposedQuantity),
       ].column(mainAxisSize: MainAxisSize.min),
       actions: [
         'close'.text().textButton(onPressed: () => Get.back()),
@@ -226,14 +220,22 @@ class _ScreenAddStockadjustmentsState extends State<ScreenAddStockadjustments> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+    if (_toStore == null) {
+      Toaster.showError("Destination company shouldnt be empty");
+      return;
+    }
+    if (_toStore == _user.user.value!.company) {
+      Toaster.showError("Destination company should be a different company");
+      return;
+    }
     setState(() {
       _isLoading = true;
     });
-    final order = StockAdjustmentModel(
+    final order = TransferOrderModel(
       id: '',
       senderId: '',
       company: '',
-      reason: _reason,
+      toCompany: _toStore ?? '',
       notes: _notesController.text,
       inventoryItems: _inventory.selectedInvItems,
     );
@@ -253,26 +255,6 @@ class _ScreenAddStockadjustmentsState extends State<ScreenAddStockadjustments> {
     Toaster.showSuccess(
       "Stock adjustment was succeefull but with some few errors",
     );
-  }
-
-  String _getTitle() {
-    switch (_reason) {
-      case 'add':
-        return "Add Stock Amount";
-      case "count":
-        return "counted stock";
-    }
-    return "Remove Stock";
-  }
-
-  String _getPrefix(int size) {
-    if (_reason == "add") {
-      return "+ $size";
-    }
-    if (_reason == "count") {
-      return "= $size";
-    }
-    return "- $size";
   }
 
   Widget _buildRejectsScreen() {

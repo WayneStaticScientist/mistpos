@@ -52,7 +52,7 @@ class _ScreenSelectPurchaseOrderItemsState
       appBar: AppBar(
         title: "Select Items".text(),
         backgroundColor: Get.theme.colorScheme.primary,
-        foregroundColor: Get.theme.colorScheme.onPrimary,
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             onPressed: _showSelectedItems,
@@ -83,7 +83,7 @@ class _ScreenSelectPurchaseOrderItemsState
             },
             child: Obx(
               () => _itemController.cartItems.isEmpty
-                  ? "No suppliers found . Click + to add new supplier".text()
+                  ? "No items found . Click + to add new item".text()
                   : ListView.builder(
                       itemBuilder: (context, index) {
                         if (index < _itemController.cartItems.length) {
@@ -98,6 +98,7 @@ class _ScreenSelectPurchaseOrderItemsState
         ),
       ].column().padding(EdgeInsets.all(14)),
       floatingActionButton: FloatingActionButton(
+        elevation: 0,
         onPressed: () => Get.to(() => ScreenAddItem()),
         child: Icon(Icons.add, color: Colors.white),
       ),

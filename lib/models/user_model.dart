@@ -14,6 +14,7 @@ class User {
   final String country;
   final String fullName;
   final bool pinnedInput;
+  final List<String> companies;
   final bool allowOfflinePurchase;
   User({
     this.password,
@@ -26,9 +27,15 @@ class User {
     required this.company,
     required this.pinnedInput,
     this.allowOfflinePurchase = true,
+    required this.companies,
   });
   factory User.fromMap(Map<String, dynamic> map) {
     return User(
+      companies: (map['companies'] == null)
+          ? []
+          : (map['companies'] as List<dynamic>)
+                .map((e) => e as String)
+                .toList(),
       till: map['till'] as int? ?? 1,
       email: map['email'] as String,
       company: map['company'] as String,
@@ -50,6 +57,7 @@ class User {
       'password': password,
       'fullName': fullName,
       'pinnedInput': pinnedInput,
+      'companies': companies,
     };
   }
 

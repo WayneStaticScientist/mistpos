@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/lucide.dart';
+import 'package:mistpos/themes/app_theme.dart';
 
 class MistFormInput extends StatefulWidget {
   final String label;
@@ -72,15 +73,19 @@ class _MistFormInputState extends State<MistFormInput> {
             color: widget.underLineColor ?? Get.theme.colorScheme.primary,
           ),
         ),
-        suffixIcon: Iconify(_isVisible ? Lucide.eye_off : Lucide.eye)
-            .center()
-            .sizedBox(width: 12, height: 12)
-            .onTap(
-              () => setState(() {
-                _isVisible = !_isVisible;
-              }),
-            )
-            .visibleIf(widget.isPasswordField == true),
+        suffixIcon:
+            Iconify(
+                  _isVisible ? Lucide.eye_off : Lucide.eye,
+                  color: AppTheme.color,
+                )
+                .center()
+                .sizedBox(width: 12, height: 12)
+                .onTap(
+                  () => setState(() {
+                    _isVisible = !_isVisible;
+                  }),
+                )
+                .visibleIf(widget.isPasswordField == true),
         enabledBorder: UnderlineInputBorder(
           borderSide: BorderSide(
             color: widget.underLineColor ?? Get.theme.colorScheme.primary,

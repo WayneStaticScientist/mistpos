@@ -1,6 +1,6 @@
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:mistpos/themes/app_theme.dart';
 
 class CardOverview extends StatelessWidget {
   final String label;
@@ -20,10 +20,6 @@ class CardOverview extends StatelessWidget {
         .column(crossAxisAlignment: CrossAxisAlignment.start)
         .sizedBox(height: 100, width: 150)
         .padding(EdgeInsets.all(12))
-        .decoratedBox(
-          decoration: BoxDecoration(
-            color: Get.isDarkMode ? Colors.black : Colors.white,
-          ),
-        );
+        .decoratedBox(decoration: BoxDecoration(color: AppTheme.surface));
   }
 }

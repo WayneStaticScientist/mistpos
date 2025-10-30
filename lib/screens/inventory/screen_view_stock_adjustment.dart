@@ -22,7 +22,7 @@ class _ScreenViewStockAdjustmentState extends State<ScreenViewStockAdjustment> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        foregroundColor: Get.theme.colorScheme.onPrimary,
+        foregroundColor: Colors.white,
         backgroundColor: Get.theme.colorScheme.primary,
         title: "Stock Adjustment Order".text(),
       ),

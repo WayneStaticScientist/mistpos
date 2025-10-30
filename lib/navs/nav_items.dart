@@ -38,13 +38,7 @@ class _NavItemsState extends State<NavItems> {
         ),
         title: Text('Items'),
         backgroundColor: Get.theme.colorScheme.primary,
-        titleTextStyle: TextStyle(
-          color: Get.theme.colorScheme.onPrimary,
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-        ),
-        iconTheme: IconThemeData(color: Get.theme.colorScheme.onPrimary),
-
+        foregroundColor: Colors.white,
         actions: [
           Obx(
             () => _itemsController.deleting.value
@@ -115,7 +109,8 @@ class _NavItemsState extends State<NavItems> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _add,
-        child: Icon(Icons.add),
+        elevation: 0,
+        child: Icon(Icons.add, color: Colors.white),
       ),
     );
   }

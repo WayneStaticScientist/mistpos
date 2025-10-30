@@ -39,7 +39,7 @@ class _ScreenAddPurchaseOrderState extends State<ScreenAddPurchaseOrder> {
       appBar: AppBar(
         title: "New Purchase Order".text(),
         backgroundColor: Get.theme.colorScheme.primary,
-        foregroundColor: Get.theme.colorScheme.onPrimary,
+        foregroundColor: Colors.white,
         actions: [
           MistLoadIconButton(
             label: 'draft',
