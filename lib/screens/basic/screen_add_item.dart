@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+import 'package:flutter_barcode_scanner_plus/flutter_barcode_scanner_plus.dart';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
@@ -163,6 +165,10 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
                       color: Colors.grey.withAlpha(200),
                     ),
                     underLineColor: Colors.grey.withAlpha(200),
+                    suffixIcon: IconButton(
+                      onPressed: _scanBarCode,
+                      icon: Iconify(Bx.barcode_reader, color: Colors.red),
+                    ),
                   ),
                 ]
                 .column(
@@ -450,5 +456,25 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
       Get.back();
       Toaster.showSuccess('Item created successfully');
     }
+  }
+
+  void _scanBarCode() async {
+    String barcodeScanResult;
+    try {
+      barcodeScanResult = await FlutterBarcodeScanner.scanBarcode(
+        '#ff6666', // Line color
+        'Cancel',
+        true,
+        ScanMode.BARCODE, // Scan mode
+      );
+    } catch (e) {
+      Toaster.showError("Error : $e");
+      return;
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _itemBarcodeController.text = barcodeScanResult;
+    });
   }
 }

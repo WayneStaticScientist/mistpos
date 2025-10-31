@@ -16,6 +16,7 @@ class MistFormInput extends StatefulWidget {
   final TextEditingController? controller;
   final TextInputType? keyboardType;
   final int? validLength;
+  final Widget? suffixIcon;
   const MistFormInput({
     super.key,
     required this.label,
@@ -28,6 +29,7 @@ class MistFormInput extends StatefulWidget {
     this.keyboardType,
     this.enabled,
     this.maxLines = 1,
+    this.suffixIcon,
   });
 
   @override
@@ -74,6 +76,7 @@ class _MistFormInputState extends State<MistFormInput> {
           ),
         ),
         suffixIcon:
+            widget.suffixIcon ??
             Iconify(
                   _isVisible ? Lucide.eye_off : Lucide.eye,
                   color: AppTheme.color,

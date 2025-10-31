@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:mistpos/models/inventory_count_model.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:mistpos/models/purchase_order_model.dart';
 import 'package:mistpos/models/stock_adjustment_model.dart';
@@ -15,6 +16,7 @@ class InvItem {
   String sku;
   String barcode;
   int inStock = 1;
+  int difference = 0;
   InvItem({
     required this.id,
     required this.name,
@@ -23,6 +25,7 @@ class InvItem {
     required this.amount,
     required this.sku,
     required this.barcode,
+    this.difference = 0,
     this.inStock = 1,
   });
   Map<String, dynamic> toMap() {
@@ -35,6 +38,7 @@ class InvItem {
       "barcode": barcode,
       "inStock": inStock,
       "quantity": quantity,
+      "difference": difference,
     };
   }
 
@@ -48,6 +52,7 @@ class InvItem {
       sku: data['sku'] ?? '',
       barcode: data['barcode'] ?? '',
       inStock: data['inStock'] ?? 0,
+      difference: data['difference'] ?? 0,
     );
   }
 }
@@ -270,5 +275,51 @@ class InventoryController extends GetxController {
     selectedInvItems.clear();
     loadStockAdjustments(page: 1);
     return (status: true, rejects: rejects);
+  }
+
+  /*
+=======================================================================================
+ INVENTORY COUNTS
+=======================================================================================
+*/
+
+  RxList<InventoryCountModel> inventoryCounts = RxList<InventoryCountModel>([]);
+  RxInt inventoryCountsPage = RxInt(1);
+  RxInt inventoryCountsTotalPages = RxInt(1);
+  Future<bool> addInventoryCounts(Map<String, dynamic> data) async {
+    final response = await Net.post("/admin/inventory/counts", data: data);
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return false;
+    }
+    selectedSupplier.value = null;
+    selectedInvItems.clear();
+    loadInventoriesCounts(page: 1);
+    return true;
+  }
+
+  RxBool inventoryCountsLoading = RxBool(false);
+  void loadInventoriesCounts({
+    int page = 1,
+    String search = '',
+    String status = '',
+  }) async {
+    if (inventoryCountsLoading.value) return;
+    inventoryCountsLoading.value = true;
+    final response = await Net.get(
+      "/admin/inventory/counts?page=$page&search=$search&status=$status",
+    );
+    inventoryCountsLoading.value = false;
+    if (response.hasError) {
+      return;
+    }
+    inventoryCountsPage.value = response.body['currentPage'];
+    inventoryCountsTotalPages.value = response.body['totalPages'];
+    if (response.body['list'] != null) {
+      List<dynamic> list = response.body['list'];
+      inventoryCounts.value = list
+          .map((e) => InventoryCountModel.fromJson(e))
+          .toList();
+    }
   }
 }

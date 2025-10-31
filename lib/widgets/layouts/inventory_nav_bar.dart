@@ -59,10 +59,18 @@ class _MistInventoryNavBarState extends State<MistInventoryNavBar> {
                 : null,
           ),
           ListTile(
-            leading: Iconify(Carbon.study_transfer, color: Colors.green),
+            leading: Iconify(Carbon.study_transfer, color: Colors.orangeAccent),
             title: "Transfer Orders".text(),
             onTap: () => widget.onTap("Transfer Orders"),
             tileColor: widget.selectedTile == "Transfer Orders"
+                ? Colors.grey.withAlpha(50)
+                : null,
+          ),
+          ListTile(
+            leading: Iconify(Carbon.inventory_management, color: Colors.indigo),
+            title: "Inventory Counts".text(),
+            onTap: () => widget.onTap("Inventory Counts"),
+            tileColor: widget.selectedTile == "Inventory Counts"
                 ? Colors.grey.withAlpha(50)
                 : null,
           ),

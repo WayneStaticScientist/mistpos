@@ -12,4 +12,9 @@ class Inventory {
     {"label": "Loss", "value": "loss"},
     {"label": "Damaged", "value": "damaged"},
   ];
+  static const inventoryCountStatus = [
+    {"label": "All", "value": ""},
+    {"label": "Pending", "value": "pending"},
+    {"label": "Accepted", "value": "completed"},
+  ];
 }
