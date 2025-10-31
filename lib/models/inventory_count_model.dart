@@ -8,6 +8,7 @@ class InventoryCountModel {
   String senderId;
   int totalCalculations = 0;
   int totalDifference = 0;
+  double totalCostDifference = 0;
   List<InventoryChildCount> inventoryItems;
   InventoryCountModel({
     required this.id,
@@ -16,6 +17,9 @@ class InventoryCountModel {
     required this.company,
     required this.senderId,
     required this.inventoryItems,
+    this.totalCalculations = 0,
+    this.totalDifference = 0,
+    this.totalCostDifference = 0,
   });
   // =========================================================
   // 1. toJson() - CONVERT DART OBJECT TO JSON MAP
@@ -26,6 +30,8 @@ class InventoryCountModel {
       'status': status,
       'company': company,
       'senderId': senderId,
+      'totalDifference': totalDifference,
+      'totalCostDifference': totalCostDifference,
       'inventoryItems': inventoryItems.map((item) => item.toJson()).toList(),
     };
   }
@@ -47,6 +53,9 @@ class InventoryCountModel {
       notes: json['notes'] as String,
       status: json['status'] as String,
       senderId: json['senderId'] as String,
+      totalDifference: json['totalDifference'] as int? ?? 0,
+      totalCostDifference:
+          (json['totalCostDifference'] as num?)?.toDouble() ?? 0,
     );
   }
 }

@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
-import 'package:iconify_flutter/icons/fa.dart';
 import 'package:mistpos/inventory/constants.dart';
 import 'package:mistpos/widgets/layouts/chips.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -48,34 +47,34 @@ class _NavInventoryPurchaseOrderState extends State<NavInventoryPurchaseOrder> {
 
   @override
   Widget build(BuildContext context) {
-    return [
-      MistSearchField(label: "Search ", controller: _searchController),
-      Wrap(
-        alignment: WrapAlignment.start,
-        children: Inventory.purchaseOrderStatus
-            .map(
-              (e) =>
-                  MistChip(
-                    label: e['label'] ?? '',
-                    selected: _statusFilter == e['value'],
-                  ).onTap(() {
-                    setState(() {
-                      _statusFilter = e['value'] ?? '';
-                    });
-                    loadInventoryPurchaseOrders();
-                  }),
-            )
-            .toList(),
-      ).sizedBox(width: double.infinity),
-      Expanded(
-        child: SmartRefresher(
-          controller: _refreshController,
-          enablePullUp: true,
-          onRefresh: () async {
-            loadInventoryPurchaseOrders();
-            await Future.delayed(Duration(milliseconds: 800));
-            _refreshController.refreshCompleted();
-          },
+    return SmartRefresher(
+      controller: _refreshController,
+      enablePullUp: true,
+      onRefresh: () async {
+        loadInventoryPurchaseOrders();
+        await Future.delayed(Duration(milliseconds: 800));
+        _refreshController.refreshCompleted();
+      },
+      child: [
+        MistSearchField(label: "Search ", controller: _searchController),
+        Wrap(
+          alignment: WrapAlignment.start,
+          children: Inventory.purchaseOrderStatus
+              .map(
+                (e) =>
+                    MistChip(
+                      label: e['label'] ?? '',
+                      selected: _statusFilter == e['value'],
+                    ).onTap(() {
+                      setState(() {
+                        _statusFilter = e['value'] ?? '';
+                      });
+                      loadInventoryPurchaseOrders();
+                    }),
+              )
+              .toList(),
+        ).sizedBox(width: double.infinity),
+        Expanded(
           child: Obx(
             () =>
                 _inventory.purchaseOrders.isEmpty &&
@@ -94,8 +93,8 @@ class _NavInventoryPurchaseOrderState extends State<NavInventoryPurchaseOrder> {
                   ),
           ),
         ),
-      ),
-    ].column().padding(EdgeInsets.all(14));
+      ].column().padding(EdgeInsets.all(14)),
+    );
   }
 
   Widget _buildTile(PurchaseOrderModel model) {
@@ -163,7 +162,7 @@ class _NavInventoryPurchaseOrderState extends State<NavInventoryPurchaseOrder> {
       return Iconify(Bx.timer, color: Colors.red);
     }
     if (status.toLowerCase() == "accepted") {
-      return Iconify(Fa.thumbs_up, color: Colors.lightGreenAccent);
+      return Iconify(Bx.check_circle, color: Colors.green);
     }
     return Iconify(Bx.archive, color: Colors.grey);
   }

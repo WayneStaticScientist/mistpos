@@ -236,11 +236,28 @@ class ItemsController extends GetxController {
     savedItems.assignAll(loadedModels);
   }
 
-  void loadReceits() {
+  void loadReceits({int page = 1, String search = ''}) async {
     final isar = Isar.getInstance();
     if (isar == null) {
       return;
     }
+    final response = await Net.get(
+      "/cashier/receits?page=$page&search=$search",
+    );
+    if (!response.hasError) {
+      if (response.body['list'] != null) {
+        final list = response.body['list'] as List<dynamic>;
+        receits.assignAll(
+          list.map((e) => ItemReceitModel.fromJson(e)).toList(),
+        );
+      }
+      await isar.writeTxn(() async {
+        await isar.itemReceitModels.where().deleteAll();
+        await isar.itemReceitModels.putAll(receits);
+      });
+      return;
+    }
+
     final r = isar.itemReceitModels.where().sortByCreatedAtDesc().findAllSync();
     receits.assignAll(r);
   }

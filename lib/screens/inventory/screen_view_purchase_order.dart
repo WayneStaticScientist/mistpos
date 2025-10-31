@@ -4,7 +4,6 @@ import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
-import 'package:iconify_flutter/icons/fa.dart';
 import 'package:mistpos/models/supplier_model.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
@@ -268,7 +267,7 @@ class _ScreenViewPurchaseOrderState extends State<ScreenViewPurchaseOrder> {
       return Iconify(Bx.x, color: Colors.red, size: 35);
     }
     if (status.toLowerCase() == "accepted") {
-      return Iconify(Fa.thumbs_up, color: Colors.lightGreenAccent, size: 35);
+      return Iconify(Bx.check_circle, color: Colors.green, size: 35);
     }
     return Iconify(Bx.archive, color: Colors.grey, size: 35);
   }

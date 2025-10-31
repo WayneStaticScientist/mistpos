@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner_plus/flutter_barcode_scanner_plus.dart';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';

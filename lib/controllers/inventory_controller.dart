@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:get/get.dart';
+import 'package:mistpos/models/inventory_child_count.dart';
 import 'package:mistpos/models/inventory_count_model.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:mistpos/models/purchase_order_model.dart';
@@ -309,6 +312,7 @@ class InventoryController extends GetxController {
     final response = await Net.get(
       "/admin/inventory/counts?page=$page&search=$search&status=$status",
     );
+    log("inventory ${response.body}");
     inventoryCountsLoading.value = false;
     if (response.hasError) {
       return;
@@ -321,5 +325,43 @@ class InventoryController extends GetxController {
           .map((e) => InventoryCountModel.fromJson(e))
           .toList();
     }
+  }
+
+  RxBool loadingInventoryCountItems = RxBool(false);
+  RxList<InventoryChildCount> inventoryCountItems =
+      RxList<InventoryChildCount>();
+  RxString inventoryCountItemsError = RxString("");
+  void loadInventoryCountItems(String searchFilter, List<String> ids) async {
+    if (loadingInventoryCountItems.value) return;
+    loadingInventoryCountItems.value = true;
+    inventoryCountItemsError.value = "";
+    final response = await Net.post(
+      "/admin/products/range",
+      data: {"filter": searchFilter, "ids": ids},
+    );
+    loadingInventoryCountItems.value = false;
+    if (response.hasError) {
+      inventoryCountItemsError.value = response.response;
+      return;
+    }
+    if (response.body['list'] != null) {
+      List<dynamic> list = response.body['list'];
+      inventoryCountItems.value = list
+          .map((e) => InventoryChildCount.fromProduct(e))
+          .toList();
+    }
+  }
+
+  Future<bool> updateInventoryCounts(
+    Map<String, dynamic> data,
+    String id,
+  ) async {
+    final response = await Net.put("/admin/inventory/counts/$id", data: data);
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return false;
+    }
+    loadInventoriesCounts(page: 1);
+    return true;
   }
 }

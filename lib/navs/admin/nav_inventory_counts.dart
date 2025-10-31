@@ -4,14 +4,15 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/inventory/constants.dart';
 import 'package:mistpos/widgets/layouts/chips.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/models/inventory_count_model.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:mistpos/screens/inventory/screen_view_inventory_count.dart';
 
 class NavInventoryCounts extends StatefulWidget {
   const NavInventoryCounts({super.key});
@@ -70,16 +71,14 @@ class _NavInventoryCountsState extends State<NavInventoryCounts> {
           controller: _refreshController,
           enablePullUp: true,
           onRefresh: () async {
-            _iventoryController.loadInventoriesCounts(
-              page: 1,
-              search: _searchTerm,
-            );
+            loadInventoryCounts();
+            await Future.delayed(Duration(milliseconds: 800));
             _refreshController.refreshCompleted();
           },
           child: Obx(
             () => ListView.builder(
               itemBuilder: (context, index) {
-                if (index < _iventoryController.suppliers.length) {
+                if (index < _iventoryController.inventoryCounts.length) {
                   return _buildTile(_iventoryController.inventoryCounts[index]);
                 }
                 return _buildLoader();
@@ -94,7 +93,13 @@ class _NavInventoryCountsState extends State<NavInventoryCounts> {
 
   Widget _buildTile(InventoryCountModel model) {
     return ListTile(
-      leading: CircleAvatar(child: Iconify(Bx.user, color: Colors.white)),
+      onTap: () => Get.to(() => ScreenViewInventoryCount(model: model)),
+      title: "${model.inventoryItems.length} Items".text(),
+      subtitle:
+          (model.notes.length > 10 ? model.notes.substring(0, 10) : model.notes)
+              .text(),
+      leading: CircleAvatar(child: Iconify(Bx.cart, color: Colors.white)),
+      trailing: _getTrailing(model.status),
     );
   }
 
@@ -137,5 +142,12 @@ class _NavInventoryCountsState extends State<NavInventoryCounts> {
       search: _searchTerm,
       status: _statusFilter,
     );
+  }
+
+  Widget _getTrailing(String status) {
+    if (status.toLowerCase() == "pending") {
+      return Iconify(Bx.timer, color: Colors.red);
+    }
+    return Iconify(Bx.check_circle, color: Colors.green);
   }
 }

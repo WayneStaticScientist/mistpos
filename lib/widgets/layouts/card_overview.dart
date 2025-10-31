@@ -25,6 +25,7 @@ class CardOverview extends StatelessWidget {
             color: AppTheme.surface,
             borderRadius: BorderRadius.circular(20),
           ),
-        );
+        )
+        .padding(EdgeInsets.all(10));
   }
 }

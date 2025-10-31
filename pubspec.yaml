@@ -54,6 +54,7 @@ dependencies:
   date_picker_plus: ^4.2.0
   fl_chart: ^1.1.1
   flutter_barcode_scanner_plus: ^3.0.8
+  data_table_2: ^2.6.0
 
 dev_dependencies:
   flutter_test:
