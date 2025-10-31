@@ -28,13 +28,19 @@ class _NavModifiersListState extends State<NavModifiersList> {
               itemBuilder: (context, index) =>
                   Card(
                         child: ListTile(
+                          onTap: () => _editModifier(
+                            _itemListController.modifiers[index],
+                          ),
                           onLongPress: () => _deleteDialog(
                             _itemListController.modifiers[index],
                           ),
                           title: Text(
                             _itemListController.modifiers[index].name,
                           ),
-                          trailing: Iconify(Bx.chevron_right),
+                          trailing: Iconify(
+                            Bx.chevron_right,
+                            color: AppTheme.color,
+                          ),
                           subtitle: Text(
                             "${_itemListController.modifiers[index].list.length} options",
                           ),

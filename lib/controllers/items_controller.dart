@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
+import 'package:mistpos/models/response_model.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:mistpos/models/customer_model.dart';
@@ -429,13 +430,23 @@ class ItemsController extends GetxController {
     deleting.value = false;
   }
 
-  Future<bool> createModifier(ItemModifier modefier) async {
-    final net = await Net.post("/admin/modifier", data: modefier.toJson());
+  Future<bool> createModifier(
+    ItemModifier modefier, {
+    bool updated = false,
+  }) async {
+    ResponseModel? net;
+    if (updated) {
+      net = await Net.put(
+        "/admin/modifier/${modefier.hexId}",
+        data: modefier.toJson(),
+      );
+    } else {
+      net = await Net.post("/admin/modifier", data: modefier.toJson());
+    }
     if (net.hasError) {
       Toaster.showError(net.response);
       return false;
     }
-    final update = ItemModifier.fromJson(net.body['update']);
     final isar = Isar.getInstance();
     if (isar == null) {
       Toaster.showError('Database not initialized');
@@ -443,7 +454,13 @@ class ItemsController extends GetxController {
     }
     try {
       await isar.writeTxn(() async {
-        await isar.itemModifiers.put(update);
+        if (updated) {
+          await isar.itemModifiers.put(modefier);
+        } else {
+          await isar.itemModifiers.put(
+            ItemModifier.fromJson(net!.body['update']),
+          );
+        }
       });
       loadMofiers();
       return true;

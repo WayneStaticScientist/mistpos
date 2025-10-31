@@ -220,7 +220,10 @@ class _ScreenEditModifierState extends State<ScreenEditModifier> {
     });
     widget.modifier.name = _itemNameController.text.trim();
     widget.modifier.list = options;
-    final result = await _itemsController.createModifier(widget.modifier);
+    final result = await _itemsController.createModifier(
+      widget.modifier,
+      updated: true,
+    );
     if (!mounted) return;
     setState(() {
       _isLoading = false;
