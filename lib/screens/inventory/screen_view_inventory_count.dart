@@ -1,10 +1,10 @@
-import 'package:data_table_2/data_table_2.dart';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/models/user_model.dart';
+import 'package:data_table_2/data_table_2.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/utils/currence_converter.dart';

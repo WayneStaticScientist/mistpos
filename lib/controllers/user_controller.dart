@@ -75,4 +75,22 @@ class UserController extends GetxController {
     token.saveToStorage();
     Get.offAll(() => ScreenMain());
   }
+
+  RxList<User> relatedAccounts = RxList<User>();
+  RxBool loadingRelatedAccounts = RxBool(false);
+  Future<void> findRelatedAccounts({String searchKey = ''}) async {
+    if (user.value == null || loadingRelatedAccounts.value) {
+      return;
+    }
+    loadingRelatedAccounts.value = true;
+    final response = await Net.get("/filtered-users?search=$searchKey");
+    loadingRelatedAccounts.value = false;
+    if (response.hasError) {
+      return;
+    }
+    if (response.body['list'] != null) {
+      List<dynamic> list = response.body['list'];
+      relatedAccounts.value = list.map((e) => User.fromMap(e)).toList();
+    }
+  }
 }

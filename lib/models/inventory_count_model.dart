@@ -55,8 +55,8 @@ class InventoryCountModel {
       company: json['company'],
       notes: json['notes'] as String,
       status: json['status'] as String,
-      countBasedOn: json['countBasedOn'],
       senderId: json['senderId'] as String,
+      countBasedOn: json['countBasedOn'] ?? '',
       totalDifference: json['totalDifference'] as int? ?? 0,
       totalCostDifference:
           (json['totalCostDifference'] as num?)?.toDouble() ?? 0,

@@ -1,13 +1,14 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
-import 'package:mistpos/utils/permissions.dart';
-import 'package:mistpos/widgets/layouts/chips.dart';
 import 'package:pinput/pinput.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/utils/permissions.dart';
+import 'package:mistpos/widgets/layouts/chips.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:mistpos/widgets/buttons/mist_form_button.dart';
 
@@ -25,6 +26,7 @@ class _ScreenAddEmployeeState extends State<ScreenAddEmployee> {
   final _roles = ['cashier', 'manager', 'admin'];
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _userController = Get.find<UserController>();
   final _adminController = Get.find<AdminController>();
   final _tillNumberController = TextEditingController();
   final _selectedPermissions = <String>[];
@@ -208,6 +210,7 @@ class _ScreenAddEmployeeState extends State<ScreenAddEmployee> {
     });
     if (result) {
       Get.back();
+      _userController.findRelatedAccounts();
       Toaster.showSuccess("employee added succesfully");
     }
   }

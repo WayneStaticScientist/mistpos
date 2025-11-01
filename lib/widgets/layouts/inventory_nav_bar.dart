@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:mistpos/themes/app_theme.dart';
+import 'package:mistpos/widgets/layouts/profile_tile.dart';
 
 class MistInventoryNavBar extends StatefulWidget {
   final String userName;
@@ -28,11 +28,7 @@ class _MistInventoryNavBarState extends State<MistInventoryNavBar> {
     return Drawer(
       child: ListView(
         children: [
-          ListTile(
-            leading: Iconify(Carbon.user_avatar, color: AppTheme.color),
-            title: widget.userName.text(),
-            subtitle: widget.userEmail.text(style: TextStyle(fontSize: 12)),
-          ),
+          ProfileTile(),
           Divider(color: Colors.grey.withAlpha(100), thickness: 1),
           ListTile(
             leading: Iconify(Carbon.purchase, color: Colors.blueAccent),
