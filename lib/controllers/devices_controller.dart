@@ -7,13 +7,19 @@ import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:pos_universal_printer/pos_universal_printer.dart';
 
 class DevicesController extends GetxController {
-  // @override
-  // void onInit() {
-  //   super.onInit();
-  // }
+  RxBool hasPrinterConnections = RxBool(false);
+  @override
+  void onInit() {
+    super.onInit();
+    hasPrinterConnections.value = printer.isRoleConnected(
+      PosPrinterRole.cashier,
+    );
+  }
+
   final PosUniversalPrinter printer = PosUniversalPrinter.instance;
   RxBool cashierConnected = false.obs;
   RxBool connectingToDevice = false.obs;
+  RxList<PrinterDeviceModel> printerDevices = RxList<PrinterDeviceModel>([]);
 
   Future<void> connectToNetwork(String ipAddress, int port, User? user) async {
     final isar = Isar.getInstance();
@@ -42,6 +48,7 @@ class DevicesController extends GetxController {
       Toaster.showError(
         "Failed to connect to device | check ip address and port from the device",
       );
+      return;
     }
     await isar.writeTxn(() async {
       isar.printerDeviceModels.put(
@@ -53,5 +60,75 @@ class DevicesController extends GetxController {
         ),
       );
     });
+    getConnectedDevices();
+  }
+
+  Future<bool> connectToBluetooth(
+    String name,
+    String macAddress,
+    User? user,
+  ) async {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      Toaster.showError("Database was not initialized");
+      return false;
+    }
+    if (user == null) {
+      Toaster.showError("User should be register first");
+      return false;
+    }
+    connectingToDevice.value = true;
+    await printer.registerDevice(
+      PosPrinterRole.cashier,
+      PrinterDevice(
+        id: user.hexId,
+        name: user.fullName,
+        type: PrinterType.bluetooth,
+        address: macAddress,
+      ),
+    );
+    connectingToDevice.value = false;
+    cashierConnected.value = printer.isRoleConnected(PosPrinterRole.cashier);
+    if (!cashierConnected.value) {
+      Toaster.showError(
+        "Failed to connect to device , Switch on bluetooth and try again",
+      );
+      return false;
+    }
+    await isar.writeTxn(() async {
+      isar.printerDeviceModels.put(
+        PrinterDeviceModel(
+          name: name,
+          address: macAddress,
+          isConnected: cashierConnected.value,
+          port: 0,
+        ),
+      );
+    });
+    getConnectedDevices();
+    return true;
+  }
+
+  void getConnectedDevices() async {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      return;
+    }
+    printerDevices.value = await isar.printerDeviceModels.where().findAll();
+  }
+
+  void forgetDevice(PrinterDeviceModel printerDevic) async {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      return;
+    }
+    printer.unregisterDevice(PosPrinterRole.cashier);
+    await isar.writeTxn(() async {
+      await isar.printerDeviceModels.delete(printerDevic.id);
+    });
+    Toaster.showError(
+      "Printer device disconnected , you might wanna connect from devices",
+    );
+    getConnectedDevices();
   }
 }

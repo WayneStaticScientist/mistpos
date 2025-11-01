@@ -6,6 +6,7 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/controllers/devices_controller.dart';
 import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/models/printer_device_model.dart';
 import 'package:mistpos/screens/basic/screen_bluetooth_scan.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/widgets/buttons/card_buttons.dart';
@@ -24,6 +25,12 @@ class _ScreenConnectedPrintersState extends State<ScreenConnectedPrinters> {
   final _devicesController = Get.find<DevicesController>();
   final _userController = Get.find<UserController>();
   @override
+  void initState() {
+    super.initState();
+    _devicesController.getConnectedDevices();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Connected Printers")),
@@ -31,6 +38,39 @@ class _ScreenConnectedPrintersState extends State<ScreenConnectedPrinters> {
         elevation: 0,
         onPressed: _addDevice,
         child: Icon(Icons.add, color: Colors.white),
+      ),
+      body: Obx(
+        () => [
+          [
+                Iconify(Bx.wifi, color: AppTheme.color),
+                18.gapWidth,
+                "No connected devices , click + to add one".text(
+                  textAlign: TextAlign.center,
+                ),
+              ]
+              .column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+              )
+              .expanded1
+              .visibleIf(
+                !_devicesController.connectingToDevice.value &&
+                    _devicesController.printerDevices.isEmpty,
+              ),
+          MistLoader1().center().expanded1.visibleIf(
+            _devicesController.connectingToDevice.value,
+          ),
+          ListView.builder(
+            itemBuilder: (context, index) => ListTile(
+              onTap: () =>
+                  _forgetDevice(_devicesController.printerDevices[index]),
+              title: _devicesController.printerDevices[index].name.text(),
+              subtitle: _devicesController.printerDevices[index].address.text(),
+              trailing: Iconify(Bx.bx_devices, color: Colors.blue),
+            ),
+            itemCount: _devicesController.printerDevices.length,
+          ).expanded1,
+        ].column().sizedBox(width: double.infinity),
       ),
     );
   }
@@ -99,6 +139,26 @@ class _ScreenConnectedPrintersState extends State<ScreenConnectedPrinters> {
                 !_devicesController.cashierConnected.value &&
                     !_devicesController.connectingToDevice.value,
               ),
+        ),
+      ],
+    );
+  }
+
+  void _forgetDevice(PrinterDeviceModel printerDevic) {
+    Get.defaultDialog(
+      title: "Forget Device",
+      content: "do you want to forget this device ?".text(),
+      actions: [
+        "close".text().textButton(
+          onPressed: () {
+            Get.back();
+          },
+        ),
+        'forget'.text().textButton(
+          onPressed: () {
+            _devicesController.forgetDevice(printerDevic);
+            Get.back();
+          },
         ),
       ],
     );
