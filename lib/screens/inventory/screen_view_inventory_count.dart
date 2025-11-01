@@ -36,7 +36,7 @@ class _ScreenViewInventoryCountState extends State<ScreenViewInventoryCount> {
     super.initState();
     if (widget.model.status == "pending") {
       _inventory.loadInventoryCountItems(
-        "",
+        widget.model.countBasedOn,
         widget.model.inventoryItems.map((e) => e.id).toList(),
       );
     }

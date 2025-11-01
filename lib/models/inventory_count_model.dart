@@ -9,6 +9,7 @@ class InventoryCountModel {
   int totalCalculations = 0;
   int totalDifference = 0;
   double totalCostDifference = 0;
+  String countBasedOn;
   List<InventoryChildCount> inventoryItems;
   InventoryCountModel({
     required this.id,
@@ -16,9 +17,10 @@ class InventoryCountModel {
     required this.status,
     required this.company,
     required this.senderId,
-    required this.inventoryItems,
-    this.totalCalculations = 0,
     this.totalDifference = 0,
+    required this.countBasedOn,
+    this.totalCalculations = 0,
+    required this.inventoryItems,
     this.totalCostDifference = 0,
   });
   // =========================================================
@@ -30,6 +32,7 @@ class InventoryCountModel {
       'status': status,
       'company': company,
       'senderId': senderId,
+      'countBasedOn': countBasedOn,
       'totalDifference': totalDifference,
       'totalCostDifference': totalCostDifference,
       'inventoryItems': inventoryItems.map((item) => item.toJson()).toList(),
@@ -52,6 +55,7 @@ class InventoryCountModel {
       company: json['company'],
       notes: json['notes'] as String,
       status: json['status'] as String,
+      countBasedOn: json['countBasedOn'],
       senderId: json['senderId'] as String,
       totalDifference: json['totalDifference'] as int? ?? 0,
       totalCostDifference:

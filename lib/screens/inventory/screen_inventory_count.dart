@@ -2,10 +2,10 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/utils/toast.dart';
+import 'package:iconify_flutter/icons/bx.dart';
 import 'package:data_table_2/data_table_2.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
@@ -36,7 +36,7 @@ class _ScreenInventoryCountState extends State<ScreenInventoryCount> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _inventory.loadInventoryCountItems(
-        "",
+        widget.model.countBasedOn,
         widget.model.inventoryItems.map((e) => e.id).toList(),
       );
     });

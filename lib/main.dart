@@ -2,6 +2,7 @@ import 'package:isar/isar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/instance_manager.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:mistpos/controllers/devices_controller.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:mistpos/controllers/admin_controller.dart';
@@ -12,6 +13,7 @@ import 'package:mistpos/models/item_categories_model.dart';
 import 'package:mistpos/models/item_modifier_model.dart';
 import 'package:mistpos/models/item_receit_model.dart';
 import 'package:mistpos/models/item_saved_items_model.dart';
+import 'package:mistpos/models/printer_device_model.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/screens/auth/screen_splash.dart';
 import 'package:mistpos/screens/basic/screen_main.dart';
@@ -26,6 +28,7 @@ void main() async {
     ItemModifierSchema,
     ItemReceitModelSchema,
     ItemCategoryModelSchema,
+    PrinterDeviceModelSchema,
     ItemSavedItemsModelSchema,
   ], directory: dir.path);
   await GetStorage.init();
@@ -45,6 +48,7 @@ class MyApp extends StatelessWidget {
         Get.put(ItemsController());
         Get.put(AdminController());
         Get.put(InventoryController());
+        Get.put(DevicesController());
       }),
 
       theme: AppTheme.lightTheme,

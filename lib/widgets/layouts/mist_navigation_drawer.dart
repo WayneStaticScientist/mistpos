@@ -6,6 +6,7 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/screens/basic/screen_dashboard.dart';
+import 'package:mistpos/screens/basic/screen_devices_section.dart';
 import 'package:mistpos/screens/basic/screen_settings_page.dart';
 import 'package:mistpos/themes/app_theme.dart';
 
@@ -65,6 +66,11 @@ class MistMainNavigationView extends StatelessWidget {
             tileColor: selectedNav == 'items'
                 ? Colors.grey.withAlpha(30)
                 : null,
+          ),
+          ListTile(
+            leading: Iconify(Bx.devices, color: AppTheme.color),
+            title: Text('Devices'),
+            onTap: () => Get.to(() => ScreenDevicesSection()),
           ),
           ListTile(
             leading: Iconify(Bx.cog, color: AppTheme.color),
