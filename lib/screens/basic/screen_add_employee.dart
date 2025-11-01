@@ -200,12 +200,13 @@ class _ScreenAddEmployeeState extends State<ScreenAddEmployee> {
     }
     final result = await _adminController.addEmployee({
       "user": {
-        "fullName": _nameController.text.trim(),
-        "email": _emailController.text,
         "role": _role,
         "pin": _pin,
         "till": tillNumber,
+        "pinnedInput": true,
+        "email": _emailController.text,
         'permissions': _selectedPermissions,
+        "fullName": _nameController.text.trim(),
       },
     });
     if (result) {

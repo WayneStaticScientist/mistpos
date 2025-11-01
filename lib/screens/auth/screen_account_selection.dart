@@ -4,11 +4,13 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/models/user_model.dart';
+import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/screens/basic/screen_add_employee.dart';
+import 'package:mistpos/screens/basic/screen_change_employee.dart';
 
 class ScreenAccountSelection extends StatefulWidget {
   const ScreenAccountSelection({super.key});
@@ -41,33 +43,40 @@ class _ScreenAccountSelectionState extends State<ScreenAccountSelection> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: "Select Account".text()),
-      body: [
-        MistSearchField(
-          label: "Search Accounts",
-          controller: _searchController,
-        ),
-        Expanded(
-          child: SmartRefresher(
-            controller: _refreshController,
-            enablePullUp: true,
-            onRefresh: () async {
-              await _userController.findRelatedAccounts();
-              _refreshController.refreshCompleted();
-            },
-            child: Obx(
-              () => ListView.builder(
-                itemBuilder: (context, index) {
-                  if (index < _userController.relatedAccounts.length) {
-                    return _buildTile(_userController.relatedAccounts[index]);
-                  }
-                  return _buildLoader();
-                },
-                itemCount: _userController.relatedAccounts.length + 1,
-              ),
-            ),
-          ),
-        ),
-      ].column().padding(EdgeInsets.all(14)),
+      body:
+          [
+                MistSearchField(
+                  label: "Search Accounts",
+                  controller: _searchController,
+                ),
+                Expanded(
+                  child: SmartRefresher(
+                    controller: _refreshController,
+                    enablePullUp: true,
+                    onRefresh: () async {
+                      await _userController.findRelatedAccounts();
+                      _refreshController.refreshCompleted();
+                    },
+                    child: Obx(
+                      () => ListView.builder(
+                        itemBuilder: (context, index) {
+                          if (index < _userController.relatedAccounts.length) {
+                            return _buildTile(
+                              _userController.relatedAccounts[index],
+                            );
+                          }
+                          return _buildLoader();
+                        },
+                        itemCount: _userController.relatedAccounts.length + 1,
+                      ),
+                    ),
+                  ),
+                ),
+              ]
+              .column()
+              .padding(EdgeInsets.all(14))
+              .constrained(maxWidth: ScreenSizes.maxWidth)
+              .center(),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Get.to(() => ScreenAddEmployee()),
         child: Icon(Icons.add, color: Colors.white),
@@ -77,6 +86,7 @@ class _ScreenAccountSelectionState extends State<ScreenAccountSelection> {
 
   _buildTile(User model) {
     return ListTile(
+      onTap: () => Get.to(() => ScreenChangeEmployee(user: model)),
       title: model.fullName.text(),
       subtitle: model.role.text(),
       leading: CircleAvatar(

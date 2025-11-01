@@ -215,6 +215,7 @@ class _ScreemEditEmployeeState extends State<ScreemEditEmployee> {
         "email": _emailController.text,
         "role": _role,
         "pin": _pin,
+        "pinnedInput": _pin.trim().isNotEmpty,
         "till": tillNumber,
         "permissions": _selectedPermissions,
       },
