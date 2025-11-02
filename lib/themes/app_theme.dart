@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class AppTheme {
   static final ThemeData lightTheme = ThemeData(
@@ -20,9 +19,13 @@ class AppTheme {
     ),
   );
 
-  static var color = Get.isDarkMode ? Colors.white : Colors.black;
+  static Color color(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+      ? Colors.white
+      : Colors.black;
 
-  static var surface = Get.isDarkMode
+  static Color surface(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
       ? const Color.fromARGB(255, 55, 55, 55).withAlpha(100)
       : Colors.white;
 }

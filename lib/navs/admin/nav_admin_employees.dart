@@ -83,7 +83,7 @@ class _NavAdminEmployeesState extends State<NavAdminEmployees> {
               .map(
                 (e) => ListTile(
                   onTap: () =>
-                      Get.to(() => ScreemEditEmployee(employeeModel: e)),
+                      Get.to(() => ScreenEditEmployee(employeeModel: e)),
                   leading: CircleAvatar(
                     backgroundColor: Get.theme.colorScheme.primary,
                     child: Iconify(

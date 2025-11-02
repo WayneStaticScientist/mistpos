@@ -15,7 +15,7 @@ class MistSearchField extends StatelessWidget {
       controller: controller,
       decoration: InputDecoration(
         hint: (label ?? "Search").text(style: TextStyle(color: Colors.grey)),
-        fillColor: AppTheme.surface,
+        fillColor: AppTheme.surface(context),
         filled: true,
         prefixIcon: SizedBox(
           height: 14,

@@ -14,7 +14,6 @@ import 'package:mistpos/widgets/layouts/card_overview.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/widgets/buttons/mist_loaded_icon_button.dart';
 import 'package:mistpos/screens/inventory/screen_inventory_count.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class ScreenViewInventoryCount extends StatefulWidget {
   final InventoryCountModel model;
@@ -27,10 +26,10 @@ class ScreenViewInventoryCount extends StatefulWidget {
 
 class _ScreenViewInventoryCountState extends State<ScreenViewInventoryCount> {
   final _inventory = Get.find<InventoryController>();
+  User? sender;
+  String _error = "";
   bool _loading = true;
   bool _updatingState = false;
-  String _error = "";
-  User? sender;
   @override
   void initState() {
     super.initState();
@@ -91,7 +90,7 @@ class _ScreenViewInventoryCountState extends State<ScreenViewInventoryCount> {
                   .padding(EdgeInsets.all(12))
                   .decoratedBox(
                     decoration: BoxDecoration(
-                      color: AppTheme.surface,
+                      color: AppTheme.surface(context),
                       borderRadius: BorderRadius.circular(20),
                     ),
                   )
@@ -106,7 +105,9 @@ class _ScreenViewInventoryCountState extends State<ScreenViewInventoryCount> {
           crossAxisAlignment: CrossAxisAlignment.start,
         )
         .padding(EdgeInsets.all(8))
-        .decoratedBox(decoration: BoxDecoration(color: AppTheme.surface));
+        .decoratedBox(
+          decoration: BoxDecoration(color: AppTheme.surface(context)),
+        );
   }
 
   _buildSupplierInformation() {
@@ -114,11 +115,7 @@ class _ScreenViewInventoryCountState extends State<ScreenViewInventoryCount> {
           "Sender Information".text(
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          if (_loading)
-            LoadingAnimationWidget.staggeredDotsWave(
-              color: Get.theme.colorScheme.primary,
-              size: 50,
-            ),
+          if (_loading) MistLoader1(),
           18.gapHeight,
           if (_error.isNotEmpty)
             "There was error fetching the supplier details ".text(
@@ -162,7 +159,9 @@ class _ScreenViewInventoryCountState extends State<ScreenViewInventoryCount> {
           crossAxisAlignment: CrossAxisAlignment.start,
         )
         .padding(EdgeInsets.all(8))
-        .decoratedBox(decoration: BoxDecoration(color: AppTheme.surface));
+        .decoratedBox(
+          decoration: BoxDecoration(color: AppTheme.surface(context)),
+        );
   }
 
   _buildProductInformation() {
@@ -217,7 +216,7 @@ class _ScreenViewInventoryCountState extends State<ScreenViewInventoryCount> {
           ).visibleIf(widget.model.status == "pending"),
           ListTile(
             title: "Total Cost difference".text(),
-            leading: Iconify(Bx.dollar, color: AppTheme.color),
+            leading: Iconify(Bx.dollar, color: AppTheme.color(context)),
             trailing:
                 CurrenceConverter.getCurrenceFloatInStrings(
                   widget.model.totalCostDifference,
@@ -231,7 +230,7 @@ class _ScreenViewInventoryCountState extends State<ScreenViewInventoryCount> {
           ).visibleIf(widget.model.status == "completed"),
           ListTile(
             title: "Total Item difference".text(),
-            leading: Iconify(Bx.adjust, color: AppTheme.color),
+            leading: Iconify(Bx.adjust, color: AppTheme.color(context)),
             trailing: widget.model.totalDifference.toString().text(
               style: TextStyle(
                 color: widget.model.totalDifference >= 0
@@ -247,7 +246,9 @@ class _ScreenViewInventoryCountState extends State<ScreenViewInventoryCount> {
           crossAxisAlignment: CrossAxisAlignment.start,
         )
         .padding(EdgeInsets.all(8))
-        .decoratedBox(decoration: BoxDecoration(color: AppTheme.surface));
+        .decoratedBox(
+          decoration: BoxDecoration(color: AppTheme.surface(context)),
+        );
   }
 
   Widget _getStatus(String status) {

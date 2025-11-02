@@ -1,11 +1,11 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
-import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
+import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
-import 'package:mistpos/utils/permissions.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/utils/permissions.dart';
 import 'package:mistpos/widgets/layouts/chips.dart';
 import 'package:mistpos/models/employee_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
@@ -13,15 +13,15 @@ import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:mistpos/widgets/buttons/mist_form_button.dart';
 
-class ScreemEditEmployee extends StatefulWidget {
+class ScreenEditEmployee extends StatefulWidget {
   final EmployeeModel employeeModel;
-  const ScreemEditEmployee({super.key, required this.employeeModel});
+  const ScreenEditEmployee({super.key, required this.employeeModel});
 
   @override
-  State<ScreemEditEmployee> createState() => _ScreemEditEmployeeState();
+  State<ScreenEditEmployee> createState() => _ScreenEditEmployeeState();
 }
 
-class _ScreemEditEmployeeState extends State<ScreemEditEmployee> {
+class _ScreenEditEmployeeState extends State<ScreenEditEmployee> {
   String _pin = "";
   late String _role = widget.employeeModel.role;
   final _formKey = GlobalKey<FormState>();

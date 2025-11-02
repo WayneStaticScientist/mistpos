@@ -53,14 +53,14 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
         actions: [
           IconButton(
             onPressed: _cancelPayment,
-            icon: Iconify(Carbon.close, color: AppTheme.color),
+            icon: Iconify(Carbon.close, color: AppTheme.color(context)),
           ),
           IconButton(
             onPressed: _savePayment,
 
             icon: _loading
                 ? CircularProgressIndicator()
-                : Iconify(Carbon.save, color: AppTheme.color),
+                : Iconify(Carbon.save, color: AppTheme.color(context)),
           ),
         ],
       ),

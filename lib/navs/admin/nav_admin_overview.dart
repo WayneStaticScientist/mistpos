@@ -55,7 +55,7 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
                   .row()
                   .onTap(_pickdateRange)
                   .decoratedBox(
-                    decoration: BoxDecoration(color: AppTheme.surface),
+                    decoration: BoxDecoration(color: AppTheme.surface(context)),
                   ),
         ),
         18.gapHeight,
@@ -160,7 +160,7 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
                   .row()
                   .onTap(_pickWeek)
                   .decoratedBox(
-                    decoration: BoxDecoration(color: AppTheme.surface),
+                    decoration: BoxDecoration(color: AppTheme.surface(context)),
                   ),
         ),
         18.gapHeight,

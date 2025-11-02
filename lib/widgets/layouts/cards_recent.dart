@@ -39,7 +39,7 @@ class CardsRecent extends StatelessWidget {
         .padding(EdgeInsets.all(29))
         .decoratedBox(
           decoration: BoxDecoration(
-            color: AppTheme.surface.withAlpha(100),
+            color: AppTheme.surface(context),
             borderRadius: BorderRadius.circular(30),
           ),
         )

@@ -30,7 +30,7 @@ class MistMainNavigationView extends StatelessWidget {
           children: <Widget>[
             ProfileTile(),
             ListTile(
-              leading: Iconify(Bx.cart, color: AppTheme.color),
+              leading: Iconify(Bx.cart, color: AppTheme.color(context)),
               title: Text('Sales'),
               onTap: () => onTap('sales'),
               tileColor: selectedNav == 'sales'
@@ -38,7 +38,7 @@ class MistMainNavigationView extends StatelessWidget {
                   : null,
             ),
             ListTile(
-              leading: Iconify(Bx.receipt, color: AppTheme.color),
+              leading: Iconify(Bx.receipt, color: AppTheme.color(context)),
               title: Text('Receipts'),
               tileColor: selectedNav == 'receipts'
                   ? Colors.grey.withAlpha(50)
@@ -46,7 +46,7 @@ class MistMainNavigationView extends StatelessWidget {
               onTap: () => onTap('receipts'),
             ),
             ListTile(
-              leading: Iconify(Bx.category, color: AppTheme.color),
+              leading: Iconify(Bx.category, color: AppTheme.color(context)),
               title: Text('Items'),
               onTap: () => onTap('items'),
               tileColor: selectedNav == 'items'
@@ -54,18 +54,18 @@ class MistMainNavigationView extends StatelessWidget {
                   : null,
             ),
             ListTile(
-              leading: Iconify(Bx.devices, color: AppTheme.color),
+              leading: Iconify(Bx.devices, color: AppTheme.color(context)),
               title: Text('Devices'),
               onTap: () => Get.to(() => ScreenDevicesSection()),
             ),
             ListTile(
-              leading: Iconify(Bx.cog, color: AppTheme.color),
+              leading: Iconify(Bx.cog, color: AppTheme.color(context)),
               title: Text('Settings'),
               onTap: () => Get.to(() => ScreenSettingsPage()),
             ),
             Dialog(),
             ListTile(
-              leading: Iconify(Bx.bar_chart, color: AppTheme.color),
+              leading: Iconify(Bx.bar_chart, color: AppTheme.color(context)),
               title: Text('Dashboard'),
               onTap: () {
                 Get.back();
@@ -73,7 +73,7 @@ class MistMainNavigationView extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Iconify(Bx.help_circle, color: AppTheme.color),
+              leading: Iconify(Bx.help_circle, color: AppTheme.color(context)),
               title: Text('Help & Support'),
               onTap: () => onTap('help'),
             ),

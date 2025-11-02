@@ -49,7 +49,7 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
   _buildItem(ItemReceitModel receit) {
     return ListTile(
       tileColor: Colors.grey.withAlpha(20),
-      leading: Iconify(Carbon.receipt, color: AppTheme.color),
+      leading: Iconify(Carbon.receipt, color: AppTheme.color(context)),
       title: CurrenceConverter.getCurrenceFloatInStrings(receit.total).text(),
       trailing: Text(receit.id.toString()),
       subtitle: Text("${receit.createdAt.hour}:${receit.createdAt.minute}"),

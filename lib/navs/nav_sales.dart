@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/screens/basic/screen_settings_page.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/themes/app_theme.dart';
@@ -18,6 +17,7 @@ import 'package:mistpos/screens/basic/screen_checkout.dart';
 import 'package:mistpos/widgets/layouts/list_tile_item.dart';
 import 'package:mistpos/widgets/layouts/cards_category.dart';
 import 'package:mistpos/screens/basic/screen_manual_cart.dart';
+import 'package:mistpos/screens/basic/screen_settings_page.dart';
 import 'package:mistpos/screens/basic/screen_edit_manual_cart.dart';
 import 'package:mistpos/screens/basic/screens_select_customers.dart';
 import 'package:mistpos/screens/basic/screen_view_selected_customer.dart';
@@ -126,13 +126,15 @@ class _NavSaleState extends State<NavSale> {
                           : Get.to(() => ScreensListCustomers()),
                       icon: Iconify(
                         selected ? Bx.user_check : Bx.user_plus,
-                        color: selected ? Colors.green : AppTheme.color,
+                        color: selected
+                            ? Colors.green
+                            : AppTheme.color(context),
                       ),
                     );
                   }),
                   IconButton(
                     onPressed: () => Get.to(() => ScreenSettingsPage()),
-                    icon: Iconify(Bx.cog, color: AppTheme.color),
+                    icon: Iconify(Bx.cog, color: AppTheme.color(context)),
                   ),
                 ],
               ),
@@ -147,14 +149,14 @@ class _NavSaleState extends State<NavSale> {
                     child: MistSearchField(controller: _searchController),
                   ),
                   12.gapWidth,
-                  Iconify(Bx.slider_alt, color: AppTheme.color)
+                  Iconify(Bx.slider_alt, color: AppTheme.color(context))
                       .padding(
                         EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                       )
                       .decoratedBox(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(207),
-                          color: AppTheme.surface,
+                          color: AppTheme.surface(context),
                         ),
                       ),
                 ].row().padding(EdgeInsets.all(14)),
@@ -357,7 +359,7 @@ class _NavSaleState extends State<NavSale> {
           : SliverFillRemaining(
               child:
                   [
-                        Iconify(Bx.cart_alt, color: AppTheme.color),
+                        Iconify(Bx.cart_alt, color: AppTheme.color(context)),
                         12.gapHeight,
                         "no items".text(),
                       ]

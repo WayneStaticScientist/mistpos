@@ -42,7 +42,7 @@ class _ScreenConnectedPrintersState extends State<ScreenConnectedPrinters> {
       body: Obx(
         () => [
           [
-                Iconify(Bx.wifi, color: AppTheme.color),
+                Iconify(Bx.wifi, color: AppTheme.color(context)),
                 18.gapWidth,
                 "No connected devices , click + to add one".text(
                   textAlign: TextAlign.center,
@@ -80,13 +80,13 @@ class _ScreenConnectedPrintersState extends State<ScreenConnectedPrinters> {
       [
         CardButtons(
           onTap: _connectWithNetwork,
-          icon: Iconify(Bx.wifi, color: AppTheme.color),
+          icon: Iconify(Bx.wifi, color: AppTheme.color(context)),
           label: "On Network",
           color: Get.theme.colorScheme.primary.withAlpha(50),
         ).expanded1,
         CardButtons(
           onTap: () => {Get.back(), Get.to(() => ScreenBluetoothScan())},
-          icon: Iconify(Bx.bluetooth, color: AppTheme.color),
+          icon: Iconify(Bx.bluetooth, color: AppTheme.color(context)),
           label: "BlueTooth",
           color: Get.theme.colorScheme.secondary.withAlpha(50),
         ).expanded1,

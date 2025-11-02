@@ -79,7 +79,7 @@ class _MistFormInputState extends State<MistFormInput> {
             widget.suffixIcon ??
             Iconify(
                   _isVisible ? Lucide.eye_off : Lucide.eye,
-                  color: AppTheme.color,
+                  color: AppTheme.color(context),
                 )
                 .center()
                 .sizedBox(width: 12, height: 12)

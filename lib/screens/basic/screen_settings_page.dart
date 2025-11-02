@@ -1,7 +1,10 @@
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:get/get.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/models/app_settings_model.dart';
+import 'package:mistpos/themes/app_theme.dart';
 
 class ScreenSettingsPage extends StatefulWidget {
   const ScreenSettingsPage({super.key});
@@ -13,6 +16,7 @@ class ScreenSettingsPage extends StatefulWidget {
 class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
   @override
   Widget build(BuildContext context) {
+    final model = AppSettingsModel.fromStorage();
     return Scaffold(
       appBar: AppBar(title: Text("Settings")),
       body: ListView(
@@ -22,12 +26,52 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                     .text(style: TextStyle(fontWeight: FontWeight.bold))
                     .padding(EdgeInsets.all(14)),
                 ListTile(
-                  trailing: Switch(value: true, onChanged: (c) {}),
-                  leading: Iconify(Bx.moon, color: Colors.white),
+                  trailing: Switch(
+                    value: model.useSystemDarkMode,
+                    onChanged: (c) {
+                      model.useSystemDarkMode = c;
+                      model.saveToStorage();
+                      setState(() {});
+                      _changeTheme();
+                    },
+                  ),
+                  leading: Iconify(Bx.adjust, color: AppTheme.color(context)),
                   title: "System Theme Mode".text(),
                   subtitle: "select type of theme mode you want".text(
                     style: TextStyle(color: Colors.grey, fontSize: 12),
                   ),
+                ),
+                ListTile(
+                  onTap: () {
+                    model.darkMode = !model.darkMode;
+                    model.saveToStorage();
+                    setState(() {});
+                    _changeTheme();
+                  },
+                  enabled: !model.useSystemDarkMode,
+                  trailing: Switch(
+                    activeThumbColor: !model.useSystemDarkMode
+                        ? null
+                        : Colors.grey,
+                    inactiveThumbColor: !model.useSystemDarkMode
+                        ? null
+                        : Colors.grey,
+                    value: model.darkMode,
+                    onChanged: (c) {
+                      if (model.useSystemDarkMode) return;
+                      model.darkMode = c;
+                      model.saveToStorage();
+                      setState(() {});
+                      _changeTheme();
+                    },
+                  ),
+                  leading: Iconify(
+                    Bx.moon,
+                    color: !model.useSystemDarkMode
+                        ? AppTheme.color(context)
+                        : Colors.grey,
+                  ),
+                  title: "Enable dark mode".text(),
                 ),
               ]
               .column(
@@ -36,7 +80,7 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
               )
               .decoratedBox(
                 decoration: BoxDecoration(
-                  color: Colors.grey.withAlpha(10),
+                  color: AppTheme.surface(context),
                   borderRadius: BorderRadius.circular(20),
                 ),
               )
@@ -44,5 +88,14 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
         ],
       ),
     );
+  }
+
+  void _changeTheme() {
+    final model = AppSettingsModel.fromStorage();
+    if (model.useSystemDarkMode) {
+      Get.changeThemeMode(ThemeMode.system);
+      return;
+    }
+    Get.changeThemeMode(model.darkMode ? ThemeMode.dark : ThemeMode.light);
   }
 }

@@ -39,7 +39,7 @@ class _NavModifiersListState extends State<NavModifiersList> {
                           ),
                           trailing: Iconify(
                             Bx.chevron_right,
-                            color: AppTheme.color,
+                            color: AppTheme.color(context),
                           ),
                           subtitle: Text(
                             "${_itemListController.modifiers[index].list.length} options",
@@ -85,7 +85,7 @@ class _NavModifiersListState extends State<NavModifiersList> {
 
   _createEmpytLayout() {
     return [
-          Iconify(Bx.no_entry, color: AppTheme.color, size: 30),
+          Iconify(Bx.no_entry, color: AppTheme.color(context), size: 30),
           18.gapHeight,
           "No modifiers found , click + to add one".text(),
         ]

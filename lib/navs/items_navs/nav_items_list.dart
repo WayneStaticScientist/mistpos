@@ -46,12 +46,12 @@ class _NavItemsListState extends State<NavItemsList> {
       [
         CardButtons(
           onTap: () => _openEditDialog(model),
-          icon: Iconify(Bx.cart_add, color: AppTheme.color),
+          icon: Iconify(Bx.cart_add, color: AppTheme.color(context)),
           label: "Add Stock",
           color: Get.theme.colorScheme.primary.withAlpha(50),
         ).expanded1,
         CardButtons(
-          icon: Iconify(Bx.bxs_edit, color: AppTheme.color),
+          icon: Iconify(Bx.bxs_edit, color: AppTheme.color(context)),
           label: "Edit Item",
           color: Get.theme.colorScheme.secondary.withAlpha(50),
           onTap: () {

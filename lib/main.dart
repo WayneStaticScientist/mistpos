@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/instance_manager.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:mistpos/controllers/devices_controller.dart';
+import 'package:mistpos/models/app_settings_model.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:mistpos/controllers/admin_controller.dart';
@@ -40,6 +41,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
+    final model = AppSettingsModel.fromStorage();
     return GetMaterialApp(
       title: 'MistPos',
       debugShowCheckedModeBanner: false,
@@ -53,7 +55,11 @@ class MyApp extends StatelessWidget {
 
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: model.useSystemDarkMode
+          ? ThemeMode.system
+          : model.darkMode
+          ? ThemeMode.dark
+          : ThemeMode.light,
       home: User.fromStorage() == null
           ? const ScreenSplash()
           : const ScreenMain(),

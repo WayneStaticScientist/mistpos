@@ -62,13 +62,13 @@ class _ScreenSplashState extends State<ScreenSplash> {
       [
         CardButtons(
           onTap: () => Get.to(() => ScreenLogin()),
-          icon: Iconify(Bx.user, color: AppTheme.color),
+          icon: Iconify(Bx.user, color: AppTheme.color(context)),
           label: "Login",
           color: Get.theme.colorScheme.primary.withAlpha(50),
         ).expanded1,
         CardButtons(
           onTap: () => Get.to(() => ScreenCreateAccount()),
-          icon: Iconify(Bx.user_plus, color: AppTheme.color),
+          icon: Iconify(Bx.user_plus, color: AppTheme.color(context)),
           label: "Create Account",
           color: Get.theme.colorScheme.secondary.withAlpha(50),
         ).expanded1,

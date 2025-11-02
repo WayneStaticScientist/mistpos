@@ -22,7 +22,7 @@ class CardOverview extends StatelessWidget {
         .padding(EdgeInsets.all(12))
         .decoratedBox(
           decoration: BoxDecoration(
-            color: AppTheme.surface,
+            color: AppTheme.surface(context),
             borderRadius: BorderRadius.circular(20),
           ),
         )
