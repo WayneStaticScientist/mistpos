@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/controllers/devices_controller.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
@@ -23,10 +24,13 @@ class ScreenCashPayment extends StatefulWidget {
 
 class _ScreenCashPaymentState extends State<ScreenCashPayment> {
   final _userController = Get.find<UserController>();
+  final _printerController = Get.find<DevicesController>();
   final _itemsListController = Get.find<ItemsController>();
   bool _loading = false;
 
-  final TextEditingController _amountController = TextEditingController();
+  late final TextEditingController _amountController = TextEditingController(
+    text: _itemsListController.totalPrice.value.toString(),
+  );
   double change = 0.0;
   Timer? _debounce;
   String _debounceCache = "";
@@ -217,12 +221,18 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
     setState(() {
       _savingReceit = true;
     });
+    if (_userController.user.value == null) {
+      Toaster.showError("User registration needed");
+      return;
+    }
     final state = await _itemsListController.addReceitFromItemModel(
       amount,
       "cash",
       allowOfflinePurchase:
           _userController.user.value != null &&
           _userController.user.value!.allowOfflinePurchase,
+      user: _userController.user.value!,
+      printReceits: _printerController.isPrinterConnected(),
     );
     setState(() {
       _savingReceit = false;

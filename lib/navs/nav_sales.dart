@@ -9,6 +9,7 @@ import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/widgets/layouts/cards_recent.dart';
@@ -32,6 +33,7 @@ class NavSale extends StatefulWidget {
 class _NavSaleState extends State<NavSale> {
   final _itemsListController = Get.find<ItemsController>();
   final TextEditingController _searchController = TextEditingController();
+  final _refreshController = RefreshController();
   bool _inSearchMode = false;
   String _searchTerm = "";
   int _animationSpeed = 0;
@@ -54,6 +56,7 @@ class _NavSaleState extends State<NavSale> {
     _debounce?.cancel();
     _searchController.dispose();
     _scrollController.dispose();
+    _refreshController.dispose();
     super.dispose();
   }
 
@@ -81,125 +84,137 @@ class _NavSaleState extends State<NavSale> {
     return Stack(
       children: [
         Positioned.fill(
-          child: CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              /*
-              ==================================================================================
-                  THE APP TOB BAR
-              ==================================================================================
-              */
-              SliverAppBar(
-                elevation: 0,
-                floating: true,
-                title: "MistPos".text(),
-                backgroundColor: Get.theme.scaffoldBackgroundColor,
-                actions: [
-                  Obx(
-                    () => (_itemsListController.syncingItems.value)
-                        ? IconButton(
-                            onPressed: () {},
-                            icon: const CircularProgressIndicator(
-                              strokeWidth: 3,
-                            ).sizedBox(height: 16, width: 16),
-                          )
-                        : SizedBox.shrink(),
-                  ),
-                  Obx(
-                    () =>
-                        (_itemsListController
-                            .syncingItemsFailed
-                            .value
-                            .isNotEmpty)
-                        ? IconButton(
-                            onPressed: _displayError,
-                            icon: Iconify(Bx.error, color: Colors.red),
-                          )
-                        : SizedBox.shrink(),
-                  ),
-                  Obx(() {
-                    bool selected =
-                        _itemsListController.selectedCustomer.value != null;
-                    return IconButton(
-                      onPressed: () => selected
-                          ? Get.to(() => ScreenViewSelectedCustomer())
-                          : Get.to(() => ScreensListCustomers()),
-                      icon: Iconify(
-                        selected ? Bx.user_check : Bx.user_plus,
-                        color: selected
-                            ? Colors.green
-                            : AppTheme.color(context),
-                      ),
-                    );
-                  }),
-                  IconButton(
-                    onPressed: () => Get.to(() => ScreenSettingsPage()),
-                    icon: Iconify(Bx.cog, color: AppTheme.color(context)),
-                  ),
-                ],
-              ),
-              /*
-            ==============================================================================
-            THE SAVED ITEMS LISTS
-            ==============================================================================            
-            */
-              SliverToBoxAdapter(
-                child: [
-                  Expanded(
-                    child: MistSearchField(controller: _searchController),
-                  ),
-                  12.gapWidth,
-                  Iconify(Bx.slider_alt, color: AppTheme.color(context))
-                      .padding(
-                        EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                      )
-                      .decoratedBox(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(207),
-                          color: AppTheme.surface(context),
-                        ),
-                      ),
-                ].row().padding(EdgeInsets.all(14)),
-              ),
-              if (!_inSearchMode)
-                Obx(
-                  () => _itemsListController.savedItems.isNotEmpty
-                      ? SliverToBoxAdapter(
-                          child: SizedBox(
-                            height: 199,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemBuilder: (BuildContext context, int index) {
-                                return CardsRecent(
-                                  savedModel:
-                                      _itemsListController.savedItems[index],
-                                ).onTap(
-                                  () => _itemsListController.unwrapToCart(
-                                    _itemsListController.savedItems[index],
-                                  ),
-                                );
-                              },
-                              itemCount: _itemsListController.savedItems.length,
-                            ),
-                          ).padding(EdgeInsets.symmetric(horizontal: 18)),
-                        )
-                      : SliverToBoxAdapter(child: SizedBox.shrink()),
-                ),
-              /*
-                ============================================================================================
-                THE APP CATEGORIES
-                ============================================================================================
+          child: SmartRefresher(
+            enablePullUp: true,
+            onRefresh: () async {
+              await _itemsListController.loadCartItems(
+                page: 1,
+                search: _searchTerm,
+              );
+              _refreshController.refreshCompleted();
+            },
+            controller: _refreshController,
+            child: CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                /*
+                ==================================================================================
+                    THE APP TOB BAR
+                ==================================================================================
                 */
-              SliverToBoxAdapter(child: SizedBox(height: 18)),
-              if (!_inSearchMode) _buidCategoriesLayout(),
+                SliverAppBar(
+                  elevation: 0,
+                  floating: true,
+                  title: "MistPos".text(),
+                  backgroundColor: Get.theme.scaffoldBackgroundColor,
+                  actions: [
+                    Obx(
+                      () => (_itemsListController.syncingItems.value)
+                          ? IconButton(
+                              onPressed: () {},
+                              icon: const CircularProgressIndicator(
+                                strokeWidth: 3,
+                              ).sizedBox(height: 16, width: 16),
+                            )
+                          : SizedBox.shrink(),
+                    ),
+                    Obx(
+                      () =>
+                          (_itemsListController
+                              .syncingItemsFailed
+                              .value
+                              .isNotEmpty)
+                          ? IconButton(
+                              onPressed: _displayError,
+                              icon: Iconify(Bx.error, color: Colors.red),
+                            )
+                          : SizedBox.shrink(),
+                    ),
+                    Obx(() {
+                      bool selected =
+                          _itemsListController.selectedCustomer.value != null;
+                      return IconButton(
+                        onPressed: () => selected
+                            ? Get.to(() => ScreenViewSelectedCustomer())
+                            : Get.to(() => ScreensListCustomers()),
+                        icon: Iconify(
+                          selected ? Bx.user_check : Bx.user_plus,
+                          color: selected
+                              ? Colors.green
+                              : AppTheme.color(context),
+                        ),
+                      );
+                    }),
+                    IconButton(
+                      onPressed: () => Get.to(() => ScreenSettingsPage()),
+                      icon: Iconify(Bx.cog, color: AppTheme.color(context)),
+                    ),
+                  ],
+                ),
+                /*
+              ==============================================================================
+              THE SAVED ITEMS LISTS
+              ==============================================================================            
+              */
+                SliverToBoxAdapter(
+                  child: [
+                    Expanded(
+                      child: MistSearchField(controller: _searchController),
+                    ),
+                    12.gapWidth,
+                    Iconify(Bx.slider_alt, color: AppTheme.color(context))
+                        .padding(
+                          EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                        )
+                        .decoratedBox(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(207),
+                            color: AppTheme.surface(context),
+                          ),
+                        ),
+                  ].row().padding(EdgeInsets.all(14)),
+                ),
+                if (!_inSearchMode)
+                  Obx(
+                    () => _itemsListController.savedItems.isNotEmpty
+                        ? SliverToBoxAdapter(
+                            child: SizedBox(
+                              height: 199,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return CardsRecent(
+                                    savedModel:
+                                        _itemsListController.savedItems[index],
+                                  ).onTap(
+                                    () => _itemsListController.unwrapToCart(
+                                      _itemsListController.savedItems[index],
+                                    ),
+                                  );
+                                },
+                                itemCount:
+                                    _itemsListController.savedItems.length,
+                              ),
+                            ).padding(EdgeInsets.symmetric(horizontal: 18)),
+                          )
+                        : SliverToBoxAdapter(child: SizedBox.shrink()),
+                  ),
+                /*
+                  ============================================================================================
+                  THE APP CATEGORIES
+                  ============================================================================================
+                  */
+                SliverToBoxAdapter(child: SizedBox(height: 18)),
+                if (!_inSearchMode) _buidCategoriesLayout(),
 
-              /*
-              ===============================================================================================
-              The items LIST 
-              ===============================================================================================
-            */
-              _buidItemList(),
-            ],
+                /*
+                ===============================================================================================
+                The items LIST 
+                ===============================================================================================
+              */
+                _buidItemList(),
+              ],
+            ),
           ),
         ),
         AnimatedPositioned(

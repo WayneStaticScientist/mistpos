@@ -16,6 +16,10 @@ class DevicesController extends GetxController {
     );
   }
 
+  bool isPrinterConnected() {
+    return printer.isRoleConnected(PosPrinterRole.cashier);
+  }
+
   final PosUniversalPrinter printer = PosUniversalPrinter.instance;
   RxBool cashierConnected = false.obs;
   RxBool connectingToDevice = false.obs;

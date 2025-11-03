@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 import 'package:mistpos/models/response_model.dart';
+import 'package:mistpos/models/user_model.dart';
+import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:mistpos/models/customer_model.dart';
@@ -13,6 +15,7 @@ import 'package:mistpos/models/item_receit_model.dart';
 import 'package:mistpos/models/item_modifier_model.dart';
 import 'package:mistpos/models/item_categories_model.dart';
 import 'package:mistpos/models/item_saved_items_model.dart';
+import 'package:pos_universal_printer/pos_universal_printer.dart';
 
 class ItemsController extends GetxController {
   RxDouble totalPrice = RxDouble(0);
@@ -25,6 +28,12 @@ class ItemsController extends GetxController {
   RxList<ItemCategoryModel> categories = <ItemCategoryModel>[].obs;
   RxList<ItemSavedItemsModel> savedItems = <ItemSavedItemsModel>[].obs;
   RxList<Map<String, dynamic>> checkOutItems = <Map<String, dynamic>>[].obs;
+  @override
+  void onInit() {
+    _loadFixedItems();
+    _loadFixedCategories();
+    super.onInit();
+  }
 
   @override
   void dispose() {
@@ -291,7 +300,11 @@ class ItemsController extends GetxController {
   }
 
   RxInt page = RxInt(1);
-  void loadCartItems({int page = 1, String search = "", String category = ""}) {
+  Future<void> loadCartItems({
+    int page = 1,
+    String search = "",
+    String category = "",
+  }) async {
     final isar = Isar.getInstance();
     if (isar == null) {
       return;
@@ -597,6 +610,8 @@ class ItemsController extends GetxController {
     double payedAmount,
     String payment, {
     required bool allowOfflinePurchase,
+    bool printReceits = false,
+    required User user,
   }) async {
     List<ItemReceitItem>? rejects;
     try {
@@ -661,6 +676,7 @@ class ItemsController extends GetxController {
       checkOutItems.clear();
       selectedCustomer.value = null;
       totalPrice.value = 0;
+      if (printReceits) printReceitToBackround(itemReceitModel, user);
       loadReceits();
       syncCartItemsOnBackground();
       return (success: true, rejects: rejects);
@@ -776,5 +792,52 @@ class ItemsController extends GetxController {
     }
     loadCustomers();
     return true;
+  }
+
+  void printReceitToBackround(ItemReceitModel itemReceitModel, User user) {
+    final printer = PosUniversalPrinter.instance;
+    final b = EscPosBuilder();
+    b.text(user.companyName.toString());
+    b.feed(2);
+    b.text("Company ${user.companyName.toString()}");
+    b.text('*** Fiscal Receipt ***', bold: true, align: PosAlign.center);
+    b.text('Role: ${user.role.toString()}');
+    b.text('Time: ${DateTime.now().toIso8601String()}');
+    b.feed(2);
+    for (final item in itemReceitModel.items) {
+      if (item.count > 1) {
+        b.text(item.name);
+        b.text(
+          "${item.count}    ${CurrenceConverter.getCurrenceFloatInStrings(item.addenum + item.price)}   - ${CurrenceConverter.getCurrenceFloatInStrings((item.addenum + item.price)) * item.count}",
+        );
+      } else {
+        b.text(
+          "${item.name}      -  ${CurrenceConverter.getCurrenceFloatInStrings(item.price)}}",
+        );
+      }
+    }
+    b.feed(2);
+    b.text(
+      "total       - ${CurrenceConverter.getCurrenceFloatInStrings(itemReceitModel.total)}",
+    );
+    b.text('--- END ---', align: PosAlign.center);
+    b.cut(); // Add a paper cut command
+    printer.printEscPos(PosPrinterRole.cashier, b);
+  }
+
+  void _loadFixedItems() {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      return;
+    }
+    cartItems.value = isar.itemModels.where().findAllSync();
+  }
+
+  void _loadFixedCategories() {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      return;
+    }
+    categories.value = isar.itemCategoryModels.where().findAllSync();
   }
 }
