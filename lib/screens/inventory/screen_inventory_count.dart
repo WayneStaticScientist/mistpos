@@ -272,10 +272,10 @@ class _ScreenInventoryCountState extends State<ScreenInventoryCount> {
     _inventory.inventoryCountItems[index] = itemInv;
     widget.model.totalDifference = _inventory.inventoryCountItems
         .map((e) => e.difference)
-        .reduce((value, element) => value + element);
+        .fold(0, (value, element) => value + element);
     widget.model.totalCostDifference = _inventory.inventoryCountItems
         .map((e) => e.costDifference)
-        .reduce((value, element) => value + element);
+        .fold(0.0, (value, element) => value + element);
     setState(() {});
   }
 

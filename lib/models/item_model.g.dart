@@ -37,64 +37,80 @@ const ItemModelSchema = CollectionSchema(
       name: r'color',
       type: IsarType.long,
     ),
-    r'cost': PropertySchema(
+    r'compositeItems': PropertySchema(
       id: 4,
+      name: r'compositeItems',
+      type: IsarType.objectList,
+      target: r'InvItem',
+    ),
+    r'cost': PropertySchema(
+      id: 5,
       name: r'cost',
       type: IsarType.double,
     ),
     r'hexId': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'hexId',
       type: IsarType.string,
     ),
+    r'isCompositeItem': PropertySchema(
+      id: 7,
+      name: r'isCompositeItem',
+      type: IsarType.bool,
+    ),
     r'lowStockThreshold': PropertySchema(
-      id: 6,
+      id: 8,
       name: r'lowStockThreshold',
       type: IsarType.long,
     ),
     r'modifiers': PropertySchema(
-      id: 7,
+      id: 9,
       name: r'modifiers',
       type: IsarType.stringList,
     ),
     r'name': PropertySchema(
-      id: 8,
+      id: 10,
       name: r'name',
       type: IsarType.string,
     ),
     r'price': PropertySchema(
-      id: 9,
+      id: 11,
       name: r'price',
       type: IsarType.double,
     ),
     r'shape': PropertySchema(
-      id: 10,
+      id: 12,
       name: r'shape',
       type: IsarType.string,
     ),
     r'sku': PropertySchema(
-      id: 11,
+      id: 13,
       name: r'sku',
       type: IsarType.string,
     ),
     r'soldBy': PropertySchema(
-      id: 12,
+      id: 14,
       name: r'soldBy',
       type: IsarType.string,
     ),
     r'stockQuantity': PropertySchema(
-      id: 13,
+      id: 15,
       name: r'stockQuantity',
       type: IsarType.long,
     ),
     r'syncOnline': PropertySchema(
-      id: 14,
+      id: 16,
       name: r'syncOnline',
       type: IsarType.bool,
     ),
     r'trackStock': PropertySchema(
-      id: 15,
+      id: 17,
       name: r'trackStock',
+      type: IsarType.bool,
+    ),
+    r'useProduction': PropertySchema(
+      id: 18,
+      name: r'useProduction',
       type: IsarType.bool,
     )
   },
@@ -105,7 +121,7 @@ const ItemModelSchema = CollectionSchema(
   idName: r'id',
   indexes: {},
   links: {},
-  embeddedSchemas: {},
+  embeddedSchemas: {r'InvItem': InvItemSchema},
   getId: _itemModelGetId,
   getLinks: _itemModelGetLinks,
   attach: _itemModelAttach,
@@ -126,6 +142,14 @@ int _itemModelEstimateSize(
   }
   bytesCount += 3 + object.barcode.length * 3;
   bytesCount += 3 + object.category.length * 3;
+  bytesCount += 3 + object.compositeItems.length * 3;
+  {
+    final offsets = allOffsets[InvItem]!;
+    for (var i = 0; i < object.compositeItems.length; i++) {
+      final value = object.compositeItems[i];
+      bytesCount += InvItemSchema.estimateSize(value, offsets, allOffsets);
+    }
+  }
   bytesCount += 3 + object.hexId.length * 3;
   {
     final list = object.modifiers;
@@ -161,18 +185,26 @@ void _itemModelSerialize(
   writer.writeString(offsets[1], object.barcode);
   writer.writeString(offsets[2], object.category);
   writer.writeLong(offsets[3], object.color);
-  writer.writeDouble(offsets[4], object.cost);
-  writer.writeString(offsets[5], object.hexId);
-  writer.writeLong(offsets[6], object.lowStockThreshold);
-  writer.writeStringList(offsets[7], object.modifiers);
-  writer.writeString(offsets[8], object.name);
-  writer.writeDouble(offsets[9], object.price);
-  writer.writeString(offsets[10], object.shape);
-  writer.writeString(offsets[11], object.sku);
-  writer.writeString(offsets[12], object.soldBy);
-  writer.writeLong(offsets[13], object.stockQuantity);
-  writer.writeBool(offsets[14], object.syncOnline);
-  writer.writeBool(offsets[15], object.trackStock);
+  writer.writeObjectList<InvItem>(
+    offsets[4],
+    allOffsets,
+    InvItemSchema.serialize,
+    object.compositeItems,
+  );
+  writer.writeDouble(offsets[5], object.cost);
+  writer.writeString(offsets[6], object.hexId);
+  writer.writeBool(offsets[7], object.isCompositeItem);
+  writer.writeLong(offsets[8], object.lowStockThreshold);
+  writer.writeStringList(offsets[9], object.modifiers);
+  writer.writeString(offsets[10], object.name);
+  writer.writeDouble(offsets[11], object.price);
+  writer.writeString(offsets[12], object.shape);
+  writer.writeString(offsets[13], object.sku);
+  writer.writeString(offsets[14], object.soldBy);
+  writer.writeLong(offsets[15], object.stockQuantity);
+  writer.writeBool(offsets[16], object.syncOnline);
+  writer.writeBool(offsets[17], object.trackStock);
+  writer.writeBool(offsets[18], object.useProduction);
 }
 
 ItemModel _itemModelDeserialize(
@@ -186,18 +218,27 @@ ItemModel _itemModelDeserialize(
     barcode: reader.readString(offsets[1]),
     category: reader.readString(offsets[2]),
     color: reader.readLongOrNull(offsets[3]),
-    cost: reader.readDouble(offsets[4]),
-    hexId: reader.readStringOrNull(offsets[5]) ?? "",
-    lowStockThreshold: reader.readLong(offsets[6]),
-    modifiers: reader.readStringList(offsets[7]),
-    name: reader.readString(offsets[8]),
-    price: reader.readDouble(offsets[9]),
-    shape: reader.readStringOrNull(offsets[10]),
-    sku: reader.readString(offsets[11]),
-    soldBy: reader.readString(offsets[12]),
-    stockQuantity: reader.readLong(offsets[13]),
-    syncOnline: reader.readBoolOrNull(offsets[14]) ?? false,
-    trackStock: reader.readBool(offsets[15]),
+    compositeItems: reader.readObjectList<InvItem>(
+          offsets[4],
+          InvItemSchema.deserialize,
+          allOffsets,
+          InvItem(),
+        ) ??
+        const [],
+    cost: reader.readDouble(offsets[5]),
+    hexId: reader.readStringOrNull(offsets[6]) ?? "",
+    isCompositeItem: reader.readBoolOrNull(offsets[7]) ?? false,
+    lowStockThreshold: reader.readLong(offsets[8]),
+    modifiers: reader.readStringList(offsets[9]),
+    name: reader.readString(offsets[10]),
+    price: reader.readDouble(offsets[11]),
+    shape: reader.readStringOrNull(offsets[12]),
+    sku: reader.readString(offsets[13]),
+    soldBy: reader.readString(offsets[14]),
+    stockQuantity: reader.readLong(offsets[15]),
+    syncOnline: reader.readBoolOrNull(offsets[16]) ?? false,
+    trackStock: reader.readBool(offsets[17]),
+    useProduction: reader.readBoolOrNull(offsets[18]) ?? false,
   );
   object.id = id;
   return object;
@@ -219,29 +260,41 @@ P _itemModelDeserializeProp<P>(
     case 3:
       return (reader.readLongOrNull(offset)) as P;
     case 4:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readObjectList<InvItem>(
+            offset,
+            InvItemSchema.deserialize,
+            allOffsets,
+            InvItem(),
+          ) ??
+          const []) as P;
     case 5:
-      return (reader.readStringOrNull(offset) ?? "") as P;
-    case 6:
-      return (reader.readLong(offset)) as P;
-    case 7:
-      return (reader.readStringList(offset)) as P;
-    case 8:
-      return (reader.readString(offset)) as P;
-    case 9:
       return (reader.readDouble(offset)) as P;
-    case 10:
-      return (reader.readStringOrNull(offset)) as P;
-    case 11:
-      return (reader.readString(offset)) as P;
-    case 12:
-      return (reader.readString(offset)) as P;
-    case 13:
-      return (reader.readLong(offset)) as P;
-    case 14:
+    case 6:
+      return (reader.readStringOrNull(offset) ?? "") as P;
+    case 7:
       return (reader.readBoolOrNull(offset) ?? false) as P;
+    case 8:
+      return (reader.readLong(offset)) as P;
+    case 9:
+      return (reader.readStringList(offset)) as P;
+    case 10:
+      return (reader.readString(offset)) as P;
+    case 11:
+      return (reader.readDouble(offset)) as P;
+    case 12:
+      return (reader.readStringOrNull(offset)) as P;
+    case 13:
+      return (reader.readString(offset)) as P;
+    case 14:
+      return (reader.readString(offset)) as P;
     case 15:
+      return (reader.readLong(offset)) as P;
+    case 16:
+      return (reader.readBoolOrNull(offset) ?? false) as P;
+    case 17:
       return (reader.readBool(offset)) as P;
+    case 18:
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -815,6 +868,95 @@ extension ItemModelQueryFilter
     });
   }
 
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      compositeItemsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'compositeItems',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      compositeItemsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'compositeItems',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      compositeItemsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'compositeItems',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      compositeItemsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'compositeItems',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      compositeItemsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'compositeItems',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      compositeItemsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'compositeItems',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
   QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> costEqualTo(
     double value, {
     double epsilon = Query.epsilon,
@@ -1056,6 +1198,16 @@ extension ItemModelQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      isCompositeItemEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isCompositeItem',
+        value: value,
       ));
     });
   }
@@ -2030,10 +2182,27 @@ extension ItemModelQueryFilter
       ));
     });
   }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      useProductionEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'useProduction',
+        value: value,
+      ));
+    });
+  }
 }
 
 extension ItemModelQueryObject
-    on QueryBuilder<ItemModel, ItemModel, QFilterCondition> {}
+    on QueryBuilder<ItemModel, ItemModel, QFilterCondition> {
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
+      compositeItemsElement(FilterQuery<InvItem> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'compositeItems');
+    });
+  }
+}
 
 extension ItemModelQueryLinks
     on QueryBuilder<ItemModel, ItemModel, QFilterCondition> {}
@@ -2108,6 +2277,18 @@ extension ItemModelQuerySortBy on QueryBuilder<ItemModel, ItemModel, QSortBy> {
   QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByHexIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'hexId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByIsCompositeItem() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompositeItem', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByIsCompositeItemDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompositeItem', Sort.desc);
     });
   }
 
@@ -2219,6 +2400,18 @@ extension ItemModelQuerySortBy on QueryBuilder<ItemModel, ItemModel, QSortBy> {
       return query.addSortBy(r'trackStock', Sort.desc);
     });
   }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByUseProduction() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'useProduction', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByUseProductionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'useProduction', Sort.desc);
+    });
+  }
 }
 
 extension ItemModelQuerySortThenBy
@@ -2304,6 +2497,18 @@ extension ItemModelQuerySortThenBy
   QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByIsCompositeItem() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompositeItem', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByIsCompositeItemDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompositeItem', Sort.desc);
     });
   }
 
@@ -2415,6 +2620,18 @@ extension ItemModelQuerySortThenBy
       return query.addSortBy(r'trackStock', Sort.desc);
     });
   }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByUseProduction() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'useProduction', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByUseProductionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'useProduction', Sort.desc);
+    });
+  }
 }
 
 extension ItemModelQueryWhereDistinct
@@ -2456,6 +2673,12 @@ extension ItemModelQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'hexId', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QDistinct> distinctByIsCompositeItem() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isCompositeItem');
     });
   }
 
@@ -2522,6 +2745,12 @@ extension ItemModelQueryWhereDistinct
       return query.addDistinctBy(r'trackStock');
     });
   }
+
+  QueryBuilder<ItemModel, ItemModel, QDistinct> distinctByUseProduction() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'useProduction');
+    });
+  }
 }
 
 extension ItemModelQueryProperty
@@ -2556,6 +2785,13 @@ extension ItemModelQueryProperty
     });
   }
 
+  QueryBuilder<ItemModel, List<InvItem>, QQueryOperations>
+      compositeItemsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'compositeItems');
+    });
+  }
+
   QueryBuilder<ItemModel, double, QQueryOperations> costProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'cost');
@@ -2565,6 +2801,12 @@ extension ItemModelQueryProperty
   QueryBuilder<ItemModel, String, QQueryOperations> hexIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'hexId');
+    });
+  }
+
+  QueryBuilder<ItemModel, bool, QQueryOperations> isCompositeItemProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isCompositeItem');
     });
   }
 
@@ -2625,6 +2867,12 @@ extension ItemModelQueryProperty
   QueryBuilder<ItemModel, bool, QQueryOperations> trackStockProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'trackStock');
+    });
+  }
+
+  QueryBuilder<ItemModel, bool, QQueryOperations> useProductionProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'useProduction');
     });
   }
 }

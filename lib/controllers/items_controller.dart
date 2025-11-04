@@ -334,10 +334,11 @@ class ItemsController extends GetxController {
   RxInt itemsPage = RxInt(1);
   RxInt totalPages = RxInt(2);
   RxString syncingItemsFailed = RxString("");
-  void syncCartItemsOnBackground({
+  Future<void> syncCartItemsOnBackground({
     int page = 1,
     String search = "",
     String category = "",
+    bool isCompositeItems = false,
   }) async {
     if (syncingItems.value) return;
     final isar = Isar.getInstance();
@@ -347,7 +348,7 @@ class ItemsController extends GetxController {
     syncingItems.value = true;
     syncingItemsFailed.value = "";
     final response = await Net.get(
-      "/cashier/products?page=$page&search=$search&category=$category",
+      "/cashier/products?page=$page&search=$search&category=$category&$isCompositeItems=${isCompositeItems ? "true" : "false"}",
     );
     syncingItems.value = false;
     if (response.hasError) {

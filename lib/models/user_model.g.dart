@@ -32,43 +32,48 @@ const UserSchema = CollectionSchema(
       name: r'company',
       type: IsarType.string,
     ),
-    r'country': PropertySchema(
+    r'companyName': PropertySchema(
       id: 3,
+      name: r'companyName',
+      type: IsarType.string,
+    ),
+    r'country': PropertySchema(
+      id: 4,
       name: r'country',
       type: IsarType.string,
     ),
     r'email': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'email',
       type: IsarType.string,
     ),
     r'fullName': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'fullName',
       type: IsarType.string,
     ),
     r'hexId': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'hexId',
       type: IsarType.string,
     ),
     r'password': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'password',
       type: IsarType.string,
     ),
     r'pinnedInput': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'pinnedInput',
       type: IsarType.bool,
     ),
     r'role': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'role',
       type: IsarType.string,
     ),
     r'till': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'till',
       type: IsarType.long,
     )
@@ -101,6 +106,7 @@ int _userEstimateSize(
     }
   }
   bytesCount += 3 + object.company.length * 3;
+  bytesCount += 3 + object.companyName.length * 3;
   bytesCount += 3 + object.country.length * 3;
   bytesCount += 3 + object.email.length * 3;
   bytesCount += 3 + object.fullName.length * 3;
@@ -124,14 +130,15 @@ void _userSerialize(
   writer.writeBool(offsets[0], object.allowOfflinePurchase);
   writer.writeStringList(offsets[1], object.companies);
   writer.writeString(offsets[2], object.company);
-  writer.writeString(offsets[3], object.country);
-  writer.writeString(offsets[4], object.email);
-  writer.writeString(offsets[5], object.fullName);
-  writer.writeString(offsets[6], object.hexId);
-  writer.writeString(offsets[7], object.password);
-  writer.writeBool(offsets[8], object.pinnedInput);
-  writer.writeString(offsets[9], object.role);
-  writer.writeLong(offsets[10], object.till);
+  writer.writeString(offsets[3], object.companyName);
+  writer.writeString(offsets[4], object.country);
+  writer.writeString(offsets[5], object.email);
+  writer.writeString(offsets[6], object.fullName);
+  writer.writeString(offsets[7], object.hexId);
+  writer.writeString(offsets[8], object.password);
+  writer.writeBool(offsets[9], object.pinnedInput);
+  writer.writeString(offsets[10], object.role);
+  writer.writeLong(offsets[11], object.till);
 }
 
 User _userDeserialize(
@@ -144,14 +151,15 @@ User _userDeserialize(
     allowOfflinePurchase: reader.readBoolOrNull(offsets[0]) ?? true,
     companies: reader.readStringList(offsets[1]) ?? [],
     company: reader.readString(offsets[2]),
-    country: reader.readString(offsets[3]),
-    email: reader.readString(offsets[4]),
-    fullName: reader.readString(offsets[5]),
-    hexId: reader.readStringOrNull(offsets[6]) ?? '',
-    password: reader.readStringOrNull(offsets[7]),
-    pinnedInput: reader.readBool(offsets[8]),
-    role: reader.readString(offsets[9]),
-    till: reader.readLong(offsets[10]),
+    companyName: reader.readStringOrNull(offsets[3]) ?? '',
+    country: reader.readString(offsets[4]),
+    email: reader.readString(offsets[5]),
+    fullName: reader.readString(offsets[6]),
+    hexId: reader.readStringOrNull(offsets[7]) ?? '',
+    password: reader.readStringOrNull(offsets[8]),
+    pinnedInput: reader.readBool(offsets[9]),
+    role: reader.readString(offsets[10]),
+    till: reader.readLong(offsets[11]),
   );
   object.id = id;
   return object;
@@ -171,20 +179,22 @@ P _userDeserializeProp<P>(
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? '') as P;
     case 4:
       return (reader.readString(offset)) as P;
     case 5:
       return (reader.readString(offset)) as P;
     case 6:
-      return (reader.readStringOrNull(offset) ?? '') as P;
-    case 7:
-      return (reader.readStringOrNull(offset)) as P;
-    case 8:
-      return (reader.readBool(offset)) as P;
-    case 9:
       return (reader.readString(offset)) as P;
+    case 7:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 8:
+      return (reader.readStringOrNull(offset)) as P;
+    case 9:
+      return (reader.readBool(offset)) as P;
     case 10:
+      return (reader.readString(offset)) as P;
+    case 11:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -626,6 +636,136 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'company',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companyNameEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'companyName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companyNameGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'companyName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companyNameLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'companyName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companyNameBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'companyName',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companyNameStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'companyName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companyNameEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'companyName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companyNameContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'companyName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companyNameMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'companyName',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companyNameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'companyName',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> companyNameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'companyName',
         value: '',
       ));
     });
@@ -1561,6 +1701,18 @@ extension UserQuerySortBy on QueryBuilder<User, User, QSortBy> {
     });
   }
 
+  QueryBuilder<User, User, QAfterSortBy> sortByCompanyName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'companyName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> sortByCompanyNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'companyName', Sort.desc);
+    });
+  }
+
   QueryBuilder<User, User, QAfterSortBy> sortByCountry() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'country', Sort.asc);
@@ -1680,6 +1832,18 @@ extension UserQuerySortThenBy on QueryBuilder<User, User, QSortThenBy> {
   QueryBuilder<User, User, QAfterSortBy> thenByCompanyDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'company', Sort.desc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> thenByCompanyName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'companyName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> thenByCompanyNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'companyName', Sort.desc);
     });
   }
 
@@ -1812,6 +1976,13 @@ extension UserQueryWhereDistinct on QueryBuilder<User, User, QDistinct> {
     });
   }
 
+  QueryBuilder<User, User, QDistinct> distinctByCompanyName(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'companyName', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<User, User, QDistinct> distinctByCountry(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1889,6 +2060,12 @@ extension UserQueryProperty on QueryBuilder<User, User, QQueryProperty> {
   QueryBuilder<User, String, QQueryOperations> companyProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'company');
+    });
+  }
+
+  QueryBuilder<User, String, QQueryOperations> companyNameProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'companyName');
     });
   }
 

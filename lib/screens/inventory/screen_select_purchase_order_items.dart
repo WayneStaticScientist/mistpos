@@ -15,7 +15,8 @@ import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class ScreenSelectPurchaseOrderItems extends StatefulWidget {
-  const ScreenSelectPurchaseOrderItems({super.key});
+  final bool? isCompositeItems;
+  const ScreenSelectPurchaseOrderItems({super.key, this.isCompositeItems});
 
   @override
   State<ScreenSelectPurchaseOrderItems> createState() =>
@@ -34,7 +35,9 @@ class _ScreenSelectPurchaseOrderItemsState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _itemController.syncCartItemsOnBackground();
+      _itemController.syncCartItemsOnBackground(
+        isCompositeItems: widget.isCompositeItems ?? false,
+      );
     });
     _initializeTimer();
   }
@@ -65,22 +68,23 @@ class _ScreenSelectPurchaseOrderItemsState
           ),
         ],
       ),
-      body: [
-        MistSearchField(
-          label: "Search Products",
-          controller: _searchController,
-        ),
-        Expanded(
-          child: SmartRefresher(
-            controller: _refreshController,
-            enablePullUp: true,
-            onRefresh: () async {
-              _itemController.syncCartItemsOnBackground(
-                page: 1,
-                search: _searchTerm,
-              );
-              _refreshController.refreshCompleted();
-            },
+      body: SmartRefresher(
+        controller: _refreshController,
+        enablePullUp: true,
+        onRefresh: () async {
+          await _itemController.syncCartItemsOnBackground(
+            page: 1,
+            search: _searchTerm,
+            isCompositeItems: widget.isCompositeItems ?? false,
+          );
+          _refreshController.refreshCompleted();
+        },
+        child: [
+          MistSearchField(
+            label: "Search Products",
+            controller: _searchController,
+          ),
+          Expanded(
             child: Obx(
               () => _itemController.cartItems.isEmpty
                   ? "No items found . Click + to add new item".text()
@@ -95,8 +99,8 @@ class _ScreenSelectPurchaseOrderItemsState
                     ),
             ),
           ),
-        ),
-      ].column().padding(EdgeInsets.all(14)),
+        ].column().padding(EdgeInsets.all(14)),
+      ),
       floatingActionButton: FloatingActionButton(
         elevation: 0,
         onPressed: () => Get.to(() => ScreenAddItem()),
@@ -151,7 +155,11 @@ class _ScreenSelectPurchaseOrderItemsState
       final searchTerm = _searchController.text;
       if (_searchTerm != searchTerm) {
         _searchTerm = searchTerm;
-        _itemController.syncCartItemsOnBackground(search: _searchTerm, page: 1);
+        _itemController.syncCartItemsOnBackground(
+          search: _searchTerm,
+          page: 1,
+          isCompositeItems: widget.isCompositeItems ?? false,
+        );
       }
     });
   }

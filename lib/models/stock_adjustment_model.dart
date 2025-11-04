@@ -1,4 +1,4 @@
-import 'package:mistpos/controllers/inventory_controller.dart';
+import 'package:mistpos/models/inv_item.dart';
 
 class StockAdjustmentModel {
   String notes;

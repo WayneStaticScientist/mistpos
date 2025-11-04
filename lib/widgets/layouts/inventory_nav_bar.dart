@@ -70,6 +70,14 @@ class _MistInventoryNavBarState extends State<MistInventoryNavBar> {
                 ? Colors.grey.withAlpha(50)
                 : null,
           ),
+          ListTile(
+            leading: Iconify(Carbon.product, color: Colors.lightBlue),
+            title: "Productions".text(),
+            onTap: () => widget.onTap("Productions"),
+            tileColor: widget.selectedTile == "Productions"
+                ? Colors.grey.withAlpha(50)
+                : null,
+          ),
         ],
       ),
     );

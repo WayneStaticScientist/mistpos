@@ -1,4 +1,5 @@
 import 'package:isar/isar.dart';
+import 'package:mistpos/models/inv_item.dart';
 part 'item_model.g.dart';
 
 @collection
@@ -16,10 +17,13 @@ class ItemModel {
   String category;
   String barcode;
   bool trackStock;
-  List<String>? modifiers;
   int stockQuantity;
   int lowStockThreshold;
+  List<String>? modifiers;
   bool syncOnline = false;
+  bool useProduction = false;
+  bool isCompositeItem = false;
+  List<InvItem> compositeItems = [];
 
   ItemModel({
     required this.name,
@@ -37,6 +41,9 @@ class ItemModel {
     required this.avatar,
     this.syncOnline = false,
     this.hexId = "",
+    this.isCompositeItem = false,
+    this.useProduction = false,
+    this.compositeItems = const [],
     this.modifiers,
   });
   Map<String, dynamic> toJson() {
@@ -56,6 +63,9 @@ class ItemModel {
       "avatar": avatar,
       "syncOnline": syncOnline,
       "modifiers": modifiers,
+      "isCompositeItem": isCompositeItem,
+      "useProduction": useProduction,
+      "compositeItems": compositeItems.map((e) => e.toMap()).toList(),
     };
   }
 
@@ -66,6 +76,14 @@ class ItemModel {
       sku: json["sku"] as String? ?? "",
       name: json["name"] as String? ?? "",
       shape: json["shape"] as String? ?? "",
+
+      isCompositeItem: json["isCompositeItem"] as bool? ?? false,
+      useProduction: json["useProduction"] as bool? ?? false,
+      compositeItems:
+          (json["compositeItems"] as List<dynamic>?)
+              ?.map((e) => InvItem.fromJson(e))
+              .toList() ??
+          [],
       stockQuantity: json["stockQuantity"],
       avatar: json["avatar"] as String? ?? "",
       soldBy: json["soldBy"] as String? ?? "",

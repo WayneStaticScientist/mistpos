@@ -1,64 +1,16 @@
 import 'dart:developer';
 
 import 'package:get/get.dart';
-import 'package:mistpos/models/inventory_child_count.dart';
-import 'package:mistpos/models/inventory_count_model.dart';
+import 'package:mistpos/models/production_model.dart';
+import 'package:mistpos/utils/toast.dart';
+import 'package:mistpos/models/inv_item.dart';
 import 'package:mistpos/models/item_model.dart';
-import 'package:mistpos/models/purchase_order_model.dart';
-import 'package:mistpos/models/stock_adjustment_model.dart';
 import 'package:mistpos/models/supplier_model.dart';
 import 'package:mistpos/services/network_wrapper.dart';
-import 'package:mistpos/utils/toast.dart';
-
-class InvItem {
-  String id;
-  String name;
-  double cost;
-  int quantity;
-  double amount;
-  String sku;
-  String barcode;
-  int inStock = 1;
-  int difference = 0;
-  InvItem({
-    required this.id,
-    required this.name,
-    required this.cost,
-    required this.quantity,
-    required this.amount,
-    required this.sku,
-    required this.barcode,
-    this.difference = 0,
-    this.inStock = 1,
-  });
-  Map<String, dynamic> toMap() {
-    return {
-      "id": id,
-      'sku': sku,
-      "name": name,
-      "cost": cost,
-      "amount": amount,
-      "barcode": barcode,
-      "inStock": inStock,
-      "quantity": quantity,
-      "difference": difference,
-    };
-  }
-
-  factory InvItem.fromJson(Map<String, dynamic> data) {
-    return InvItem(
-      id: data['id'],
-      name: data['name'],
-      cost: (data['cost'] as num?)?.toDouble() ?? 0.0,
-      quantity: data['quantity'],
-      amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
-      sku: data['sku'] ?? '',
-      barcode: data['barcode'] ?? '',
-      inStock: data['inStock'] ?? 0,
-      difference: data['difference'] ?? 0,
-    );
-  }
-}
+import 'package:mistpos/models/inventory_child_count.dart';
+import 'package:mistpos/models/inventory_count_model.dart';
+import 'package:mistpos/models/purchase_order_model.dart';
+import 'package:mistpos/models/stock_adjustment_model.dart';
 
 class InventoryController extends GetxController {
   RxList<SupplierModel> suppliers = RxList<SupplierModel>();
@@ -363,5 +315,37 @@ class InventoryController extends GetxController {
     }
     loadInventoriesCounts(page: 1);
     return true;
+  }
+
+  /*
+   ======================================================
+   PRODUCTIONS 
+   ======================================================
+   */
+  Future<bool> addProduction(Map<String, dynamic> data) async {
+    final response = await Net.post("/admin/inventory/production", data: data);
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return false;
+    }
+    loadProductions(page: 1);
+    return true;
+  }
+
+  RxInt productionsPage = RxInt(1);
+  RxBool productionsLoading = RxBool(false);
+  RxInt productionsTotalPages = RxInt(1);
+  RxList<ProductionModel> productions = RxList<ProductionModel>();
+  void loadProductions({int page = 1, String search = ''}) async {
+    final response = await Net.get(
+      "/admin/inventory/productions?page=$page&search=$search",
+    );
+    if (response.hasError) {
+      return;
+    }
+    if (response.body['list'] != null) {
+      List<dynamic> list = response.body['list'];
+      productions.value = list.map((e) => ProductionModel.fromJson(e)).toList();
+    }
   }
 }

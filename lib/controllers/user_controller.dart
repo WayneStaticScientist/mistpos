@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:mistpos/screens/auth/screen_splash.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/models/token_model.dart';
@@ -92,5 +93,42 @@ class UserController extends GetxController {
       List<dynamic> list = response.body['list'];
       relatedAccounts.value = list.map((e) => User.fromMap(e)).toList();
     }
+  }
+
+  RxBool changingPassword = RxBool(false);
+  Future<bool> changePassword(String oldPassword, String newPassword) async {
+    if (user.value == null) {
+      return false;
+    }
+    changingPassword.value = true;
+    final response = await Net.put(
+      "/user/change-password",
+      data: {"oldPassword": oldPassword, "newPassword": newPassword},
+    );
+    changingPassword.value = false;
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return false;
+    }
+    Toaster.showSuccess("Password changed successfully");
+    return true;
+  }
+
+  RxBool logingOut = RxBool(false);
+  Future<void> logout() async {
+    if (user.value == null) {
+      return;
+    }
+    logingOut.value = true;
+    final response = await Net.put("/user/logout");
+    logingOut.value = false;
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return;
+    }
+    Get.offAll(() => ScreenSplash());
+    User.clearStorage();
+    TokenModel.clearStorage();
+    user.value = null;
   }
 }
