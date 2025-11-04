@@ -78,6 +78,7 @@ class _ScreenAccountSelectionState extends State<ScreenAccountSelection> {
               .constrained(maxWidth: ScreenSizes.maxWidth)
               .center(),
       floatingActionButton: FloatingActionButton(
+        elevation: 1,
         onPressed: () => Get.to(() => ScreenAddEmployee()),
         child: Icon(Icons.add, color: Colors.white),
       ),
