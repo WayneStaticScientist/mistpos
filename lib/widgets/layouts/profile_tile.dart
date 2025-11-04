@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/tabler.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/controllers/user_controller.dart';
-import 'package:mistpos/screens/auth/screen_account_selection.dart';
+import 'package:mistpos/screens/auth/screen_user_profile.dart';
 
 class ProfileTile extends StatefulWidget {
   const ProfileTile({super.key});
@@ -29,13 +29,13 @@ class _ProfileTileState extends State<ProfileTile> {
         subtitle: user.role.text(),
         trailing: IconButton(
           onPressed: _dropDown,
-          icon: Iconify(Tabler.switch_horizontal, color: Colors.grey),
+          icon: Iconify(Tabler.dots_vertical, color: Colors.grey),
         ),
       );
     });
   }
 
   void _dropDown() {
-    Get.to(() => ScreenAccountSelection());
+    Get.to(() => ScreenUserProfile());
   }
 }
