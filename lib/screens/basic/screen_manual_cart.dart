@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
@@ -21,6 +22,7 @@ class ScreenManualCart extends StatefulWidget {
 
 class _ScreenManualCartState extends State<ScreenManualCart> {
   final _itemsListController = Get.find<ItemsController>();
+  final _userController = Get.find<UserController>();
   int count = 1;
   double price = 0;
   double floatAmount = 0;
@@ -35,6 +37,7 @@ class _ScreenManualCartState extends State<ScreenManualCart> {
         actions: [
           CurrenceConverter.getCurrenceFloatInStrings(
             price,
+            _userController.user.value?.baseCurrence ?? '',
           ).text().padding(EdgeInsets.only(right: 14)),
         ],
       ),

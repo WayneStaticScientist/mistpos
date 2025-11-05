@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/themes/app_theme.dart';
@@ -31,6 +32,7 @@ class NavSale extends StatefulWidget {
 }
 
 class _NavSaleState extends State<NavSale> {
+  final _userController = Get.find<UserController>();
   final _itemsListController = Get.find<ItemsController>();
   final TextEditingController _searchController = TextEditingController();
   final _refreshController = RefreshController();
@@ -256,6 +258,11 @@ class _NavSaleState extends State<NavSale> {
                                 [
                                   CurrenceConverter.getCurrenceFloatInStrings(
                                         _itemsListController.totalPrice.value,
+                                        _userController
+                                                .user
+                                                .value
+                                                ?.baseCurrence ??
+                                            '',
                                       )
                                       .text(
                                         style: TextStyle(
@@ -401,10 +408,14 @@ class _NavSaleState extends State<NavSale> {
                     leading: Text("x $count"),
                     onTap: () => Get.to(() => ScreenEditManualCart(map: e)),
                     subtitle: Text(
-                      CurrenceConverter.getCurrenceFloatInStrings(model.price),
+                      CurrenceConverter.getCurrenceFloatInStrings(
+                        model.price,
+                        _userController.user.value?.baseCurrence ?? '',
+                      ),
                     ),
                     trailing: CurrenceConverter.getCurrenceFloatInStrings(
                       model.price * count,
+                      _userController.user.value?.baseCurrence ?? '',
                     ).text(style: TextStyle(fontSize: 24)),
                   );
                 })
@@ -421,6 +432,7 @@ class _NavSaleState extends State<NavSale> {
             ),
             trailing: CurrenceConverter.getCurrenceFloatInStrings(
               _itemsListController.totalPrice.value,
+              _userController.user.value?.baseCurrence ?? '',
             ).text(style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
           ),
         ].column(mainAxisSize: MainAxisSize.max),

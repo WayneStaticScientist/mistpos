@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/supplier_model.dart';
@@ -26,6 +27,7 @@ class ScreenViewPurchaseOrder extends StatefulWidget {
 
 class _ScreenViewPurchaseOrderState extends State<ScreenViewPurchaseOrder> {
   final _inventory = Get.find<InventoryController>();
+  final _userController = Get.find<UserController>();
   SupplierModel? model;
   bool _loading = true;
   bool _updatingState = false;
@@ -109,6 +111,7 @@ class _ScreenViewPurchaseOrderState extends State<ScreenViewPurchaseOrder> {
                 label: "Total Price",
                 value: CurrenceConverter.getCurrenceFloatInStrings(
                   totalProductPrice,
+                  _userController.user.value?.baseCurrence ?? '',
                 ),
               ),
               CardOverview(label: "Total Items", value: totalItems.toString()),
@@ -237,10 +240,11 @@ class _ScreenViewPurchaseOrderState extends State<ScreenViewPurchaseOrder> {
                     leading: CircleAvatar(child: "x ${e.quantity}".text()),
                     title: e.name.text(),
                     subtitle:
-                        "Prop ${CurrenceConverter.getCurrenceFloatInStrings(e.cost)}"
+                        "Prop ${CurrenceConverter.getCurrenceFloatInStrings(e.cost, _userController.user.value?.baseCurrence ?? '')}"
                             .text(style: TextStyle(fontSize: 12)),
                     trailing: CurrenceConverter.getCurrenceFloatInStrings(
                       e.amount,
+                      _userController.user.value?.baseCurrence ?? '',
                     ).text(style: TextStyle(color: Colors.green)),
                   ),
                 )

@@ -131,4 +131,21 @@ class UserController extends GetxController {
     TokenModel.clearStorage();
     user.value = null;
   }
+
+  RxBool switchingCurrency = RxBool(false);
+  void switchCurrency(String key) async {
+    if (user.value == null) {
+      return;
+    }
+    switchingCurrency.value = true;
+    final response = await Net.put("/user/curreny/$key");
+    switchingCurrency.value = false;
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return;
+    }
+    user.value = User.fromMap(response.body['update']);
+    User.saveToStorage(user.value!);
+    Toaster.showSuccess("Currency switched successfully");
+  }
 }

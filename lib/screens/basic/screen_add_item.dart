@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/models/inv_item.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/themes/app_theme.dart';
@@ -38,6 +39,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
   bool _isCompositeItem = false;
   bool _useProduction = false;
   final _formKey = GlobalKey<FormState>();
+  final _userController = Get.find<UserController>();
   final _itemSKUController = TextEditingController();
   final _itemNameController = TextEditingController();
   final _itemCostController = TextEditingController();
@@ -412,7 +414,9 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
         14.gapHeight,
         MistFormInput(
           label: "Item Price",
-          icon: Iconify(Bx.money, color: Colors.grey.withAlpha(200)),
+          icon: (_userController.user.value?.baseCurrence ?? 'USD').text(
+            style: TextStyle(fontSize: 8),
+          ),
           underLineColor: Colors.grey.withAlpha(200),
           controller: _itemPriceController,
         ),
@@ -424,7 +428,9 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
           MistFormInput(
             label: "Item Cost",
             validateString: "Item Cost is required",
-            icon: Iconify(Bx.wallet, color: Colors.grey.withAlpha(200)),
+            icon: (_userController.user.value?.baseCurrence ?? 'USD').text(
+              style: TextStyle(fontSize: 8),
+            ),
             underLineColor: Colors.grey.withAlpha(200),
             controller: _itemCostController,
           ),
@@ -487,6 +493,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
                 ),
                 subtitle: CurrenceConverter.getCurrenceFloatInStrings(
                   e.cost * e.quantity,
+                  _userController.user.value?.baseCurrence ?? '',
                 ).text(style: TextStyle(color: Colors.green)),
               ),
             ),
@@ -496,6 +503,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
                 _inventorController.selectedInvItems
                     .map((e) => e.cost * e.quantity)
                     .fold(0.0, (value, element) => value + element),
+                _userController.user.value?.baseCurrence ?? '',
               ).text(style: TextStyle(color: Colors.green, fontSize: 16)),
             ),
           ].column(

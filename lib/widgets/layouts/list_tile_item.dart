@@ -1,10 +1,11 @@
+import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:get/route_manager.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:mistpos/models/item_model.dart';
 import 'package:mistpos/themes/app_theme.dart';
+import 'package:mistpos/models/item_model.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/utils/currence_converter.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 
 class MistListTileItem extends StatefulWidget {
   final ItemModel item;
@@ -15,6 +16,7 @@ class MistListTileItem extends StatefulWidget {
 }
 
 class _MistListTileItemState extends State<MistListTileItem> {
+  final _userController = Get.find<UserController>();
   @override
   Widget build(BuildContext context) {
     return [
@@ -41,6 +43,7 @@ class _MistListTileItemState extends State<MistListTileItem> {
               .expanded1,
           CurrenceConverter.getCurrenceFloatInStrings(
             widget.item.price,
+            _userController.user.value?.baseCurrence ?? '',
           ).text(style: TextStyle(fontWeight: FontWeight.bold)),
         ]
         .row()

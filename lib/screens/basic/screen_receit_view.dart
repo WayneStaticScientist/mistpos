@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/screens/basic/screen_refund_cart.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/models/item_receit_model.dart';
@@ -16,6 +17,7 @@ class ScreenReceitView extends StatefulWidget {
 }
 
 class _ScreenReceitViewState extends State<ScreenReceitView> {
+  final _userController = Get.find<UserController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,6 +37,7 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
           child: [
             CurrenceConverter.getCurrenceFloatInStrings(
               widget.receitModel.total,
+              _userController.user.value?.baseCurrence ?? '',
             ).text(style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
             "Total".text(),
             18.gapHeight,
@@ -52,12 +55,13 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                   ...widget.receitModel.items.map(
                     (e) => ListTile(
                       subtitle:
-                          "${e.count.toString()} x ${CurrenceConverter.getCurrenceFloatInStrings(e.price + e.addenum)}"
+                          "${e.count.toString()} x ${CurrenceConverter.getCurrenceFloatInStrings(e.price + e.addenum, _userController.user.value?.baseCurrence ?? '')}"
                               .text(),
                       title: e.name.text(),
                       tileColor: e.refunded ? Colors.red.withAlpha(100) : null,
                       trailing: CurrenceConverter.getCurrenceFloatInStrings(
                         (e.price + e.addenum) * e.count,
+                        _userController.user.value?.baseCurrence ?? '',
                       ).text(),
                     ),
                   ),
@@ -68,12 +72,14 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                     title: 'Total'.text(),
                     trailing: CurrenceConverter.getCurrenceFloatInStrings(
                       widget.receitModel.total,
+                      _userController.user.value?.baseCurrence ?? '',
                     ).text(),
                   ),
                   ListTile(
                     title: widget.receitModel.payment.text(),
                     trailing: CurrenceConverter.getCurrenceFloatInStrings(
                       widget.receitModel.amount,
+                      _userController.user.value?.baseCurrence ?? '',
                     ).text(),
                   ),
                   ListTile(
@@ -82,6 +88,7 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                     textColor: Colors.white,
                     trailing: CurrenceConverter.getCurrenceFloatInStrings(
                       widget.receitModel.amount - widget.receitModel.total,
+                      _userController.user.value?.baseCurrence ?? '',
                     ).text(style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                   18.gapHeight,

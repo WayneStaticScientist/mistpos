@@ -1,6 +1,9 @@
 import 'dart:developer';
 
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:mistpos/models/company_model.dart';
+import 'package:mistpos/models/exchange_rate_model.dart';
 import 'package:mistpos/models/production_model.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/inv_item.dart';
@@ -22,6 +25,12 @@ class InventoryController extends GetxController {
     }
     loadSuppliers();
     return true;
+  }
+
+  @override
+  void onInit() {
+    loadCompany();
+    super.onInit();
   }
 
   RxList<InvItem> selectedInvItems = RxList<InvItem>();
@@ -347,5 +356,42 @@ class InventoryController extends GetxController {
       List<dynamic> list = response.body['list'];
       productions.value = list.map((e) => ProductionModel.fromJson(e)).toList();
     }
+  }
+
+  /*
+   ======================================================
+   COMPANY 
+   ======================================================
+   */
+
+  RxBool loadingCompany = RxBool(false);
+  RxString companyError = RxString("");
+  Rx<CompanyModel?> company = Rx<CompanyModel?>(null);
+  void loadCompany() async {
+    if (loadingCompany.value) return;
+    loadingCompany.value = true;
+    companyError.value = "";
+    final response = await Net.get("/company");
+    loadingCompany.value = false;
+    if (response.hasError) {
+      companyError.value = response.response;
+      return;
+    }
+    company.value = CompanyModel.fromJson(response.body['update']);
+    GetStorage storage = GetStorage();
+    storage.write("company", company.value!.toJson());
+  }
+
+  Future<bool> updateCurrency(ExchangeRateModel model) async {
+    final response = await Net.put(
+      "/admin/company/currency",
+      data: model.toJson(),
+    );
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return false;
+    }
+    loadCompany();
+    return true;
   }
 }

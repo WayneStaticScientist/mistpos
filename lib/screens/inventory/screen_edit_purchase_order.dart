@@ -2,6 +2,7 @@ import 'package:exui/exui.dart';
 import 'package:get/get.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/models/inv_item.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
@@ -27,6 +28,7 @@ class ScreenEditPurchaseOrder extends StatefulWidget {
 class _ScreenEditPurchaseOrderState extends State<ScreenEditPurchaseOrder> {
   bool _isLoading = false;
   final _formKey = GlobalKey<FormState>();
+  final _userController = Get.find<UserController>();
   late final _notesController = TextEditingController(text: widget.model.notes);
   final _inventory = Get.find<InventoryController>();
   late DateTime? _expectDate = widget.model.expectedDate;
@@ -145,11 +147,21 @@ class _ScreenEditPurchaseOrderState extends State<ScreenEditPurchaseOrder> {
                                 subtitle:
                                     CurrenceConverter.getCurrenceFloatInStrings(
                                       e.cost,
+                                      _userController
+                                              .user
+                                              .value
+                                              ?.baseCurrence ??
+                                          '',
                                     ).text(),
                                 title: e.name.text(),
                                 trailing:
                                     CurrenceConverter.getCurrenceFloatInStrings(
                                       e.quantity * e.cost,
+                                      _userController
+                                              .user
+                                              .value
+                                              ?.baseCurrence ??
+                                          '',
                                     ).text(),
                               );
                             },

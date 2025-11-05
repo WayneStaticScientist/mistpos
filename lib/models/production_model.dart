@@ -14,7 +14,9 @@ class ProductionModel {
       hexId: json['_id'] ?? '',
       label: json['label'],
       items:
-          json['compositeItems']?.map((e) => InvItem.fromJson(e)).toList() ??
+          (json['compositeItems'] as List<dynamic>?)
+              ?.map((e) => InvItem.fromJson(e))
+              .toList() ??
           [],
     );
   }

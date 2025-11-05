@@ -7,8 +7,9 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:mistpos/widgets/layouts/profile_tile.dart';
 import 'package:mistpos/screens/basic/screen_dashboard.dart';
-import 'package:mistpos/screens/basic/screen_devices_section.dart';
+import 'package:mistpos/screens/currence/screen_currency.dart';
 import 'package:mistpos/screens/basic/screen_settings_page.dart';
+import 'package:mistpos/screens/basic/screen_devices_section.dart';
 
 class MistMainNavigationView extends StatelessWidget {
   final Function(String value) onTap;
@@ -63,7 +64,12 @@ class MistMainNavigationView extends StatelessWidget {
               title: Text('Settings'),
               onTap: () => Get.to(() => ScreenSettingsPage()),
             ),
-            Dialog(),
+            Divider(color: Colors.grey.withAlpha(50)),
+            ListTile(
+              leading: Iconify(Bx.money, color: AppTheme.color(context)),
+              title: Text('Currencies'),
+              onTap: () => Get.to(() => ScreenCurrency()),
+            ),
             ListTile(
               leading: Iconify(Bx.bar_chart, color: AppTheme.color(context)),
               title: Text('Dashboard'),

@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
@@ -28,6 +29,7 @@ class _ScreenSelectPurchaseOrderItemsState
   final _refreshController = RefreshController();
   final _inventory = Get.find<InventoryController>();
   final _itemController = Get.find<ItemsController>();
+  final _userController = Get.find<UserController>();
   final TextEditingController _searchController = TextEditingController();
   String _searchTerm = "";
   Timer? _debounce;
@@ -122,6 +124,7 @@ class _ScreenSelectPurchaseOrderItemsState
         ),
         subtitle: CurrenceConverter.getCurrenceFloatInStrings(
           model.cost,
+          _userController.user.value?.baseCurrence ?? '',
         ).text(),
         title: model.name.text(),
       );
@@ -176,6 +179,7 @@ class _ScreenSelectPurchaseOrderItemsState
                   ),
                   subtitle: CurrenceConverter.getCurrenceFloatInStrings(
                     e.cost,
+                    _userController.user.value?.baseCurrence ?? '',
                   ).text(),
                   title: e.name.text(),
                   trailing: IconButton(

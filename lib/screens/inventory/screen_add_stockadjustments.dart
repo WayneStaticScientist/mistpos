@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/models/inv_item.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
@@ -28,6 +29,7 @@ class _ScreenAddStockadjustmentsState extends State<ScreenAddStockadjustments> {
   final _formKey = GlobalKey<FormState>();
   final _notesController = TextEditingController();
   final _inventory = Get.find<InventoryController>();
+  final _userController = Get.find<UserController>();
   String _reason = "add";
   List<InvItem> _rejects = [];
   @override
@@ -144,6 +146,11 @@ class _ScreenAddStockadjustmentsState extends State<ScreenAddStockadjustments> {
                                       trailing: _reason == "add"
                                           ? CurrenceConverter.getCurrenceFloatInStrings(
                                               e.quantity * e.cost,
+                                              _userController
+                                                      .user
+                                                      .value
+                                                      ?.baseCurrence ??
+                                                  '',
                                             ).text()
                                           : null,
                                     );

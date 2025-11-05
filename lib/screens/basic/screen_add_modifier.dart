@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
@@ -21,6 +22,7 @@ class ScreenAddModifier extends StatefulWidget {
 
 class _ScreenAddModifierState extends State<ScreenAddModifier> {
   final _formKey = GlobalKey<FormState>();
+  final _userController = Get.find<UserController>();
   final _itemsController = Get.find<ItemsController>();
   final _itemNameController = TextEditingController();
   final _textFieldOptionsName = TextEditingController();
@@ -86,6 +88,7 @@ class _ScreenAddModifierState extends State<ScreenAddModifier> {
                         title: "${e['key']}".text(),
                         subtitle: CurrenceConverter.getCurrenceFloatInStrings(
                           (e['value'] as num?)?.toDouble() ?? 0.0,
+                          _userController.user.value?.baseCurrence ?? '',
                         ).text(),
                         onTap: () => _editOption(e),
                         trailing: IconButton(

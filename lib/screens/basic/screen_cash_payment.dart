@@ -74,6 +74,7 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
                 "Cash Payment".text(),
                 CurrenceConverter.getCurrenceFloatInStrings(
                   _itemsListController.totalPrice.value,
+                  _userController.user.value?.baseCurrence ?? '',
                 ).text(
                   style: TextStyle(
                     fontSize: 42,
@@ -95,7 +96,7 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
                           fontWeight: FontWeight.bold,
                         ),
                       )
-                    : "Change ${CurrenceConverter.getCurrenceFloatInStrings(change)}"
+                    : "Change ${CurrenceConverter.getCurrenceFloatInStrings(change, _userController.user.value?.baseCurrence ?? '')}"
                           .text(),
               ].column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -269,6 +270,7 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
           trailing: Text(
             CurrenceConverter.getCurrenceFloatInStrings(
               (e.price + e.addenum) * e.count,
+              _userController.user.value?.baseCurrence ?? '',
             ),
           ),
           subtitle: Text(e.rejectedReason, overflow: TextOverflow.ellipsis),

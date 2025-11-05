@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:data_table_2/data_table_2.dart';
@@ -30,6 +31,7 @@ class _ScreenViewInventoryCountState extends State<ScreenViewInventoryCount> {
   String _error = "";
   bool _loading = true;
   bool _updatingState = false;
+  final _userController = Get.find<UserController>();
   @override
   void initState() {
     super.initState();
@@ -208,6 +210,7 @@ class _ScreenViewInventoryCountState extends State<ScreenViewInventoryCount> {
                       ),
                       trailing: CurrenceConverter.getCurrenceFloatInStrings(
                         e.cost,
+                        _userController.user.value?.baseCurrence ?? '',
                       ).text(style: TextStyle(color: Colors.green)),
                     ),
                   )
@@ -220,6 +223,7 @@ class _ScreenViewInventoryCountState extends State<ScreenViewInventoryCount> {
             trailing:
                 CurrenceConverter.getCurrenceFloatInStrings(
                   widget.model.totalCostDifference,
+                  _userController.user.value?.baseCurrence ?? '',
                 ).text(
                   style: TextStyle(
                     color: widget.model.totalCostDifference >= 0
@@ -284,11 +288,15 @@ class _ScreenViewInventoryCountState extends State<ScreenViewInventoryCount> {
                 DataCell(e.counted.toString().text()),
                 DataCell((e.difference).toString().text()),
                 DataCell(
-                  CurrenceConverter.getCurrenceFloatInStrings(e.cost).text(),
+                  CurrenceConverter.getCurrenceFloatInStrings(
+                    e.cost,
+                    _userController.user.value?.baseCurrence ?? '',
+                  ).text(),
                 ),
                 DataCell(
                   CurrenceConverter.getCurrenceFloatInStrings(
                     e.costDifference,
+                    _userController.user.value?.baseCurrence ?? '',
                   ).text(),
                 ),
               ],

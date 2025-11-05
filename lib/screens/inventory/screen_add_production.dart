@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/inv_item.dart';
 import 'package:data_table_2/data_table_2.dart';
@@ -24,6 +25,7 @@ class ScreenAddProduction extends StatefulWidget {
 class _ScreenAddProductionState extends State<ScreenAddProduction> {
   bool _isLoading = false;
   final _label = TextEditingController();
+  final _userController = Get.find<UserController>();
   final _inventory = Get.find<InventoryController>();
   final _formKey = GlobalKey<FormState>();
   @override
@@ -114,7 +116,10 @@ class _ScreenAddProductionState extends State<ScreenAddProduction> {
               cells: <DataCell>[
                 DataCell(e.name.text()),
                 DataCell(
-                  CurrenceConverter.getCurrenceFloatInStrings(e.cost).text(),
+                  CurrenceConverter.getCurrenceFloatInStrings(
+                    e.cost,
+                    _userController.user.value?.baseCurrence ?? '',
+                  ).text(),
                 ),
                 DataCell(
                   e.quantity.toString().text().textButton(

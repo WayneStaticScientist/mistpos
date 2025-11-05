@@ -3,6 +3,7 @@ import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/widgets/layouts/card_overview.dart';
@@ -18,6 +19,7 @@ class ScreenViewStockAdjustment extends StatefulWidget {
 }
 
 class _ScreenViewStockAdjustmentState extends State<ScreenViewStockAdjustment> {
+  final _userController = Get.find<UserController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,6 +57,7 @@ class _ScreenViewStockAdjustmentState extends State<ScreenViewStockAdjustment> {
                   label: "Total Price ",
                   value: CurrenceConverter.getCurrenceFloatInStrings(
                     totalProductPrice,
+                    _userController.user.value?.baseCurrence ?? '',
                   ),
                 ),
               CardOverview(
@@ -92,7 +95,7 @@ class _ScreenViewStockAdjustmentState extends State<ScreenViewStockAdjustment> {
                     leading: CircleAvatar(child: _getPrefix(e.quantity).text()),
                     title: e.name.text(),
                     subtitle: widget.model.reason == "add"
-                        ? "Prop ${CurrenceConverter.getCurrenceFloatInStrings(e.cost)}"
+                        ? "Prop ${CurrenceConverter.getCurrenceFloatInStrings(e.cost, _userController.user.value?.baseCurrence ?? '')}"
                               .text(style: TextStyle(fontSize: 12))
                         : null,
                   ),

@@ -809,20 +809,20 @@ class ItemsController extends GetxController {
       if (item.count > 1) {
         b.text(item.name);
         b.text(
-          "${item.count}    ${CurrenceConverter.getCurrenceFloatInStrings(item.addenum + item.price)}   - ${CurrenceConverter.getCurrenceFloatInStrings((item.addenum + item.price)) * item.count}",
+          "${item.count}    ${CurrenceConverter.getCurrenceFloatInStrings(item.addenum + item.price, user.baseCurrence)}   - ${CurrenceConverter.getCurrenceFloatInStrings((item.addenum + item.price), user.baseCurrence) * item.count}",
         );
       } else {
         b.text(
-          "${item.name}      -  ${CurrenceConverter.getCurrenceFloatInStrings(item.price)}}",
+          "${item.name}      -  ${CurrenceConverter.getCurrenceFloatInStrings(item.price, user.baseCurrence)}}",
         );
       }
     }
     b.feed(2);
     b.text(
-      "total       - ${CurrenceConverter.getCurrenceFloatInStrings(itemReceitModel.total)}",
+      "total       - ${CurrenceConverter.getCurrenceFloatInStrings(itemReceitModel.total, user.baseCurrence)}",
     );
     b.text('--- END ---', align: PosAlign.center);
-    b.cut(); // Add a paper cut command
+    b.cut();
     printer.printEscPos(PosPrinterRole.cashier, b);
   }
 

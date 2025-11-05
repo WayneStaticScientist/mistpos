@@ -5,6 +5,7 @@ import 'package:iconify_flutter/icons/bx.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/models/item_receit_model.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/currence_converter.dart';
@@ -20,7 +21,7 @@ class ReceitsLayoutView extends StatefulWidget {
 
 class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
   final _itemsListController = Get.find<ItemsController>();
-
+  final _userController = Get.find<UserController>();
   @override
   Widget build(BuildContext context) {
     return Obx(
@@ -50,7 +51,10 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
     return ListTile(
       tileColor: Colors.grey.withAlpha(20),
       leading: Iconify(Carbon.receipt, color: AppTheme.color(context)),
-      title: CurrenceConverter.getCurrenceFloatInStrings(receit.total).text(),
+      title: CurrenceConverter.getCurrenceFloatInStrings(
+        receit.total,
+        _userController.user.value?.baseCurrence ?? '',
+      ).text(),
       trailing: Text(receit.id.toString()),
       subtitle: Text("${receit.createdAt.hour}:${receit.createdAt.minute}"),
       onTap: () => Get.to(() => ScreenReceitView(receitModel: receit)),

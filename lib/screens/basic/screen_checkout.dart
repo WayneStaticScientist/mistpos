@@ -4,6 +4,7 @@ import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/screens/basic/screen_card_payment.dart';
@@ -17,6 +18,7 @@ class ScreenCheckout extends StatefulWidget {
 }
 
 class _ScreenCheckoutState extends State<ScreenCheckout> {
+  final _userController = Get.find<UserController>();
   final _itemsListController = Get.find<ItemsController>();
   @override
   Widget build(BuildContext context) {
@@ -28,6 +30,7 @@ class _ScreenCheckoutState extends State<ScreenCheckout> {
               [
                 CurrenceConverter.getCurrenceFloatInStrings(
                   _itemsListController.totalPrice.value,
+                  _userController.user.value?.baseCurrence ?? '',
                 ).text(
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),

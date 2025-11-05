@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:date_picker_plus/date_picker_plus.dart';
@@ -18,6 +19,7 @@ class NavAdminOverView extends StatefulWidget {
 }
 
 class _NavAdminOverViewState extends State<NavAdminOverView> {
+  final _userController = Get.find<UserController>();
   final _adminController = Get.find<AdminController>();
   DateTime? _startDate;
   DateTime? _endDate = DateTime.now();
@@ -84,6 +86,7 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
                 label: "Total Expense",
                 value: CurrenceConverter.getCurrenceFloatInStrings(
                   _adminController.statsPoducts.value?.totalCost ?? 0,
+                  _userController.user.value?.baseCurrence ?? '',
                 ),
               ),
             ],
@@ -103,6 +106,7 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
                 value: CurrenceConverter.getCurrenceFloatInStrings(
                   (_adminController.statsSales.value?.totalSales ?? 0) -
                       (_adminController.statsSales.value?.totalCost ?? 0),
+                  _userController.user.value?.baseCurrence ?? '',
                 ),
               ),
               18.gapWidth,
@@ -110,6 +114,7 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
                 label: "Total Sales",
                 value: CurrenceConverter.getCurrenceFloatInStrings(
                   _adminController.statsSales.value?.totalSales ?? 0,
+                  _userController.user.value?.baseCurrence ?? '',
                 ),
               ),
               18.gapWidth,
@@ -226,7 +231,12 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
                 showTitles: true,
                 reservedSize: 80,
                 getTitlesWidget: (value, meta) {
-                  return Text(CurrenceConverter.getCurrenceFloatk(value));
+                  return Text(
+                    CurrenceConverter.getCurrenceFloatk(
+                      value,
+                      _userController.user.value?.baseCurrence ?? '',
+                    ),
+                  );
                 },
               ), // Y-axis labels
             ),
@@ -293,7 +303,12 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
                 showTitles: true,
                 reservedSize: 80,
                 getTitlesWidget: (value, meta) {
-                  return Text(CurrenceConverter.getCurrenceFloatk(value));
+                  return Text(
+                    CurrenceConverter.getCurrenceFloatk(
+                      value,
+                      _userController.user.value?.baseCurrence ?? '',
+                    ),
+                  );
                 }, // Y-axis labels
               ),
             ),

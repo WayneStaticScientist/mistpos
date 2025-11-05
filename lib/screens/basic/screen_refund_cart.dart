@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/item_receit_item.dart';
 import 'package:mistpos/models/item_receit_model.dart';
@@ -20,6 +21,7 @@ class ScreenRefundCart extends StatefulWidget {
 class _ScreenRefundCartState extends State<ScreenRefundCart> {
   bool _loading = false;
   final _itemController = Get.find<ItemsController>();
+  final _userController = Get.find<UserController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,11 +41,12 @@ class _ScreenRefundCartState extends State<ScreenRefundCart> {
                     tileColor: e.$2.refunded ? Colors.red.withAlpha(100) : null,
                     onTap: () => _refund(e.$1, e.$2),
                     subtitle:
-                        "${e.$2.count.toString()} x ${CurrenceConverter.getCurrenceFloatInStrings(e.$2.price + e.$2.addenum)}"
+                        "${e.$2.count.toString()} x ${CurrenceConverter.getCurrenceFloatInStrings(e.$2.price + e.$2.addenum, _userController.user.value?.baseCurrence ?? '')}"
                             .text(),
                     title: e.$2.name.text(),
                     trailing: CurrenceConverter.getCurrenceFloatInStrings(
                       (e.$2.price + e.$2.addenum) * e.$2.count,
+                      _userController.user.value?.baseCurrence ?? '',
                     ).text(),
                   ),
                 ),
@@ -54,12 +57,14 @@ class _ScreenRefundCartState extends State<ScreenRefundCart> {
                   title: 'Total'.text(),
                   trailing: CurrenceConverter.getCurrenceFloatInStrings(
                     widget.receitModel.total,
+                    _userController.user.value?.baseCurrence ?? '',
                   ).text(),
                 ),
                 ListTile(
                   title: widget.receitModel.payment.text(),
                   trailing: CurrenceConverter.getCurrenceFloatInStrings(
                     widget.receitModel.amount,
+                    _userController.user.value?.baseCurrence ?? '',
                   ).text(),
                 ),
               ].column(),
