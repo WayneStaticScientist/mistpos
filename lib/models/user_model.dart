@@ -55,7 +55,6 @@ class User {
   }
   Map<String, dynamic> toMap() {
     return {
-      '_id': hexId,
       'till': till,
       'role': role,
       'email': email,

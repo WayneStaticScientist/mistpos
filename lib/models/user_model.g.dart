@@ -22,58 +22,63 @@ const UserSchema = CollectionSchema(
       name: r'allowOfflinePurchase',
       type: IsarType.bool,
     ),
-    r'companies': PropertySchema(
+    r'baseCurrence': PropertySchema(
       id: 1,
+      name: r'baseCurrence',
+      type: IsarType.string,
+    ),
+    r'companies': PropertySchema(
+      id: 2,
       name: r'companies',
       type: IsarType.stringList,
     ),
     r'company': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'company',
       type: IsarType.string,
     ),
     r'companyName': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'companyName',
       type: IsarType.string,
     ),
     r'country': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'country',
       type: IsarType.string,
     ),
     r'email': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'email',
       type: IsarType.string,
     ),
     r'fullName': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'fullName',
       type: IsarType.string,
     ),
     r'hexId': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'hexId',
       type: IsarType.string,
     ),
     r'password': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'password',
       type: IsarType.string,
     ),
     r'pinnedInput': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'pinnedInput',
       type: IsarType.bool,
     ),
     r'role': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'role',
       type: IsarType.string,
     ),
     r'till': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'till',
       type: IsarType.long,
     )
@@ -98,6 +103,7 @@ int _userEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 + object.baseCurrence.length * 3;
   bytesCount += 3 + object.companies.length * 3;
   {
     for (var i = 0; i < object.companies.length; i++) {
@@ -128,17 +134,18 @@ void _userSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeBool(offsets[0], object.allowOfflinePurchase);
-  writer.writeStringList(offsets[1], object.companies);
-  writer.writeString(offsets[2], object.company);
-  writer.writeString(offsets[3], object.companyName);
-  writer.writeString(offsets[4], object.country);
-  writer.writeString(offsets[5], object.email);
-  writer.writeString(offsets[6], object.fullName);
-  writer.writeString(offsets[7], object.hexId);
-  writer.writeString(offsets[8], object.password);
-  writer.writeBool(offsets[9], object.pinnedInput);
-  writer.writeString(offsets[10], object.role);
-  writer.writeLong(offsets[11], object.till);
+  writer.writeString(offsets[1], object.baseCurrence);
+  writer.writeStringList(offsets[2], object.companies);
+  writer.writeString(offsets[3], object.company);
+  writer.writeString(offsets[4], object.companyName);
+  writer.writeString(offsets[5], object.country);
+  writer.writeString(offsets[6], object.email);
+  writer.writeString(offsets[7], object.fullName);
+  writer.writeString(offsets[8], object.hexId);
+  writer.writeString(offsets[9], object.password);
+  writer.writeBool(offsets[10], object.pinnedInput);
+  writer.writeString(offsets[11], object.role);
+  writer.writeLong(offsets[12], object.till);
 }
 
 User _userDeserialize(
@@ -149,17 +156,18 @@ User _userDeserialize(
 ) {
   final object = User(
     allowOfflinePurchase: reader.readBoolOrNull(offsets[0]) ?? true,
-    companies: reader.readStringList(offsets[1]) ?? [],
-    company: reader.readString(offsets[2]),
-    companyName: reader.readStringOrNull(offsets[3]) ?? '',
-    country: reader.readString(offsets[4]),
-    email: reader.readString(offsets[5]),
-    fullName: reader.readString(offsets[6]),
-    hexId: reader.readStringOrNull(offsets[7]) ?? '',
-    password: reader.readStringOrNull(offsets[8]),
-    pinnedInput: reader.readBool(offsets[9]),
-    role: reader.readString(offsets[10]),
-    till: reader.readLong(offsets[11]),
+    baseCurrence: reader.readStringOrNull(offsets[1]) ?? '',
+    companies: reader.readStringList(offsets[2]) ?? [],
+    company: reader.readString(offsets[3]),
+    companyName: reader.readStringOrNull(offsets[4]) ?? '',
+    country: reader.readString(offsets[5]),
+    email: reader.readString(offsets[6]),
+    fullName: reader.readString(offsets[7]),
+    hexId: reader.readStringOrNull(offsets[8]) ?? '',
+    password: reader.readStringOrNull(offsets[9]),
+    pinnedInput: reader.readBool(offsets[10]),
+    role: reader.readString(offsets[11]),
+    till: reader.readLong(offsets[12]),
   );
   object.id = id;
   return object;
@@ -175,26 +183,28 @@ P _userDeserializeProp<P>(
     case 0:
       return (reader.readBoolOrNull(offset) ?? true) as P;
     case 1:
-      return (reader.readStringList(offset) ?? []) as P;
-    case 2:
-      return (reader.readString(offset)) as P;
-    case 3:
       return (reader.readStringOrNull(offset) ?? '') as P;
-    case 4:
+    case 2:
+      return (reader.readStringList(offset) ?? []) as P;
+    case 3:
       return (reader.readString(offset)) as P;
+    case 4:
+      return (reader.readStringOrNull(offset) ?? '') as P;
     case 5:
       return (reader.readString(offset)) as P;
     case 6:
       return (reader.readString(offset)) as P;
     case 7:
-      return (reader.readStringOrNull(offset) ?? '') as P;
-    case 8:
-      return (reader.readStringOrNull(offset)) as P;
-    case 9:
-      return (reader.readBool(offset)) as P;
-    case 10:
       return (reader.readString(offset)) as P;
+    case 8:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 9:
+      return (reader.readStringOrNull(offset)) as P;
+    case 10:
+      return (reader.readBool(offset)) as P;
     case 11:
+      return (reader.readString(offset)) as P;
+    case 12:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -295,6 +305,136 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'allowOfflinePurchase',
         value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> baseCurrenceEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'baseCurrence',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> baseCurrenceGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'baseCurrence',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> baseCurrenceLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'baseCurrence',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> baseCurrenceBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'baseCurrence',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> baseCurrenceStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'baseCurrence',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> baseCurrenceEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'baseCurrence',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> baseCurrenceContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'baseCurrence',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> baseCurrenceMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'baseCurrence',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> baseCurrenceIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'baseCurrence',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> baseCurrenceIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'baseCurrence',
+        value: '',
       ));
     });
   }
@@ -1689,6 +1829,18 @@ extension UserQuerySortBy on QueryBuilder<User, User, QSortBy> {
     });
   }
 
+  QueryBuilder<User, User, QAfterSortBy> sortByBaseCurrence() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'baseCurrence', Sort.asc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> sortByBaseCurrenceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'baseCurrence', Sort.desc);
+    });
+  }
+
   QueryBuilder<User, User, QAfterSortBy> sortByCompany() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'company', Sort.asc);
@@ -1820,6 +1972,18 @@ extension UserQuerySortThenBy on QueryBuilder<User, User, QSortThenBy> {
   QueryBuilder<User, User, QAfterSortBy> thenByAllowOfflinePurchaseDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'allowOfflinePurchase', Sort.desc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> thenByBaseCurrence() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'baseCurrence', Sort.asc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> thenByBaseCurrenceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'baseCurrence', Sort.desc);
     });
   }
 
@@ -1963,6 +2127,13 @@ extension UserQueryWhereDistinct on QueryBuilder<User, User, QDistinct> {
     });
   }
 
+  QueryBuilder<User, User, QDistinct> distinctByBaseCurrence(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'baseCurrence', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<User, User, QDistinct> distinctByCompanies() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'companies');
@@ -2048,6 +2219,12 @@ extension UserQueryProperty on QueryBuilder<User, User, QQueryProperty> {
   QueryBuilder<User, bool, QQueryOperations> allowOfflinePurchaseProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'allowOfflinePurchase');
+    });
+  }
+
+  QueryBuilder<User, String, QQueryOperations> baseCurrenceProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'baseCurrence');
     });
   }
 

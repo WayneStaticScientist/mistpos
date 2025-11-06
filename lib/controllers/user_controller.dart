@@ -1,11 +1,11 @@
 import 'package:get/get.dart';
-import 'package:mistpos/screens/auth/screen_splash.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/models/token_model.dart';
 import 'package:mistpos/services/network_wrapper.dart';
 import 'package:mistpos/screens/basic/screen_main.dart';
 import 'package:mistpos/services/auth_interceptor.dart';
+import 'package:mistpos/screens/auth/screen_splash.dart';
 
 class UserController extends GetxController {
   RxBool loading = RxBool(false);
@@ -140,6 +140,26 @@ class UserController extends GetxController {
     switchingCurrency.value = true;
     final response = await Net.put("/user/curreny/$key");
     switchingCurrency.value = false;
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return;
+    }
+    user.value = User.fromMap(response.body['update']);
+    User.saveToStorage(user.value!);
+    Toaster.showSuccess("Currency switched successfully");
+  }
+
+  RxBool switchingStore = RxBool(false);
+  void switchStore(String key) async {
+    if (user.value == null) {
+      return;
+    }
+    if (key.trim().isEmpty) {
+      return Toaster.showError("Store is required");
+    }
+    switchingStore.value = true;
+    final response = await Net.put("/user/company/$key");
+    switchingStore.value = false;
     if (response.hasError) {
       Toaster.showError(response.response);
       return;

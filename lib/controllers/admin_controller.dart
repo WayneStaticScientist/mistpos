@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:mistpos/models/average_profit_model.dart';
+import 'package:mistpos/models/company_model.dart';
 import 'package:mistpos/models/employee_model.dart';
 import 'package:mistpos/services/network_wrapper.dart';
 import 'package:mistpos/models/sales_stats_model.dart';
@@ -130,5 +131,51 @@ class AdminController extends GetxController {
           .map((e) => AverageProfitModel.fromJson(e))
           .toList();
     }
+  }
+
+  Future<bool> addCompany(Map<String, dynamic> data) async {
+    final result = await Net.post("/admin/company", data: data);
+    if (result.hasError) {
+      Toaster.showError(result.response);
+      return false;
+    }
+    loadCompanies();
+    return true;
+  }
+
+  RxBool loadingCompanies = RxBool(false);
+  RxList<CompanyModel> companies = RxList<CompanyModel>();
+  Future<void> loadCompanies({int page = 1, String search = ''}) async {
+    if (loadingCompanies.value) return;
+    loadingCompanies.value = true;
+    final result = await Net.get("/admin/companies?page=$page&search=$search");
+    loadingCompanies.value = false;
+    if (result.hasError) {
+      return;
+    }
+    if (result.body['list'] != null) {
+      List<dynamic> list = result.body['list'];
+      companies.value = list.map((e) => CompanyModel.fromJson(e)).toList();
+    }
+  }
+
+  Future<bool> deleteCompany(String id) async {
+    final result = await Net.delete("/admin/company/$id");
+    if (result.hasError) {
+      Toaster.showError(result.response);
+      return false;
+    }
+    loadCompanies();
+    return true;
+  }
+
+  Future<bool> updateCompany(Map<String, dynamic> data, String id) async {
+    final result = await Net.put("/admin/company/$id", data: data);
+    if (result.hasError) {
+      Toaster.showError(result.response);
+      return false;
+    }
+    loadCompanies();
+    return true;
   }
 }

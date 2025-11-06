@@ -119,6 +119,14 @@ class _MistAdminDashboardState extends State<MistAdminDashboard> {
                 ? Colors.grey.withAlpha(50)
                 : null,
           ),
+          ListTile(
+            leading: Iconify(Carbon.shopping_bag, color: Colors.amber),
+            title: "Stores".text(),
+            onTap: () => widget.onTap("Stores"),
+            tileColor: widget.selectedTile == "Stores"
+                ? Colors.grey.withAlpha(50)
+                : null,
+          ),
         ],
       ),
     );

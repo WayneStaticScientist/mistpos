@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/themes/app_theme.dart';
@@ -12,6 +11,7 @@ import 'package:mistpos/models/item_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:mistpos/utils/currence_converter.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/widgets/layouts/cards_recent.dart';
 import 'package:mistpos/controllers/items_controller.dart';
@@ -23,6 +23,7 @@ import 'package:mistpos/screens/basic/screen_settings_page.dart';
 import 'package:mistpos/screens/basic/screen_edit_manual_cart.dart';
 import 'package:mistpos/screens/basic/screens_select_customers.dart';
 import 'package:mistpos/screens/basic/screen_view_selected_customer.dart';
+import 'package:flutter_barcode_scanner_plus/flutter_barcode_scanner_plus.dart';
 
 class NavSale extends StatefulWidget {
   const NavSale({super.key});
@@ -159,22 +160,34 @@ class _NavSaleState extends State<NavSale> {
               ==============================================================================            
               */
                 SliverToBoxAdapter(
-                  child: [
-                    Expanded(
-                      child: MistSearchField(controller: _searchController),
-                    ),
-                    12.gapWidth,
-                    Iconify(Bx.slider_alt, color: AppTheme.color(context))
-                        .padding(
-                          EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                        )
-                        .decoratedBox(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(207),
-                            color: AppTheme.surface(context),
-                          ),
-                        ),
-                  ].row().padding(EdgeInsets.all(14)),
+                  child:
+                      [
+                            Expanded(
+                              child: MistSearchField(
+                                controller: _searchController,
+                              ),
+                            ),
+                            12.gapWidth,
+                            Iconify(
+                                  Bx.barcode_reader,
+                                  color: AppTheme.color(context),
+                                )
+                                .padding(
+                                  EdgeInsets.symmetric(
+                                    horizontal: 18,
+                                    vertical: 14,
+                                  ),
+                                )
+                                .decoratedBox(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(207),
+                                    color: AppTheme.surface(context),
+                                  ),
+                                ),
+                          ]
+                          .row()
+                          .padding(EdgeInsets.all(14))
+                          .onTapUp((e) => scanItem(e)),
                 ),
                 if (!_inSearchMode)
                   Obx(
@@ -569,5 +582,26 @@ class _NavSaleState extends State<NavSale> {
       ].row(mainAxisAlignment: MainAxisAlignment.center);
     }
     return SizedBox.shrink();
+  }
+
+  void scanItem(TapUpDetails details) async {
+    String barcodeScanResult;
+    try {
+      barcodeScanResult = await FlutterBarcodeScanner.scanBarcode(
+        '#ff6666', // Line color
+        'Cancel',
+        true,
+        ScanMode.BARCODE, // Scan mode
+      );
+    } catch (e) {
+      Toaster.showError("Error : $e");
+      return;
+    }
+    if (!mounted) return;
+    ItemModel? model = await _itemsListController.findModelByBarCode(
+      barcodeScanResult,
+    );
+    if (model == null) return;
+    _handleWidgetClick(details, model);
   }
 }

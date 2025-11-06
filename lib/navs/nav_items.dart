@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/controllers/items_controller.dart';
+import 'package:mistpos/screens/basic/screen_add_discounts.dart';
 import 'package:mistpos/screens/basic/screen_add_item.dart';
 import 'package:mistpos/navs/items_navs/nav_items_list.dart';
 import 'package:mistpos/navs/items_navs/nav_category_list.dart';
@@ -123,7 +124,7 @@ class _NavItemsState extends State<NavItems> {
     } else if (_selectedIndex == 2) {
       Get.to(() => ScreenAddModifier());
     } else if (_selectedIndex == 3) {
-      // Add Discount
+      Get.to(() => ScreenAddDiscounts());
     }
   }
 }

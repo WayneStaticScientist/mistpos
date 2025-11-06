@@ -1,18 +1,20 @@
 import 'package:exui/exui.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/navs/admin/nav_admin_stores.dart';
 import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:mistpos/navs/admin/nav_admin_employees.dart';
 import 'package:mistpos/navs/admin/nav_admin_overview.dart';
-import 'package:mistpos/navs/admin/screen_list_customers.dart';
-import 'package:mistpos/navs/items_navs/nav_category_list.dart';
 import 'package:mistpos/navs/items_navs/nav_items_list.dart';
+import 'package:mistpos/screens/basic/screen_add_store.dart';
+import 'package:mistpos/navs/admin/screen_list_customers.dart';
+import 'package:mistpos/screens/basic/screen_add_employee.dart';
+import 'package:mistpos/screens/basic/screen_add_customer.dart';
+import 'package:mistpos/navs/items_navs/nav_category_list.dart';
 import 'package:mistpos/navs/items_navs/nav_discounts_list.dart';
 import 'package:mistpos/navs/items_navs/nav_modifiers_list.dart';
-import 'package:mistpos/responsive/screen_sizes.dart';
-import 'package:mistpos/screens/basic/screen_add_customer.dart';
-import 'package:mistpos/screens/basic/screen_add_employee.dart';
 import 'package:mistpos/widgets/layouts/receits_layout_view.dart';
 import 'package:mistpos/widgets/layouts/mist_admin_dashboard.dart';
 
@@ -35,6 +37,7 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     "Discounts": NavDiscountsList(),
     "Employees": NavAdminEmployees(),
     "Customers": NavListCustomers(),
+    "Stores": NavAdminStores(),
   };
 
   @override
@@ -65,7 +68,8 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
         ],
       ),
       drawer: isLargeScreen ? null : _makeDrawer(true),
-      floatingActionButton: ["Employees", "Customers"].contains(_selectedIndex)
+      floatingActionButton:
+          ["Employees", "Customers", 'Stores'].contains(_selectedIndex)
           ? FloatingActionButton(
               onPressed: _add,
               elevation: 0,
@@ -81,6 +85,9 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     }
     if (_selectedIndex == "Customers") {
       Get.to(() => ScreenAddCustomer());
+    }
+    if (_selectedIndex == 'Stores') {
+      Get.to(() => ScreenAddStore());
     }
   }
 

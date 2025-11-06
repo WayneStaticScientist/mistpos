@@ -81,36 +81,50 @@ class DevicesController extends GetxController {
       Toaster.showError("User should be register first");
       return false;
     }
-    connectingToDevice.value = true;
-    await printer.registerDevice(
-      PosPrinterRole.cashier,
-      PrinterDevice(
-        id: user.hexId,
-        name: user.fullName,
-        type: PrinterType.bluetooth,
-        address: macAddress,
-      ),
-    );
-    connectingToDevice.value = false;
-    cashierConnected.value = printer.isRoleConnected(PosPrinterRole.cashier);
-    if (!cashierConnected.value) {
-      Toaster.showError(
-        "Failed to connect to device , Switch on bluetooth and try again",
-      );
-      return false;
-    }
-    await isar.writeTxn(() async {
-      isar.printerDeviceModels.put(
-        PrinterDeviceModel(
-          name: name,
+    try {
+      connectingToDevice.value = true;
+      await printer.registerDevice(
+        PosPrinterRole.cashier,
+        PrinterDevice(
+          id: user.hexId,
+          name: user.fullName,
+          type: PrinterType.bluetooth,
           address: macAddress,
-          isConnected: cashierConnected.value,
-          port: 0,
         ),
       );
-    });
-    getConnectedDevices();
-    return true;
+      cashierConnected.value = false;
+      for (int i = 0; i < 10; i++) {
+        if (printer.isRoleConnected(PosPrinterRole.cashier)) {
+          cashierConnected.value = true;
+          break;
+        }
+        await Future.delayed(const Duration(seconds: 1));
+      }
+      connectingToDevice.value = true;
+
+      if (!cashierConnected.value) {
+        Toaster.showError(
+          "Failed to connect to device , Switch on bluetooth and try again",
+        );
+        return false;
+      }
+      await isar.writeTxn(() async {
+        isar.printerDeviceModels.put(
+          PrinterDeviceModel(
+            name: name,
+            address: macAddress,
+            isConnected: cashierConnected.value,
+            port: 0,
+          ),
+        );
+      });
+      getConnectedDevices();
+      return true;
+    } catch (e) {
+      connectingToDevice.value = false;
+      Toaster.showError("There was error : $e");
+      return false;
+    }
   }
 
   void getConnectedDevices() async {

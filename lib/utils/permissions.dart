@@ -27,6 +27,10 @@ class UserPermissions {
       name: "Add/Update/Delete modifiers",
       value: "modifiers",
     ),
+    PermissionStructure(
+      name: "Add/Update/Delete discounts",
+      value: "discounts",
+    ),
     PermissionStructure(name: "Delete Customers", value: "customer-*"),
     PermissionStructure(name: "Have Cashier Capabilites", value: "cashier"),
   ];

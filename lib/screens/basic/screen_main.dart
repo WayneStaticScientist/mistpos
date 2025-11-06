@@ -51,6 +51,7 @@ class _ScreenMainState extends State<ScreenMain> {
         _itemsController.loadCategories();
         _itemsController.loadSavedItems();
         _itemsController.loadReceits();
+        _itemsController.loadDiscounts();
         _itemsInialized = true;
       }
     });

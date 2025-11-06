@@ -6,6 +6,7 @@ import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/models/response_model.dart';
+import 'package:mistpos/models/discount_model.dart';
 import 'package:mistpos/models/customer_model.dart';
 import 'package:mistpos/models/item_saved_model.dart';
 import 'package:mistpos/models/item_receit_item.dart';
@@ -31,6 +32,7 @@ class ItemsController extends GetxController {
   @override
   void onInit() {
     _loadFixedItems();
+    _loadFixedDiscounts();
     _loadFixedCategories();
     super.onInit();
   }
@@ -840,5 +842,106 @@ class ItemsController extends GetxController {
       return;
     }
     categories.value = isar.itemCategoryModels.where().findAllSync();
+  }
+
+  /*
+  =====================================================================
+   =================== DICOUNTS========================================
+  =====================================================================
+*/
+  Future<bool> addDiscount(dynamic data) async {
+    final response = await Net.post("/admin/discount", data: data);
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return false;
+    }
+    DiscountModel discount = DiscountModel.fromJson(response.body['update']);
+    final isar = Isar.getInstance();
+    if (isar != null) {
+      await isar.writeTxn(() async {
+        await isar.discountModels.put(discount);
+      });
+    }
+    loadDiscounts();
+    return true;
+  }
+
+  RxList<DiscountModel> discounts = <DiscountModel>[].obs;
+  RxBool syncingDiscounts = RxBool(false);
+  RxString syncingDiscountsFailed = RxString("");
+  void loadDiscounts({String search = '', int page = 1}) async {
+    if (syncingDiscounts.value) return;
+    syncingDiscounts.value = true;
+    syncingDiscountsFailed.value = "";
+    final response = await Net.get(
+      "/cashier/discounts?page=$page&search=$search",
+    );
+    syncingDiscounts.value = false;
+    if (response.hasError) {
+      syncingDiscountsFailed.value = response.response;
+      return;
+    }
+    final list = response.body['list'] as List<dynamic>? ?? [];
+    discounts.value = list.map((e) => DiscountModel.fromJson(e)).toList();
+    final isar = Isar.getInstance();
+    if (isar != null) {
+      await isar.writeTxn(() async {
+        await isar.discountModels.where().deleteAll();
+        await isar.discountModels.putAll(discounts);
+      });
+    }
+  }
+
+  void _loadFixedDiscounts() {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      return;
+    }
+    discounts.value = isar.discountModels.where().findAllSync();
+  }
+
+  void deleteDiscount(String id) async {
+    final response = await Net.delete("/admin/discount/$id");
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return;
+    }
+    loadDiscounts();
+    Toaster.showSuccess("discount deleted");
+  }
+
+  Future<bool> updateDiscount(dynamic data, String id) async {
+    final response = await Net.put("/admin/discount/$id", data: data);
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return false;
+    }
+    loadDiscounts();
+    return true;
+  }
+
+  /*
+  ==============================================
+  Ysssssssssss
+  */
+  Future<ItemModel?> findModelByBarCode(String barCode) async {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      Toaster.showError('Database not initialized');
+      return null;
+    }
+    ItemModel? model = isar.itemModels
+        .filter()
+        .barcodeEqualTo(barCode)
+        .findFirstSync();
+    if (model != null) {
+      return model;
+    }
+    final result = await Net.get("/cashier/product/barcode/$barCode");
+    if (result.hasError) {
+      Toaster.showError(result.response);
+      return null;
+    }
+    return ItemModel.fromJson(result.body['update']);
   }
 }
