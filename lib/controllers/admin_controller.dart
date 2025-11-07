@@ -1,11 +1,12 @@
 import 'package:get/get.dart';
-import 'package:mistpos/models/average_profit_model.dart';
-import 'package:mistpos/models/company_model.dart';
+import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/employee_model.dart';
+import 'package:mistpos/models/company_model.dart';
+import 'package:mistpos/models/dialy_sale_model.dart';
 import 'package:mistpos/services/network_wrapper.dart';
 import 'package:mistpos/models/sales_stats_model.dart';
 import 'package:mistpos/models/product_stats_model.dart';
-import 'package:mistpos/utils/toast.dart';
+import 'package:mistpos/models/average_profit_model.dart';
 
 class AdminController extends GetxController {
   RxBool loading = RxBool(false);
@@ -177,5 +178,23 @@ class AdminController extends GetxController {
     }
     loadCompanies();
     return true;
+  }
+
+  RxBool loadingDailySales = RxBool(false);
+  RxList<DialySaleModel> dailySales = RxList<DialySaleModel>();
+  Future<void> getDailySales(DateTime date) async {
+    if (loadingDailySales.value) return;
+    loadingDailySales.value = true;
+    final result = await Net.get(
+      "/admin/stats/sales/daily?date=${date.toIso8601String()}",
+    );
+    loadingDailySales.value = false;
+    if (result.hasError) {
+      return;
+    }
+    if (result.body['list'] != null) {
+      List<dynamic> list = result.body['list'];
+      dailySales.value = list.map((e) => DialySaleModel.fromJson(e)).toList();
+    }
   }
 }

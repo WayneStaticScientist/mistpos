@@ -12,6 +12,7 @@ class InvItem {
   String barcode;
   int inStock = 1;
   int difference = 0;
+  bool updated = false;
   InvItem({
     this.id = '',
     this.name = '',
@@ -22,6 +23,7 @@ class InvItem {
     this.barcode = '',
     this.difference = 0,
     this.inStock = 1,
+    this.updated = false,
   });
   Map<String, dynamic> toMap() {
     return {
@@ -30,6 +32,7 @@ class InvItem {
       "name": name,
       "cost": cost,
       "amount": amount,
+      "updated": updated,
       "barcode": barcode,
       "inStock": inStock,
       "quantity": quantity,
@@ -41,13 +44,14 @@ class InvItem {
     return InvItem(
       id: data['id'],
       name: data['name'],
-      cost: (data['cost'] as num?)?.toDouble() ?? 0.0,
-      quantity: data['quantity'],
-      amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
       sku: data['sku'] ?? '',
-      barcode: data['barcode'] ?? '',
+      quantity: data['quantity'],
       inStock: data['inStock'] ?? 0,
+      barcode: data['barcode'] ?? '',
+      updated: data['updated'] ?? false,
       difference: data['difference'] ?? 0,
+      cost: (data['cost'] as num?)?.toDouble() ?? 0.0,
+      amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

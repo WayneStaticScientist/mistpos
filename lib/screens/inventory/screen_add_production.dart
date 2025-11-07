@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/inv_item.dart';
 import 'package:data_table_2/data_table_2.dart';
@@ -11,6 +10,7 @@ import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/screens/basic/modern_layout.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/widgets/buttons/mist_loaded_icon_button.dart';
 import 'package:mistpos/screens/inventory/screen_select_purchase_order_items.dart';
@@ -74,8 +74,11 @@ class _ScreenAddProductionState extends State<ScreenAddProduction> {
                   title: "Composite Items".text(),
                   contentPadding: EdgeInsets.all(0),
                   trailing: IconButton(
-                    onPressed: () =>
-                        Get.to(() => ScreenSelectPurchaseOrderItems()),
+                    onPressed: () => Get.to(
+                      () => ScreenSelectPurchaseOrderItems(
+                        isCompositeItems: true,
+                      ),
+                    ),
                     icon: Icon(Icons.add),
                   ),
                 ),

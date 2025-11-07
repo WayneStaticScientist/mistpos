@@ -168,4 +168,12 @@ class UserController extends GetxController {
     User.saveToStorage(user.value!);
     Toaster.showSuccess("Currency switched successfully");
   }
+
+  Future<({User? user, String error})> getUserById(String senderId) async {
+    final response = await Net.get("/user/$senderId");
+    if (response.hasError) {
+      return (error: response.response, user: null);
+    }
+    return (error: "", user: User.fromMap(response.body['update']));
+  }
 }

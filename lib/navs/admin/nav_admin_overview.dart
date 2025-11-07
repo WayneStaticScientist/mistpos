@@ -83,9 +83,17 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
               ),
               18.gapWidth,
               CardOverview(
-                label: "Total Expense",
+                label: "Stock Value",
                 value: CurrenceConverter.getCurrenceFloatInStrings(
                   _adminController.statsPoducts.value?.totalCost ?? 0,
+                  _userController.user.value?.baseCurrence ?? '',
+                ),
+              ),
+              18.gapWidth,
+              CardOverview(
+                label: "Total Revenue",
+                value: CurrenceConverter.getCurrenceFloatInStrings(
+                  _adminController.statsPoducts.value?.totalRevenue ?? 0,
                   _userController.user.value?.baseCurrence ?? '',
                 ),
               ),
@@ -113,7 +121,7 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
               CardOverview(
                 label: "Total Sales",
                 value: CurrenceConverter.getCurrenceFloatInStrings(
-                  _adminController.statsSales.value?.totalSales ?? 0,
+                  _adminController.statsSales.value?.totalRevenue ?? 0,
                   _userController.user.value?.baseCurrence ?? '',
                 ),
               ),

@@ -4,11 +4,11 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:iconify_flutter/icons/bx.dart';
-import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/utils/currence_converter.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/screens/basic/screen_add_item.dart';
@@ -37,7 +37,7 @@ class _ScreenSelectPurchaseOrderItemsState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _itemController.syncCartItemsOnBackground(
+      _itemController.syncFixedItemsOnBackground(
         isCompositeItems: widget.isCompositeItems ?? false,
       );
     });
@@ -74,7 +74,7 @@ class _ScreenSelectPurchaseOrderItemsState
         controller: _refreshController,
         enablePullUp: true,
         onRefresh: () async {
-          await _itemController.syncCartItemsOnBackground(
+          await _itemController.syncFixedItemsOnBackground(
             page: 1,
             search: _searchTerm,
             isCompositeItems: widget.isCompositeItems ?? false,
@@ -88,16 +88,16 @@ class _ScreenSelectPurchaseOrderItemsState
           ),
           Expanded(
             child: Obx(
-              () => _itemController.cartItems.isEmpty
+              () => _itemController.fixedItems.isEmpty
                   ? "No items found . Click + to add new item".text()
                   : ListView.builder(
                       itemBuilder: (context, index) {
-                        if (index < _itemController.cartItems.length) {
-                          return _buildTile(_itemController.cartItems[index]);
+                        if (index < _itemController.fixedItems.length) {
+                          return _buildTile(_itemController.fixedItems[index]);
                         }
                         return _buildLoader();
                       },
-                      itemCount: _itemController.cartItems.length + 1,
+                      itemCount: _itemController.fixedItems.length + 1,
                     ),
             ),
           ),
@@ -158,7 +158,7 @@ class _ScreenSelectPurchaseOrderItemsState
       final searchTerm = _searchController.text;
       if (_searchTerm != searchTerm) {
         _searchTerm = searchTerm;
-        _itemController.syncCartItemsOnBackground(
+        _itemController.syncFixedItemsOnBackground(
           search: _searchTerm,
           page: 1,
           isCompositeItems: widget.isCompositeItems ?? false,

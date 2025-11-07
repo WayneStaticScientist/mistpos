@@ -5,6 +5,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:mistpos/models/company_model.dart';
 import 'package:mistpos/models/exchange_rate_model.dart';
 import 'package:mistpos/models/production_model.dart';
+import 'package:mistpos/models/transfer_order_model.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/inv_item.dart';
 import 'package:mistpos/models/item_model.dart';
@@ -237,8 +238,32 @@ class InventoryController extends GetxController {
     }
     selectedSupplier.value = null;
     selectedInvItems.clear();
-    loadStockAdjustments(page: 1);
+    loadTransferOrders(page: 1);
     return (status: true, rejects: rejects);
+  }
+
+  Rx<bool> loadingTransferOrders = Rx<bool>(false);
+  RxList<TransferOrderModel> transferOrders = RxList<TransferOrderModel>([]);
+  RxInt transferOrderPage = RxInt(1);
+  RxInt transferOrderTotalPages = RxInt(2);
+  Future<void> loadTransferOrders({int page = 1, String search = ''}) async {
+    if (loadingTransferOrders.value) return;
+    loadingTransferOrders.value = true;
+    final response = await Net.get(
+      "/admin/inventory/transfer-order?page=$page&search=$search",
+    );
+    loadingTransferOrders.value = false;
+    if (response.hasError) {
+      return;
+    }
+    transferOrderPage.value = response.body['currentPage'];
+    transferOrderTotalPages.value = response.body['totalPages'];
+    if (response.body['list'] != null) {
+      List<dynamic> list = response.body['list'];
+      transferOrders.value = list
+          .map((e) => TransferOrderModel.fromJson(e))
+          .toList();
+    }
   }
 
   /*

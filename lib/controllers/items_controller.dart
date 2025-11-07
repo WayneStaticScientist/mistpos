@@ -945,7 +945,7 @@ class ItemsController extends GetxController {
     syncingFixedItems.value = true;
     syncingFixedItemsFailed.value = "";
     final response = await Net.get(
-      "/cashier/products?page=$page&search=$search&category=$category",
+      "/cashier/products?page=$page&search=$search&category=$category&composite=${isCompositeItems ? 'true' : 'false'}",
     );
     syncingFixedItems.value = false;
     if (response.hasError) {

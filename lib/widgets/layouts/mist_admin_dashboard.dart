@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
+import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/layouts/profile_tile.dart';
@@ -30,14 +31,34 @@ class _MistAdminDashboardState extends State<MistAdminDashboard> {
       child: ListView(
         children: [
           ProfileTile(),
-          Divider(color: Colors.grey.withAlpha(100), thickness: 1),
-          ListTile(
-            leading: Iconify(Carbon.dashboard, color: Colors.blueAccent),
-            title: "Overview".text(),
-            onTap: () => widget.onTap("Overview"),
-            tileColor: widget.selectedTile == "Overview"
+          Divider(color: Colors.grey.withAlpha(50), thickness: 1),
+          ExpansionTile(
+            title: "Statistics".text(),
+            childrenPadding: EdgeInsets.symmetric(horizontal: 14),
+            shape: RoundedRectangleBorder(),
+            leading: Iconify(Bx.stats, color: Colors.deepPurple),
+            collapsedBackgroundColor:
+                ["Overview", "Daily Sales"].contains(widget.selectedTile)
                 ? Colors.grey.withAlpha(50)
                 : null,
+            children: [
+              ListTile(
+                leading: Iconify(Carbon.dashboard, color: Colors.blueAccent),
+                title: "Overview".text(),
+                onTap: () => widget.onTap("Overview"),
+                tileColor: widget.selectedTile == "Overview"
+                    ? Colors.grey.withAlpha(50)
+                    : null,
+              ),
+              ListTile(
+                leading: Iconify(Carbon.sun, color: Colors.lime),
+                title: "Daily Sales".text(),
+                onTap: () => widget.onTap("Daily Sales"),
+                tileColor: widget.selectedTile == "Daily Sales"
+                    ? Colors.grey.withAlpha(50)
+                    : null,
+              ),
+            ],
           ),
           ListTile(
             leading: Iconify(Carbon.receipt, color: Colors.red),

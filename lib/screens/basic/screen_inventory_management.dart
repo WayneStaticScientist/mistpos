@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/navs/admin/nav_inventory_counts.dart';
 import 'package:mistpos/navs/admin/nav_inventory_production.dart';
+import 'package:mistpos/navs/admin/nav_transfer_orders.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:mistpos/screens/inventory/screen_add_inventory_counts.dart';
 import 'package:mistpos/screens/inventory/screen_add_production.dart';
@@ -27,7 +28,7 @@ class ScreenInventoryManagement extends StatefulWidget {
 class _ScreenInventoryManagementState extends State<ScreenInventoryManagement> {
   final _userController = Get.find<UserController>();
   final navs = {
-    "Transfer Orders": const SizedBox.shrink(),
+    "Transfer Orders": const NavTransferOrders(),
     "Productions": const NavInventoryProduction(),
     "Inventory Counts": const NavInventoryCounts(),
     "Suppliers": const NavInventorySuppliersList(),

@@ -2,14 +2,17 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/models/inv_item.dart';
 import 'package:mistpos/utils/toast.dart';
+import 'package:mistpos/models/inv_item.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/models/transfer_order_model.dart';
 import 'package:mistpos/widgets/buttons/card_buttons.dart';
+import 'package:mistpos/controllers/admin_controller.dart';
+import 'package:mistpos/screens/basic/modern_layout.dart';
+import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/widgets/buttons/mist_loaded_icon_button.dart';
 import 'package:mistpos/screens/inventory/screen_select_purchase_order_items.dart';
@@ -27,11 +30,22 @@ class _ScreenAddTransferOrderState extends State<ScreenAddTransferOrder> {
   final _user = Get.find<UserController>();
   final _notesController = TextEditingController();
   final _inventory = Get.find<InventoryController>();
+  final _adminController = Get.find<AdminController>();
   String? _toStore;
   List<InvItem> _rejects = [];
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _adminController.loadCompanies();
+    });
+  }
+
+  @override
+  void dispose() {
+    _inventory.selectedInvItems.clear();
+    _notesController.dispose();
+    super.dispose();
   }
 
   @override
@@ -56,61 +70,68 @@ class _ScreenAddTransferOrderState extends State<ScreenAddTransferOrder> {
               child: ListView(
                 padding: EdgeInsets.all(5),
                 children: [
-                  [
-                        "Transfer Information".text(
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        24.gapHeight,
-                        "Transfer Items to which store".text(),
-                        8.gapHeight,
-                        DropdownButton(
-                          value: _toStore,
-                          isDense: true,
-                          isExpanded: true,
-                          onChanged: (value) {
-                            setState(() {
-                              _toStore = value;
-                            });
-                          },
-                          items: List.generate(
-                            _user.user.value!.companies.length,
-                            (index) {
-                              return DropdownMenuItem(
-                                value: (_user.user.value!.companies[index]),
-                                child: (_user.user.value!.companies[index])
-                                    .text(),
-                              );
-                            },
-                          ),
-                          hint: Text(
-                            "Select Which store you want to transfer ",
-                          ),
-                        ).sizedBox(width: double.infinity),
-                        18.gapHeight,
-                        MistFormInput(
-                          label: "Notes",
-                          icon: Iconify(
-                            Bx.note,
-                            color: Colors.grey.withAlpha(200),
-                          ),
-                          underLineColor: Colors.grey.withAlpha(200),
-                          controller: _notesController,
-                        ),
-                      ]
-                      .column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                      )
-                      .padding(EdgeInsets.all(12))
-                      .decoratedBox(
-                        decoration: BoxDecoration(
-                          color: Get.theme.colorScheme.surface,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                  MistMordernLayout(
+                    label: "Transfer Information",
+                    children: [
+                      8.gapHeight,
+                      ListTile(
+                        contentPadding: EdgeInsets.all(0),
+                        title: "Current Store".text(),
+                        subtitle: _user.user.value!.companyName.text(),
+                        leading: Iconify(Bx.building, color: Colors.white),
                       ),
+                      24.gapHeight,
+
+                      "Transfer Items to which store".text(),
+
+                      Obx(() {
+                        if (_adminController.loadingCompanies.value) {
+                          return MistLoader1();
+                        }
+                        if (_adminController.companies.isEmpty) {
+                          return "No Stores found".text();
+                        }
+                        return DropdownButton(
+                              value: _toStore,
+                              isDense: true,
+                              isExpanded: true,
+                              onChanged: (value) {
+                                setState(() {
+                                  _toStore = value;
+                                });
+                              },
+                              items: List.generate(
+                                _adminController.companies.length,
+                                (index) {
+                                  return DropdownMenuItem(
+                                    value:
+                                        _adminController.companies[index].hexId,
+                                    child: _adminController
+                                        .companies[index]
+                                        .name
+                                        .text(),
+                                  );
+                                },
+                              ),
+                              hint: Text(
+                                "Select Which store you want to transfer ",
+                              ),
+                            )
+                            .sizedBox(width: double.infinity)
+                            .visibleIf(_adminController.companies.isNotEmpty);
+                      }),
+                      18.gapHeight,
+                      MistFormInput(
+                        label: "Notes",
+                        icon: Iconify(
+                          Bx.note,
+                          color: Colors.grey.withAlpha(200),
+                        ),
+                        underLineColor: Colors.grey.withAlpha(200),
+                        controller: _notesController,
+                      ),
+                    ],
+                  ),
                   32.gapHeight,
                   [
                         [
@@ -138,7 +159,9 @@ class _ScreenAddTransferOrderState extends State<ScreenAddTransferOrder> {
                                         () => _showBottomBar(e),
                                       ),
                                       leading: CircleAvatar(
-                                        child: "${(e.quantity)}".text(),
+                                        child: "${(e.quantity)}".text(
+                                          style: TextStyle(color: Colors.white),
+                                        ),
                                       ),
                                       subtitle: "in stock ${e.inStock}".text(),
                                       title: e.name.text(),
@@ -240,9 +263,7 @@ class _ScreenAddTransferOrderState extends State<ScreenAddTransferOrder> {
       notes: _notesController.text,
       inventoryItems: _inventory.selectedInvItems,
     );
-    final response = await _inventory.addInventoryStockAdjustment(
-      order.toJson(),
-    );
+    final response = await _inventory.addInventoryTransferOrder(order.toJson());
     if (!mounted) return;
     setState(() {
       _isLoading = false;
@@ -253,9 +274,6 @@ class _ScreenAddTransferOrderState extends State<ScreenAddTransferOrder> {
       Toaster.showSuccess("Stock Ajusted");
       return;
     }
-    Toaster.showSuccess(
-      "Stock adjustment was succeefull but with some few errors",
-    );
   }
 
   Widget _buildRejectsScreen() {

@@ -2,13 +2,13 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
-import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/utils/currence_converter.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/models/inventory_count_model.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/widgets/layouts/card_overview.dart';
@@ -30,7 +30,6 @@ class _ScreenViewInventoryCountState extends State<ScreenViewInventoryCount> {
   User? sender;
   String _error = "";
   bool _loading = true;
-  bool _updatingState = false;
   final _userController = Get.find<UserController>();
   @override
   void initState() {
@@ -41,7 +40,16 @@ class _ScreenViewInventoryCountState extends State<ScreenViewInventoryCount> {
         widget.model.inventoryItems.map((e) => e.id).toList(),
       );
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) async {});
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final response = await _userController.getUserById(widget.model.senderId);
+      if (mounted) {
+        setState(() {
+          sender = response.user;
+          _loading = false;
+          _error = response.error;
+        });
+      }
+    });
   }
 
   @override
