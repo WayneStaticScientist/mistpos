@@ -29,7 +29,10 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
   bool _loading = false;
 
   late final TextEditingController _amountController = TextEditingController(
-    text: _itemsListController.totalPrice.value.toString(),
+    text: CurrenceConverter.prevailingAmount(
+      _itemsListController.totalPrice.value,
+      _userController.user.value?.baseCurrence ?? '',
+    ).toString(),
   );
   double change = 0.0;
   Timer? _debounce;
@@ -134,12 +137,20 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
       final amount = double.tryParse(_amountController.text);
       if (amount == null) {
         setState(() {
-          change = -_itemsListController.totalPrice.value;
+          change = -CurrenceConverter.prevailingAmount(
+            _itemsListController.totalPrice.value,
+            _userController.user.value?.baseCurrence ?? '',
+          );
         });
         return;
       }
       setState(() {
-        change = amount - _itemsListController.totalPrice.value;
+        change =
+            amount -
+            CurrenceConverter.prevailingAmount(
+              _itemsListController.totalPrice.value,
+              _userController.user.value?.baseCurrence ?? '',
+            );
       });
     });
   }

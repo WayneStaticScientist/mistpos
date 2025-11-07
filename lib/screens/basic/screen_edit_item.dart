@@ -215,6 +215,22 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
           underLineColor: Colors.grey.withAlpha(200),
           controller: _itemNameController,
         ),
+        14.gapHeight,
+        ListTile(
+          onTap: () => setState(() {
+            widget.model.isForSale = !widget.model.isForSale;
+          }),
+          contentPadding: EdgeInsets.zero,
+          title: "Item is available for sale".text(),
+          leading: Checkbox(
+            value: widget.model.isForSale,
+            onChanged: (e) {
+              setState(() {
+                widget.model.isForSale = e ?? false;
+              });
+            },
+          ),
+        ),
         32.gapHeight,
         Obx(
           () => DropdownButton(

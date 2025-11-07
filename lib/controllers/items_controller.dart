@@ -10,18 +10,18 @@ import 'package:mistpos/models/discount_model.dart';
 import 'package:mistpos/models/customer_model.dart';
 import 'package:mistpos/models/item_saved_model.dart';
 import 'package:mistpos/models/item_receit_item.dart';
-import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/services/network_wrapper.dart';
 import 'package:mistpos/models/item_receit_model.dart';
 import 'package:mistpos/models/item_modifier_model.dart';
 import 'package:mistpos/models/item_categories_model.dart';
 import 'package:mistpos/models/item_saved_items_model.dart';
-import 'package:pos_universal_printer/pos_universal_printer.dart';
+import 'package:mistpos/controllers/devices_controller.dart';
 
 class ItemsController extends GetxController {
   RxDouble totalPrice = RxDouble(0);
   RxString selectedCategory = ''.obs;
   RxList<ItemModel> cartItems = <ItemModel>[].obs;
+  RxList<ItemModel> fixedItems = <ItemModel>[].obs;
   RxList<ItemModifier> modifiers = <ItemModifier>[].obs;
   RxList<CustomerModel> customers = <CustomerModel>[].obs;
   RxList<ItemReceitModel> receits = <ItemReceitModel>[].obs;
@@ -350,7 +350,7 @@ class ItemsController extends GetxController {
     syncingItems.value = true;
     syncingItemsFailed.value = "";
     final response = await Net.get(
-      "/cashier/products?page=$page&search=$search&category=$category&$isCompositeItems=${isCompositeItems ? "true" : "false"}",
+      "/cashier/products?page=$page&search=$search&category=$category&salesOnly=true",
     );
     syncingItems.value = false;
     if (response.hasError) {
@@ -679,7 +679,9 @@ class ItemsController extends GetxController {
       checkOutItems.clear();
       selectedCustomer.value = null;
       totalPrice.value = 0;
-      if (printReceits) printReceitToBackround(itemReceitModel, user);
+      if (printReceits) {
+        DevicesController.printReceitToBackround(itemReceitModel, user);
+      }
       loadReceits();
       syncCartItemsOnBackground();
       return (success: true, rejects: rejects);
@@ -797,43 +799,16 @@ class ItemsController extends GetxController {
     return true;
   }
 
-  void printReceitToBackround(ItemReceitModel itemReceitModel, User user) {
-    final printer = PosUniversalPrinter.instance;
-    final b = EscPosBuilder();
-    b.text(user.companyName.toString());
-    b.feed(2);
-    b.text("Company ${user.companyName.toString()}");
-    b.text('*** Fiscal Receipt ***', bold: true, align: PosAlign.center);
-    b.text('Role: ${user.role.toString()}');
-    b.text('Time: ${DateTime.now().toIso8601String()}');
-    b.feed(2);
-    for (final item in itemReceitModel.items) {
-      if (item.count > 1) {
-        b.text(item.name);
-        b.text(
-          "${item.count}    ${CurrenceConverter.getCurrenceFloatInStrings(item.addenum + item.price, user.baseCurrence)}   - ${CurrenceConverter.getCurrenceFloatInStrings((item.addenum + item.price), user.baseCurrence) * item.count}",
-        );
-      } else {
-        b.text(
-          "${item.name}      -  ${CurrenceConverter.getCurrenceFloatInStrings(item.price, user.baseCurrence)}}",
-        );
-      }
-    }
-    b.feed(2);
-    b.text(
-      "total       - ${CurrenceConverter.getCurrenceFloatInStrings(itemReceitModel.total, user.baseCurrence)}",
-    );
-    b.text('--- END ---', align: PosAlign.center);
-    b.cut();
-    printer.printEscPos(PosPrinterRole.cashier, b);
-  }
-
   void _loadFixedItems() {
     final isar = Isar.getInstance();
     if (isar == null) {
       return;
     }
-    cartItems.value = isar.itemModels.where().findAllSync();
+    cartItems.value = isar.itemModels
+        .filter()
+        .isForSaleEqualTo(true)
+        .findAllSync();
+    fixedItems.value = isar.itemModels.where().findAllSync();
   }
 
   void _loadFixedCategories() {
@@ -943,5 +918,56 @@ class ItemsController extends GetxController {
       return null;
     }
     return ItemModel.fromJson(result.body['update']);
+  }
+
+  /*
+  ==============================================
+  ==============================================
+                   FIXDED ITEMS |
+  ==============================================
+  ==============================================
+  */
+  RxBool syncingFixedItems = RxBool(false);
+  RxInt fixedItemsPage = RxInt(1);
+  RxInt fixedItemTotalPages = RxInt(2);
+  RxString syncingFixedItemsFailed = RxString("");
+  Future<void> syncFixedItemsOnBackground({
+    int page = 1,
+    String search = "",
+    String category = "",
+    bool isCompositeItems = false,
+  }) async {
+    if (syncingFixedItems.value) return;
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      return;
+    }
+    syncingFixedItems.value = true;
+    syncingFixedItemsFailed.value = "";
+    final response = await Net.get(
+      "/cashier/products?page=$page&search=$search&category=$category",
+    );
+    syncingFixedItems.value = false;
+    if (response.hasError) {
+      syncingFixedItemsFailed.value = response.response;
+      return;
+    }
+    fixedItemTotalPages.value = response.body['totalPages'];
+    fixedItemsPage.value = response.body['currentPage'] as int;
+    final itemList = response.body['list'] as List<dynamic>? ?? [];
+    syncingFixedItems.value = true;
+    List<ItemModel> models = itemList.map((e) {
+      return ItemModel.fromJson((e));
+    }).toList();
+    await isar.writeTxn(() async {
+      await isar.itemModels.where().deleteAll();
+      if (itemsPage.value > 1) {
+        await isar.itemModels.putAll(fixedItems);
+      }
+      await isar.itemModels.putAll(models);
+    });
+    final loadedItems = isar.itemModels.where().findAllSync();
+    fixedItems.assignAll(loadedItems);
+    syncingFixedItems.value = false;
   }
 }

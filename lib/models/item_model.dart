@@ -23,6 +23,8 @@ class ItemModel {
   bool syncOnline = false;
   bool useProduction = false;
   bool isCompositeItem = false;
+  bool isForSale = true;
+
   List<InvItem> compositeItems = [];
 
   ItemModel({
@@ -45,12 +47,14 @@ class ItemModel {
     this.useProduction = false,
     this.compositeItems = const [],
     this.modifiers,
+    this.isForSale = true,
   });
   Map<String, dynamic> toJson() {
     return {
       "name": name,
       "category": category,
       "price": price,
+      "isForSale": isForSale,
       "cost": cost,
       "soldBy": soldBy,
       "sku": sku,
@@ -72,6 +76,7 @@ class ItemModel {
   factory ItemModel.fromJson(Map<String, dynamic> json) {
     return ItemModel(
       hexId: json["_id"],
+      isForSale: json["isForSale"] as bool? ?? true,
       color: json["color"] as int?,
       sku: json["sku"] as String? ?? "",
       name: json["name"] as String? ?? "",

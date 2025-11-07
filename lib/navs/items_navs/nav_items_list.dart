@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
@@ -10,8 +13,10 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/widgets/buttons/card_buttons.dart';
+import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/widgets/layouts/list_tile_item.dart';
 import 'package:mistpos/screens/basic/screen_edit_item.dart';
+import 'package:mistpos/widgets/loaders/small_loader.dart';
 
 class NavItemsList extends StatefulWidget {
   const NavItemsList({super.key});
@@ -21,24 +26,41 @@ class NavItemsList extends StatefulWidget {
 }
 
 class _NavItemsListState extends State<NavItemsList> {
+  String searchKey = "";
+  late Timer? _debounce;
   final _itemsController = Get.find<ItemsController>();
+  final _searchController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    _startDebounce();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _itemsController.syncFixedItemsOnBackground();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => _itemsController.cartItems.isEmpty
-          ? _emptyWidget()
-          : ListView.builder(
-              itemBuilder: (context, index) => InkWell(
-                onTap: () => _openEditor(_itemsController.cartItems[index]),
-                onLongPress: () =>
-                    _openDeleteDialog(_itemsController.cartItems[index]),
-                child: MistListTileItem(
-                  item: _itemsController.cartItems[index],
-                ),
-              ),
-              itemCount: _itemsController.cartItems.length,
-            ),
-    );
+    return [
+      MistSearchField(controller: _searchController, label: "Search Items"),
+      Obx(() {
+        if (_itemsController.syncingFixedItems.value) {
+          return const Center(child: MistLoader1());
+        }
+        if (_itemsController.fixedItems.isEmpty) {
+          return _emptyWidget();
+        }
+        return ListView.builder(
+          itemBuilder: (context, index) => InkWell(
+            onTap: () => _openEditor(_itemsController.fixedItems[index]),
+            onLongPress: () =>
+                _openDeleteDialog(_itemsController.fixedItems[index]),
+            child: MistListTileItem(item: _itemsController.fixedItems[index]),
+          ),
+          itemCount: _itemsController.fixedItems.length,
+        );
+      }).expanded1,
+    ].column().padding(EdgeInsets.all(9));
   }
 
   _openEditor(ItemModel model) {
@@ -130,5 +152,20 @@ class _NavItemsListState extends State<NavItemsList> {
           crossAxisAlignment: CrossAxisAlignment.center,
         )
         .center();
+  }
+
+  void _startDebounce() {
+    _debounce = Timer.periodic(const Duration(milliseconds: 500), (e) {
+      if (_searchController.text.trim() != searchKey.trim()) {
+        searchKey = _searchController.text;
+        _itemsController.syncFixedItemsOnBackground(search: searchKey);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
   }
 }

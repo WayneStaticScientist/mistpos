@@ -9,12 +9,13 @@ class CurrenceConverter {
   static String getCurrenceFloatInStrings(double amount, String baseCurreny) {
     GetStorage storage = GetStorage();
     var jsonData = storage.read("company");
-    if (jsonData == null) return "\$${(amount).toStringAsFixed(2)}";
+    int decimalPlaces = storage.read("decimalPlaces") ?? 2;
+    if (jsonData == null) return "\$${(amount).toStringAsFixed(decimalPlaces)}";
     CompanyModel company = CompanyModel.fromJson(jsonData);
     final rate = company.exchangeRates.rates[baseCurreny];
-    if (rate == null) return "\$${(amount).toStringAsFixed(2)}";
+    if (rate == null) return "\$${(amount).toStringAsFixed(decimalPlaces)}";
     amount = amount * rate;
-    return "${baseCurreny.toUpperCase()}${(amount).toStringAsFixed(2)}";
+    return "${baseCurreny.toUpperCase()}${(amount).toStringAsFixed(decimalPlaces)}";
   }
 
   static String getCurrenceFloatk(double amount, String baseCurreny) {
@@ -26,5 +27,23 @@ class CurrenceConverter {
       return "${getCurrenceFloatInStrings(amount / 1000000, baseCurreny)}M";
     }
     return "${getCurrenceFloatInStrings(amount / 1000000000, baseCurreny)}B";
+  }
+
+  static double prevailingAmount(double amount, String baseCurreny) {
+    GetStorage storage = GetStorage();
+    var jsonData = storage.read("company");
+    if (jsonData == null) return amount;
+    CompanyModel company = CompanyModel.fromJson(jsonData);
+    final rate = company.exchangeRates.rates[baseCurreny] ?? 1.0;
+    return amount * rate;
+  }
+
+  static double toBaseAmount(double amount, String baseCurreny) {
+    GetStorage storage = GetStorage();
+    var jsonData = storage.read("company");
+    if (jsonData == null) return amount;
+    CompanyModel company = CompanyModel.fromJson(jsonData);
+    final rate = company.exchangeRates.rates[baseCurreny] ?? 1.0;
+    return amount / rate;
   }
 }

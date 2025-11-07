@@ -2,9 +2,8 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/controllers/user_controller.dart';
-import 'package:mistpos/models/inv_item.dart';
 import 'package:mistpos/utils/toast.dart';
+import 'package:mistpos/models/inv_item.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/color_list.dart';
 import 'package:mistpos/utils/icons_list.dart';
@@ -14,6 +13,7 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/screens/basic/modern_layout.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/models/item_categories_model.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
@@ -54,6 +54,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
   bool _isTrackingInventory = false;
   String _selectedIcon = IconsList.icons.first;
   Color _selectedColor = ColorList.colors.first;
+  bool _isForSale = true;
   @override
   void dispose() {
     _modifiers.clear();
@@ -365,7 +366,24 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
           underLineColor: Colors.grey.withAlpha(200),
           controller: _itemNameController,
         ),
+        14.gapHeight,
+        ListTile(
+          onTap: () => setState(() {
+            _isForSale = !_isForSale;
+          }),
+          contentPadding: EdgeInsets.zero,
+          title: "Item is available for sale".text(),
+          leading: Checkbox(
+            value: _isForSale,
+            onChanged: (e) {
+              setState(() {
+                _isForSale = e ?? false;
+              });
+            },
+          ),
+        ),
         32.gapHeight,
+
         Obx(
           () => DropdownButton(
             value: _selectedCategory,
@@ -573,6 +591,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
       avatar: "",
       soldBy: soldBy,
       shape: _selectedIcon,
+      isForSale: _isForSale,
       modifiers: _modifiers,
       useProduction: _useProduction,
       trackStock: _isTrackingInventory,

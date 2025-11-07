@@ -17,6 +17,7 @@ class MistFormInput extends StatefulWidget {
   final TextInputType? keyboardType;
   final int? validLength;
   final Widget? suffixIcon;
+  final bool? isNumberInput;
   const MistFormInput({
     super.key,
     required this.label,
@@ -30,6 +31,7 @@ class MistFormInput extends StatefulWidget {
     this.enabled,
     this.maxLines = 1,
     this.suffixIcon,
+    this.isNumberInput,
   });
 
   @override
@@ -53,7 +55,9 @@ class _MistFormInputState extends State<MistFormInput> {
       obscureText: (widget.isPasswordField != null && widget.isPasswordField!)
           ? !_isVisible
           : false,
-      keyboardType: widget.keyboardType,
+      keyboardType: widget.isNumberInput == true
+          ? TextInputType.number
+          : widget.keyboardType,
       decoration: InputDecoration(
         prefixIcon: widget.icon != null
             ? Padding(

@@ -58,58 +58,63 @@ const ItemModelSchema = CollectionSchema(
       name: r'isCompositeItem',
       type: IsarType.bool,
     ),
-    r'lowStockThreshold': PropertySchema(
+    r'isForSale': PropertySchema(
       id: 8,
+      name: r'isForSale',
+      type: IsarType.bool,
+    ),
+    r'lowStockThreshold': PropertySchema(
+      id: 9,
       name: r'lowStockThreshold',
       type: IsarType.long,
     ),
     r'modifiers': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'modifiers',
       type: IsarType.stringList,
     ),
     r'name': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'name',
       type: IsarType.string,
     ),
     r'price': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'price',
       type: IsarType.double,
     ),
     r'shape': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'shape',
       type: IsarType.string,
     ),
     r'sku': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'sku',
       type: IsarType.string,
     ),
     r'soldBy': PropertySchema(
-      id: 14,
+      id: 15,
       name: r'soldBy',
       type: IsarType.string,
     ),
     r'stockQuantity': PropertySchema(
-      id: 15,
+      id: 16,
       name: r'stockQuantity',
       type: IsarType.long,
     ),
     r'syncOnline': PropertySchema(
-      id: 16,
+      id: 17,
       name: r'syncOnline',
       type: IsarType.bool,
     ),
     r'trackStock': PropertySchema(
-      id: 17,
+      id: 18,
       name: r'trackStock',
       type: IsarType.bool,
     ),
     r'useProduction': PropertySchema(
-      id: 18,
+      id: 19,
       name: r'useProduction',
       type: IsarType.bool,
     )
@@ -194,17 +199,18 @@ void _itemModelSerialize(
   writer.writeDouble(offsets[5], object.cost);
   writer.writeString(offsets[6], object.hexId);
   writer.writeBool(offsets[7], object.isCompositeItem);
-  writer.writeLong(offsets[8], object.lowStockThreshold);
-  writer.writeStringList(offsets[9], object.modifiers);
-  writer.writeString(offsets[10], object.name);
-  writer.writeDouble(offsets[11], object.price);
-  writer.writeString(offsets[12], object.shape);
-  writer.writeString(offsets[13], object.sku);
-  writer.writeString(offsets[14], object.soldBy);
-  writer.writeLong(offsets[15], object.stockQuantity);
-  writer.writeBool(offsets[16], object.syncOnline);
-  writer.writeBool(offsets[17], object.trackStock);
-  writer.writeBool(offsets[18], object.useProduction);
+  writer.writeBool(offsets[8], object.isForSale);
+  writer.writeLong(offsets[9], object.lowStockThreshold);
+  writer.writeStringList(offsets[10], object.modifiers);
+  writer.writeString(offsets[11], object.name);
+  writer.writeDouble(offsets[12], object.price);
+  writer.writeString(offsets[13], object.shape);
+  writer.writeString(offsets[14], object.sku);
+  writer.writeString(offsets[15], object.soldBy);
+  writer.writeLong(offsets[16], object.stockQuantity);
+  writer.writeBool(offsets[17], object.syncOnline);
+  writer.writeBool(offsets[18], object.trackStock);
+  writer.writeBool(offsets[19], object.useProduction);
 }
 
 ItemModel _itemModelDeserialize(
@@ -228,17 +234,18 @@ ItemModel _itemModelDeserialize(
     cost: reader.readDouble(offsets[5]),
     hexId: reader.readStringOrNull(offsets[6]) ?? "",
     isCompositeItem: reader.readBoolOrNull(offsets[7]) ?? false,
-    lowStockThreshold: reader.readLong(offsets[8]),
-    modifiers: reader.readStringList(offsets[9]),
-    name: reader.readString(offsets[10]),
-    price: reader.readDouble(offsets[11]),
-    shape: reader.readStringOrNull(offsets[12]),
-    sku: reader.readString(offsets[13]),
-    soldBy: reader.readString(offsets[14]),
-    stockQuantity: reader.readLong(offsets[15]),
-    syncOnline: reader.readBoolOrNull(offsets[16]) ?? false,
-    trackStock: reader.readBool(offsets[17]),
-    useProduction: reader.readBoolOrNull(offsets[18]) ?? false,
+    isForSale: reader.readBoolOrNull(offsets[8]) ?? true,
+    lowStockThreshold: reader.readLong(offsets[9]),
+    modifiers: reader.readStringList(offsets[10]),
+    name: reader.readString(offsets[11]),
+    price: reader.readDouble(offsets[12]),
+    shape: reader.readStringOrNull(offsets[13]),
+    sku: reader.readString(offsets[14]),
+    soldBy: reader.readString(offsets[15]),
+    stockQuantity: reader.readLong(offsets[16]),
+    syncOnline: reader.readBoolOrNull(offsets[17]) ?? false,
+    trackStock: reader.readBool(offsets[18]),
+    useProduction: reader.readBoolOrNull(offsets[19]) ?? false,
   );
   object.id = id;
   return object;
@@ -274,26 +281,28 @@ P _itemModelDeserializeProp<P>(
     case 7:
       return (reader.readBoolOrNull(offset) ?? false) as P;
     case 8:
-      return (reader.readLong(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? true) as P;
     case 9:
-      return (reader.readStringList(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 10:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringList(offset)) as P;
     case 11:
-      return (reader.readDouble(offset)) as P;
-    case 12:
-      return (reader.readStringOrNull(offset)) as P;
-    case 13:
       return (reader.readString(offset)) as P;
+    case 12:
+      return (reader.readDouble(offset)) as P;
+    case 13:
+      return (reader.readStringOrNull(offset)) as P;
     case 14:
       return (reader.readString(offset)) as P;
     case 15:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 16:
-      return (reader.readBoolOrNull(offset) ?? false) as P;
+      return (reader.readLong(offset)) as P;
     case 17:
-      return (reader.readBool(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 18:
+      return (reader.readBool(offset)) as P;
+    case 19:
       return (reader.readBoolOrNull(offset) ?? false) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1207,6 +1216,16 @@ extension ItemModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'isCompositeItem',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> isForSaleEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isForSale',
         value: value,
       ));
     });
@@ -2292,6 +2311,18 @@ extension ItemModelQuerySortBy on QueryBuilder<ItemModel, ItemModel, QSortBy> {
     });
   }
 
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByIsForSale() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isForSale', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByIsForSaleDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isForSale', Sort.desc);
+    });
+  }
+
   QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByLowStockThreshold() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lowStockThreshold', Sort.asc);
@@ -2512,6 +2543,18 @@ extension ItemModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByIsForSale() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isForSale', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByIsForSaleDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isForSale', Sort.desc);
+    });
+  }
+
   QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByLowStockThreshold() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lowStockThreshold', Sort.asc);
@@ -2682,6 +2725,12 @@ extension ItemModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<ItemModel, ItemModel, QDistinct> distinctByIsForSale() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isForSale');
+    });
+  }
+
   QueryBuilder<ItemModel, ItemModel, QDistinct> distinctByLowStockThreshold() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lowStockThreshold');
@@ -2807,6 +2856,12 @@ extension ItemModelQueryProperty
   QueryBuilder<ItemModel, bool, QQueryOperations> isCompositeItemProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isCompositeItem');
+    });
+  }
+
+  QueryBuilder<ItemModel, bool, QQueryOperations> isForSaleProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isForSale');
     });
   }
 

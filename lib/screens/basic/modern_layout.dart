@@ -27,7 +27,7 @@ class MistMordernLayout extends StatelessWidget {
         .decoratedBox(
           decoration: BoxDecoration(
             color: AppTheme.surface(context),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(20),
           ),
         );
   }
