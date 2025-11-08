@@ -12,6 +12,9 @@ class ItemReceitItem {
   String rejectedReason = "";
   bool refunded = false;
   int originalCount = 0;
+  double discount = 0;
+  String? discountId;
+  bool percentageDiscount = true;
   int baseId = 0;
   ItemReceitItem();
   Map<String, dynamic> toJson() {
@@ -25,6 +28,10 @@ class ItemReceitItem {
       "refunded": refunded,
       "baseId": baseId,
       "originalCount": originalCount,
+      "rejectedReason": rejectedReason,
+      "discount": discount,
+      "discountId": discountId,
+      "percentageDiscount": percentageDiscount,
     };
   }
 
@@ -38,6 +45,9 @@ class ItemReceitItem {
       ..itemId = data['itemId'] ?? ''
       ..refunded = data['refunded'] ?? false
       ..baseId = data['baseId'] ?? 0
+      ..discount = (data['discount'] as num?)?.toDouble() ?? 0.0
+      ..discountId = data['discountId'] ?? ''
+      ..percentageDiscount = data['percentageDiscount'] ?? true
       ..rejectedReason = data['rejectedReason'] ?? ""
       ..originalCount = data['originalCount'] ?? 0;
   }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:get/get.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/user_model.dart';
@@ -164,6 +166,7 @@ class UserController extends GetxController {
       Toaster.showError(response.response);
       return;
     }
+    log("The update is ${response.body['update']}}");
     user.value = User.fromMap(response.body['update']);
     User.saveToStorage(user.value!);
     Toaster.showSuccess("Currency switched successfully");

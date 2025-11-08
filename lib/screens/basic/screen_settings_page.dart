@@ -1,15 +1,16 @@
+import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:mistpos/utils/toast.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/models/app_settings_model.dart';
 import 'package:mistpos/screens/basic/modern_layout.dart';
-import 'package:mistpos/themes/app_theme.dart';
-import 'package:mistpos/utils/toast.dart';
-import 'package:mistpos/widgets/inputs/input_form.dart';
+import 'package:mistpos/screens/auth/screen_user_profile.dart';
 
 class ScreenSettingsPage extends StatefulWidget {
   const ScreenSettingsPage({super.key});
@@ -28,6 +29,22 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
       body: ListView(
         padding: EdgeInsets.all(8),
         children: [
+          24.gapColumn,
+          MistMordernLayout(
+            label: "User",
+            children: [
+              ListTile(
+                onTap: () => Get.to(() => ScreenUserProfile()),
+                contentPadding: EdgeInsets.all(0),
+                title: Text("My Profile"),
+                subtitle: "view your profile".text(
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+                leading: Iconify(Bx.user, color: AppTheme.color(context)),
+              ),
+            ],
+          ),
+          24.gapColumn,
           MistMordernLayout(
             label: "Theme Settings",
             children: [

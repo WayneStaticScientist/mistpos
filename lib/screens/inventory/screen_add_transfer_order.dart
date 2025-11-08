@@ -192,13 +192,13 @@ class _ScreenAddTransferOrderState extends State<ScreenAddTransferOrder> {
       [
         CardButtons(
           onTap: () => {Get.back(), _edit(itemInv)},
-          icon: Iconify(Bx.edit),
+          icon: Iconify(Bx.edit, color: Colors.white),
           label: "Edit",
           color: Get.theme.colorScheme.primary.withAlpha(50),
         ).expanded1,
         CardButtons(
           onTap: () => {Get.back(), _inventory.removeodel(itemInv)},
-          icon: Iconify(Bx.user_plus),
+          icon: Iconify(Bx.user_plus, color: Colors.white),
           label: "Remove",
           color: Get.theme.colorScheme.secondary.withAlpha(50),
         ).expanded1,
@@ -271,7 +271,7 @@ class _ScreenAddTransferOrderState extends State<ScreenAddTransferOrder> {
     });
     if (response.status && response.rejects.isEmpty) {
       Get.back();
-      Toaster.showSuccess("Stock Ajusted");
+      Toaster.showSuccess("Transfer order processed");
       return;
     }
   }

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
-import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
@@ -14,8 +13,8 @@ import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/widgets/layouts/cards_recent.dart';
+import 'package:mistpos/widgets/layouts/layout_cashout.dart';
 import 'package:mistpos/controllers/items_controller.dart';
-import 'package:mistpos/screens/basic/screen_checkout.dart';
 import 'package:mistpos/widgets/layouts/list_tile_item.dart';
 import 'package:mistpos/widgets/layouts/cards_category.dart';
 import 'package:mistpos/screens/basic/screen_manual_cart.dart';
@@ -263,65 +262,7 @@ class _NavSaleState extends State<NavSale> {
                   bottom: 24,
                   right: 24,
                   left: 24,
-                  child: Container(
-                    key: _bottomBarKey,
-                    child:
-                        Row(
-                              children: [
-                                [
-                                  CurrenceConverter.getCurrenceFloatInStrings(
-                                        _itemsListController.totalPrice.value,
-                                        _userController
-                                                .user
-                                                .value
-                                                ?.baseCurrence ??
-                                            '',
-                                      )
-                                      .text(
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
-                                        ),
-                                      )
-                                      .textButton(
-                                        onPressed: _showSelectedItems,
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                          foregroundColor:
-                                              Get.theme.colorScheme.primary,
-                                        ),
-                                      ),
-                                  18.gapWidth,
-                                  "${_itemsListController.checkOutItems.length} items"
-                                      .text(
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                ].row().expanded1,
-                                12.gapWidth,
-                                "Checkout"
-                                    .text(
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    )
-                                    .textButton(
-                                      onPressed: () =>
-                                          Get.to(() => ScreenCheckout()),
-                                    ),
-                              ],
-                            )
-                            .padding(EdgeInsets.all(18))
-                            .decoratedBox(
-                              decoration: BoxDecoration(
-                                color: Get.theme.colorScheme.primary,
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                            ),
-                  ),
+                  child: LayoutCashout(bottomBarKey: _bottomBarKey),
                 )
               : Positioned.fill(child: SizedBox.shrink()),
         ),
@@ -517,44 +458,6 @@ class _NavSaleState extends State<NavSale> {
         _animatedOpacity = 0;
       });
     });
-  }
-
-  void _showSelectedItems() {
-    Get.bottomSheet(
-      SizedBox(
-        width: double.infinity,
-        height: MediaQuery.of(context).size.height * 0.5,
-        child: SingleChildScrollView(
-          child: [
-            "Items".text(
-              textAlign: TextAlign.start,
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Obx(
-              () => _itemsListController.checkOutItems
-                  .map<Widget>((e) {
-                    final count = e['count'] as int;
-                    final model = e['item'] as ItemModel;
-                    return Card(
-                      child: ListTile(
-                        title: Text(model.name),
-                        leading: Text("x $count"),
-                        trailing: IconButton(
-                          onPressed: () =>
-                              _itemsListController.removeSelectedItem(e),
-                          icon: Icon(Icons.close),
-                        ),
-                      ),
-                    ).onTap(() => Get.to(() => ScreenEditManualCart(map: e)));
-                  })
-                  .toList()
-                  .column(mainAxisSize: MainAxisSize.min),
-            ),
-          ].column(crossAxisAlignment: CrossAxisAlignment.start),
-        ),
-      ).padding(EdgeInsets.all(14)),
-      backgroundColor: Get.theme.scaffoldBackgroundColor,
-    );
   }
 
   void _displayError() {

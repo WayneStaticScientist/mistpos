@@ -6,13 +6,15 @@ import 'package:get/get.dart';
 class MistFormButton extends StatelessWidget {
   final bool? isLoading;
   final String label;
-  final Widget icon;
+  final Widget? icon;
+  final Color? fillColor;
   final Function()? onTap;
   const MistFormButton({
     super.key,
     required this.label,
-    required this.icon,
+    this.icon,
     this.onTap,
+    this.fillColor,
     this.isLoading,
   });
 
@@ -34,7 +36,7 @@ class MistFormButton extends StatelessWidget {
               : icon,
           style: FilledButton.styleFrom(
             iconColor: Colors.white,
-            backgroundColor: Get.theme.colorScheme.primary,
+            backgroundColor: fillColor ?? Get.theme.colorScheme.primary,
             minimumSize: Size(250, 50),
           ),
         );

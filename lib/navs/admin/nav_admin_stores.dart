@@ -48,22 +48,24 @@ class _NavAdminStoresState extends State<NavAdminStores> {
           Expanded(
             child: ListView.builder(
               itemBuilder: (context, index) {
-                return ListTile(
-                  tileColor:
-                      _userController.user.value?.company ==
-                          _adminController.companies[index].hexId
-                      ? Colors.green.withAlpha(50)
-                      : null,
-                  onTap: () => Get.to(
-                    () => ScreenViewCompany(
-                      company: _adminController.companies[index],
+                return Obx(
+                  () => ListTile(
+                    tileColor:
+                        _userController.user.value?.company ==
+                            _adminController.companies[index].hexId
+                        ? Colors.green.withAlpha(50)
+                        : null,
+                    onTap: () => Get.to(
+                      () => ScreenViewCompany(
+                        company: _adminController.companies[index],
+                      ),
                     ),
+                    leading: Iconify(Bx.store, color: AppTheme.color(context)),
+                    subtitle: _adminController.companies[index].email.text(
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                    title: _adminController.companies[index].name.text(),
                   ),
-                  leading: Iconify(Bx.store, color: AppTheme.color(context)),
-                  subtitle: _adminController.companies[index].email.text(
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
-                  ),
-                  title: _adminController.companies[index].name.text(),
                 );
               },
               itemCount: _adminController.companies.length,

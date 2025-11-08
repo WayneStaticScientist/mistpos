@@ -1,13 +1,18 @@
+import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:iconify_flutter/icons/bx.dart';
-import 'package:mistpos/controllers/items_controller.dart';
-import 'package:mistpos/models/item_model.dart';
 import 'package:mistpos/utils/toast.dart';
+import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/models/item_model.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/responsive/screen_sizes.dart';
+import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
+import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/controllers/items_controller.dart';
+import 'package:mistpos/widgets/buttons/mist_form_button.dart';
+import 'package:mistpos/screens/basic/screen_select_discount.dart';
 
 class ScreenEditManualCart extends StatefulWidget {
   final Map<String, dynamic> map;
@@ -19,8 +24,13 @@ class ScreenEditManualCart extends StatefulWidget {
 
 class _ScreenEditManualCartState extends State<ScreenEditManualCart> {
   final _itemsListController = Get.find<ItemsController>();
+  final _userController = Get.find<UserController>();
   late int count = widget.map['count'] as int;
   late int track = widget.map['count'] as int;
+  late String? discountId = widget.map['discountId'] as String?;
+  late bool percentageDiscount =
+      widget.map['percentageDiscount'] as bool? ?? true;
+  late double discount = (widget.map['discount'] as num?)?.toDouble() ?? 0.0;
   double price = 0;
   late double floatAmount = widget.map['qouted'] as double? ?? 0.0;
   late final Map<String, bool> dataMap =
@@ -37,10 +47,31 @@ class _ScreenEditManualCartState extends State<ScreenEditManualCart> {
   @override
   Widget build(BuildContext context) {
     price = count * item.price + floatAmount;
+    if (discountId != null) {
+      price = !percentageDiscount
+          ? (price - discount)
+          : (price - discount * price / 100);
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(item.name),
-        actions: ["$price".text().padding(EdgeInsets.only(right: 14))],
+        actions: [
+          CurrenceConverter.getCurrenceFloatInStrings(
+                price,
+                _userController.user.value?.baseCurrence ?? '',
+              )
+              .text(style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))
+              .padding(EdgeInsets.only(right: 14)),
+          (percentageDiscount
+                  ? "$discount%"
+                  : CurrenceConverter.getCurrenceFloatInStrings(
+                      discount,
+                      _userController.user.value?.baseCurrence ?? '',
+                    ))
+              .text(style: TextStyle(color: Colors.red, fontSize: 12))
+              .padding(EdgeInsets.only(right: 14))
+              .visibleIf(discountId != null),
+        ],
       ),
       body: ListView(
         padding: EdgeInsets.all(14),
@@ -78,8 +109,26 @@ class _ScreenEditManualCartState extends State<ScreenEditManualCart> {
               controller: priceTextController,
             ),
           ],
+          18.gapHeight,
+          [
+                MistFormButton(
+                  label: "Remove Discount",
+                  onTap: _removeDiscount,
+                  fillColor: Colors.red,
+                ),
+              ]
+              .row(mainAxisAlignment: MainAxisAlignment.center)
+              .visibleIf(discountId != null),
+
+          18.gapHeight,
+          [
+            MistFormButton(
+              label: discountId == null ? "Add Discount" : "Edit Discount",
+              onTap: _addDiscount,
+            ),
+          ].row(mainAxisAlignment: MainAxisAlignment.center),
         ],
-      ),
+      ).constrained(maxWidth: ScreenSizes.maxWidth).center(),
       bottomNavigationBar: SafeArea(
         child: SizedBox(
           child: "Update Cart"
@@ -87,8 +136,9 @@ class _ScreenEditManualCartState extends State<ScreenEditManualCart> {
               .elevatedButton(
                 onPressed: _addToCart,
                 style: ElevatedButton.styleFrom(
+                  elevation: 0,
                   backgroundColor: Get.theme.colorScheme.primary,
-                  foregroundColor: Get.theme.colorScheme.onPrimary,
+                  foregroundColor: Colors.white,
                 ),
               )
               .padding(EdgeInsets.all(12)),
@@ -191,7 +241,27 @@ class _ScreenEditManualCartState extends State<ScreenEditManualCart> {
       addenum: addenum,
       qouted: floatAmount,
       restoreAmount: track - count,
+      discountId: discountId,
+      discount: discount,
+      percentageDiscount: percentageDiscount,
     );
     Get.back();
+  }
+
+  _addDiscount() async {
+    final result = await Get.to(() => ScreenSelectDiscount());
+    if (result == null) return;
+    setState(() {
+      discount = result.value;
+      discountId = result.hexId;
+      percentageDiscount = result.percentage;
+    });
+  }
+
+  _removeDiscount() {
+    setState(() {
+      discount = 0.0;
+      discountId = null;
+    });
   }
 }

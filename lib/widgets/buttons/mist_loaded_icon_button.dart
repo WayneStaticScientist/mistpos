@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/themes/app_theme.dart';
 
 class MistLoadIconButton extends StatelessWidget {
   final String label;
@@ -29,10 +30,10 @@ class MistLoadIconButton extends StatelessWidget {
                   ),
                 )
               : SizedBox.shrink(),
-          onPressed: onPressed,
+          onPressed: isLoading == true ? null : onPressed,
           style: ElevatedButton.styleFrom(
             backgroundColor: Get.theme.colorScheme.onPrimary,
-            foregroundColor: Colors.white,
+            foregroundColor: AppTheme.color(context),
           ),
         )
         .padding(EdgeInsets.only(right: 12));

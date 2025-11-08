@@ -22,7 +22,7 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Receit ${widget.receitModel.id}"),
+        title: Text(widget.receitModel.label),
         actions: [
           "refund".text().textIconButton(
             onPressed: () => Get.off(
@@ -41,7 +41,7 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
             ).text(style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
             "Total".text(),
             18.gapHeight,
-            Divider(color: Colors.grey, thickness: 1),
+            Divider(color: Colors.grey.withAlpha(80), thickness: 1),
             [
                   18.gapHeight,
                   ListTile(
@@ -50,23 +50,37 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                   ),
 
                   18.gapHeight,
-                  Divider(color: Colors.grey, thickness: 1),
+                  Divider(color: Colors.grey.withAlpha(80), thickness: 1),
                   18.gapHeight,
-                  ...widget.receitModel.items.map(
-                    (e) => ListTile(
-                      subtitle:
-                          "${e.count.toString()} x ${CurrenceConverter.getCurrenceFloatInStrings(e.price + e.addenum, _userController.user.value?.baseCurrence ?? '')}"
-                              .text(),
+                  ...widget.receitModel.items.map((e) {
+                    double totalPrice = (e.price + e.addenum) * e.count;
+                    if (e.discountId != null && e.discountId!.isNotEmpty) {
+                      if (e.percentageDiscount) {
+                        totalPrice = totalPrice * (1 - e.discount / 100);
+                      } else {
+                        totalPrice = totalPrice - e.discount;
+                      }
+                    }
+                    return ListTile(
+                      subtitle: [
+                        "${e.count.toString()} x ${CurrenceConverter.getCurrenceFloatInStrings(e.price + e.addenum, _userController.user.value?.baseCurrence ?? '')}"
+                            .text(),
+                        12.gapWidth,
+                        (e.percentageDiscount
+                                ? "${e.discount}% off"
+                                : "\$${CurrenceConverter.getCurrenceFloatInStrings(e.discount, _userController.user.value?.baseCurrence ?? "")}")
+                            .text(style: TextStyle(color: Colors.red)),
+                      ].row(),
                       title: e.name.text(),
                       tileColor: e.refunded ? Colors.red.withAlpha(100) : null,
                       trailing: CurrenceConverter.getCurrenceFloatInStrings(
-                        (e.price + e.addenum) * e.count,
+                        totalPrice,
                         _userController.user.value?.baseCurrence ?? '',
                       ).text(),
-                    ),
-                  ),
+                    );
+                  }),
                   18.gapHeight,
-                  Divider(color: Colors.grey, thickness: 1),
+                  Divider(color: Colors.grey.withAlpha(80), thickness: 1),
                   18.gapHeight,
                   ListTile(
                     title: 'Total'.text(),
@@ -82,6 +96,10 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                       _userController.user.value?.baseCurrence ?? '',
                     ).text(),
                   ),
+                  Divider(color: Colors.grey.withAlpha(80), thickness: 1),
+                  18.gapHeight,
+                  widget.receitModel.createdAt.toString().text(),
+                  18.gapHeight,
                   ListTile(
                     title: 'Change'.text(),
                     tileColor: Colors.green,

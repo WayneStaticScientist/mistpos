@@ -1,8 +1,6 @@
 import 'package:exui/exui.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:iconify_flutter/icons/tabler.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/screens/auth/screen_user_profile.dart';
 
@@ -22,16 +20,38 @@ class _ProfileTileState extends State<ProfileTile> {
     }
     return Obx(() {
       final user = _userController.user.value!;
-      return ListTile(
-        onTap: _dropDown,
-        leading: CircleAvatar(child: user.fullName[0].text()),
-        title: user.fullName.text(),
-        subtitle: user.role.text(),
-        trailing: IconButton(
-          onPressed: _dropDown,
-          icon: Iconify(Tabler.dots_vertical, color: Colors.grey),
-        ),
-      );
+      return [
+            CircleAvatar(
+              child: user.fullName[0].text(
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            12.gapWidth,
+            [
+                  user.fullName.text(),
+                  "role : ${user.role}".text(
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  user.companyName.text(
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ]
+                .column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                )
+                .expanded1,
+            12.gapWidth,
+            "Till ${user.till.toString()}"
+                .text(style: TextStyle(fontSize: 12, color: Colors.grey))
+                .visibleIf(user.role == "cashier"),
+            12.gapWidth,
+          ]
+          .row()
+          .onTap(_dropDown)
+          .padding(EdgeInsets.symmetric(horizontal: 9, vertical: 12));
     });
   }
 

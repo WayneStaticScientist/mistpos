@@ -1,12 +1,12 @@
-import 'package:exui/material.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
+import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/controllers/user_controller.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:date_picker_plus/date_picker_plus.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:mistpos/widgets/layouts/card_overview.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
@@ -121,7 +121,7 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
               CardOverview(
                 label: "Total Sales",
                 value: CurrenceConverter.getCurrenceFloatInStrings(
-                  _adminController.statsSales.value?.totalRevenue ?? 0,
+                  _adminController.statsSales.value?.totalSales ?? 0,
                   _userController.user.value?.baseCurrence ?? '',
                 ),
               ),

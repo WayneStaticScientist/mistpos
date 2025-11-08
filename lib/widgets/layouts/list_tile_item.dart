@@ -1,9 +1,8 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/themes/app_theme.dart';
+import 'package:mistpos/utils/avatars.dart';
 import 'package:mistpos/models/item_model.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 
@@ -20,7 +19,7 @@ class _MistListTileItemState extends State<MistListTileItem> {
   @override
   Widget build(BuildContext context) {
     return [
-          _getAvatar(),
+          MistAvatar.getAvatar(widget.item),
           12.gapWidth,
           [
                 widget.item.name.text(),
@@ -51,32 +50,12 @@ class _MistListTileItemState extends State<MistListTileItem> {
         .sizedBox(height: 80)
         .decoratedBox(
           decoration: BoxDecoration(
-            color: AppTheme.surface(context),
-            borderRadius: BorderRadius.circular(20),
+            border: Border(
+              top: BorderSide(color: Colors.grey.withAlpha(40), width: 1),
+              bottom: BorderSide(color: Colors.grey.withAlpha(40), width: 1),
+            ),
           ),
         )
-        .padding(EdgeInsets.symmetric(vertical: 14));
-  }
-
-  Widget _getAvatar() {
-    if (widget.item.shape == null || widget.item.shape!.isEmpty) {
-      if (widget.item.avatar != null && widget.item.avatar!.isNotEmpty) {
-        return _getImage();
-      }
-    }
-    if (widget.item.shape != null && widget.item.shape!.isNotEmpty) {
-      return Iconify(
-        widget.item.shape!,
-        size: 48,
-        color: widget.item.color != null
-            ? Color(int.parse('${widget.item.color!}'))
-            : Get.theme.colorScheme.primary,
-      );
-    }
-    return SizedBox();
-  }
-
-  _getImage() {
-    return const SizedBox();
+        .padding(EdgeInsets.symmetric(vertical: 5));
   }
 }

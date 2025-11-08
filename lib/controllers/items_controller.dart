@@ -52,7 +52,7 @@ class ItemsController extends GetxController {
     final model = e['item'] as ItemModel;
     int indexOfSelected = checkOutItems.indexWhere((e) {
       final lmodel = e['item'] as ItemModel;
-      return lmodel.id == model.id;
+      return lmodel.hexId == model.hexId;
     });
     if (indexOfSelected < 0) {
       Toaster.showError("something went wrong");
@@ -62,12 +62,22 @@ class ItemsController extends GetxController {
     _calculatedTotalPrice();
   }
 
-  Future<void> removeAllSelected() async {
-    final isar = Isar.getInstance();
-    if (isar == null) {
-      Toaster.showError('Database not initialized');
+  void incrItem(Map<String, dynamic> e, int increment) async {
+    final model = e['item'] as ItemModel;
+    int indexOfSelected = checkOutItems.indexWhere((e) {
+      final lmodel = e['item'] as ItemModel;
+      return lmodel.hexId == model.hexId;
+    });
+    if (indexOfSelected < 0) {
+      Toaster.showError("something went wrong");
       return;
     }
+    e['count'] += increment;
+    checkOutItems[indexOfSelected] = e;
+    _calculatedTotalPrice();
+  }
+
+  Future<void> removeAllSelected() async {
     checkOutItems.clear();
     selectedCustomer.value = null;
     totalPrice.value = 0;
@@ -77,10 +87,13 @@ class ItemsController extends GetxController {
   void addSelectedItem(
     ItemModel model, {
     int count = -1,
+    String? discountId,
     double qouted = 0.0,
     double addenum = 0.0,
-    Map<String, bool>? dataMap,
+    double discount = 0.0,
     int restoreAmount = -1,
+    Map<String, bool>? dataMap,
+    bool percentageDiscount = true,
   }) async {
     final dataFound = checkOutItems.indexWhere((e) {
       final id = e['id'];
@@ -99,6 +112,10 @@ class ItemsController extends GetxController {
         "dataMap": dataMap ?? <String, bool>{},
         "hexId": model.hexId,
         "cost": model.cost,
+        "discount": discount,
+        "discountId": discountId,
+        "restoreAmount": restoreAmount,
+        "percentageDiscount": percentageDiscount,
       });
       _calculatedTotalPrice();
       return;
@@ -108,6 +125,10 @@ class ItemsController extends GetxController {
     modelFound['dataMap'] = dataMap ?? <String, bool>{};
     modelFound['addenum'] = addenum;
     modelFound['qouted'] = qouted;
+    modelFound['discount'] = discount;
+    modelFound['discountId'] = discountId;
+    modelFound['restoreAmount'] = restoreAmount;
+    modelFound['percentageDiscount'] = percentageDiscount;
     checkOutItems[dataFound] = modelFound;
     _calculatedTotalPrice();
   }
@@ -248,7 +269,7 @@ class ItemsController extends GetxController {
     savedItems.assignAll(loadedModels);
   }
 
-  void loadReceits({int page = 1, String search = ''}) async {
+  Future<void> loadReceits({int page = 1, String search = ''}) async {
     final isar = Isar.getInstance();
     if (isar == null) {
       return;
@@ -530,7 +551,15 @@ class ItemsController extends GetxController {
       final addenum = item['addenum'] as double? ?? 0.0;
       final qouted = item['qouted'] as double? ?? 0.0;
       final model = item['item'] as ItemModel;
-      return prev + count * (model.price + addenum + qouted);
+      double price = count * (model.price + addenum + qouted);
+      if (item['discountId'] != null) {
+        double discount = (item['discount'] as num?)?.toDouble() ?? 0.0;
+        bool percentageDiscount = item['percentageDiscount'] as bool? ?? true;
+        price = percentageDiscount
+            ? price * (1 - discount / 100)
+            : price - discount;
+      }
+      return prev + price;
     });
   }
 
@@ -634,6 +663,9 @@ class ItemsController extends GetxController {
           final receit = ItemReceitItem()
             ..itemId = e['hexId']
             ..name = model.name
+            ..discount = (e['discount'] as num?)?.toDouble() ?? 0.0
+            ..discountId = e['discountId'] as String?
+            ..percentageDiscount = e['percentageDiscount'] as bool? ?? true
             ..cost = e['cost'] as double? ?? 0.0
             ..baseId = model.id
             ..originalCount = e['count'] ?? 0

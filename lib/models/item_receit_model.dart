@@ -14,6 +14,7 @@ class ItemReceitModel {
   DateTime createdAt;
   String hexId = "";
   String? customerId;
+  String label;
   List<ItemReceitItem> items = [];
   ItemReceitModel({
     required this.items,
@@ -26,6 +27,7 @@ class ItemReceitModel {
     required this.createdAt,
     this.customerId,
     this.synced = false,
+    this.label = "",
   });
   Map<String, dynamic> toJson() {
     return {
@@ -36,6 +38,8 @@ class ItemReceitModel {
       "amount": amount,
       "total": total,
       "synced": synced,
+      "label": label,
+      "createdAt": createdAt.toIso8601String(),
       "items": items.map<Map<String, dynamic>>((e) => e.toJson()).toList(),
     };
   }
@@ -48,6 +52,7 @@ class ItemReceitModel {
                 .map((e) => ItemReceitItem.fromJson(e))
                 .toList()
           : [],
+      label: data['label'] ?? "-",
       synced: data['synced'] ?? false,
       hexId: data['_id'],
       total: (data['total'] as num?)?.toDouble() ?? 0.0,
@@ -55,7 +60,8 @@ class ItemReceitModel {
       change: (data['change'] as num?)?.toDouble() ?? 0.0,
       cashier: data['cashier'],
       payment: data['payment'],
-      createdAt: DateTime.now(),
+      createdAt:
+          DateTime.tryParse(data['createdAt'])?.toLocal() ?? DateTime.now(),
     );
   }
 }
