@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:mistpos/models/sales_by_employee_model.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/employee_model.dart';
 import 'package:mistpos/models/company_model.dart';
@@ -182,11 +183,11 @@ class AdminController extends GetxController {
 
   RxBool loadingDailySales = RxBool(false);
   RxList<DialySaleModel> dailySales = RxList<DialySaleModel>();
-  Future<void> getDailySales(DateTime date) async {
+  Future<void> getDailySales(DateTime date, DateTime? timeStart) async {
     if (loadingDailySales.value) return;
     loadingDailySales.value = true;
     final result = await Net.get(
-      "/admin/stats/sales/daily?date=${date.toIso8601String()}",
+      "/admin/stats/sales/daily?date=${date.toIso8601String()}&startDate=${timeStart?.toIso8601String() ?? ''}",
     );
     loadingDailySales.value = false;
     if (result.hasError) {
@@ -195,6 +196,26 @@ class AdminController extends GetxController {
     if (result.body['list'] != null) {
       List<dynamic> list = result.body['list'];
       dailySales.value = list.map((e) => DialySaleModel.fromJson(e)).toList();
+    }
+  }
+
+  RxBool loadingSalesByEmployee = RxBool(false);
+  RxList<SalesByEmployeeModel> salesByEmployee = RxList<SalesByEmployeeModel>();
+  Future<void> getSalesByEmployee(DateTime start, DateTime end) async {
+    if (loadingSalesByEmployee.value) return;
+    loadingSalesByEmployee.value = true;
+    final result = await Net.get(
+      "/admin/stats/sales/employee?endDate=${end.toIso8601String()}&startDate=${start.toIso8601String()}",
+    );
+    loadingSalesByEmployee.value = false;
+    if (result.hasError) {
+      return;
+    }
+    if (result.body['list'] != null) {
+      List<dynamic> list = result.body['list'];
+      salesByEmployee.value = list
+          .map((e) => SalesByEmployeeModel.fromJson(e))
+          .toList();
     }
   }
 }

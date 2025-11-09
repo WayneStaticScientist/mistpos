@@ -2,6 +2,7 @@ import 'package:exui/exui.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/navs/admin/daily_sales.dart';
+import 'package:mistpos/navs/admin/nav_sales_by_employee.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/navs/admin/nav_admin_stores.dart';
@@ -52,6 +53,7 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     "Customers": NavListCustomers(),
     "Stores": NavAdminStores(),
     "Daily Sales": DailySales(),
+    "Sales By Employee": const NavSalesByEmployee(),
     "Transfer Orders": const NavTransferOrders(),
     "Productions": const NavInventoryProduction(),
     "Inventory Counts": const NavInventoryCounts(),

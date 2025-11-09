@@ -1,15 +1,15 @@
+import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:data_table_2/data_table_2.dart';
-import 'package:get/get.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/bx.dart';
-import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/utils/date_utils.dart';
+import 'package:data_table_2/data_table_2.dart';
 import 'package:mistpos/models/production_model.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/screens/basic/modern_layout.dart';
-import 'package:mistpos/utils/date_utils.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 
 class ScreenViewProductions extends StatefulWidget {
   final ProductionModel model;

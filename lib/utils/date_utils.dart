@@ -11,6 +11,10 @@ class MistDateUtils {
     return "${_getMonthName(dateTime.month)} ${dateTime.day}, ${dateTime.year}";
   }
 
+  static String getInformalShortDate(DateTime dateTime) {
+    return "${_getShortMonthName(dateTime.month)} ${dateTime.day}, ${dateTime.year}";
+  }
+
   static String getWeekDayName(DateTime dateTime) {
     switch (dateTime.weekday) {
       case DateTime.monday:
@@ -58,6 +62,37 @@ class MistDateUtils {
         return "November";
       case 12:
         return "December";
+      default:
+        return "";
+    }
+  }
+
+  static String _getShortMonthName(int month) {
+    switch (month) {
+      case 1:
+        return "Jan";
+      case 2:
+        return "Feb";
+      case 3:
+        return "Mar";
+      case 4:
+        return "Apr";
+      case 5:
+        return "May";
+      case 6:
+        return "June";
+      case 7:
+        return "July";
+      case 8:
+        return "Aug";
+      case 9:
+        return "Sept";
+      case 10:
+        return "Oct";
+      case 11:
+        return "Nov";
+      case 12:
+        return "Dec";
       default:
         return "";
     }

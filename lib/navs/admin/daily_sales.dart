@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/themes/app_theme.dart';
+import 'package:mistpos/utils/date_utils.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/models/dialy_sale_model.dart';
@@ -22,28 +24,34 @@ class _DailySalesState extends State<DailySales> {
   final _controller = Get.find<AdminController>();
   final _userController = Get.find<UserController>();
   DateTime _selectedDate = DateTime.now();
+  DateTime? _startDate;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _controller.getDailySales(DateTime.now());
+      _controller.getDailySales(DateTime.now(), null);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return [
-      ListTile(
-        contentPadding: EdgeInsets.all(0),
-        subtitle: "Tap to select date of interest".text(
-          style: TextStyle(color: Colors.grey, fontSize: 12),
-        ),
-        onTap: _pickdate,
-        title:
-            "Sales for ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year} "
-                .text(),
-        trailing: Iconify(Bx.calendar, color: Colors.white),
+      14.gapHeight,
+      [
+        Iconify(Bx.calendar, color: AppTheme.color(context)),
+        8.gapWidth,
+        "Sales for ${(DateUtils.isSameDay(_selectedDate, DateTime.now()) ? "Today only" : MistDateUtils.formatNormalDate(_selectedDate))}"
+            .text()
+            .visibleIf(_startDate == null),
+        if (_startDate != null)
+          "From ${MistDateUtils.getInformalShortDate(_startDate!)} - ${(DateUtils.isSameDay(_selectedDate, DateTime.now()) ? "Today " : MistDateUtils.getInformalShortDate(_selectedDate))}"
+              .text()
+              .visibleIfNotNull(_startDate),
+      ].row(mainAxisAlignment: MainAxisAlignment.center).onTap(_changeDateRange),
+      "Tap on the date icon to change date ranges".text(
+        style: TextStyle(color: Colors.grey, fontSize: 12),
       ),
+
       14.gapHeight,
       Obx(() {
         final totalSales = _controller.dailySales.fold(
@@ -128,17 +136,17 @@ class _DailySalesState extends State<DailySales> {
     ).constrained(maxWidth: ScreenSizes.maxWidth, maxHeight: 10000);
   }
 
-  void _pickdate() async {
-    final date = await showDatePicker(
+  void _changeDateRange() async {
+    final date = await showDateRangePicker(
       context: context,
-      initialDate: _selectedDate,
       firstDate: DateTime(2023),
       lastDate: DateTime.now(),
     );
     if (date == null) return;
     setState(() {
-      _selectedDate = date;
+      _selectedDate = date.end;
+      _startDate = date.start;
     });
-    _controller.getDailySales(_selectedDate);
+    _controller.getDailySales(_selectedDate, _startDate);
   }
 }
