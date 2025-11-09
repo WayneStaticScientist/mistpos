@@ -5,6 +5,7 @@ import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/inventory/constants.dart';
+import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/widgets/layouts/chips.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
@@ -44,37 +45,37 @@ class _NavInventoryCountsState extends State<NavInventoryCounts> {
 
   @override
   Widget build(BuildContext context) {
-    return [
-      MistSearchField(
-        label: "Search Inventory Counts",
-        controller: _searchController,
-      ),
-      Wrap(
-        alignment: WrapAlignment.start,
-        children: Inventory.inventoryCountStatus
-            .map(
-              (e) =>
-                  MistChip(
-                    label: e['label'] ?? '',
-                    selected: _statusFilter == e['value'],
-                  ).onTap(() {
-                    setState(() {
-                      _statusFilter = e['value'] ?? '';
-                    });
-                    loadInventoryCounts();
-                  }),
-            )
-            .toList(),
-      ).sizedBox(width: double.infinity),
-      Expanded(
-        child: SmartRefresher(
-          controller: _refreshController,
-          enablePullUp: true,
-          onRefresh: () async {
-            loadInventoryCounts();
-            await Future.delayed(Duration(milliseconds: 800));
-            _refreshController.refreshCompleted();
-          },
+    return SmartRefresher(
+      controller: _refreshController,
+      enablePullUp: true,
+      onRefresh: () async {
+        loadInventoryCounts();
+        await Future.delayed(Duration(milliseconds: 800));
+        _refreshController.refreshCompleted();
+      },
+      child: [
+        MistSearchField(
+          label: "Search Inventory Counts",
+          controller: _searchController,
+        ),
+        Wrap(
+          alignment: WrapAlignment.start,
+          children: Inventory.inventoryCountStatus
+              .map(
+                (e) =>
+                    MistChip(
+                      label: e['label'] ?? '',
+                      selected: _statusFilter == e['value'],
+                    ).onTap(() {
+                      setState(() {
+                        _statusFilter = e['value'] ?? '';
+                      });
+                      loadInventoryCounts();
+                    }),
+              )
+              .toList(),
+        ).sizedBox(width: double.infinity),
+        Expanded(
           child: Obx(
             () => ListView.builder(
               itemBuilder: (context, index) {
@@ -87,17 +88,27 @@ class _NavInventoryCountsState extends State<NavInventoryCounts> {
             ),
           ),
         ),
-      ),
-    ].column().padding(EdgeInsets.all(14));
+      ].column().padding(EdgeInsets.all(14)),
+    );
   }
 
   Widget _buildTile(InventoryCountModel model) {
     return ListTile(
+      contentPadding: EdgeInsets.all(0),
       onTap: () => Get.to(() => ScreenViewInventoryCount(model: model)),
-      title: "${model.inventoryItems.length} Items".text(),
-      subtitle:
-          (model.notes.length > 10 ? model.notes.substring(0, 10) : model.notes)
-              .text(),
+      title:
+          [
+            model.label.text(),
+            "Created At ${MistDateUtils.getInformalDate(model.createdAt!)}"
+                .text(style: TextStyle(fontSize: 12)),
+            "Completed At ${MistDateUtils.getInformalDate(model.updatedAt!)}"
+                .text(style: TextStyle(fontSize: 12, color: Colors.green))
+                .visibleIfNot(model.status == "pending"),
+          ].column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+
       leading: CircleAvatar(child: Iconify(Bx.cart, color: Colors.white)),
       trailing: _getTrailing(model.status),
     );

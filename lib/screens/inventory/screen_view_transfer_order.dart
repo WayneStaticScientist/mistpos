@@ -5,11 +5,12 @@ import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:data_table_2/data_table_2.dart';
+import 'package:mistpos/utils/date_utils.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/screens/basic/modern_layout.dart';
 import 'package:mistpos/models/transfer_order_model.dart';
-import 'package:mistpos/widgets/layouts/card_overview.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 
 class ScreenViewTransferOrder extends StatefulWidget {
@@ -63,27 +64,20 @@ class _ScreenViewTransferOrderState extends State<ScreenViewTransferOrder> {
   }
 
   _buildInventorySummary() {
-    return [
-          "Summary ".text(style: TextStyle(fontWeight: FontWeight.bold)),
-          Wrap(
-            children: [
-              CardOverview(
-                label: "Total Items",
-                value: widget.model.inventoryItems.length.toString(),
-              ),
-            ],
-          ),
-          Iconify(Bx.pencil, color: Colors.white),
-          widget.model.notes.text(),
-        ]
-        .column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-        )
-        .padding(EdgeInsets.all(8))
-        .decoratedBox(
-          decoration: BoxDecoration(color: AppTheme.surface(context)),
-        );
+    return MistMordernLayout(
+      label: "Summary",
+      children: [
+        12.gapHeight,
+        widget.model.label.text(style: TextStyle(fontSize: 18)),
+        15.gapHeight,
+
+        [
+          "Date Created: ".text(style: TextStyle(fontWeight: FontWeight.bold)),
+          if (widget.model.createdAt != null)
+            MistDateUtils.getInformalDate(widget.model.createdAt!).text(),
+        ].row(),
+      ],
+    );
   }
 
   _buildSupplierInformation() {

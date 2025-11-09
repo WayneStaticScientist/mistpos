@@ -239,7 +239,7 @@ class _ScreenEditPurchaseOrderState extends State<ScreenEditPurchaseOrder> {
         'update'.text().textButton(
           onPressed: () {
             try {
-              int quantity = int.parse(proposedQuantity.text);
+              double quantity = double.parse(proposedQuantity.text);
               double cost = double.parse(proposedCostsPrice.text);
               itemInv.quantity = quantity;
               itemInv.cost = cost;

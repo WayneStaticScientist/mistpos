@@ -9,6 +9,7 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
+import 'package:mistpos/screens/inventory/screem_edit_supplier.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class NavInventorySuppliersList extends StatefulWidget {
@@ -69,6 +70,8 @@ class _NavInventorySuppliersListState extends State<NavInventorySuppliersList> {
 
   Widget _buildTile(SupplierModel model) {
     return ListTile(
+      onTap: () => Get.to(() => ScreenEditSupplier(supplierModel: model)),
+      contentPadding: EdgeInsets.all(0),
       leading: CircleAvatar(child: Iconify(Bx.user, color: Colors.white)),
       title: model.name.text(),
       subtitle: model.email?.text(),

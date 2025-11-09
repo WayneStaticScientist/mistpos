@@ -7,6 +7,10 @@ class MistDateUtils {
     return "${getWeekDayName(dateTime)} ${dateTime.day} ${_getMonthName(dateTime.month)} ${dateTime.year}";
   }
 
+  static String getInformalDate(DateTime dateTime) {
+    return "${_getMonthName(dateTime.month)} ${dateTime.day}, ${dateTime.year}";
+  }
+
   static String getWeekDayName(DateTime dateTime) {
     switch (dateTime.weekday) {
       case DateTime.monday:

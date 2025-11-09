@@ -33,6 +33,8 @@ class _MistListTileItemState extends State<MistListTileItem> {
                           ? Colors.red
                           : null,
                     ),
+                  ).visibleIfNot(
+                    widget.item.isCompositeItem && !widget.item.useProduction,
                   ),
               ]
               .column(

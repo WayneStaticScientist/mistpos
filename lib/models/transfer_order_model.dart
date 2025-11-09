@@ -7,6 +7,8 @@ class TransferOrderModel {
   String senderId;
   String company;
   String toCompany;
+  String label;
+  DateTime? createdAt;
   TransferOrderModel({
     required this.id,
     required this.notes,
@@ -14,6 +16,8 @@ class TransferOrderModel {
     required this.senderId,
     required this.inventoryItems,
     required this.company,
+    this.label = '',
+    this.createdAt,
   });
   // =========================================================
   // 1. toJson() - CONVERT DART OBJECT TO JSON MAP
@@ -41,7 +45,9 @@ class TransferOrderModel {
       senderId: json['senderId'] as String,
       inventoryItems: items,
       id: json['_id'],
+      label: json['label'] ?? '--',
       company: json['company'],
+      createdAt: DateTime.tryParse(json['createdAt'])?.toLocal(),
     );
   }
 }

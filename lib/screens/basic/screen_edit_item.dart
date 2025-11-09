@@ -526,7 +526,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
         'cancel'.text().textButton(onPressed: () => Get.back()),
         'save'.text().textButton(
           onPressed: () {
-            final quantity = int.tryParse(itemCountController.text.trim());
+            final quantity = double.tryParse(itemCountController.text.trim());
             if (quantity == null || quantity <= 0) {
               Toaster.showError("Invalid quantity");
               return;

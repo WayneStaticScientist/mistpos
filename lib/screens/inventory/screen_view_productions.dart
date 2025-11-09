@@ -2,11 +2,14 @@ import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:get/get.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/models/production_model.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/screens/basic/modern_layout.dart';
+import 'package:mistpos/utils/date_utils.dart';
 
 class ScreenViewProductions extends StatefulWidget {
   final ProductionModel model;
@@ -28,6 +31,13 @@ class _ScreenViewProductionsState extends State<ScreenViewProductions> {
           MistMordernLayout(
             label: "Info",
             children: [
+              18.gapHeight,
+              [
+                "Created At: ".text(
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                MistDateUtils.getInformalDate(widget.model.createdAt!).text(),
+              ].row(),
               ListTile(
                 title: "Label".text(),
                 contentPadding: EdgeInsets.all(0),
@@ -51,6 +61,7 @@ class _ScreenViewProductionsState extends State<ScreenViewProductions> {
         DataColumn2(label: Text('Item Name'), size: ColumnSize.L), // Has flex
         DataColumn(label: Text('Cost')),
         DataColumn(label: Text('Quantity')),
+        DataColumn(label: Text('Processed')),
       ],
       rows: widget.model.items
           .map(
@@ -64,6 +75,11 @@ class _ScreenViewProductionsState extends State<ScreenViewProductions> {
                   ).text(),
                 ),
                 DataCell(e.quantity.toString().text()),
+                DataCell(
+                  e.updated
+                      ? Iconify(Bx.check, color: Colors.green)
+                      : Iconify(Bx.x, color: Colors.red),
+                ),
               ],
             ),
           )

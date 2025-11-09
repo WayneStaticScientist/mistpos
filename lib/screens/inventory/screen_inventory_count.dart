@@ -3,6 +3,7 @@ import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:data_table_2/data_table_2.dart';
@@ -119,7 +120,7 @@ class _ScreenInventoryCountState extends State<ScreenInventoryCount> {
                   ),
                   ListTile(
                     title: "Total Cost difference".text(),
-                    leading: Iconify(Bx.dollar),
+                    leading: Iconify(Bx.dollar, color: AppTheme.color(context)),
                     trailing:
                         CurrenceConverter.getCurrenceFloatInStrings(
                           widget.model.totalCostDifference,
@@ -134,7 +135,7 @@ class _ScreenInventoryCountState extends State<ScreenInventoryCount> {
                   ),
                   ListTile(
                     title: "Total Item difference".text(),
-                    leading: Iconify(Bx.dollar),
+                    leading: Iconify(Bx.dollar, color: AppTheme.color(context)),
                     trailing: widget.model.totalDifference.toString().text(
                       style: TextStyle(
                         color: widget.model.totalDifference >= 0
@@ -183,7 +184,8 @@ class _ScreenInventoryCountState extends State<ScreenInventoryCount> {
     });
     if (response) {
       _itemController.syncCartItemsOnBackground(page: 1);
-      Get.back();
+      widget.model.status = "completed";
+      Get.back(result: widget.model);
       Toaster.showSuccess("Inventory Count was complited successfully");
       return;
     }
@@ -249,7 +251,7 @@ class _ScreenInventoryCountState extends State<ScreenInventoryCount> {
         'update'.text().textButton(
           onPressed: () {
             try {
-              int quantity = int.parse(countedController.text);
+              double quantity = double.parse(countedController.text);
               if (quantity < 0) {
                 Toaster.showError("Error | number shouldnt be less than 0");
                 return;
@@ -265,7 +267,7 @@ class _ScreenInventoryCountState extends State<ScreenInventoryCount> {
     );
   }
 
-  void _calculateQuantity(int quantity, InventoryChildCount itemInv) {
+  void _calculateQuantity(double quantity, InventoryChildCount itemInv) {
     int index = _inventory.inventoryCountItems.indexWhere(
       (e) => e.id == itemInv.id,
     );

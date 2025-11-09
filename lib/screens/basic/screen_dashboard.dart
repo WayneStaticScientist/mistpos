@@ -1,7 +1,7 @@
 import 'package:exui/exui.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/navs/items_navs/daily_sales.dart';
+import 'package:mistpos/navs/admin/daily_sales.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/navs/admin/nav_admin_stores.dart';
@@ -10,6 +10,8 @@ import 'package:mistpos/navs/admin/nav_admin_employees.dart';
 import 'package:mistpos/navs/admin/nav_admin_overview.dart';
 import 'package:mistpos/navs/items_navs/nav_items_list.dart';
 import 'package:mistpos/screens/basic/screen_add_store.dart';
+import 'package:mistpos/navs/admin/nav_transfer_orders.dart';
+import 'package:mistpos/navs/admin/nav_inventory_counts.dart';
 import 'package:mistpos/navs/admin/screen_list_customers.dart';
 import 'package:mistpos/screens/basic/screen_add_employee.dart';
 import 'package:mistpos/screens/basic/screen_add_customer.dart';
@@ -17,7 +19,17 @@ import 'package:mistpos/navs/items_navs/nav_category_list.dart';
 import 'package:mistpos/navs/items_navs/nav_discounts_list.dart';
 import 'package:mistpos/navs/items_navs/nav_modifiers_list.dart';
 import 'package:mistpos/widgets/layouts/receits_layout_view.dart';
+import 'package:mistpos/navs/admin/nav_inventory_production.dart';
 import 'package:mistpos/widgets/layouts/mist_admin_dashboard.dart';
+import 'package:mistpos/screens/inventory/screen_add_supplier.dart';
+import 'package:mistpos/screens/inventory/screen_add_production.dart';
+import 'package:mistpos/navs/admin/nav_inventory_purchase_order.dart';
+import 'package:mistpos/navs/admin/nav_inventory_suppliers_list.dart';
+import 'package:mistpos/navs/admin/nav_inventory_stock_adjustments.dart';
+import 'package:mistpos/screens/inventory/screen_add_transfer_order.dart';
+import 'package:mistpos/screens/inventory/screen_add_purchase_order.dart';
+import 'package:mistpos/screens/inventory/screen_add_inventory_counts.dart';
+import 'package:mistpos/screens/inventory/screen_add_stockadjustments.dart';
 
 class ScreenDashboard extends StatefulWidget {
   const ScreenDashboard({super.key});
@@ -40,6 +52,12 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     "Customers": NavListCustomers(),
     "Stores": NavAdminStores(),
     "Daily Sales": DailySales(),
+    "Transfer Orders": const NavTransferOrders(),
+    "Productions": const NavInventoryProduction(),
+    "Inventory Counts": const NavInventoryCounts(),
+    "Suppliers": const NavInventorySuppliersList(),
+    "Purchase Orders": const NavInventoryPurchaseOrder(),
+    "Stock Adjustments": const NavInventoryStockAdjustments(),
   };
 
   @override
@@ -71,7 +89,17 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
       ),
       drawer: isLargeScreen ? null : _makeDrawer(true),
       floatingActionButton:
-          ["Employees", "Customers", 'Stores'].contains(_selectedIndex)
+          [
+            "Employees",
+            "Customers",
+            'Stores',
+            "Transfer Orders",
+            "Productions",
+            "Inventory Counts",
+            "Suppliers",
+            "Purchase Orders",
+            "Stock Adjustments",
+          ].contains(_selectedIndex)
           ? FloatingActionButton(
               onPressed: _add,
               elevation: 0,
@@ -90,6 +118,24 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     }
     if (_selectedIndex == 'Stores') {
       Get.to(() => ScreenAddStore());
+    }
+    if (_selectedIndex == 'Purchase Orders') {
+      Get.to(() => ScreenAddPurchaseOrder());
+    }
+    if (_selectedIndex == 'Transfer Orders') {
+      Get.to(() => ScreenAddTransferOrder());
+    }
+    if (_selectedIndex == 'Productions') {
+      Get.to(() => ScreenAddProduction());
+    }
+    if (_selectedIndex == 'Inventory Counts') {
+      Get.to(() => ScreenAddInventoryCounts());
+    }
+    if (_selectedIndex == 'Suppliers') {
+      Get.to(() => ScreenAddSupplier());
+    }
+    if (_selectedIndex == 'Stock Adjustments') {
+      Get.to(() => ScreenAddStockadjustments());
     }
   }
 

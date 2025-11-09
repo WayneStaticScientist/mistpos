@@ -5,6 +5,7 @@ import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/inventory/constants.dart';
+import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/widgets/layouts/chips.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
@@ -57,8 +58,8 @@ class _NavInventoryPurchaseOrderState extends State<NavInventoryPurchaseOrder> {
       },
       child: [
         MistSearchField(label: "Search ", controller: _searchController),
-        Wrap(
-          alignment: WrapAlignment.start,
+        ListView(
+          scrollDirection: Axis.horizontal,
           children: Inventory.purchaseOrderStatus
               .map(
                 (e) =>
@@ -73,7 +74,7 @@ class _NavInventoryPurchaseOrderState extends State<NavInventoryPurchaseOrder> {
                     }),
               )
               .toList(),
-        ).sizedBox(width: double.infinity),
+        ).sizedBox(height: 60, width: double.infinity),
         Expanded(
           child: Obx(
             () =>
@@ -99,10 +100,11 @@ class _NavInventoryPurchaseOrderState extends State<NavInventoryPurchaseOrder> {
 
   Widget _buildTile(PurchaseOrderModel model) {
     return ListTile(
+      contentPadding: EdgeInsets.all(0),
       onTap: () => Get.to(() => ScreenViewPurchaseOrder(model: model)),
       leading: CircleAvatar(child: Iconify(Bx.tag, color: Colors.white)),
-      subtitle: Text(model.notes, maxLines: 1, overflow: TextOverflow.ellipsis),
-      title: ("${model.inventoryItems.length} Items").text(),
+      subtitle: MistDateUtils.getInformalDate(model.createdAt).text(),
+      title: (model.label).text(),
       trailing: _getIcon(model.status),
     );
   }
@@ -144,26 +146,27 @@ class _NavInventoryPurchaseOrderState extends State<NavInventoryPurchaseOrder> {
     });
   }
 
-  void loadInventoryPurchaseOrders() {
-    Future.microtask(() {
-      _inventory.loadPurchaseOrders(
-        page: 1,
-        search: _searchTerm,
-        status: _statusFilter,
-      );
-    });
+  Future<void> loadInventoryPurchaseOrders() async {
+    await _inventory.loadPurchaseOrders(
+      page: 1,
+      search: _searchTerm,
+      status: _statusFilter,
+    );
   }
 
-  _getIcon(String status) {
+  Widget _getIcon(String status) {
     if (status.toLowerCase() == "pending") {
-      return Iconify(Bx.timer, color: Colors.orange);
+      return Iconify(Bx.timer, color: Colors.orange, size: 35);
     }
     if (status.toLowerCase() == "declined") {
-      return Iconify(Bx.timer, color: Colors.red);
+      return Iconify(Bx.x, color: Colors.red, size: 35);
     }
     if (status.toLowerCase() == "accepted") {
-      return Iconify(Bx.check_circle, color: Colors.green);
+      return Iconify(Bx.check_circle, color: Colors.green, size: 35);
     }
-    return Iconify(Bx.archive, color: Colors.grey);
+    if (status.toLowerCase() == "partial-received") {
+      return Iconify(Bx.time, color: Colors.yellow, size: 35);
+    }
+    return Iconify(Bx.archive, color: Colors.grey, size: 35);
   }
 }

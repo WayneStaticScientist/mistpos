@@ -3,16 +3,19 @@ import 'package:mistpos/models/inv_item.dart';
 class ProductionModel {
   final String hexId;
   final String label;
+  final DateTime? createdAt;
   final List<InvItem> items;
   ProductionModel({
     required this.items,
     required this.hexId,
     required this.label,
+    this.createdAt,
   });
   factory ProductionModel.fromJson(Map<String, dynamic> json) {
     return ProductionModel(
       hexId: json['_id'] ?? '',
       label: json['label'],
+      createdAt: DateTime.tryParse(json['createdAt'])?.toLocal(),
       items:
           (json['compositeItems'] as List<dynamic>?)
               ?.map((e) => InvItem.fromJson(e))

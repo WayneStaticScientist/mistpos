@@ -166,7 +166,7 @@ class ItemsController extends GetxController {
           await isar.itemModels.put(obj);
         }
       });
-      loadCartItems();
+      syncCartItemsOnBackground();
       return true;
     } catch (e) {
       log("Error $e");

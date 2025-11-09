@@ -5,10 +5,13 @@ class PurchaseOrderModel {
   String notes;
   String id;
   String sellerId;
-  List<InvItem> inventoryItems;
+  String label;
   String senderId;
   String status;
   String company;
+  DateTime createdAt;
+  DateTime updatedAt;
+  List<InvItem> inventoryItems;
   PurchaseOrderModel({
     required this.notes,
     required this.id,
@@ -18,6 +21,9 @@ class PurchaseOrderModel {
     required this.expectedDate,
     required this.inventoryItems,
     required this.company,
+    required this.createdAt,
+    required this.updatedAt,
+    this.label = '',
   });
   // =========================================================
   // 1. toJson() - CONVERT DART OBJECT TO JSON MAP
@@ -48,8 +54,11 @@ class PurchaseOrderModel {
       status: json['status'] as String,
       sellerId: json['sellerId'] as String,
       senderId: json['senderId'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String).toLocal(),
+      updatedAt: DateTime.parse(json['updatedAt'] as String).toLocal(),
       inventoryItems: items,
       id: json['_id'],
+      label: json['label'] ?? "-",
       company: json['company'],
     );
   }

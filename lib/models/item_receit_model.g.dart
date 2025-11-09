@@ -53,18 +53,23 @@ const ItemReceitModelSchema = CollectionSchema(
       type: IsarType.objectList,
       target: r'ItemReceitItem',
     ),
-    r'payment': PropertySchema(
+    r'label': PropertySchema(
       id: 7,
+      name: r'label',
+      type: IsarType.string,
+    ),
+    r'payment': PropertySchema(
+      id: 8,
       name: r'payment',
       type: IsarType.string,
     ),
     r'synced': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'synced',
       type: IsarType.bool,
     ),
     r'total': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'total',
       type: IsarType.double,
     )
@@ -106,6 +111,7 @@ int _itemReceitModelEstimateSize(
           ItemReceitItemSchema.estimateSize(value, offsets, allOffsets);
     }
   }
+  bytesCount += 3 + object.label.length * 3;
   bytesCount += 3 + object.payment.length * 3;
   return bytesCount;
 }
@@ -128,9 +134,10 @@ void _itemReceitModelSerialize(
     ItemReceitItemSchema.serialize,
     object.items,
   );
-  writer.writeString(offsets[7], object.payment);
-  writer.writeBool(offsets[8], object.synced);
-  writer.writeDouble(offsets[9], object.total);
+  writer.writeString(offsets[7], object.label);
+  writer.writeString(offsets[8], object.payment);
+  writer.writeBool(offsets[9], object.synced);
+  writer.writeDouble(offsets[10], object.total);
 }
 
 ItemReceitModel _itemReceitModelDeserialize(
@@ -153,9 +160,10 @@ ItemReceitModel _itemReceitModelDeserialize(
           ItemReceitItem(),
         ) ??
         [],
-    payment: reader.readString(offsets[7]),
-    synced: reader.readBoolOrNull(offsets[8]) ?? false,
-    total: reader.readDouble(offsets[9]),
+    label: reader.readStringOrNull(offsets[7]) ?? "",
+    payment: reader.readString(offsets[8]),
+    synced: reader.readBoolOrNull(offsets[9]) ?? false,
+    total: reader.readDouble(offsets[10]),
   );
   object.id = id;
   return object;
@@ -189,10 +197,12 @@ P _itemReceitModelDeserializeProp<P>(
           ) ??
           []) as P;
     case 7:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? "") as P;
     case 8:
-      return (reader.readBoolOrNull(offset) ?? false) as P;
+      return (reader.readString(offset)) as P;
     case 9:
+      return (reader.readBoolOrNull(offset) ?? false) as P;
+    case 10:
       return (reader.readDouble(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1054,6 +1064,142 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      labelEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'label',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      labelGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'label',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      labelLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'label',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      labelBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'label',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      labelStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'label',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      labelEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'label',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      labelContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'label',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      labelMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'label',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      labelIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'label',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      labelIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'label',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
       paymentEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1361,6 +1507,19 @@ extension ItemReceitModelQuerySortBy
     });
   }
 
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortByLabel() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'label', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+      sortByLabelDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'label', Sort.desc);
+    });
+  }
+
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortByPayment() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'payment', Sort.asc);
@@ -1495,6 +1654,19 @@ extension ItemReceitModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenByLabel() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'label', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+      thenByLabelDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'label', Sort.desc);
+    });
+  }
+
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenByPayment() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'payment', Sort.asc);
@@ -1577,6 +1749,13 @@ extension ItemReceitModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QDistinct> distinctByLabel(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'label', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<ItemReceitModel, ItemReceitModel, QDistinct> distinctByPayment(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1647,6 +1826,12 @@ extension ItemReceitModelQueryProperty
       itemsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'items');
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, String, QQueryOperations> labelProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'label');
     });
   }
 

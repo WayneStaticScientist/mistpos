@@ -1,12 +1,14 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:iconify_flutter/icons/bx.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/models/inv_item.dart';
+import 'package:mistpos/themes/app_theme.dart';
+import 'package:mistpos/utils/date_utils.dart';
+import 'package:mistpos/inventory/constants.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:mistpos/utils/currence_converter.dart';
-import 'package:mistpos/widgets/layouts/card_overview.dart';
+import 'package:mistpos/screens/basic/modern_layout.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/models/stock_adjustment_model.dart';
 
 class ScreenViewStockAdjustment extends StatefulWidget {
@@ -40,94 +42,119 @@ class _ScreenViewStockAdjustmentState extends State<ScreenViewStockAdjustment> {
   }
 
   _buildProductSummary() {
-    final totalProductPrice = widget.model.inventoryItems.fold(
-      0.0,
-      (prev, current) => prev + current.amount,
+    return MistMordernLayout(
+      label: "Summary ",
+      children: [
+        18.gapHeight,
+        widget.model.label.text(
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        14.gapHeight,
+        [
+          "Date : ".text(),
+          MistDateUtils.getInformalDate(widget.model.createdAt).text(),
+        ].row(),
+        14.gapHeight,
+        [
+          "Reason : ".text(),
+          Inventory.adjustStockReasons
+                  .firstWhere(
+                    (element) => element['value'] == widget.model.reason,
+                  )['label']
+                  ?.text() ??
+              ''.text(),
+        ].row(),
+      ],
     );
-    final totalItems = widget.model.inventoryItems.fold(
-      0,
-      (prev, current) => prev + current.quantity,
-    );
-    return [
-          "Summary ".text(style: TextStyle(fontWeight: FontWeight.bold)),
-          Wrap(
-            children: [
-              if (widget.model.reason == 'add')
-                CardOverview(
-                  label: "Total Price ",
-                  value: CurrenceConverter.getCurrenceFloatInStrings(
-                    totalProductPrice,
-                    _userController.user.value?.baseCurrence ?? '',
-                  ),
-                ),
-              CardOverview(
-                label: _getProperLabel(),
-                value: totalItems.toString(),
-              ),
-            ],
-          ),
-          Iconify(Bx.pencil),
-          widget.model.notes.text(),
-        ]
-        .column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-        )
-        .padding(EdgeInsets.all(8))
-        .decoratedBox(
-          decoration: BoxDecoration(
-            color: Get.isDarkMode ? Colors.black : Colors.white,
-          ),
-        );
   }
 
   _buildProductInformation() {
-    return [
-          "Product Information ".text(
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          ExpansionTile(
-            shape: RoundedRectangleBorder(),
-            title: "Products".text(),
-            children: widget.model.inventoryItems
-                .map(
-                  (e) => ListTile(
-                    leading: CircleAvatar(child: _getPrefix(e.quantity).text()),
-                    title: e.name.text(),
-                    subtitle: widget.model.reason == "add"
-                        ? "Prop ${CurrenceConverter.getCurrenceFloatInStrings(e.cost, _userController.user.value?.baseCurrence ?? '')}"
-                              .text(style: TextStyle(fontSize: 12))
-                        : null,
-                  ),
-                )
-                .toList(),
-          ),
-        ]
-        .column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-        )
-        .padding(EdgeInsets.all(8))
-        .decoratedBox(
-          decoration: BoxDecoration(
-            color: Get.isDarkMode ? Colors.black : Colors.white,
-          ),
-        );
+    return MistMordernLayout(
+      label: "Product Information ",
+      children: [_makeTable(widget.model.inventoryItems)],
+    );
   }
 
-  String _getProperLabel() {
-    if (widget.model.reason == "add") return "Total Added";
-    if (widget.model.reason == "count") return "Total revaluated";
-    return "Total removed";
+  Widget _makeTable(List<InvItem> inventoryItems) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Table(
+        columnWidths: <int, TableColumnWidth>{
+          0: FixedColumnWidth(120.0), // Item
+          1: FixedColumnWidth(80.0),
+          2: FixedColumnWidth(80.0),
+          3: FixedColumnWidth(
+            widget.model.reason == "add" ? 100.0 : 0.0,
+          ), // Cost
+          4: FixedColumnWidth(80),
+        },
+        children: [
+          TableRow(
+            decoration: BoxDecoration(color: AppTheme.surface(context)),
+            children: [
+              "Item".text().padding(
+                EdgeInsets.symmetric(vertical: 10, horizontal: 3),
+              ),
+              "In Stock".text().padding(
+                EdgeInsets.symmetric(vertical: 10, horizontal: 3),
+              ),
+              _getLabel().text().padding(
+                EdgeInsets.symmetric(vertical: 10, horizontal: 3),
+              ),
+              "Cost"
+                  .text()
+                  .padding(EdgeInsets.symmetric(vertical: 10, horizontal: 3))
+                  .visibleIf(widget.model.reason == "add"),
+              "Stock After".text().padding(
+                EdgeInsets.symmetric(vertical: 10, horizontal: 3),
+              ), // This is the 5th item/column
+            ],
+          ),
+          ...inventoryItems.map<TableRow>(
+            (e) => TableRow(
+              children: [
+                e.name.text().padding(EdgeInsets.symmetric(vertical: 15)),
+                e.inStock.toString().text().padding(
+                  EdgeInsets.symmetric(vertical: 15),
+                ),
+                e.quantity.toString().text().padding(
+                  EdgeInsets.symmetric(vertical: 15),
+                ),
+                CurrenceConverter.getCurrenceFloatInStrings(
+                      e.cost,
+                      _userController.user.value?.baseCurrence ?? '',
+                    )
+                    .text()
+                    .padding(EdgeInsets.symmetric(vertical: 15))
+                    .visibleIf(widget.model.reason == "add"),
+                (_getStockAfter(e)).toString().text().padding(
+                  EdgeInsets.symmetric(vertical: 15),
+                ), // This is the 5th item's data
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  String _getPrefix(int size) {
+  String _getLabel() {
     if (widget.model.reason == "add") {
-      return "+ $size";
+      return "Added Stock";
     }
     if (widget.model.reason == "count") {
-      return "= $size";
+      return "Counteded";
     }
-    return "- $size";
+    return "Removed Stock";
+  }
+
+  double _getStockAfter(InvItem e) {
+    if (widget.model.reason == "add") {
+      return e.inStock + e.quantity;
+    }
+    if (widget.model.reason == "count") {
+      return e.quantity;
+    }
+    return e.inStock - e.quantity;
   }
 }

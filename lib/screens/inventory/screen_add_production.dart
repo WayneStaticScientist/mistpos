@@ -158,7 +158,7 @@ class _ScreenAddProductionState extends State<ScreenAddProduction> {
         'update'.text().textButton(
           onPressed: () {
             try {
-              int quantity = int.parse(countedController.text);
+              double quantity = double.parse(countedController.text);
               if (quantity < 0) {
                 Toaster.showError("Error | number shouldnt be less than 0");
                 return;
@@ -174,7 +174,7 @@ class _ScreenAddProductionState extends State<ScreenAddProduction> {
     );
   }
 
-  void _calculateQuantity(int quantity, InvItem itemInv) {
+  void _calculateQuantity(double quantity, InvItem itemInv) {
     itemInv.quantity = quantity;
     _inventory.updateInvItem(itemInv);
   }

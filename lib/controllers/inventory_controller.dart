@@ -28,6 +28,16 @@ class InventoryController extends GetxController {
     return true;
   }
 
+  Future<bool> updateSupplier(Map<String, dynamic> data, String id) async {
+    final result = await Net.put("/admin/supplier/$id", data: data);
+    if (result.hasError) {
+      Toaster.showError(result.response);
+      return false;
+    }
+    loadSuppliers();
+    return true;
+  }
+
   @override
   void onInit() {
     loadCompany();
@@ -114,7 +124,7 @@ class InventoryController extends GetxController {
   RxInt purchaseOrderPage = RxInt(1);
   RxInt purchaseOrderTotalPages = RxInt(1);
   RxBool purchaseOrdersLoading = RxBool(false);
-  void loadPurchaseOrders({
+  Future<void> loadPurchaseOrders({
     int page = 1,
     String search = '',
     String status = '',
@@ -165,6 +175,23 @@ class InventoryController extends GetxController {
     selectedInvItems.clear();
     loadPurchaseOrders();
     return true;
+  }
+
+  Future<PurchaseOrderModel?> receivePurchaseOrder(
+    PurchaseOrderModel model,
+  ) async {
+    final response = await Net.put(
+      "/admin/inventory/purchase-order-receive/${model.id}",
+      data: model.toJson(),
+    );
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return null;
+    }
+    selectedSupplier.value = null;
+    selectedInvItems.clear();
+    loadPurchaseOrders();
+    return PurchaseOrderModel.fromJson(response.body['update']);
   }
 
   Future<({bool status, List<InvItem> rejects})> addInventoryStockAdjustment(

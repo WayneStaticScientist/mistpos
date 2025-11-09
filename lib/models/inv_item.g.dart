@@ -51,12 +51,17 @@ const InvItemSchema = Schema(
     r'quantity': PropertySchema(
       id: 7,
       name: r'quantity',
-      type: IsarType.long,
+      type: IsarType.double,
     ),
     r'sku': PropertySchema(
       id: 8,
       name: r'sku',
       type: IsarType.string,
+    ),
+    r'updated': PropertySchema(
+      id: 9,
+      name: r'updated',
+      type: IsarType.bool,
     )
   },
   estimateSize: _invItemEstimateSize,
@@ -91,8 +96,9 @@ void _invItemSerialize(
   writer.writeString(offsets[4], object.id);
   writer.writeLong(offsets[5], object.inStock);
   writer.writeString(offsets[6], object.name);
-  writer.writeLong(offsets[7], object.quantity);
+  writer.writeDouble(offsets[7], object.quantity);
   writer.writeString(offsets[8], object.sku);
+  writer.writeBool(offsets[9], object.updated);
 }
 
 InvItem _invItemDeserialize(
@@ -109,8 +115,9 @@ InvItem _invItemDeserialize(
     id: reader.readStringOrNull(offsets[4]) ?? '',
     inStock: reader.readLongOrNull(offsets[5]) ?? 1,
     name: reader.readStringOrNull(offsets[6]) ?? '',
-    quantity: reader.readLongOrNull(offsets[7]) ?? 0,
+    quantity: reader.readDoubleOrNull(offsets[7]) ?? 0,
     sku: reader.readStringOrNull(offsets[8]) ?? '',
+    updated: reader.readBoolOrNull(offsets[9]) ?? false,
   );
   return object;
 }
@@ -137,9 +144,11 @@ P _invItemDeserializeProp<P>(
     case 6:
       return (reader.readStringOrNull(offset) ?? '') as P;
     case 7:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
+      return (reader.readDoubleOrNull(offset) ?? 0) as P;
     case 8:
       return (reader.readStringOrNull(offset) ?? '') as P;
+    case 9:
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -767,46 +776,54 @@ extension InvItemQueryFilter
   }
 
   QueryBuilder<InvItem, InvItem, QAfterFilterCondition> quantityEqualTo(
-      int value) {
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'quantity',
         value: value,
+        epsilon: epsilon,
       ));
     });
   }
 
   QueryBuilder<InvItem, InvItem, QAfterFilterCondition> quantityGreaterThan(
-    int value, {
+    double value, {
     bool include = false,
+    double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
         property: r'quantity',
         value: value,
+        epsilon: epsilon,
       ));
     });
   }
 
   QueryBuilder<InvItem, InvItem, QAfterFilterCondition> quantityLessThan(
-    int value, {
+    double value, {
     bool include = false,
+    double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
         property: r'quantity',
         value: value,
+        epsilon: epsilon,
       ));
     });
   }
 
   QueryBuilder<InvItem, InvItem, QAfterFilterCondition> quantityBetween(
-    int lower,
-    int upper, {
+    double lower,
+    double upper, {
     bool includeLower = true,
     bool includeUpper = true,
+    double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
@@ -815,6 +832,7 @@ extension InvItemQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+        epsilon: epsilon,
       ));
     });
   }
@@ -945,6 +963,16 @@ extension InvItemQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'sku',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<InvItem, InvItem, QAfterFilterCondition> updatedEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'updated',
+        value: value,
       ));
     });
   }

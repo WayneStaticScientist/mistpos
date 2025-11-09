@@ -9,6 +9,7 @@ import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/models/transfer_order_model.dart';
 import 'package:mistpos/screens/inventory/screen_view_transfer_order.dart';
+import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -76,11 +77,13 @@ class _NavTransferOrdersState extends State<NavTransferOrders> {
 
   Widget _buildTile(TransferOrderModel model) {
     return ListTile(
+      contentPadding: EdgeInsets.all(0),
       onTap: () => Get.to(() => ScreenViewTransferOrder(model: model)),
       leading: CircleAvatar(child: Iconify(Bx.transfer, color: Colors.white)),
-      title:
-          (model.notes.length > 10 ? model.notes.substring(0, 10) : model.notes)
-              .text(),
+      subtitle: model.createdAt != null
+          ? MistDateUtils.getInformalDate(model.createdAt!).text()
+          : null,
+      title: model.label.text(),
     );
   }
 

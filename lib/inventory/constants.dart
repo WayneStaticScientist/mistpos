@@ -3,6 +3,7 @@ class Inventory {
     {"label": "All", "value": ""},
     {"label": "Drafts", "value": "draft"},
     {"label": "Pending", "value": "pending"},
+    {"label": "In Process", "value": "partial-received"},
     {"label": "Declined", "value": "declined"},
     {"label": "Accepted", "value": "accepted"},
   ];

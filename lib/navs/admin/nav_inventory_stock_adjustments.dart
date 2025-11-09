@@ -5,14 +5,15 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/inventory/constants.dart';
-import 'package:mistpos/screens/inventory/screen_view_stock_adjustment.dart';
+import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/widgets/layouts/chips.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
+import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/models/stock_adjustment_model.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:mistpos/screens/inventory/screen_view_stock_adjustment.dart';
 
 class NavInventoryStockAdjustments extends StatefulWidget {
   const NavInventoryStockAdjustments({super.key});
@@ -50,8 +51,8 @@ class _NavInventoryStockAdjustmentsState
   Widget build(BuildContext context) {
     return [
       MistSearchField(label: "Search ", controller: _searchController),
-      Wrap(
-        alignment: WrapAlignment.start,
+      ListView(
+        scrollDirection: Axis.horizontal,
         children: [
           MistChip(label: "All", selected: _statusFilter == "").onTap(() {
             setState(() {
@@ -72,7 +73,7 @@ class _NavInventoryStockAdjustmentsState
                 }),
           ),
         ],
-      ).sizedBox(width: double.infinity),
+      ).sizedBox(width: double.infinity, height: 70),
       Expanded(
         child: SmartRefresher(
           controller: _refreshController,
@@ -106,29 +107,41 @@ class _NavInventoryStockAdjustmentsState
 
   Widget _buildTile(StockAdjustmentModel model) {
     return ListTile(
+      contentPadding: EdgeInsets.all(0),
+
       onTap: () => Get.to(() => ScreenViewStockAdjustment(model: model)),
       leading: CircleAvatar(child: Iconify(Bx.tag, color: Colors.white)),
-      subtitle: Text(model.notes, maxLines: 1, overflow: TextOverflow.ellipsis),
-      title: ("${model.inventoryItems.length} Items").text(),
+      title:
+          [
+            (model.label).text(),
+            MistDateUtils.getInformalDate(
+              model.createdAt,
+            ).text(style: TextStyle(fontSize: 12, color: Colors.grey)),
+            Inventory.adjustStockReasons
+                    .firstWhere(
+                      (element) => element['value'] == model.reason,
+                    )['label']
+                    ?.text(style: TextStyle(fontSize: 12, color: Colors.red)) ??
+                ''.text(),
+          ].column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+          ),
     );
   }
 
   Widget _buildLoader() {
     if (_inventory.purchaseOrderPage.value >=
-        _inventory.purchaseOrderTotalPages.value) {
-      return ['No more Purchase Orders'.text()]
+            _inventory.purchaseOrderTotalPages.value &&
+        !_inventory.stockAdjustOrdersLoading.value) {
+      return ['No more Stock Adjustments'.text()]
           .row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
           )
           .padding(EdgeInsets.all(14));
     }
-    return [
-          LoadingAnimationWidget.staggeredDotsWave(
-            color: Colors.white,
-            size: 200,
-          ),
-        ]
+    return [MistLoader1()]
         .row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,

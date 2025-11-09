@@ -7,6 +7,8 @@ class StockAdjustmentModel {
   String reason;
   String senderId;
   String company;
+  String label;
+  DateTime createdAt;
   StockAdjustmentModel({
     required this.id,
     required this.notes,
@@ -14,6 +16,8 @@ class StockAdjustmentModel {
     required this.senderId,
     required this.inventoryItems,
     required this.company,
+    this.label = '',
+    required this.createdAt,
   });
   // =========================================================
   // 1. toJson() - CONVERT DART OBJECT TO JSON MAP
@@ -24,6 +28,7 @@ class StockAdjustmentModel {
       'reason': reason,
       'senderId': senderId,
       'company': company,
+      'label': label,
       'inventoryItems': inventoryItems.map((item) => item.toMap()).toList(),
     };
   }
@@ -42,6 +47,8 @@ class StockAdjustmentModel {
       inventoryItems: items,
       id: json['_id'],
       company: json['company'],
+      label: json['label'] ?? '--',
+      createdAt: DateTime.parse(json['createdAt']).toLocal(),
     );
   }
 }

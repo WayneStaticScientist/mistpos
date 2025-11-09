@@ -32,14 +32,6 @@ class _DailySalesState extends State<DailySales> {
 
   @override
   Widget build(BuildContext context) {
-    final totalSales = _controller.dailySales.fold(
-      0.0,
-      (prev, data) => prev + data.totalSales,
-    );
-    final totalCosts = _controller.dailySales.fold(
-      0.0,
-      (prev, data) => prev + data.totalCosts,
-    );
     return [
       ListTile(
         contentPadding: EdgeInsets.all(0),
@@ -54,6 +46,11 @@ class _DailySalesState extends State<DailySales> {
       ),
       14.gapHeight,
       Obx(() {
+        final totalSales = _controller.dailySales.fold(
+          0.0,
+          (prev, data) => prev + data.totalSales,
+        );
+
         return ListTile(
           contentPadding: EdgeInsets.all(0),
           title: "Total Sales".text(),
@@ -67,6 +64,10 @@ class _DailySalesState extends State<DailySales> {
         );
       }),
       Obx(() {
+        final totalCosts = _controller.dailySales.fold(
+          0.0,
+          (prev, data) => prev + data.totalCosts,
+        );
         return ListTile(
           contentPadding: EdgeInsets.all(0),
           title: "Total Costs".text(),
