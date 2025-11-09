@@ -4,21 +4,37 @@ class AppSettingsModel {
   bool externalBarCodeEnabled;
   bool useSystemDarkMode;
   bool darkMode;
+  bool enableQrCode;
+  int printerRecietLength = 32;
+  int decimalPlaces = 2;
+  String receitLogoPath;
   AppSettingsModel({
     required this.externalBarCodeEnabled,
     required this.useSystemDarkMode,
     required this.darkMode,
+    required this.enableQrCode,
+    required this.printerRecietLength,
+    required this.decimalPlaces,
+    this.receitLogoPath = "",
   });
   factory AppSettingsModel.fromJson(Map<String, dynamic> json) =>
       AppSettingsModel(
         externalBarCodeEnabled: json["externalBarCodeEnabled"] ?? false,
         useSystemDarkMode: json["useSystemDarkMode"] ?? true,
         darkMode: json["darkMode"] ?? false,
+        enableQrCode: json["enableQrCode"] ?? false,
+        printerRecietLength: json["printerRecietLength"] ?? 32,
+        decimalPlaces: json["decimalPlaces"] ?? 2,
+        receitLogoPath: json["receitLogoPath"] ?? "",
       );
   Map<String, dynamic> toJson() => {
     "externalBarCodeEnabled": externalBarCodeEnabled,
     "useSystemDarkMode": useSystemDarkMode,
     "darkMode": darkMode,
+    "enableQrCode": enableQrCode,
+    "printerRecietLength": printerRecietLength,
+    "decimalPlaces": decimalPlaces,
+    "receitLogoPath": receitLogoPath,
   };
   static AppSettingsModel fromStorage() {
     GetStorage box = GetStorage();

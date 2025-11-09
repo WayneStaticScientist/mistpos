@@ -1,15 +1,17 @@
+import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:get_storage/get_storage.dart';
 import 'package:isar/isar.dart';
-import 'package:mistpos/models/item_receit_model.dart';
-import 'package:mistpos/models/printer_device_model.dart';
-import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/user_model.dart';
+import 'package:mistpos/models/customer_model.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:mistpos/utils/currence_converter.dart';
+import 'package:mistpos/models/item_receit_model.dart';
+import 'package:mistpos/models/app_settings_model.dart';
+import 'package:mistpos/models/printer_device_model.dart';
 import 'package:pos_universal_printer/pos_universal_printer.dart';
+import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 
 class DevicesController extends GetxController {
   RxBool hasPrinterConnections = RxBool(false);
@@ -106,11 +108,11 @@ class DevicesController extends GetxController {
         await Future.delayed(const Duration(seconds: 1));
       }
       connectingToDevice.value = true;
-
       if (!cashierConnected.value) {
         Toaster.showError(
           "Failed to connect to device , Switch on bluetooth and try again",
         );
+        connectingToDevice.value = false;
         return false;
       }
       await isar.writeTxn(() async {
@@ -124,6 +126,7 @@ class DevicesController extends GetxController {
         );
       });
       getConnectedDevices();
+      connectingToDevice.value = false;
       return true;
     } catch (e) {
       connectingToDevice.value = false;
@@ -158,13 +161,22 @@ class DevicesController extends GetxController {
   static void printReceitToBackround(
     ItemReceitModel itemReceitModel,
     User user,
+    CustomerModel? customer,
   ) {
     final printer = PosUniversalPrinter.instance;
     final b = EscPosBuilder();
-    GetStorage storage = GetStorage();
-    int receitWidth = storage.read("receitWidth") ?? 42;
+    final model = AppSettingsModel.fromStorage();
+    int receitWidth = model.printerRecietLength;
+    bool enableQrCode = model.enableQrCode;
     String padRight(String text, int length) => text.padRight(length, ' ');
-    String padLeft(String text, int length) => text.padLeft(length, ' ');
+    if (model.receitLogoPath.isNotEmpty) {
+      final rasterImage = getRasterImage(model.receitLogoPath);
+      if (rasterImage != null) {
+        b.feed(1);
+        b.raster(rasterImage);
+        b.feed(1);
+      }
+    }
     b.text(user.companyName.toString(), align: PosAlign.center, bold: true);
     b.feed(2);
     b.text('Company: ${user.companyName.toString()}', align: PosAlign.center);
@@ -177,15 +189,8 @@ class DevicesController extends GetxController {
     b.feed(1);
     b.text('*** FISCAL RECEIPT ***', align: PosAlign.center, bold: true);
     b.feed(1);
-
     // --- SEPARATOR and ITEM HEADER (Manually Aligned) ---
-    b.text('-' * receitWidth);
-    // ITEM (22 chars) + QTY (4 chars) + TOTAL (16 chars) = 42
-    b.text(
-      padRight('ITEM', 22) + padRight('QTY', 4) + padLeft('TOTAL', 16),
-      bold: true,
-    );
-    b.text('-' * receitWidth);
+    b.text('.' * receitWidth);
     for (final item in itemReceitModel.items) {
       final itemPrice = item.addenum + item.price;
       final totalItemPrice = itemPrice * item.count;
@@ -193,31 +198,26 @@ class DevicesController extends GetxController {
         totalItemPrice,
         user.baseCurrence,
       );
-      final itemName = item.name.substring(0, math.min(item.name.length, 22));
-      if (item.count > 1) {
-        final qtyStr = item.count.toString();
-        final unitPriceStr = CurrenceConverter.getCurrenceFloatInStrings(
-          itemPrice,
-          user.baseCurrence,
-        );
-        String line1 =
-            padRight(itemName, 22) + padLeft(qtyStr, 4) + padLeft(totalStr, 16);
-        b.text(line1);
-        b.text('  @ $unitPriceStr');
-      } else {
-        final singleItemName = item.name.substring(
-          0,
-          math.min(item.name.length, 26),
-        );
-        String line1 = padRight(singleItemName, 26) + padLeft(totalStr, 16);
-        b.text(line1);
+      final itemName = item.name.substring(
+        0,
+        math.min(item.name.length, (receitWidth * 0.65).toInt()),
+      );
+      String label =
+          padRight(itemName, receitWidth - totalStr.length) + totalStr;
+      b.text(label);
+      final unitPriceStr = CurrenceConverter.getCurrenceFloatInStrings(
+        itemPrice,
+        user.baseCurrence,
+      );
+      String priceModel = "${item.count} x $unitPriceStr";
+      if (item.discount > 0 && item.discountId != null) {
+        priceModel +=
+            " - ${(item.percentageDiscount ? '${item.discount}%' : CurrenceConverter.getCurrenceFloatInStrings(item.discount, user.baseCurrence))}";
       }
+      b.text(priceModel);
     }
-
     // --- SEPARATOR ---
-    b.text('=' * receitWidth);
-
-    // --- 3. TOTALS SECTION ---
+    b.text('.' * receitWidth);
     b.feed(1);
     final totalDueStr = CurrenceConverter.getCurrenceFloatInStrings(
       itemReceitModel.total,
@@ -226,16 +226,37 @@ class DevicesController extends GetxController {
     final totalLine =
         padRight('TOTAL DUE:', receitWidth - totalDueStr.length) + totalDueStr;
 
-    // The total is now only formatted with 'bold' and left alignment (since 'align: PosAlign.right' would align the entire string)
     b.text(totalLine, bold: true);
-
     b.feed(2);
-
-    // --- 4. FOOTER SECTION ---
-    b.text('--- THANK YOU FOR YOUR BUSINESS ---', align: PosAlign.center);
+    b.text('.' * receitWidth);
+    if (customer != null) {
+      b.feed(1);
+      b.text("--- CUSTOMER INFO ---", align: PosAlign.center, bold: true);
+      b.feed(1);
+      b.text('Customer: ${customer.fullName}');
+      b.text('Phone: ${customer.phoneNumber}');
+      b.text('Email: ${customer.email}');
+      b.text('Address: ${customer.address}');
+      b.feed(1);
+    }
+    if (enableQrCode) {
+      b.feed(1);
+      b.text("--- QR CODE ---", align: PosAlign.center, bold: true);
+      b.qrCode(itemReceitModel.hexId);
+      b.feed(1);
+    }
     b.text('--- END ---', align: PosAlign.center);
     b.feed(1);
     b.cut();
     printer.printEscPos(PosPrinterRole.cashier, b);
+  }
+
+  static List<int>? getRasterImage(String receitLogoPath) {
+    try {
+      final imageBytes = File(receitLogoPath).readAsBytesSync();
+      return imageBytes;
+    } catch (_) {
+      return null;
+    }
   }
 }

@@ -1,11 +1,15 @@
+import 'dart:io';
+
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
+import 'package:path/path.dart' as p;
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/themes/app_theme.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/models/app_settings_model.dart';
@@ -22,7 +26,6 @@ class ScreenSettingsPage extends StatefulWidget {
 class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
   @override
   Widget build(BuildContext context) {
-    GetStorage storage = GetStorage();
     final model = AppSettingsModel.fromStorage();
     return Scaffold(
       appBar: AppBar(title: Text("Settings")),
@@ -105,13 +108,53 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
             label: "Receits",
             children: [
               ListTile(
-                onTap: () => _changeSize(storage.read("receitWidth") ?? 42),
+                onTap: () => _changeSize(model.printerRecietLength),
                 contentPadding: EdgeInsets.all(0),
                 title: Text("Printer Receit Length"),
-                subtitle: "${storage.read("receitWidth") ?? 42} units".text(
+                subtitle: "${model.printerRecietLength} units".text(
                   style: TextStyle(color: Colors.grey, fontSize: 12),
                 ),
                 leading: Iconify(Bx.receipt, color: AppTheme.color(context)),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.all(0),
+                onTap: () {
+                  model.enableQrCode = !model.enableQrCode;
+                  model.saveToStorage();
+                  setState(() {});
+                },
+                trailing: Switch(
+                  value: model.enableQrCode,
+                  onChanged: (c) {
+                    model.enableQrCode = c;
+                    model.saveToStorage();
+                    setState(() {});
+                  },
+                ),
+                leading: Iconify(Bx.qr_scan, color: AppTheme.color(context)),
+                title: "Print Receit Qr Code".text(),
+                subtitle: "enable qrcode scanning of receits".text(
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+              ),
+              ListTile(
+                onTap: _pickImage,
+                title: "Receit Logo".text(),
+                contentPadding: EdgeInsets.all(0),
+                leading: Iconify(Bx.camera, color: AppTheme.color(context)),
+                trailing: model.receitLogoPath.isEmpty
+                    ? null
+                    : IconButton(
+                        onPressed: _removeLogo,
+                        icon: Iconify(Bx.x, color: Colors.red),
+                      ),
+                subtitle:
+                    (model.receitLogoPath.isEmpty
+                            ? "not selected"
+                            : model.receitLogoPath)
+                        .text(
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
               ),
             ],
           ),
@@ -120,11 +163,10 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
             label: "Numbers",
             children: [
               ListTile(
-                onTap: () =>
-                    _changeDecimalPlaces(storage.read("decimalPlaces") ?? 2),
+                onTap: () => _changeDecimalPlaces(model.decimalPlaces),
                 contentPadding: EdgeInsets.all(0),
                 title: Text("Decimal Places"),
-                subtitle: "${storage.read("decimalPlaces") ?? 2} places".text(
+                subtitle: "${model.decimalPlaces} places".text(
                   style: TextStyle(color: Colors.grey, fontSize: 12),
                 ),
                 leading: Iconify(Bx.font_size, color: AppTheme.color(context)),
@@ -146,6 +188,7 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
   }
 
   _changeSize(int size) {
+    final model = AppSettingsModel.fromStorage();
     final sizeController = TextEditingController(text: size.toString());
     Get.defaultDialog(
       title: "Printer Receit Length",
@@ -167,9 +210,9 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
               Toaster.showError("invalid number input");
               return;
             }
+            model.printerRecietLength = value;
+            model.saveToStorage();
             Get.back();
-            GetStorage storage = GetStorage();
-            storage.write("receitWidth", value);
             setState(() {});
           },
         ),
@@ -181,6 +224,8 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
     final decimalPlacesController = TextEditingController(
       text: size.toString(),
     );
+    final model = AppSettingsModel.fromStorage();
+
     Get.defaultDialog(
       title: "Decimal Places",
       content: MistFormInput(
@@ -202,9 +247,50 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
               return;
             }
             Get.back();
-            GetStorage storage = GetStorage();
-            storage.write("decimalPlaces", value);
+            model.decimalPlaces = value;
+            model.saveToStorage();
             setState(() {});
+          },
+        ),
+      ],
+    );
+  }
+
+  void _pickImage() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      if (image == null) return;
+      final model = AppSettingsModel.fromStorage();
+      final Directory appDocDir = await getApplicationDocumentsDirectory();
+      final String appDocPath = appDocDir.path;
+      final String fileName = 'receit_logo.jpg';
+      final String localPath = p.join(appDocPath, fileName);
+      final File localImage = await File(image.path).copy(localPath);
+      model.receitLogoPath = localImage.path;
+      model.saveToStorage();
+      setState(() {});
+    } catch (e) {
+      Toaster.showError("Error : $e");
+    }
+  }
+
+  void _removeLogo() {
+    Get.defaultDialog(
+      title: "Remove Logo",
+      content: "Are you sure to remove the receit logo".text(),
+      actions: [
+        "close".text().textButton(onPressed: () => Get.back()),
+        "remove".text().textButton(
+          onPressed: () {
+            final model = AppSettingsModel.fromStorage();
+            try {
+              File(model.receitLogoPath).deleteSync();
+            } catch (_) {}
+            model.receitLogoPath = "";
+            model.saveToStorage();
+            setState(() {});
+            Get.back();
           },
         ),
       ],

@@ -1,5 +1,6 @@
 import 'package:get_storage/get_storage.dart';
 import 'package:mistpos/models/company_model.dart';
+import 'package:mistpos/models/app_settings_model.dart';
 
 class CurrenceConverter {
   static String getCurrenceInStrings(int amount) {
@@ -9,13 +10,18 @@ class CurrenceConverter {
   static String getCurrenceFloatInStrings(double amount, String baseCurreny) {
     GetStorage storage = GetStorage();
     var jsonData = storage.read("company");
-    int decimalPlaces = storage.read("decimalPlaces") ?? 2;
-    if (jsonData == null) return "\$${(amount).toStringAsFixed(decimalPlaces)}";
+    final model = AppSettingsModel.fromStorage();
+
+    if (jsonData == null) {
+      return "\$${(amount).toStringAsFixed(model.decimalPlaces)}";
+    }
     CompanyModel company = CompanyModel.fromJson(jsonData);
     final rate = company.exchangeRates.rates[baseCurreny];
-    if (rate == null) return "\$${(amount).toStringAsFixed(decimalPlaces)}";
+    if (rate == null) {
+      return "\$${(amount).toStringAsFixed(model.decimalPlaces)}";
+    }
     amount = amount * rate;
-    return "${baseCurreny.toUpperCase()}${(amount).toStringAsFixed(decimalPlaces)}";
+    return "${baseCurreny.toUpperCase()}${(amount).toStringAsFixed(model.decimalPlaces)}";
   }
 
   static String getCurrenceFloatk(double amount, String baseCurreny) {

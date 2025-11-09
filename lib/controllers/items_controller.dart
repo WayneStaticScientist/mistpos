@@ -712,7 +712,11 @@ class ItemsController extends GetxController {
       selectedCustomer.value = null;
       totalPrice.value = 0;
       if (printReceits) {
-        DevicesController.printReceitToBackround(itemReceitModel, user);
+        DevicesController.printReceitToBackround(
+          itemReceitModel,
+          user,
+          selectedCustomer.value,
+        );
       }
       loadReceits();
       syncCartItemsOnBackground();
