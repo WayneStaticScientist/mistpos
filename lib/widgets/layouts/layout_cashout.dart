@@ -2,11 +2,11 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/screens/basic/screen_selected_items_readjust.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/screens/basic/screen_checkout.dart';
+import 'package:mistpos/screens/basic/screen_selected_items_readjust.dart';
 
 class LayoutCashout extends StatefulWidget {
   final GlobalKey bottomBarKey;
@@ -25,42 +25,45 @@ class _LayoutCashoutState extends State<LayoutCashout> {
       key: widget.bottomBarKey,
       child: Row(
         children: [
-          [
-                CurrenceConverter.getCurrenceFloatInStrings(
-                      _itemsListController.totalPrice.value,
-                      _userController.user.value?.baseCurrence ?? '',
-                    )
-                    .text(
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+          Obx(
+            () =>
+                [
+                      CurrenceConverter.getCurrenceFloatInStrings(
+                            _itemsListController.totalPrice.value,
+                            _userController.user.value?.baseCurrence ?? '',
+                          )
+                          .text(
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          )
+                          .textButton(
+                            onPressed: () =>
+                                Get.to(() => ScreenSelectedItemsReadjust()),
+                            style: TextButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Get.theme.colorScheme.primary,
+                            ),
+                          ),
+                      18.gapWidth,
+                      "${_itemsListController.checkOutItems.length} items".text(
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ]
+                    .row()
+                    .padding(EdgeInsets.all(3))
+                    .decoratedBox(
+                      decoration: BoxDecoration(
+                        color: Get.theme.colorScheme.primary,
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     )
-                    .textButton(
-                      onPressed: () =>
-                          Get.to(() => ScreenSelectedItemsReadjust()),
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Get.theme.colorScheme.primary,
-                      ),
-                    ),
-                18.gapWidth,
-                "${_itemsListController.checkOutItems.length} items".text(
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ]
-              .row()
-              .padding(EdgeInsets.all(3))
-              .decoratedBox(
-                decoration: BoxDecoration(
-                  color: Get.theme.colorScheme.primary,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              )
-              .expanded1,
+                    .expanded1,
+          ),
           12.gapWidth,
           "Checkout"
               .text(

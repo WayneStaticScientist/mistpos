@@ -14,16 +14,15 @@ import 'package:mistpos/models/app_settings_model.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/widgets/layouts/cards_recent.dart';
-import 'package:mistpos/widgets/layouts/layout_cashout.dart';
 import 'package:mistpos/controllers/items_controller.dart';
-import 'package:mistpos/widgets/layouts/list_tile_item.dart';
-import 'package:mistpos/widgets/layouts/cards_category.dart';
+import 'package:mistpos/widgets/layouts/layout_cashout.dart';
 import 'package:mistpos/screens/basic/screen_manual_cart.dart';
-import 'package:mistpos/screens/basic/screen_settings_page.dart';
+import 'package:mistpos/widgets/sales_widgets/sales_app_bar.dart';
+import 'package:mistpos/widgets/sales_widgets/sales_item_list.dart';
 import 'package:mistpos/screens/basic/screen_edit_manual_cart.dart';
-import 'package:mistpos/screens/basic/screens_select_customers.dart';
 import 'package:flutter_barcode_listener/flutter_barcode_listener.dart';
-import 'package:mistpos/screens/basic/screen_view_selected_customer.dart';
+import 'package:mistpos/widgets/sales_widgets/sales_discounts_list.dart';
+import 'package:mistpos/widgets/sales_widgets/sales_categories_list.dart';
 import 'package:flutter_barcode_scanner_plus/flutter_barcode_scanner_plus.dart';
 
 class NavSale extends StatefulWidget {
@@ -44,6 +43,7 @@ class _NavSaleState extends State<NavSale> {
   double _leftPosition = 0.0; // Left position
   double _topPosition = 1000.0; // Off-screen initial position
   double _animatedOpacity = 0.0;
+  String _selectedListGroup = "*";
   final GlobalKey _scanKey = GlobalKey();
   final GlobalKey _bottomBarKey = GlobalKey();
   final _scrollController = ScrollController();
@@ -53,6 +53,7 @@ class _NavSaleState extends State<NavSale> {
   void initState() {
     super.initState();
     _initializeTimer();
+    _itemsListController.loadDiscounts(page: 1);
     _scrollController.addListener(_scrollListener);
   }
 
@@ -116,55 +117,7 @@ class _NavSaleState extends State<NavSale> {
                     THE APP TOB BAR
                 ==================================================================================
                 */
-                SliverAppBar(
-                  elevation: 0,
-                  floating: true,
-                  title: "MistPos".text(),
-                  backgroundColor: Get.theme.scaffoldBackgroundColor,
-                  actions: [
-                    Obx(
-                      () => (_itemsListController.syncingItems.value)
-                          ? IconButton(
-                              onPressed: () {},
-                              icon: const CircularProgressIndicator(
-                                strokeWidth: 3,
-                              ).sizedBox(height: 16, width: 16),
-                            )
-                          : SizedBox.shrink(),
-                    ),
-                    Obx(
-                      () =>
-                          (_itemsListController
-                              .syncingItemsFailed
-                              .value
-                              .isNotEmpty)
-                          ? IconButton(
-                              onPressed: _displayError,
-                              icon: Iconify(Bx.error, color: Colors.red),
-                            )
-                          : SizedBox.shrink(),
-                    ),
-                    Obx(() {
-                      bool selected =
-                          _itemsListController.selectedCustomer.value != null;
-                      return IconButton(
-                        onPressed: () => selected
-                            ? Get.to(() => ScreenViewSelectedCustomer())
-                            : Get.to(() => ScreensListCustomers()),
-                        icon: Iconify(
-                          selected ? Bx.user_check : Bx.user_plus,
-                          color: selected
-                              ? Colors.green
-                              : AppTheme.color(context),
-                        ),
-                      );
-                    }),
-                    IconButton(
-                      onPressed: () => Get.to(() => ScreenSettingsPage()),
-                      icon: Iconify(Bx.cog, color: AppTheme.color(context)),
-                    ),
-                  ],
-                ),
+                SalesAppBar(),
                 /*
               ==============================================================================
               THE SAVED ITEMS LISTS
@@ -201,6 +154,7 @@ class _NavSaleState extends State<NavSale> {
                           .padding(EdgeInsets.all(14))
                           .onTapUp((e) => scanItem(e)),
                 ),
+
                 if (!_inSearchMode)
                   Obx(
                     () => _itemsListController.savedItems.isNotEmpty
@@ -284,81 +238,20 @@ class _NavSaleState extends State<NavSale> {
   }
 
   _buidCategoriesLayout() {
-    return SliverToBoxAdapter(
-      child: SizedBox(
-        height: 40,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: [
-            Obx(
-              () => CardsCategory(
-                onTap: () => _changeCategory(""),
-                isSelected: _itemsListController.selectedCategory.value == "",
-                category: "All",
-              ),
-            ),
-            Obx(
-              () => _itemsListController.categories
-                  .map<Widget>((category) {
-                    return CardsCategory(
-                      onTap: () => _changeCategory(category.hexId),
-                      category: category.name,
-                      isSelected:
-                          _itemsListController.selectedCategory.value ==
-                          category.hexId,
-                    ).sizedBox(height: 60);
-                  })
-                  .toList()
-                  .row(mainAxisSize: MainAxisSize.min),
-            ),
-          ],
-        ).sizedBox().padding(EdgeInsets.symmetric(horizontal: 18)),
-      ),
+    return SalesCategoriesList(
+      value: _selectedListGroup,
+      changeCategory: (e) => _changeCategory(e),
+      onChange: (e) {
+        setState(() {
+          _selectedListGroup = e as String;
+        });
+      },
     );
   }
 
   _buidItemList() {
-    return Obx(
-      () => _itemsListController.cartItems.isNotEmpty
-          ? SliverList.builder(
-              itemBuilder: (context, index) =>
-                  index >= _itemsListController.cartItems.length
-                  ? _makeLastList()
-                  : MistListTileItem(
-                          item: _itemsListController.cartItems[index],
-                        )
-                        .padding(EdgeInsets.symmetric(horizontal: 18))
-                        .onTapUp(
-                          (e) => _handleWidgetClick(
-                            e,
-                            _itemsListController.cartItems[index],
-                          ),
-                        )
-                        .padding(
-                          EdgeInsets.only(
-                            bottom:
-                                index ==
-                                    _itemsListController.cartItems.length - 1
-                                ? 100
-                                : 0,
-                          ),
-                        ),
-              itemCount: _itemsListController.cartItems.length + 1,
-            )
-          : SliverFillRemaining(
-              child:
-                  [
-                        Iconify(Bx.cart_alt, color: AppTheme.color(context)),
-                        12.gapHeight,
-                        "no items".text(),
-                      ]
-                      .column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                      )
-                      .center(),
-            ),
-    );
+    if (_selectedListGroup == "discounts") return SalesDiscountsList();
+    return SalesItemList(onTap: (a, b) => _handleWidgetClick(a, b));
   }
 
   _selectedItemsList() {
@@ -478,10 +371,6 @@ class _NavSaleState extends State<NavSale> {
     });
   }
 
-  void _displayError() {
-    Toaster.showError(_itemsListController.syncingItemsFailed.value);
-  }
-
   void _scrollListener() {
     if (_scrollController.offset >=
             _scrollController.position.maxScrollExtent &&
@@ -493,16 +382,6 @@ class _NavSaleState extends State<NavSale> {
         search: _searchTerm,
       );
     }
-  }
-
-  Widget _makeLastList() {
-    if (_itemsListController.itemsPage.value <
-        _itemsListController.totalPages.value) {
-      return [
-        CircularProgressIndicator().sizedBox(width: 20, height: 20),
-      ].row(mainAxisAlignment: MainAxisAlignment.center);
-    }
-    return SizedBox.shrink();
   }
 
   void scanItem(TapUpDetails details) async {

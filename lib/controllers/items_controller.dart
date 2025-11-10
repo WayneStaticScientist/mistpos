@@ -26,9 +26,11 @@ class ItemsController extends GetxController {
   RxList<CustomerModel> customers = <CustomerModel>[].obs;
   RxList<ItemReceitModel> receits = <ItemReceitModel>[].obs;
   Rx<CustomerModel?> selectedCustomer = Rx<CustomerModel?>(null);
+  RxList<DiscountModel> selectedDiscounts = <DiscountModel>[].obs;
   RxList<ItemCategoryModel> categories = <ItemCategoryModel>[].obs;
   RxList<ItemSavedItemsModel> savedItems = <ItemSavedItemsModel>[].obs;
   RxList<Map<String, dynamic>> checkOutItems = <Map<String, dynamic>>[].obs;
+
   @override
   void onInit() {
     _loadFixedItems();
@@ -46,6 +48,30 @@ class ItemsController extends GetxController {
       );
     }
     super.dispose();
+  }
+
+  void addDiscountToProduct(DiscountModel model) {
+    if (selectedDiscounts.indexWhere((e) {
+          return e.hexId == model.hexId;
+        }) ==
+        -1) {
+      selectedDiscounts.add(model);
+      _calculatedTotalPrice();
+      return;
+    }
+    Toaster.showError("discount already added");
+  }
+
+  void removeDiscountFromProduct(DiscountModel model) {
+    int selectedIndex = selectedDiscounts.indexWhere((e) {
+      return e.hexId == model.hexId;
+    });
+    if (selectedIndex != -1) {
+      selectedDiscounts.removeAt(selectedIndex);
+      _calculatedTotalPrice();
+      return;
+    }
+    Toaster.showError("discount not selected already");
   }
 
   void removeSelectedItem(Map<String, dynamic> e) async {
@@ -561,6 +587,13 @@ class ItemsController extends GetxController {
       }
       return prev + price;
     });
+    final totalDiscounts = selectedDiscounts.fold(0.0, (prev, data) {
+      return prev +
+          (!data.percentage
+              ? data.value
+              : totalPrice.value * (data.value / 100));
+    });
+    totalPrice.value -= totalDiscounts;
   }
 
   ItemSavedModel _getModel(Map<String, dynamic> e) {

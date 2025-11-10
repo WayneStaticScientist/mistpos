@@ -8,9 +8,9 @@ import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:mistpos/models/customer_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/utils/currence_converter.dart';
+import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/items_controller.dart';
-import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 
 class ScreenViewCustomer extends StatefulWidget {
