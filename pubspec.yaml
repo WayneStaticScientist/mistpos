@@ -61,6 +61,7 @@ dependencies:
   esc_pos_utils_plus: ^2.0.4
   image_picker: ^1.2.0
   path: ^1.9.1
+  flutter_barcode_listener: ^0.1.4
 
 dev_dependencies:
   flutter_test:

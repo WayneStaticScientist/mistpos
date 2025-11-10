@@ -199,6 +199,22 @@ class _MistAdminDashboardState extends State<MistAdminDashboard> {
                     ? Colors.grey.withAlpha(50)
                     : null,
               ),
+              ListTile(
+                leading: Iconify(Carbon.timer, color: Colors.lightGreenAccent),
+                title: "Inventory History".text(),
+                onTap: () => widget.onTap("Inventory History"),
+                tileColor: widget.selectedTile == "Inventory History"
+                    ? Colors.grey.withAlpha(50)
+                    : null,
+              ),
+              ListTile(
+                leading: Iconify(Carbon.math_curve, color: Colors.teal),
+                title: "Inventory Valuation".text(),
+                onTap: () => widget.onTap("Inventory Valuation"),
+                tileColor: widget.selectedTile == "Inventory Valuation"
+                    ? Colors.grey.withAlpha(50)
+                    : null,
+              ),
             ],
           ),
           ListTile(

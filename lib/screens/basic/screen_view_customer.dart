@@ -10,6 +10,8 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/items_controller.dart';
+import 'package:mistpos/widgets/inputs/input_form.dart';
+import 'package:mistpos/widgets/loaders/small_loader.dart';
 
 class ScreenViewCustomer extends StatefulWidget {
   final CustomerModel model;
@@ -97,6 +99,14 @@ class _ScreenViewCustomerState extends State<ScreenViewCustomer> {
               ListTile(
                 leading: Iconify(Bx.star, color: Colors.white),
                 title: "Points".text(),
+                trailing: Obx(
+                  () => _itemsController.updatingCustomerPoints.value
+                      ? MistLoader1()
+                      : IconButton(
+                          onPressed: _addPoints,
+                          icon: Icon(Icons.add),
+                        ),
+                ),
                 subtitle: selectedCustomer.points.toStringAsFixed(2).text(),
               ),
               ListTile(
@@ -150,5 +160,44 @@ class _ScreenViewCustomerState extends State<ScreenViewCustomer> {
       Get.back();
       Toaster.showSuccess("customer deleted");
     }
+  }
+
+  void _addPoints() {
+    final pointsController = TextEditingController();
+    Get.defaultDialog(
+      title: "Add Points",
+      content: MistFormInput(label: "Points", controller: pointsController),
+      actions: [
+        "cancel".text().textButton(onPressed: () => Get.back()),
+        "add".text().textButton(
+          onPressed: () {
+            final points = double.tryParse(pointsController.text);
+            if (points == null) {
+              Toaster.showError("invalid points");
+              return;
+            }
+            _updateCustomerPoints(points);
+            Get.back();
+          },
+        ),
+      ],
+    );
+  }
+
+  void _updateCustomerPoints(double points) async {
+    final response = await _itemsController.updateCustomerPoints(
+      widget.model.hexId,
+      points,
+    );
+    if (response == null) {
+      return;
+    }
+    Toaster.showSuccess("points updated");
+    if (!mounted) return;
+    setState(() {
+      widget.model.points = response.points;
+      widget.model.purchaseValue = response.purchaseValue;
+      widget.model.inboundProfit = response.inboundProfit;
+    });
   }
 }

@@ -3,14 +3,15 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/models/customer_model.dart';
-import 'package:mistpos/screens/basic/screen_view_customer.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/items_controller.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:mistpos/widgets/loaders/small_loader.dart';
+import 'package:mistpos/screens/basic/screen_view_customer.dart';
 
 class NavListCustomers extends StatefulWidget {
   const NavListCustomers({super.key});
@@ -21,6 +22,7 @@ class NavListCustomers extends StatefulWidget {
 
 class _NavListCustomersState extends State<NavListCustomers> {
   final _refreshController = RefreshController();
+  final _userController = Get.find<UserController>();
   final _itemsController = Get.find<ItemsController>();
   final TextEditingController _searchController = TextEditingController();
   String _searchTerm = "";
@@ -41,62 +43,32 @@ class _NavListCustomersState extends State<NavListCustomers> {
 
   @override
   Widget build(BuildContext context) {
-    return [
-      MistSearchField(label: "Search Customers", controller: _searchController),
-      Expanded(
-        child: SmartRefresher(
-          controller: _refreshController,
-          enablePullUp: true,
-          onRefresh: () async {
-            _itemsController.loadCustomers(page: 1, search: _searchTerm);
-            _refreshController.refreshCompleted();
-          },
-          child: Obx(
-            () => ListView.builder(
-              itemBuilder: (context, index) {
-                if (index < _itemsController.customers.length) {
-                  return _buildTile(_itemsController.customers[index]);
-                }
-                return _buildLoader();
-              },
-              itemCount: _itemsController.customers.length + 1,
-            ),
-          ),
+    return SmartRefresher(
+      controller: _refreshController,
+      enablePullUp: true,
+      onRefresh: () async {
+        await _itemsController.loadCustomers(page: 1, search: _searchTerm);
+        _refreshController.refreshCompleted();
+      },
+      child: [
+        MistSearchField(
+          label: "Search Customers",
+          controller: _searchController,
         ),
-      ),
-    ].column().padding(EdgeInsets.all(14));
-  }
-
-  Widget _buildTile(CustomerModel model) {
-    return ListTile(
-      onTap: () => Get.to(() => ScreenViewCustomer(model: model)),
-      leading: CircleAvatar(child: Iconify(Bx.user, color: Colors.white)),
-      title: model.fullName.text(),
-      subtitle: model.email.text(),
+        18.gapHeight,
+        Expanded(
+          child: Obx(() {
+            if (_itemsController.syncingCustomers.value) {
+              return MistLoader1();
+            }
+            if (_itemsController.customers.isEmpty) {
+              return "No customers found".text();
+            }
+            return _makeTable(_itemsController.customers);
+          }),
+        ),
+      ].column().padding(EdgeInsets.all(14)),
     );
-  }
-
-  Widget _buildLoader() {
-    if (_itemsController.customerPage >=
-        _itemsController.customerTotalPages.value) {
-      return ['No more customers'.text()]
-          .row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-          )
-          .padding(EdgeInsets.all(14));
-    }
-    return [
-          LoadingAnimationWidget.staggeredDotsWave(
-            color: Colors.white,
-            size: 200,
-          ),
-        ]
-        .row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-        )
-        .padding(EdgeInsets.all(14));
   }
 
   void _initializeTimer() {
@@ -107,5 +79,65 @@ class _NavListCustomersState extends State<NavListCustomers> {
         _itemsController.loadCustomers(search: _searchTerm, page: 1);
       }
     });
+  }
+
+  Widget _makeTable(RxList<CustomerModel> customers) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Table(
+        columnWidths: const <int, TableColumnWidth>{
+          0: FixedColumnWidth(200.0), // Item
+          1: FixedColumnWidth(100.0),
+          2: FixedColumnWidth(100.0),
+          3: FixedColumnWidth(100.0),
+          4: FixedColumnWidth(100.0),
+          5: FixedColumnWidth(100.0),
+          6: FixedColumnWidth(120.0),
+        },
+        children: [
+          TableRow(
+            decoration: BoxDecoration(
+              color: AppTheme.surface(context),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            children: [
+              Text('Customer').padding(EdgeInsets.all(10)),
+              Text('Email').padding(EdgeInsets.all(10)),
+              Text('Visits').padding(EdgeInsets.all(10)),
+              Text('Points').padding(EdgeInsets.all(10)),
+              Text('Total Purchases').padding(EdgeInsets.all(10)),
+              Text('Inbound Profit').padding(EdgeInsets.all(10)),
+            ],
+          ),
+          ...customers.map(
+            (e) => TableRow(
+              children: [
+                TableRowInkWell(
+                  onTap: () => Get.to(() => ScreenViewCustomer(model: e)),
+                  child: e.fullName.text().padding(EdgeInsets.all(10)),
+                ),
+                TableRowInkWell(
+                  onTap: () => Get.to(() => ScreenViewCustomer(model: e)),
+                  child: e.email.text().padding(EdgeInsets.all(10)),
+                ),
+                TableRowInkWell(
+                  onTap: () => Get.to(() => ScreenViewCustomer(model: e)),
+                  child: e.visits.toString().text().padding(EdgeInsets.all(10)),
+                ),
+                e.points.toString().text().padding(EdgeInsets.all(10)),
+                CurrenceConverter.getCurrenceFloatInStrings(
+                  e.purchaseValue,
+                  _userController.user.value?.baseCurrence ?? '',
+                ).text().padding(EdgeInsets.all(10)),
+                CurrenceConverter.getCurrenceFloatInStrings(
+                  e.inboundProfit,
+                  _userController.user.value?.baseCurrence ?? '',
+                ).text().padding(EdgeInsets.all(10)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

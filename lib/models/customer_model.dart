@@ -7,15 +7,15 @@ class CustomerModel {
   final String email;
   final String city;
   final String notes;
-  final double points;
+  double points;
   final int visits;
   final String company;
   final String country;
   final String address;
   final String fullName;
   final String phoneNumber;
-  final double purchaseValue;
-  final double inboundProfit;
+  double purchaseValue;
+  double inboundProfit;
   final String hexId;
   CustomerModel({
     required this.email,

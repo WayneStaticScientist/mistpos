@@ -804,7 +804,7 @@ class ItemsController extends GetxController {
   RxString syncingCustomersFailed = RxString("");
   RxInt customerPage = RxInt(1);
   RxInt customerTotalPages = RxInt(2);
-  void loadCustomers({String search = '', int page = 1}) async {
+  Future<void> loadCustomers({String search = '', int page = 1}) async {
     if (syncingCustomers.value) return;
     syncingCustomers.value = true;
     syncingCustomersFailed.value = "";
@@ -1005,5 +1005,27 @@ class ItemsController extends GetxController {
     final loadedItems = isar.itemModels.where().findAllSync();
     fixedItems.assignAll(loadedItems);
     syncingFixedItems.value = false;
+  }
+
+  /*
+  ==============================================
+  ==============================================
+                  CUSTOMERS |
+  ==============================================
+  ==============================================
+  */
+  RxBool updatingCustomerPoints = RxBool(false);
+  Future<CustomerModel?> updateCustomerPoints(String id, double points) async {
+    updatingCustomerPoints.value = true;
+    final response = await Net.put(
+      "/admin/customer/points/$id",
+      data: {"points": points},
+    );
+    updatingCustomerPoints.value = false;
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return null;
+    }
+    return CustomerModel.fromJson(response.body['update']);
   }
 }

@@ -1,9 +1,9 @@
-import 'dart:developer';
-
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:mistpos/models/company_model.dart';
 import 'package:mistpos/models/exchange_rate_model.dart';
+import 'package:mistpos/models/inventory_history_model.dart';
+import 'package:mistpos/models/product_stats_model.dart';
 import 'package:mistpos/models/production_model.dart';
 import 'package:mistpos/models/transfer_order_model.dart';
 import 'package:mistpos/utils/toast.dart';
@@ -325,7 +325,6 @@ class InventoryController extends GetxController {
     final response = await Net.get(
       "/admin/inventory/counts?page=$page&search=$search&status=$status",
     );
-    log("inventory ${response.body}");
     inventoryCountsLoading.value = false;
     if (response.hasError) {
       return;
@@ -445,5 +444,77 @@ class InventoryController extends GetxController {
     }
     loadCompany();
     return true;
+  }
+
+  /*
+   ======================================================
+   INVENTORY HISTORY 
+   ======================================================
+   */
+
+  RxBool loadingInventoryHistory = RxBool(false);
+  RxList<InventoryHistoryModel> inventoryHistory =
+      RxList<InventoryHistoryModel>();
+  Future<void> getInventoryHistory(DateTime start, DateTime end) async {
+    if (loadingInventoryHistory.value) return;
+    loadingInventoryHistory.value = true;
+    final result = await Net.get(
+      "/admin/inventory/history?endDate=${end.toIso8601String()}&startDate=${start.toIso8601String()}",
+    );
+    loadingInventoryHistory.value = false;
+    if (result.hasError) {
+      return;
+    }
+    if (result.body['list'] != null) {
+      List<dynamic> list = result.body['list'];
+      inventoryHistory.value = list
+          .map((e) => InventoryHistoryModel.fromJson(e))
+          .toList();
+    }
+  }
+
+  /*
+   ======================================================
+   INVENTORY EVALUATION 
+   ======================================================
+   */
+  RxBool loadingInventoryValuation = RxBool(false);
+  Rx<StatsProductModel?> statsPoducts = Rx<StatsProductModel?>(null);
+  void loadInventoryValuation({DateTime? start, DateTime? end}) async {
+    if (loadingInventoryValuation.value) return;
+    loadingInventoryValuation.value = true;
+    final result = await Net.get(
+      "/admin/inventory/evalution?startDate=${start?.toIso8601String() ?? ''}&endDate=${end?.toIso8601String() ?? ''}",
+    );
+    loadingInventoryValuation.value = false;
+    if (result.hasError) {
+      return;
+    }
+    statsPoducts.value = StatsProductModel.fromJson(result.body['update']);
+  }
+
+  RxBool loadingInventoryProducts = RxBool(false);
+  RxInt inventoryProductsPage = RxInt(1);
+  RxInt inventoryProductsTotalPages = RxInt(1);
+  RxList<ItemModel> inventoryProducts = RxList<ItemModel>();
+  void loadInventoryProducts({
+    int page = 1,
+    String search = '',
+    String category = '',
+  }) async {
+    if (loadingInventoryProducts.value) return;
+    final response = await Net.get(
+      "/cashier/products?page=$page&search=$search&category=$category&salesOnly=true",
+    );
+    loadingInventoryProducts.value = false;
+    if (response.hasError) {
+      return;
+    }
+    inventoryProductsPage.value = response.body['currentPage'];
+    inventoryProductsTotalPages.value = response.body['totalPages'];
+    if (response.body['list'] != null) {
+      List<dynamic> list = response.body['list'];
+      inventoryProducts.value = list.map((e) => ItemModel.fromJson(e)).toList();
+    }
   }
 }

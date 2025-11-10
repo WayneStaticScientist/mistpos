@@ -2,6 +2,8 @@ import 'package:exui/exui.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/navs/admin/daily_sales.dart';
+import 'package:mistpos/navs/admin/nav_inventory_history.dart';
+import 'package:mistpos/navs/admin/nav_inventory_valuation.dart';
 import 'package:mistpos/navs/admin/nav_sales_by_employee.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:mistpos/controllers/user_controller.dart';
@@ -60,6 +62,8 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     "Suppliers": const NavInventorySuppliersList(),
     "Purchase Orders": const NavInventoryPurchaseOrder(),
     "Stock Adjustments": const NavInventoryStockAdjustments(),
+    "Inventory History": const NavInventoryHistory(),
+    "Inventory Valuation": const NavInventoryValuation(),
   };
 
   @override

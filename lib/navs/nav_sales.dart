@@ -10,6 +10,7 @@ import 'package:mistpos/models/item_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:mistpos/utils/currence_converter.dart';
+import 'package:mistpos/models/app_settings_model.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/widgets/layouts/cards_recent.dart';
@@ -21,6 +22,7 @@ import 'package:mistpos/screens/basic/screen_manual_cart.dart';
 import 'package:mistpos/screens/basic/screen_settings_page.dart';
 import 'package:mistpos/screens/basic/screen_edit_manual_cart.dart';
 import 'package:mistpos/screens/basic/screens_select_customers.dart';
+import 'package:flutter_barcode_listener/flutter_barcode_listener.dart';
 import 'package:mistpos/screens/basic/screen_view_selected_customer.dart';
 import 'package:flutter_barcode_scanner_plus/flutter_barcode_scanner_plus.dart';
 
@@ -42,6 +44,7 @@ class _NavSaleState extends State<NavSale> {
   double _leftPosition = 0.0; // Left position
   double _topPosition = 1000.0; // Off-screen initial position
   double _animatedOpacity = 0.0;
+  final GlobalKey _scanKey = GlobalKey();
   final GlobalKey _bottomBarKey = GlobalKey();
   final _scrollController = ScrollController();
 
@@ -64,21 +67,30 @@ class _NavSaleState extends State<NavSale> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth > 700) {
-          return Row(
-            children: [
-              Expanded(child: _buildNormalFlowLayout()),
-              SizedBox(
-                width: constraints.maxWidth * 0.5,
-                child: _selectedItemsList(),
-              ),
-            ],
-          );
+    final model = AppSettingsModel.fromStorage();
+    return BarcodeKeyboardListener(
+      bufferDuration: const Duration(milliseconds: 200),
+      onBarcodeScanned: (String p1) {
+        if (model.externalBarCodeEnabled) {
+          _scanBarCode(p1);
         }
-        return _buildNormalFlowLayout();
       },
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth > 700) {
+            return Row(
+              children: [
+                Expanded(child: _buildNormalFlowLayout()),
+                SizedBox(
+                  width: constraints.maxWidth * 0.5,
+                  child: _selectedItemsList(),
+                ),
+              ],
+            );
+          }
+          return _buildNormalFlowLayout();
+        },
+      ),
     );
   }
 
@@ -168,6 +180,7 @@ class _NavSaleState extends State<NavSale> {
                             ),
                             12.gapWidth,
                             Iconify(
+                                  key: _scanKey,
                                   Bx.barcode_reader,
                                   color: AppTheme.color(context),
                                 )
@@ -423,7 +436,12 @@ class _NavSaleState extends State<NavSale> {
     });
   }
 
-  void _handleWidgetClick(TapUpDetails details, ItemModel model) async {
+  void _handleWidgetClick(
+    TapUpDetails? details,
+    ItemModel model, {
+    double x = 0,
+    double y = 0,
+  }) async {
     if (_itemsListController.syncingItems.value) {
       Toaster.showError("items syncing please wait");
       return;
@@ -440,8 +458,8 @@ class _NavSaleState extends State<NavSale> {
     final Offset bottomBarTopLeft = renderBox.localToGlobal(Offset.zero);
     final double targetTopPosition = bottomBarTopLeft.dy;
 
-    final double clickX = details.globalPosition.dx;
-    final double clickY = details.globalPosition.dy;
+    final double clickX = details?.globalPosition.dx ?? x;
+    final double clickY = details?.globalPosition.dy ?? y;
 
     setState(() {
       _topPosition = clickY;
@@ -506,5 +524,21 @@ class _NavSaleState extends State<NavSale> {
     );
     if (model == null) return;
     _handleWidgetClick(details, model);
+  }
+
+  void _scanBarCode(String barcodeScanResult) async {
+    if (!mounted) return;
+    ItemModel? model = await _itemsListController.findModelByBarCode(
+      barcodeScanResult,
+    );
+    if (model == null) return;
+    final RenderBox? renderBox =
+        _bottomBarKey.currentContext?.findRenderObject() as RenderBox?;
+    _handleWidgetClick(
+      null,
+      model,
+      x: renderBox?.localToGlobal(Offset.zero).dx ?? 150,
+      y: renderBox?.localToGlobal(Offset.zero).dy ?? 100,
+    );
   }
 }
