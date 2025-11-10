@@ -42,34 +42,40 @@ const ItemReceitModelSchema = CollectionSchema(
       name: r'customerId',
       type: IsarType.string,
     ),
-    r'hexId': PropertySchema(
+    r'discounts': PropertySchema(
       id: 5,
+      name: r'discounts',
+      type: IsarType.objectList,
+      target: r'EmbeddedDiscountModel',
+    ),
+    r'hexId': PropertySchema(
+      id: 6,
       name: r'hexId',
       type: IsarType.string,
     ),
     r'items': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'items',
       type: IsarType.objectList,
       target: r'ItemReceitItem',
     ),
     r'label': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'label',
       type: IsarType.string,
     ),
     r'payment': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'payment',
       type: IsarType.string,
     ),
     r'synced': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'synced',
       type: IsarType.bool,
     ),
     r'total': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'total',
       type: IsarType.double,
     )
@@ -81,7 +87,10 @@ const ItemReceitModelSchema = CollectionSchema(
   idName: r'id',
   indexes: {},
   links: {},
-  embeddedSchemas: {r'ItemReceitItem': ItemReceitItemSchema},
+  embeddedSchemas: {
+    r'ItemReceitItem': ItemReceitItemSchema,
+    r'EmbeddedDiscountModel': EmbeddedDiscountModelSchema
+  },
   getId: _itemReceitModelGetId,
   getLinks: _itemReceitModelGetLinks,
   attach: _itemReceitModelAttach,
@@ -99,6 +108,15 @@ int _itemReceitModelEstimateSize(
     final value = object.customerId;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.discounts.length * 3;
+  {
+    final offsets = allOffsets[EmbeddedDiscountModel]!;
+    for (var i = 0; i < object.discounts.length; i++) {
+      final value = object.discounts[i];
+      bytesCount +=
+          EmbeddedDiscountModelSchema.estimateSize(value, offsets, allOffsets);
     }
   }
   bytesCount += 3 + object.hexId.length * 3;
@@ -127,17 +145,23 @@ void _itemReceitModelSerialize(
   writer.writeDouble(offsets[2], object.change);
   writer.writeDateTime(offsets[3], object.createdAt);
   writer.writeString(offsets[4], object.customerId);
-  writer.writeString(offsets[5], object.hexId);
+  writer.writeObjectList<EmbeddedDiscountModel>(
+    offsets[5],
+    allOffsets,
+    EmbeddedDiscountModelSchema.serialize,
+    object.discounts,
+  );
+  writer.writeString(offsets[6], object.hexId);
   writer.writeObjectList<ItemReceitItem>(
-    offsets[6],
+    offsets[7],
     allOffsets,
     ItemReceitItemSchema.serialize,
     object.items,
   );
-  writer.writeString(offsets[7], object.label);
-  writer.writeString(offsets[8], object.payment);
-  writer.writeBool(offsets[9], object.synced);
-  writer.writeDouble(offsets[10], object.total);
+  writer.writeString(offsets[8], object.label);
+  writer.writeString(offsets[9], object.payment);
+  writer.writeBool(offsets[10], object.synced);
+  writer.writeDouble(offsets[11], object.total);
 }
 
 ItemReceitModel _itemReceitModelDeserialize(
@@ -152,18 +176,25 @@ ItemReceitModel _itemReceitModelDeserialize(
     change: reader.readDouble(offsets[2]),
     createdAt: reader.readDateTime(offsets[3]),
     customerId: reader.readStringOrNull(offsets[4]),
-    hexId: reader.readString(offsets[5]),
+    discounts: reader.readObjectList<EmbeddedDiscountModel>(
+          offsets[5],
+          EmbeddedDiscountModelSchema.deserialize,
+          allOffsets,
+          EmbeddedDiscountModel(),
+        ) ??
+        const [],
+    hexId: reader.readString(offsets[6]),
     items: reader.readObjectList<ItemReceitItem>(
-          offsets[6],
+          offsets[7],
           ItemReceitItemSchema.deserialize,
           allOffsets,
           ItemReceitItem(),
         ) ??
         [],
-    label: reader.readStringOrNull(offsets[7]) ?? "",
-    payment: reader.readString(offsets[8]),
-    synced: reader.readBoolOrNull(offsets[9]) ?? false,
-    total: reader.readDouble(offsets[10]),
+    label: reader.readStringOrNull(offsets[8]) ?? "",
+    payment: reader.readString(offsets[9]),
+    synced: reader.readBoolOrNull(offsets[10]) ?? false,
+    total: reader.readDouble(offsets[11]),
   );
   object.id = id;
   return object;
@@ -187,8 +218,16 @@ P _itemReceitModelDeserializeProp<P>(
     case 4:
       return (reader.readStringOrNull(offset)) as P;
     case 5:
-      return (reader.readString(offset)) as P;
+      return (reader.readObjectList<EmbeddedDiscountModel>(
+            offset,
+            EmbeddedDiscountModelSchema.deserialize,
+            allOffsets,
+            EmbeddedDiscountModel(),
+          ) ??
+          const []) as P;
     case 6:
+      return (reader.readString(offset)) as P;
+    case 7:
       return (reader.readObjectList<ItemReceitItem>(
             offset,
             ItemReceitItemSchema.deserialize,
@@ -196,13 +235,13 @@ P _itemReceitModelDeserializeProp<P>(
             ItemReceitItem(),
           ) ??
           []) as P;
-    case 7:
-      return (reader.readStringOrNull(offset) ?? "") as P;
     case 8:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? "") as P;
     case 9:
-      return (reader.readBoolOrNull(offset) ?? false) as P;
+      return (reader.readString(offset)) as P;
     case 10:
+      return (reader.readBoolOrNull(offset) ?? false) as P;
+    case 11:
       return (reader.readDouble(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -779,6 +818,95 @@ extension ItemReceitModelQueryFilter
         property: r'customerId',
         value: '',
       ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      discountsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'discounts',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      discountsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'discounts',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      discountsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'discounts',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      discountsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'discounts',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      discountsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'discounts',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      discountsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'discounts',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
     });
   }
 
@@ -1415,6 +1543,13 @@ extension ItemReceitModelQueryFilter
 extension ItemReceitModelQueryObject
     on QueryBuilder<ItemReceitModel, ItemReceitModel, QFilterCondition> {
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      discountsElement(FilterQuery<EmbeddedDiscountModel> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'discounts');
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
       itemsElement(FilterQuery<ItemReceitItem> q) {
     return QueryBuilder.apply(this, (query) {
       return query.object(q, r'items');
@@ -1813,6 +1948,13 @@ extension ItemReceitModelQueryProperty
       customerIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'customerId');
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, List<EmbeddedDiscountModel>, QQueryOperations>
+      discountsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'discounts');
     });
   }
 

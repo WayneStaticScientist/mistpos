@@ -28,38 +28,48 @@ const InvItemSchema = Schema(
       name: r'cost',
       type: IsarType.double,
     ),
-    r'difference': PropertySchema(
+    r'counted': PropertySchema(
       id: 3,
+      name: r'counted',
+      type: IsarType.double,
+    ),
+    r'difference': PropertySchema(
+      id: 4,
       name: r'difference',
       type: IsarType.long,
     ),
     r'id': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'id',
       type: IsarType.string,
     ),
     r'inStock': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'inStock',
       type: IsarType.long,
     ),
     r'name': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'name',
       type: IsarType.string,
     ),
     r'quantity': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'quantity',
       type: IsarType.double,
     ),
+    r'receive': PropertySchema(
+      id: 9,
+      name: r'receive',
+      type: IsarType.double,
+    ),
     r'sku': PropertySchema(
-      id: 8,
+      id: 10,
       name: r'sku',
       type: IsarType.string,
     ),
     r'updated': PropertySchema(
-      id: 9,
+      id: 11,
       name: r'updated',
       type: IsarType.bool,
     )
@@ -92,13 +102,15 @@ void _invItemSerialize(
   writer.writeDouble(offsets[0], object.amount);
   writer.writeString(offsets[1], object.barcode);
   writer.writeDouble(offsets[2], object.cost);
-  writer.writeLong(offsets[3], object.difference);
-  writer.writeString(offsets[4], object.id);
-  writer.writeLong(offsets[5], object.inStock);
-  writer.writeString(offsets[6], object.name);
-  writer.writeDouble(offsets[7], object.quantity);
-  writer.writeString(offsets[8], object.sku);
-  writer.writeBool(offsets[9], object.updated);
+  writer.writeDouble(offsets[3], object.counted);
+  writer.writeLong(offsets[4], object.difference);
+  writer.writeString(offsets[5], object.id);
+  writer.writeLong(offsets[6], object.inStock);
+  writer.writeString(offsets[7], object.name);
+  writer.writeDouble(offsets[8], object.quantity);
+  writer.writeDouble(offsets[9], object.receive);
+  writer.writeString(offsets[10], object.sku);
+  writer.writeBool(offsets[11], object.updated);
 }
 
 InvItem _invItemDeserialize(
@@ -111,13 +123,15 @@ InvItem _invItemDeserialize(
     amount: reader.readDoubleOrNull(offsets[0]) ?? 0,
     barcode: reader.readStringOrNull(offsets[1]) ?? '',
     cost: reader.readDoubleOrNull(offsets[2]) ?? 0.0,
-    difference: reader.readLongOrNull(offsets[3]) ?? 0,
-    id: reader.readStringOrNull(offsets[4]) ?? '',
-    inStock: reader.readLongOrNull(offsets[5]) ?? 1,
-    name: reader.readStringOrNull(offsets[6]) ?? '',
-    quantity: reader.readDoubleOrNull(offsets[7]) ?? 0,
-    sku: reader.readStringOrNull(offsets[8]) ?? '',
-    updated: reader.readBoolOrNull(offsets[9]) ?? false,
+    counted: reader.readDoubleOrNull(offsets[3]) ?? 0,
+    difference: reader.readLongOrNull(offsets[4]) ?? 0,
+    id: reader.readStringOrNull(offsets[5]) ?? '',
+    inStock: reader.readLongOrNull(offsets[6]) ?? 1,
+    name: reader.readStringOrNull(offsets[7]) ?? '',
+    quantity: reader.readDoubleOrNull(offsets[8]) ?? 0,
+    receive: reader.readDoubleOrNull(offsets[9]) ?? 0,
+    sku: reader.readStringOrNull(offsets[10]) ?? '',
+    updated: reader.readBoolOrNull(offsets[11]) ?? false,
   );
   return object;
 }
@@ -136,18 +150,22 @@ P _invItemDeserializeProp<P>(
     case 2:
       return (reader.readDoubleOrNull(offset) ?? 0.0) as P;
     case 3:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
-    case 4:
-      return (reader.readStringOrNull(offset) ?? '') as P;
-    case 5:
-      return (reader.readLongOrNull(offset) ?? 1) as P;
-    case 6:
-      return (reader.readStringOrNull(offset) ?? '') as P;
-    case 7:
       return (reader.readDoubleOrNull(offset) ?? 0) as P;
-    case 8:
+    case 4:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
+    case 5:
       return (reader.readStringOrNull(offset) ?? '') as P;
+    case 6:
+      return (reader.readLongOrNull(offset) ?? 1) as P;
+    case 7:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 8:
+      return (reader.readDoubleOrNull(offset) ?? 0) as P;
     case 9:
+      return (reader.readDoubleOrNull(offset) ?? 0) as P;
+    case 10:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 11:
       return (reader.readBoolOrNull(offset) ?? false) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -401,6 +419,68 @@ extension InvItemQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'cost',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<InvItem, InvItem, QAfterFilterCondition> countedEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'counted',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<InvItem, InvItem, QAfterFilterCondition> countedGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'counted',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<InvItem, InvItem, QAfterFilterCondition> countedLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'counted',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<InvItem, InvItem, QAfterFilterCondition> countedBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'counted',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -828,6 +908,68 @@ extension InvItemQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'quantity',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<InvItem, InvItem, QAfterFilterCondition> receiveEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'receive',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<InvItem, InvItem, QAfterFilterCondition> receiveGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'receive',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<InvItem, InvItem, QAfterFilterCondition> receiveLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'receive',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<InvItem, InvItem, QAfterFilterCondition> receiveBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'receive',
         lower: lower,
         includeLower: includeLower,
         upper: upper,

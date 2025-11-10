@@ -1,4 +1,5 @@
 import 'package:isar/isar.dart';
+import 'package:mistpos/models/embedded_discount_model.dart';
 import 'package:mistpos/models/item_receit_item.dart';
 part 'item_receit_model.g.dart';
 
@@ -16,6 +17,7 @@ class ItemReceitModel {
   String? customerId;
   String label;
   List<ItemReceitItem> items = [];
+  List<EmbeddedDiscountModel> discounts = [];
   ItemReceitModel({
     required this.items,
     required this.total,
@@ -28,6 +30,7 @@ class ItemReceitModel {
     this.customerId,
     this.synced = false,
     this.label = "",
+    this.discounts = const [],
   });
   Map<String, dynamic> toJson() {
     return {
@@ -40,6 +43,9 @@ class ItemReceitModel {
       "synced": synced,
       "label": label,
       "createdAt": createdAt.toIso8601String(),
+      "discounts": discounts
+          .map<Map<String, dynamic>>((e) => e.toJson())
+          .toList(),
       "items": items.map<Map<String, dynamic>>((e) => e.toJson()).toList(),
     };
   }
@@ -60,6 +66,11 @@ class ItemReceitModel {
       change: (data['change'] as num?)?.toDouble() ?? 0.0,
       cashier: data['cashier'],
       payment: data['payment'],
+      discounts: data['discounts'] != null
+          ? (data['discounts'] as List<dynamic>)
+                .map((e) => EmbeddedDiscountModel.fromJson(e))
+                .toList()
+          : [],
       createdAt:
           DateTime.tryParse(data['createdAt'])?.toLocal() ?? DateTime.now(),
     );

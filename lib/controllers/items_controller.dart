@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
+import 'package:mistpos/models/embedded_discount_model.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:mistpos/models/user_model.dart';
@@ -685,11 +686,15 @@ class ItemsController extends GetxController {
         Toaster.showError('Database not initialized');
         return (success: false, rejects: rejects);
       }
+      final discounts = selectedDiscounts;
       final itemReceitModel = ItemReceitModel(
         hexId: "",
         cashier: "admin",
         payment: payment,
         amount: payedAmount,
+        discounts: discounts
+            .map((e) => EmbeddedDiscountModel.fromModel(e))
+            .toList(),
         customerId: selectedCustomer.value?.hexId,
         items: checkOutItems.map((e) {
           final model = e['item'] as ItemModel;

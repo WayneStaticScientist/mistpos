@@ -223,10 +223,26 @@ class DevicesController extends GetxController {
       itemReceitModel.total,
       user.baseCurrence,
     );
+
+    if (itemReceitModel.discounts.isNotEmpty) {
+      b.feed(1);
+      b.text('--- DISCOUNTS ---', align: PosAlign.center, bold: true);
+      b.feed(1);
+      for (final discount in itemReceitModel.discounts) {
+        final discountStr = discount.percentageDiscount == false
+            ? CurrenceConverter.getCurrenceFloatInStrings(
+                discount.discount ?? 0.0,
+                user.baseCurrence,
+              )
+            : '${discount.discount}%';
+        String label = '${discount.name ?? '-no=name-'} - $discountStr';
+        b.text(label);
+      }
+    }
     final totalLine =
         padRight('TOTAL DUE:', receitWidth - totalDueStr.length) + totalDueStr;
-
     b.text(totalLine, bold: true);
+
     b.feed(2);
     b.text('.' * receitWidth);
     if (customer != null) {
@@ -246,6 +262,8 @@ class DevicesController extends GetxController {
       b.feed(1);
     }
     b.text('--- END ---', align: PosAlign.center);
+    b.feed(1);
+    b.text(itemReceitModel.label, align: PosAlign.center);
     b.feed(1);
     b.cut();
     printer.printEscPos(PosPrinterRole.cashier, b);

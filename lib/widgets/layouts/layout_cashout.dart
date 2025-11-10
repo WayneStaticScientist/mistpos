@@ -11,7 +11,6 @@ import 'package:mistpos/screens/basic/screen_selected_items_readjust.dart';
 class LayoutCashout extends StatefulWidget {
   final GlobalKey bottomBarKey;
   const LayoutCashout({super.key, required this.bottomBarKey});
-
   @override
   State<LayoutCashout> createState() => _LayoutCashoutState();
 }
