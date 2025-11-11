@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/screens/basic/screens_seleected_discounts_view.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/utils/avatars.dart';
 import 'package:mistpos/themes/app_theme.dart';
@@ -46,6 +47,24 @@ class _ScreenSelectedItemsReadjustState
                 : Iconify(Carbon.save, color: AppTheme.color(context)),
           ),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: [
+          Obx(
+            () => "View discounts"
+                .text()
+                .elevatedButton(
+                  onPressed: () =>
+                      Get.to(() => ScreensSeleectedDiscountsView()),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Get.theme.colorScheme.primary,
+                  ),
+                )
+                .padding(EdgeInsets.all(8))
+                .visibleIf(_itemsListController.discounts.isNotEmpty),
+          ),
+        ].row(mainAxisAlignment: MainAxisAlignment.center),
       ),
       body: [
         "Tap on the item to change discounts and modifiers"

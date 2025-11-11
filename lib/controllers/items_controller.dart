@@ -106,6 +106,7 @@ class ItemsController extends GetxController {
 
   Future<void> removeAllSelected() async {
     checkOutItems.clear();
+    selectedDiscounts.clear();
     selectedCustomer.value = null;
     totalPrice.value = 0;
     loadCartItems();
@@ -746,6 +747,7 @@ class ItemsController extends GetxController {
           await isar.itemReceitModels.put(receivedModel);
         });
       }
+      discounts.clear();
       checkOutItems.clear();
       selectedCustomer.value = null;
       totalPrice.value = 0;
