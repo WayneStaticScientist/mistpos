@@ -75,14 +75,22 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
                   elements: _itemsListController.receits,
                   groupBy: (element) =>
                       MistDateUtils.formatNormalDate(element.createdAt),
-                  groupSeparatorBuilder: (String groupByValue) => Text(
-                    groupByValue,
-                    style: TextStyle(
-                      color: Get.theme.colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
+                  groupSeparatorBuilder: (String groupByValue) =>
+                      Text(
+                            groupByValue,
+                            style: TextStyle(
+                              color: Get.theme.colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          )
+                          .row()
+                          .padding(EdgeInsets.all(10))
+                          .decoratedBox(
+                            decoration: BoxDecoration(
+                              color: AppTheme.surface(context),
+                            ),
+                          ),
                   itemBuilder: (context, ItemReceitModel element) =>
                       _buildItem(element),
                   itemComparator: (item1, item2) =>
@@ -102,7 +110,7 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                 ),
         ).expanded1,
-      ].column(),
+      ].column().padding(EdgeInsets.all(8)),
     );
   }
 

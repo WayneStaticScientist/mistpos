@@ -1,3 +1,4 @@
+import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/instance_manager.dart';
 import 'package:mistpos/themes/app_theme.dart';
@@ -8,6 +9,7 @@ import 'package:get/get_navigation/get_navigation.dart';
 import 'package:mistpos/widgets/layouts/profile_tile.dart';
 import 'package:mistpos/screens/basic/screen_dashboard.dart';
 import 'package:mistpos/screens/currence/screen_currency.dart';
+import 'package:mistpos/screens/gateways/payment_gateway.dart';
 import 'package:mistpos/screens/basic/screen_settings_page.dart';
 import 'package:mistpos/screens/basic/screen_devices_section.dart';
 
@@ -30,6 +32,7 @@ class MistMainNavigationView extends StatelessWidget {
           padding: EdgeInsets.zero,
           children: <Widget>[
             ProfileTile(),
+            "Basic".text(style: TextStyle(fontSize: 12)).paddingLeft(12),
             ListTile(
               leading: Iconify(Bx.cart, color: AppTheme.color(context)),
               title: Text('Sales'),
@@ -65,6 +68,16 @@ class MistMainNavigationView extends StatelessWidget {
               onTap: () => Get.to(() => ScreenSettingsPage()),
             ),
             Divider(color: Colors.grey.withAlpha(50)),
+            "Payment Methods"
+                .text(style: TextStyle(fontSize: 12))
+                .paddingLeft(12),
+            ListTile(
+              leading: Iconify(Bx.bxl_visa, color: AppTheme.color(context)),
+              title: Text('Payment Getways'),
+              onTap: () => Get.to(() => ScreenPaymentGetway()),
+            ),
+            Divider(color: Colors.grey.withAlpha(50)),
+            "System".text(style: TextStyle(fontSize: 12)).paddingLeft(12),
             ListTile(
               leading: Iconify(Bx.money, color: AppTheme.color(context)),
               title: Text('Currencies'),

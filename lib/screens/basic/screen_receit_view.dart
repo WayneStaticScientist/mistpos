@@ -69,7 +69,10 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                         (e.percentageDiscount
                                 ? "${e.discount}% off"
                                 : "\$${CurrenceConverter.getCurrenceFloatInStrings(e.discount, _userController.user.value?.baseCurrence ?? "")}")
-                            .text(style: TextStyle(color: Colors.red)),
+                            .text(style: TextStyle(color: Colors.red))
+                            .visibleIf(
+                              e.discountId != null && e.discountId!.isNotEmpty,
+                            ),
                       ].row(),
                       title: e.name.text(),
                       tileColor: e.refunded ? Colors.red.withAlpha(100) : null,
@@ -80,6 +83,34 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                     );
                   }),
                   18.gapHeight,
+                  if (widget.receitModel.discounts.isNotEmpty) ...[
+                    "Discounts".text(
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    12.gapHeight,
+                    ...widget.receitModel.discounts.map(
+                      (e) => [
+                        e.name?.text() ?? "".text(),
+                        ((e.percentageDiscount == true)
+                                ? " - ${e.discount}% off"
+                                : CurrenceConverter.getCurrenceFloatInStrings(
+                                    e.discount ?? 0,
+                                    _userController.user.value?.baseCurrence ??
+                                        '',
+                                  ))
+                            .text(
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                      ].row(),
+                    ),
+                    18.gapHeight,
+                  ],
                   Divider(color: Colors.grey.withAlpha(80), thickness: 1),
                   18.gapHeight,
                   ListTile(
