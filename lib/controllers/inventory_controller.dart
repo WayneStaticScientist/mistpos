@@ -3,6 +3,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:mistpos/models/company_model.dart';
 import 'package:mistpos/models/exchange_rate_model.dart';
 import 'package:mistpos/models/inventory_history_model.dart';
+import 'package:mistpos/models/item_unsaved_model.dart';
 import 'package:mistpos/models/product_stats_model.dart';
 import 'package:mistpos/models/production_model.dart';
 import 'package:mistpos/models/transfer_order_model.dart';
@@ -54,7 +55,7 @@ class InventoryController extends GetxController {
     selectedInvItems[index] = item;
   }
 
-  void addInvModel(ItemModel model) {
+  void addInvModel(ItemUnsavedModel model) {
     if (selectedInvItems.indexWhere((e) => e.id == model.hexId) != -1) {
       Toaster.showError("Item already added");
       return;

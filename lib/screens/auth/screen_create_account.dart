@@ -114,6 +114,8 @@ class _ScreenCreateAccountState extends State<ScreenCreateAccount> {
       role: 'admin',
       companies: [],
       pinnedInput: false,
+      permissions: [],
+      subscriptions: [],
       email: _emailController.text,
       country: _countryController.text,
       fullName: _fullNameController.text,

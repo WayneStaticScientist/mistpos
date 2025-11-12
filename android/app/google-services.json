@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "578318699753",
+    "project_id": "mistpos-f7b3b",
+    "storage_bucket": "mistpos-f7b3b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:578318699753:android:de265798ffc40064c5b478",
+        "android_client_info": {
+          "package_name": "aca.bicosatstudios.mistpos.mistpos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmrE-X8wX94sQkSB4IbGtRstNlGqMfifs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

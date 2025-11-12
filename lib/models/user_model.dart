@@ -19,7 +19,9 @@ class User {
   final String baseCurrence;
   final bool paynowActivated;
   final List<String> companies;
+  final List<String> permissions;
   final bool allowOfflinePurchase;
+  final List<String> subscriptions;
   User({
     this.password,
     this.hexId = '',
@@ -31,10 +33,12 @@ class User {
     this.companyName = '',
     required this.fullName,
     this.baseCurrence = '',
+    this.receitsCount = 0,
     required this.companies,
+    required this.subscriptions,
     required this.pinnedInput,
     this.paynowActivated = false,
-    this.receitsCount = 0,
+    required this.permissions,
     this.allowOfflinePurchase = true,
   });
   factory User.fromMap(Map<String, dynamic> map) {
@@ -57,6 +61,16 @@ class User {
       baseCurrence: map['baseCurrence'] as String? ?? 'USD',
       paynowActivated: map['paynowActivated'] as bool? ?? false,
       receitsCount: map['receitsCount'] as int? ?? 0,
+      permissions: (map['permissions'] == null)
+          ? []
+          : (map['permissions'] as List<dynamic>)
+                .map((e) => e as String)
+                .toList(),
+      subscriptions: (map['subscriptions'] == null)
+          ? []
+          : (map['subscriptions'] as List<dynamic>)
+                .map((e) => e as String)
+                .toList(),
     );
   }
   Map<String, dynamic> toMap() {
@@ -69,10 +83,12 @@ class User {
       'password': password,
       'fullName': fullName,
       'companies': companies,
+      'permissions': permissions,
       'companyName': companyName,
       'pinnedInput': pinnedInput,
       'receitsCount': receitsCount,
       'baseCurrence': baseCurrence,
+      "subscriptions": subscriptions,
       'paynowActivated': paynowActivated,
       'allowOfflinePurchase': allowOfflinePurchase,
     };

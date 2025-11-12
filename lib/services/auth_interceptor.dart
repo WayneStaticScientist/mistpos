@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
 import 'package:mistpos/models/token_model.dart';
 import 'package:mistpos/models/response_model.dart';
@@ -43,11 +41,11 @@ class AuthenticationInterceptor extends Interceptor {
   }
 
   static Future<ResponseModel> requestToken() async {
-    log("requesting another token");
     final mobileDeviceIdentifier = await MobileDeviceIdentifier().getDeviceId();
     try {
-      final response = await dio.get(
+      final response = await dio.post(
         "${Net.baseUrl}/user/tokens",
+        data: User.fromStorage(),
         options: Options(
           headers: {
             "device": mobileDeviceIdentifier,

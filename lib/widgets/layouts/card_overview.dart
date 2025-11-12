@@ -11,14 +11,15 @@ class CardOverview extends StatelessWidget {
   Widget build(BuildContext context) {
     return [
           label.text(maxLines: 1, overflow: TextOverflow.ellipsis),
+          18.gapHeight,
           value.text(
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ]
         .column(crossAxisAlignment: CrossAxisAlignment.start)
-        .sizedBox(height: 100, width: 150)
+        .sizedBox(height: 150, width: 150)
         .padding(EdgeInsets.all(12))
         .decoratedBox(
           decoration: BoxDecoration(
@@ -26,6 +27,6 @@ class CardOverview extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
         )
-        .padding(EdgeInsets.all(10));
+        .padding(EdgeInsets.symmetric(horizontal: 3));
   }
 }

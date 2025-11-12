@@ -23,7 +23,7 @@ class _LayoutCashoutState extends State<LayoutCashout> {
   static const double moveDistance = 10.0;
   final _userController = Get.find<UserController>();
   final _itemsListController = Get.find<ItemsController>();
-  static const Duration moveDuration = Duration(seconds: 2);
+  static const Duration moveDuration = Duration(seconds: 1);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -74,7 +74,9 @@ class _LayoutCashoutState extends State<LayoutCashout> {
             side: BorderSide.none,
             shape: RoundedRectangleBorder(side: BorderSide.none),
             avatar: Iconify(Bx.chevron_right, color: AppTheme.color(context))
-                .animate(onComplete: (controller) => controller.reverse())
+                .animate(
+                  onComplete: (controller) => controller.repeat(reverse: true),
+                )
                 .moveX(begin: 0, end: moveDistance, duration: moveDuration),
             label: "Checkout".text(
               style: TextStyle(
