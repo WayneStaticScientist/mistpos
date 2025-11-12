@@ -33,22 +33,22 @@ class NavSale extends StatefulWidget {
 }
 
 class _NavSaleState extends State<NavSale> {
-  final _userController = Get.find<UserController>();
-  final _itemsListController = Get.find<ItemsController>();
-  final TextEditingController _searchController = TextEditingController();
-  final _refreshController = RefreshController();
-  bool _inSearchMode = false;
+  Timer? _debounce;
   String _searchTerm = "";
   int _animationSpeed = 0;
   double _leftPosition = 0.0; // Left position
+  bool _inSearchMode = false;
   double _topPosition = 1000.0; // Off-screen initial position
   double _animatedOpacity = 0.0;
   String _selectedListGroup = "*";
   final GlobalKey _scanKey = GlobalKey();
   final GlobalKey _bottomBarKey = GlobalKey();
   final _scrollController = ScrollController();
+  final _refreshController = RefreshController();
+  final _userController = Get.find<UserController>();
+  final _itemsListController = Get.find<ItemsController>();
+  final TextEditingController _searchController = TextEditingController();
 
-  Timer? _debounce;
   @override
   void initState() {
     super.initState();

@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
-import 'package:mistpos/models/item_receit_item.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
@@ -38,7 +37,6 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
   Timer? _debounce;
   String _debounceCache = "";
   bool _savingReceit = false;
-  List<ItemReceitItem> _rejects = [];
   @override
   void initState() {
     super.initState();
@@ -72,40 +70,39 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
         ],
       ),
       body: SingleChildScrollView(
-        child: _rejects.isEmpty
-            ? [
-                "Cash Payment".text(),
-                CurrenceConverter.getCurrenceFloatInStrings(
-                  _itemsListController.totalPrice.value,
-                  _userController.user.value?.baseCurrence ?? '',
-                ).text(
-                  style: TextStyle(
-                    fontSize: 42,
-                    fontWeight: FontWeight.bold,
-                    color: Get.theme.colorScheme.primary,
-                  ),
+        child:
+            [
+              "Cash Payment".text(),
+              CurrenceConverter.getCurrenceFloatInStrings(
+                _itemsListController.totalPrice.value,
+                _userController.user.value?.baseCurrence ?? '',
+              ).text(
+                style: TextStyle(
+                  fontSize: 42,
+                  fontWeight: FontWeight.bold,
+                  color: Get.theme.colorScheme.primary,
                 ),
-                18.gapHeight,
-                MistFormInput(
-                  label: "Amount Payed",
-                  controller: _amountController,
-                  keyboardType: TextInputType.number,
-                ),
-                18.gapHeight,
-                (change < 0.0)
-                    ? "Not Enough Funds".text(
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )
-                    : "Change ${CurrenceConverter.getCurrenceFloatInStrings(change, _userController.user.value?.baseCurrence ?? '')}"
-                          .text(),
-              ].column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-              )
-            : _listRejects(),
+              ),
+              18.gapHeight,
+              MistFormInput(
+                label: "Amount Payed",
+                controller: _amountController,
+                keyboardType: TextInputType.number,
+              ),
+              18.gapHeight,
+              (change < 0.0)
+                  ? "Not Enough Funds".text(
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  : "Change ${CurrenceConverter.getCurrenceFloatInStrings(change, _userController.user.value?.baseCurrence ?? '')}"
+                        .text(),
+            ].column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+            ),
       ).center().padding(EdgeInsets.all(30)),
       bottomNavigationBar: SafeArea(
         child: "Pay"
@@ -246,50 +243,14 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
       user: _userController.user.value!,
       printReceits: _printerController.isPrinterConnected(),
     );
-    setState(() {
-      _savingReceit = false;
-    });
-    if (state.success) {
-      if (state.rejects != null && state.rejects!.isNotEmpty) {
-        setState(() {
-          _rejects = state.rejects!;
-        });
-        return;
-      }
+    if (mounted) {
+      setState(() {
+        _savingReceit = false;
+      });
+    }
+    if (state) {
       Get.back();
       Toaster.showSuccess("payment done");
     }
-  }
-
-  Widget _listRejects() {
-    return [
-      "Reject Notice".text(
-        style: TextStyle(
-          fontSize: 32,
-          color: Colors.red,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      14.gapHeight,
-      "Your payment has rejected the following items but others have proceeded payment"
-          .text(),
-      22.gapHeight,
-      ..._rejects.map(
-        (e) => ListTile(
-          leading: Text(e.count.toString()),
-          title: Text(e.name),
-          trailing: Text(
-            CurrenceConverter.getCurrenceFloatInStrings(
-              (e.price + e.addenum) * e.count,
-              _userController.user.value?.baseCurrence ?? '',
-            ),
-          ),
-          subtitle: Text(e.rejectedReason, overflow: TextOverflow.ellipsis),
-        ),
-      ),
-    ].column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-    );
   }
 }

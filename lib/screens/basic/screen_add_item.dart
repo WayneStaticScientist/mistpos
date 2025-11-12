@@ -8,8 +8,8 @@ import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/color_list.dart';
 import 'package:mistpos/utils/icons_list.dart';
 import 'package:iconify_flutter/icons/bx.dart';
-import 'package:mistpos/models/item_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/models/item_unsaved_model.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/screens/basic/modern_layout.dart';
@@ -20,6 +20,7 @@ import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:radio_group_v2/radio_group_v2.dart' as rg;
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:radio_group_v2/utils/radio_group_decoration.dart';
+import 'package:mistpos/controllers/items_unsaved_controller.dart';
 import 'package:mistpos/widgets/buttons/mist_loaded_icon_button.dart';
 import 'package:flutter_barcode_scanner_plus/flutter_barcode_scanner_plus.dart';
 import 'package:radio_group_v2/widgets/view_models/radio_group_controller.dart';
@@ -36,6 +37,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
   final _soldByGroup = RadioGroupController();
   final _itemRepresentation = RadioGroupController();
   final _itemsController = Get.find<ItemsController>();
+  final _itemsUnsavedController = Get.find<ItemsUnsavedController>();
   bool _isCompositeItem = false;
   bool _useProduction = false;
   final _formKey = GlobalKey<FormState>();
@@ -585,7 +587,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
     }
     double price = double.tryParse(_itemPriceController.text.trim()) ?? 0.0;
     final soldBy = _soldByGroup.value as String;
-    final itemModel = ItemModel(
+    final itemModel = ItemUnsavedModel(
       price: price,
       cost: cost,
       avatar: "",
@@ -605,17 +607,18 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
       stockQuantity: int.tryParse(_initialStockController.text.trim()) ?? 0,
       lowStockThreshold: int.tryParse(_reorderLevelController.text.trim()) ?? 0,
     );
-    final response = await _itemsController.createItem(
+    final response = await _itemsUnsavedController.createItem(
       itemModel,
       update: false,
     );
     if (!mounted) return;
+
     setState(() {
       _isLoading = false;
     });
     if (response) {
       _inventorController.selectedInvItems.clear();
-
+      _itemsController.syncCartItemsOnBackground();
       Get.back();
       Toaster.showSuccess('Item created successfully');
     }

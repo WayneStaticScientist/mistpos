@@ -121,7 +121,7 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
             receit.total,
             _userController.user.value?.baseCurrence ?? '',
           ).text(),
-          trailing: Text(receit.label),
+          trailing: Text(receit.label, style: TextStyle(fontSize: 10)),
           subtitle: Text("${receit.createdAt.hour}:${receit.createdAt.minute}"),
           onTap: () => Get.to(() => ScreenReceitView(receitModel: receit)),
         )

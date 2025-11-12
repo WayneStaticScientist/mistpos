@@ -1,13 +1,14 @@
+import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:mistpos/controllers/user_controller.dart';
-import 'package:mistpos/screens/basic/screen_refund_cart.dart';
+import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/models/item_receit_model.dart';
+import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/screens/basic/screen_refund_cart.dart';
 
 class ScreenReceitView extends StatefulWidget {
   final ItemReceitModel receitModel;
@@ -35,6 +36,10 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
       body: Center(
         child: SingleChildScrollView(
           child: [
+            ["Not synced ".text().padding(EdgeInsets.all(10))]
+                .row(mainAxisAlignment: MainAxisAlignment.center)
+                .decoratedBox(decoration: BoxDecoration(color: Colors.red))
+                .visibleIfNot(widget.receitModel.synced),
             CurrenceConverter.getCurrenceFloatInStrings(
               widget.receitModel.total,
               _userController.user.value?.baseCurrence ?? '',
@@ -48,7 +53,6 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                     title: "Employee : ${widget.receitModel.cashier}".text(),
                     subtitle: "POS : pos 1".text(),
                   ),
-
                   18.gapHeight,
                   Divider(color: Colors.grey.withAlpha(80), thickness: 1),
                   18.gapHeight,
@@ -149,7 +153,7 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                 .sizedBox(width: double.infinity),
           ].column(crossAxisAlignment: CrossAxisAlignment.center),
         ),
-      ).padding(EdgeInsets.all(20)),
+      ).constrained(maxWidth: ScreenSizes.maxWidth).padding(EdgeInsets.all(20)),
     );
   }
 }

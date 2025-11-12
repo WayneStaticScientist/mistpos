@@ -14,6 +14,7 @@ import 'package:mistpos/services/network_wrapper.dart';
 import 'package:mistpos/models/item_receit_model.dart';
 import 'package:mistpos/models/item_modifier_model.dart';
 import 'package:mistpos/models/item_categories_model.dart';
+import 'package:mistpos/utils/labeller.dart' show Labeller;
 import 'package:mistpos/models/item_saved_items_model.dart';
 import 'package:mistpos/controllers/devices_controller.dart';
 import 'package:mistpos/models/embedded_discount_model.dart';
@@ -127,25 +128,23 @@ class ItemsController extends GetxController {
     if (isar == null) {
       return;
     }
-    if (page > 1) {
-      syncCartItemsOnBackground(page: page, search: search, category: category);
-      return;
-    }
     if (selectedCategory.value.isNotEmpty) {
       final loadedItems = isar.itemModels
           .filter()
           .categoryEqualTo(selectedCategory.value)
-          .nameContains(search)
+          .nameContains(search, caseSensitive: false)
           .findAllSync();
       cartItems.assignAll(loadedItems);
     } else {
       final loadedItems = isar.itemModels
           .filter()
-          .nameContains(search)
+          .nameContains(search, caseSensitive: false)
           .findAllSync();
       cartItems.assignAll(loadedItems);
     }
-    syncCartItemsOnBackground(page: page, search: search, category: category);
+    if (search.trim().isEmpty && category.trim().isEmpty) {
+      syncCartItemsOnBackground();
+    }
   }
 
   //sync background
@@ -237,14 +236,18 @@ class ItemsController extends GetxController {
   }
 
   //loads receits background
+  RxBool receitsLoading = RxBool(false);
   Future<void> loadReceits({int page = 1, String search = ''}) async {
+    if (receitsLoading.value) return;
     final isar = Isar.getInstance();
     if (isar == null) {
       return;
     }
+    receitsLoading.value = true;
     final response = await Net.get(
       "/cashier/receits?page=$page&search=$search",
     );
+    receitsLoading.value = false;
     if (!response.hasError) {
       if (response.body['list'] != null) {
         final list = response.body['list'] as List<dynamic>;
@@ -253,14 +256,14 @@ class ItemsController extends GetxController {
         );
       }
       await isar.writeTxn(() async {
-        await isar.itemReceitModels.where().deleteAll();
+        await isar.itemReceitModels.filter().syncedEqualTo(true).deleteAll();
         await isar.itemReceitModels.putAll(receits);
       });
       return;
     }
-
     final r = isar.itemReceitModels.where().sortByCreatedAtDesc().findAllSync();
     receits.assignAll(r);
+    _updateUnsyncedReceits();
   }
 
   /*
@@ -433,101 +436,6 @@ class ItemsController extends GetxController {
     } catch (e) {
       Toaster.showError("Error ; $e");
       log(e.toString());
-    }
-  }
-
-  Future<({bool success, List<ItemReceitItem>? rejects})>
-  addReceitFromItemModel(
-    double payedAmount,
-    String payment, {
-    required bool allowOfflinePurchase,
-    bool printReceits = false,
-    required User user,
-  }) async {
-    List<ItemReceitItem>? rejects;
-    try {
-      final isar = Isar.getInstance();
-      if (isar == null) {
-        Toaster.showError('Database not initialized');
-        return (success: false, rejects: rejects);
-      }
-      final discounts = selectedDiscounts;
-      final itemReceitModel = ItemReceitModel(
-        hexId: "",
-        cashier: "admin",
-        payment: payment,
-        amount: payedAmount,
-        discounts: discounts
-            .map((e) => EmbeddedDiscountModel.fromModel(e))
-            .toList(),
-        customerId: selectedCustomer.value?.hexId,
-        items: checkOutItems.map((e) {
-          final model = e['item'] as ItemModel;
-          final receit = ItemReceitItem()
-            ..itemId = e['hexId']
-            ..name = model.name
-            ..discount = (e['discount'] as num?)?.toDouble() ?? 0.0
-            ..discountId = e['discountId'] as String?
-            ..percentageDiscount = e['percentageDiscount'] as bool? ?? true
-            ..cost = e['cost'] as double? ?? 0.0
-            ..baseId = model.id
-            ..originalCount = e['count'] ?? 0
-            ..price = model.price + e['qouted'] as double? ?? 0.0
-            ..addenum = e['addenum'] as double? ?? 0.0
-            ..count = e['count'] ?? 0;
-          return receit;
-        }).toList(),
-        change: payedAmount - totalPrice.value,
-        createdAt: DateTime.now(),
-        total: totalPrice.value,
-      );
-      final response = await Net.post(
-        "/cashier/purchase",
-        data: itemReceitModel.toJson(),
-      );
-      if (response.hasError &&
-          (response.statusCode == null || response.statusCode! > 0)) {
-        Toaster.showError(response.response);
-        return (success: false, rejects: rejects);
-      }
-      if (response.hasError && (response.statusCode! < 0)) {
-        if (allowOfflinePurchase) {
-          Toaster.showError(response.response);
-          return (success: false, rejects: rejects);
-        }
-        Toaster.showError("syncing to online server failed continuing offline");
-      }
-      if (response.hasError) {
-        await isar.writeTxn(() async {
-          await isar.itemReceitModels.put(itemReceitModel);
-        });
-      } else {
-        List<dynamic>? drejects = response.body['rejects'];
-        if (drejects != null && drejects.isNotEmpty) {
-          rejects = drejects.map((e) => ItemReceitItem.fromJson(e)).toList();
-        }
-        final receivedModel = ItemReceitModel.fromJson(response.body['update']);
-        await isar.writeTxn(() async {
-          await isar.itemReceitModels.put(receivedModel);
-        });
-      }
-      discounts.clear();
-      checkOutItems.clear();
-      selectedCustomer.value = null;
-      totalPrice.value = 0;
-      if (printReceits) {
-        DevicesController.printReceitToBackround(
-          itemReceitModel,
-          user,
-          selectedCustomer.value,
-        );
-      }
-      loadReceits();
-      syncCartItemsOnBackground();
-      return (success: true, rejects: rejects);
-    } catch (e) {
-      Toaster.showError("There was error : $e");
-      return (success: false, rejects: rejects);
     }
   }
 
@@ -1154,5 +1062,131 @@ class ItemsController extends GetxController {
       Toaster.showError('Failed to add category');
     }
     return false;
+  }
+
+  /*
+  =========================================================================
+  =========================================================================
+  RECEIT Payment
+  =========================================================================
+  =========================================================================
+*/
+  Future<bool> addReceitFromItemModel(
+    double payedAmount,
+    String payment, {
+    required bool allowOfflinePurchase,
+    bool printReceits = false,
+    required User user,
+  }) async {
+    try {
+      final isar = Isar.getInstance();
+      if (isar == null) {
+        Toaster.showError('Database not initialized');
+        return false;
+      }
+      final discounts = selectedDiscounts;
+      final itemReceitModel = ItemReceitModel(
+        hexId: "",
+        cashier: "admin",
+        label: Labeller.generateRecietNumber(
+          fullName: user.fullName,
+          count: user.receitsCount,
+          companyName: user.companyName,
+        ),
+        payment: payment,
+        amount: payedAmount,
+        synced: false,
+        discounts: discounts
+            .map((e) => EmbeddedDiscountModel.fromModel(e))
+            .toList(),
+        customerId: selectedCustomer.value?.hexId,
+        items: checkOutItems.map((e) {
+          final model = e['item'] as ItemModel;
+          final receit = ItemReceitItem()
+            ..name = model.name
+            ..baseId = model.id
+            ..itemId = e['hexId']
+            ..originalCount = e['count'] ?? 0
+            ..cost = e['cost'] as double? ?? 0.0
+            ..discountId = e['discountId'] as String?
+            ..addenum = e['addenum'] as double? ?? 0.0
+            ..price = model.price + e['qouted'] as double? ?? 0.0
+            ..discount = (e['discount'] as num?)?.toDouble() ?? 0.0
+            ..percentageDiscount = e['percentageDiscount'] as bool? ?? true
+            ..count = e['count'] ?? 0;
+          return receit;
+        }).toList(),
+        change: payedAmount - totalPrice.value,
+        createdAt: DateTime.now(),
+        total: totalPrice.value,
+      );
+      int newReceitId = -1;
+      await isar.writeTxn(() async {
+        newReceitId = await isar.itemReceitModels.put(itemReceitModel);
+      });
+      user.receitsCount++;
+      User.saveToStorage(user);
+      updateReceitsInBackground(newReceitId, itemReceitModel);
+      if (printReceits) {
+        DevicesController.printReceitToBackround(
+          itemReceitModel,
+          user,
+          selectedCustomer.value,
+        );
+      }
+      discounts.clear();
+      checkOutItems.clear();
+      selectedCustomer.value = null;
+      totalPrice.value = 0;
+      return true;
+    } catch (e) {
+      Toaster.showError("There was error : $e");
+      return false;
+    }
+  }
+
+  Future<void> updateReceitsInBackground(
+    int id,
+    ItemReceitModel itemReceitModel,
+  ) async {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      return;
+    }
+    receitsLoading.value = true;
+    final response = await Net.post(
+      "/cashier/purchase",
+      data: itemReceitModel.toJson(),
+    );
+    if (response.hasError) {
+      receitsLoading.value = true;
+      return;
+    }
+    final receivedModel = ItemReceitModel.fromJson(response.body['update']);
+    await isar.writeTxn(() async {
+      receivedModel.id = id;
+      await isar.itemReceitModels.put(receivedModel);
+    });
+    loadReceits();
+    syncCartItemsOnBackground();
+  }
+
+  RxBool updatingUsyncedReceits = RxBool(true);
+  void _updateUnsyncedReceits() async {
+    if (updatingUsyncedReceits.value) return;
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      return;
+    }
+    updatingUsyncedReceits.value = true;
+    final allUnsynced = await isar.itemReceitModels
+        .filter()
+        .syncedEqualTo(false)
+        .findAll();
+    for (final receit in allUnsynced) {
+      await updateReceitsInBackground(receit.id, receit);
+      await Future.delayed(Duration(milliseconds: 500));
+    }
+    updatingUsyncedReceits.value = false;
   }
 }

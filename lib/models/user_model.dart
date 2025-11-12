@@ -8,6 +8,7 @@ class User {
   String hexId;
   final int till;
   String? password;
+  int receitsCount;
   final String role;
   final String email;
   final String company;
@@ -33,6 +34,7 @@ class User {
     required this.companies,
     required this.pinnedInput,
     this.paynowActivated = false,
+    this.receitsCount = 0,
     this.allowOfflinePurchase = true,
   });
   factory User.fromMap(Map<String, dynamic> map) {
@@ -54,6 +56,7 @@ class User {
       companyName: map['companyName'] as String? ?? '',
       baseCurrence: map['baseCurrence'] as String? ?? 'USD',
       paynowActivated: map['paynowActivated'] as bool? ?? false,
+      receitsCount: map['receitsCount'] as int? ?? 0,
     );
   }
   Map<String, dynamic> toMap() {
@@ -68,6 +71,7 @@ class User {
       'companies': companies,
       'companyName': companyName,
       'pinnedInput': pinnedInput,
+      'receitsCount': receitsCount,
       'baseCurrence': baseCurrence,
       'paynowActivated': paynowActivated,
       'allowOfflinePurchase': allowOfflinePurchase,
