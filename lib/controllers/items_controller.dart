@@ -24,6 +24,7 @@ class ItemsController extends GetxController {
   RxList<ItemModel> cartItems = <ItemModel>[].obs;
   RxList<ItemModel> fixedItems = <ItemModel>[].obs;
   RxList<ItemModifier> modifiers = <ItemModifier>[].obs;
+  RxList<DiscountModel> discounts = <DiscountModel>[].obs;
   RxList<CustomerModel> customers = <CustomerModel>[].obs;
   RxList<ItemReceitModel> receits = <ItemReceitModel>[].obs;
   Rx<CustomerModel?> selectedCustomer = Rx<CustomerModel?>(null);
@@ -35,8 +36,6 @@ class ItemsController extends GetxController {
   @override
   void onInit() {
     _loadFixedItems();
-    _loadFixedDiscounts();
-    _loadFixedCategories();
     super.onInit();
   }
 
@@ -51,204 +50,10 @@ class ItemsController extends GetxController {
     super.dispose();
   }
 
-  void addDiscountToProduct(DiscountModel model) {
-    if (selectedDiscounts.indexWhere((e) {
-          return e.hexId == model.hexId;
-        }) ==
-        -1) {
-      selectedDiscounts.add(model);
-      _calculatedTotalPrice();
-      return;
-    }
-    Toaster.showError("discount already added");
-  }
-
-  void removeDiscountFromProduct(DiscountModel model) {
-    int selectedIndex = selectedDiscounts.indexWhere((e) {
-      return e.hexId == model.hexId;
-    });
-    if (selectedIndex != -1) {
-      selectedDiscounts.removeAt(selectedIndex);
-      _calculatedTotalPrice();
-      return;
-    }
-    Toaster.showError("discount not selected already");
-  }
-
-  void removeSelectedItem(Map<String, dynamic> e) async {
-    final model = e['item'] as ItemModel;
-    int indexOfSelected = checkOutItems.indexWhere((e) {
-      final lmodel = e['item'] as ItemModel;
-      return lmodel.hexId == model.hexId;
-    });
-    if (indexOfSelected < 0) {
-      Toaster.showError("something went wrong");
-      return;
-    }
-    checkOutItems.removeAt(indexOfSelected);
-    _calculatedTotalPrice();
-  }
-
-  void incrItem(Map<String, dynamic> e, int increment) async {
-    final model = e['item'] as ItemModel;
-    int indexOfSelected = checkOutItems.indexWhere((e) {
-      final lmodel = e['item'] as ItemModel;
-      return lmodel.hexId == model.hexId;
-    });
-    if (indexOfSelected < 0) {
-      Toaster.showError("something went wrong");
-      return;
-    }
-    e['count'] += increment;
-    checkOutItems[indexOfSelected] = e;
-    _calculatedTotalPrice();
-  }
-
-  Future<void> removeAllSelected() async {
-    checkOutItems.clear();
-    selectedDiscounts.clear();
-    selectedCustomer.value = null;
-    totalPrice.value = 0;
-    loadCartItems();
-  }
-
-  void addSelectedItem(
-    ItemModel model, {
-    int count = -1,
-    String? discountId,
-    double qouted = 0.0,
-    double addenum = 0.0,
-    double discount = 0.0,
-    int restoreAmount = -1,
-    Map<String, bool>? dataMap,
-    bool percentageDiscount = true,
-  }) async {
-    final dataFound = checkOutItems.indexWhere((e) {
-      final id = e['id'];
-      if (id is int) {
-        return id == model.id;
-      }
-      return false;
-    });
-    if (dataFound == -1) {
-      checkOutItems.add({
-        'id': model.id,
-        'item': model,
-        "count": count < 0 ? 1 : count,
-        "addenum": addenum,
-        "qouted": qouted,
-        "dataMap": dataMap ?? <String, bool>{},
-        "hexId": model.hexId,
-        "cost": model.cost,
-        "discount": discount,
-        "discountId": discountId,
-        "restoreAmount": restoreAmount,
-        "percentageDiscount": percentageDiscount,
-      });
-      _calculatedTotalPrice();
-      return;
-    }
-    final modelFound = checkOutItems[dataFound];
-    modelFound['count'] = count < 0 ? modelFound['count'] + 1 : count;
-    modelFound['dataMap'] = dataMap ?? <String, bool>{};
-    modelFound['addenum'] = addenum;
-    modelFound['qouted'] = qouted;
-    modelFound['discount'] = discount;
-    modelFound['discountId'] = discountId;
-    modelFound['restoreAmount'] = restoreAmount;
-    modelFound['percentageDiscount'] = percentageDiscount;
-    checkOutItems[dataFound] = modelFound;
-    _calculatedTotalPrice();
-  }
-
-  RxBool creatingItem = RxBool(false);
-  Future<bool> createItem(ItemModel item, {update = true}) async {
-    if (syncingItems.value == true) {
-      Toaster.showError("syncing items please wait");
-      return false;
-    }
-    try {
-      dynamic response;
-      if (update) {
-        response = await Net.put(
-          "/admin/product/${item.hexId}",
-          data: item.toJson(),
-        );
-      } else {
-        response = await Net.post("/admin/product", data: item.toJson());
-      }
-      if (response.hasError) {
-        Toaster.showError(response.response);
-        return false;
-      }
-      final obj = ItemModel.fromJson(response.body['update']);
-      final isar = Isar.getInstance();
-      if (isar == null) {
-        Toaster.showError('Database not initialized');
-        return false;
-      }
-      await isar.writeTxn(() async {
-        if (update) {
-          await isar.itemModels.put(item);
-        } else {
-          await isar.itemModels.put(obj);
-        }
-      });
-      syncCartItemsOnBackground();
-      return true;
-    } catch (e) {
-      log("Error $e");
-      Toaster.showError('Failed to create item');
-      return false;
-    }
-  }
-
-  Future<bool> createCategory(
-    ItemCategoryModel category, {
-    update = true,
-  }) async {
-    if (categoriesSyncing.value == true) {
-      Toaster.showError("categories syncing please wait");
-      return false;
-    }
-    try {
-      dynamic response;
-      if (update) {
-        response = await Net.put(
-          "/admin/category/${category.hexId}",
-          data: category.toJson(),
-        );
-      } else {
-        response = await Net.post("/admin/category", data: category.toJson());
-      }
-      if (response.hasError) {
-        Toaster.showError(response.response);
-        return false;
-      }
-      final obj = ItemCategoryModel.fromJson(response.body['update']);
-      final isar = Isar.getInstance();
-      if (isar == null) {
-        Toaster.showError('Database not initialized');
-        return false;
-      }
-      await isar.writeTxn(() async {
-        if (update) {
-          category.name = obj.name;
-          category.color = obj.color;
-          await isar.itemCategoryModels.put(category);
-        } else {
-          await isar.itemCategoryModels.put(obj);
-        }
-      });
-      loadCategories();
-      return true;
-    } catch (e) {
-      log('Error adding category: $e');
-      Toaster.showError('Failed to add category');
-    }
-    return false;
-  }
-
+  /*
+ =================================== CATEGORY LOADING ==============================================
+ */
+  //get categories
   void loadCategories() {
     if (categoriesSyncing.value) return;
     final isar = Isar.getInstance();
@@ -260,6 +65,7 @@ class ItemsController extends GetxController {
     loadCategoriesAsync();
   }
 
+  //async categories
   RxBool categoriesSyncing = RxBool(false);
   RxString categoriesSyncingFailed = RxString("");
   void loadCategoriesAsync() async {
@@ -288,68 +94,29 @@ class ItemsController extends GetxController {
     categoriesSyncing.value = false;
   }
 
-  void loadSavedItems() {
-    final isar = Isar.getInstance();
-    if (isar == null) {
+  //delete category
+  void deleteCategory(String id) async {
+    if (deleting.value) {
+      Toaster.showError("deletion in progress please wait");
       return;
     }
-    final loadedModels = isar.itemSavedItemsModels.where().findAllSync();
-    savedItems.assignAll(loadedModels);
+    deleting.value = true;
+    final response = await Net.delete("/admin/category/$id");
+    if (response.hasError) {
+      deleting.value = false;
+      Toaster.showError(response.response);
+      return;
+    }
+    Toaster.showSuccess("category deleted");
+    deleting.value = false;
+    loadCategoriesAsync();
   }
 
-  Future<void> loadReceits({int page = 1, String search = ''}) async {
-    final isar = Isar.getInstance();
-    if (isar == null) {
-      return;
-    }
-    final response = await Net.get(
-      "/cashier/receits?page=$page&search=$search",
-    );
-    if (!response.hasError) {
-      if (response.body['list'] != null) {
-        final list = response.body['list'] as List<dynamic>;
-        receits.assignAll(
-          list.map((e) => ItemReceitModel.fromJson(e)).toList(),
-        );
-      }
-      await isar.writeTxn(() async {
-        await isar.itemReceitModels.where().deleteAll();
-        await isar.itemReceitModels.putAll(receits);
-      });
-      return;
-    }
+  /*
+ =================================== ITEMS LOADING ==============================================
+ */
 
-    final r = isar.itemReceitModels.where().sortByCreatedAtDesc().findAllSync();
-    receits.assignAll(r);
-  }
-
-  RxBool modifiersLoading = RxBool(false);
-  void loadMofiers({int page = 1, String search = ''}) async {
-    if (modifiersLoading.value) return;
-    modifiersLoading.value = true;
-    final isar = Isar.getInstance();
-    if (isar == null) {
-      return;
-    }
-    final response = await Net.get(
-      "/cashier/modifiers?page=$page&search=$search",
-    );
-    modifiersLoading.value = false;
-    if (!response.hasError) {
-      final list = response.body['list'] as List<dynamic>?;
-      if (list != null) {
-        modifiers.value = list.map((e) => ItemModifier.fromJson(e)).toList();
-      }
-      await isar.writeTxn(() async {
-        await isar.itemModifiers.where().deleteAll();
-        await isar.itemModifiers.putAll(modifiers);
-      });
-      return;
-    }
-    final loadedModifiers = isar.itemModifiers.where().findAllSync();
-    modifiers.assignAll(loadedModifiers);
-  }
-
+  //load cart items
   RxInt page = RxInt(1);
   Future<void> loadCartItems({
     int page = 1,
@@ -381,6 +148,7 @@ class ItemsController extends GetxController {
     syncCartItemsOnBackground(page: page, search: search, category: category);
   }
 
+  //sync background
   RxBool syncingItems = RxBool(false);
   RxInt itemsPage = RxInt(1);
   RxInt totalPages = RxInt(2);
@@ -426,6 +194,7 @@ class ItemsController extends GetxController {
     syncingItems.value = false;
   }
 
+  //search
   void searchItems(String searchTerm) {
     final isar = Isar.getInstance();
     if (isar == null) {
@@ -438,37 +207,7 @@ class ItemsController extends GetxController {
     cartItems.assignAll(loadedItems);
   }
 
-  RxBool deleting = RxBool(false);
-  void deleteCategory(String id) async {
-    if (deleting.value) {
-      Toaster.showError("deletion in progress please wait");
-      return;
-    }
-    deleting.value = true;
-    final response = await Net.delete("/admin/category/$id");
-    if (response.hasError && response.statusCode != 404) {
-      deleting.value = false;
-      Toaster.showError(response.response);
-      return;
-    }
-
-    final isar = Isar.getInstance();
-    if (isar == null) {
-      Toaster.showError("database not initialized");
-      deleting.value = false;
-      return;
-    }
-    await isar.writeTxn(() async {
-      final count = await isar.itemCategoryModels
-          .filter()
-          .hexIdEqualTo(id)
-          .deleteAll();
-      Toaster.showSuccess("deleted $count");
-    });
-    loadCategories();
-    deleting.value = false;
-  }
-
+  //delete
   void deleteItem(String id) async {
     if (deleting.value) {
       Toaster.showError("deletion in progress please wait");
@@ -481,20 +220,81 @@ class ItemsController extends GetxController {
       deleting.value = false;
       return;
     }
-    final isar = Isar.getInstance();
-    if (isar == null) {
-      Toaster.showError("database not initialized");
-      deleting.value = false;
-      return;
-    }
-    await isar.writeTxn(() async {
-      final count = await isar.itemModels.filter().hexIdEqualTo(id).deleteAll();
-      Toaster.showSuccess("deleted $count");
-    });
-    loadCartItems();
     deleting.value = false;
   }
 
+  /*
+ =================================== RECEITS LOADING ==============================================
+ */
+  Future<void> loadReceitsStatic() async {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      return;
+    }
+    final r = isar.itemReceitModels.where().sortByCreatedAtDesc().findAllSync();
+    receits.assignAll(r);
+    loadReceits();
+  }
+
+  //loads receits background
+  Future<void> loadReceits({int page = 1, String search = ''}) async {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      return;
+    }
+    final response = await Net.get(
+      "/cashier/receits?page=$page&search=$search",
+    );
+    if (!response.hasError) {
+      if (response.body['list'] != null) {
+        final list = response.body['list'] as List<dynamic>;
+        receits.assignAll(
+          list.map((e) => ItemReceitModel.fromJson(e)).toList(),
+        );
+      }
+      await isar.writeTxn(() async {
+        await isar.itemReceitModels.where().deleteAll();
+        await isar.itemReceitModels.putAll(receits);
+      });
+      return;
+    }
+
+    final r = isar.itemReceitModels.where().sortByCreatedAtDesc().findAllSync();
+    receits.assignAll(r);
+  }
+
+  /*
+ =================================== MODIFIERS LOADING ==============================================
+ */
+
+  RxBool modifiersLoading = RxBool(false);
+  void loadMofiers({int page = 1, String search = ''}) async {
+    if (modifiersLoading.value) return;
+    modifiersLoading.value = true;
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      return;
+    }
+    final response = await Net.get(
+      "/cashier/modifiers?page=$page&search=$search",
+    );
+    modifiersLoading.value = false;
+    if (!response.hasError) {
+      final list = response.body['list'] as List<dynamic>?;
+      if (list != null) {
+        modifiers.value = list.map((e) => ItemModifier.fromJson(e)).toList();
+      }
+      await isar.writeTxn(() async {
+        await isar.itemModifiers.where().deleteAll();
+        await isar.itemModifiers.putAll(modifiers);
+      });
+      return;
+    }
+    final loadedModifiers = isar.itemModifiers.where().findAllSync();
+    modifiers.assignAll(loadedModifiers);
+  }
+
+  RxBool deleting = RxBool(false);
   Future<bool> createModifier(
     ItemModifier modefier, {
     bool updated = false,
@@ -553,6 +353,10 @@ class ItemsController extends GetxController {
     return false;
   }
 
+  /*
+ =================================== MODIFIERS LOADING ==============================================
+ */
+  //Inventory Items
   Future<void> saveItem(String name) async {
     final isar = Isar.getInstance();
     if (isar == null) {
@@ -573,45 +377,13 @@ class ItemsController extends GetxController {
     loadSavedItems();
   }
 
-  void _calculatedTotalPrice() {
-    totalPrice.value = checkOutItems.fold(0.0, (prev, item) {
-      final count = item['count'] as int? ?? 0;
-      final addenum = item['addenum'] as double? ?? 0.0;
-      final qouted = item['qouted'] as double? ?? 0.0;
-      final model = item['item'] as ItemModel;
-      double price = count * (model.price + addenum + qouted);
-      if (item['discountId'] != null) {
-        double discount = (item['discount'] as num?)?.toDouble() ?? 0.0;
-        bool percentageDiscount = item['percentageDiscount'] as bool? ?? true;
-        price = percentageDiscount
-            ? price * (1 - discount / 100)
-            : price - discount;
-      }
-      return prev + price;
-    });
-    final totalDiscounts = selectedDiscounts.fold(0.0, (prev, data) {
-      return prev +
-          (!data.percentage
-              ? data.value
-              : totalPrice.value * (data.value / 100));
-    });
-    totalPrice.value -= totalDiscounts;
-  }
-
-  ItemSavedModel _getModel(Map<String, dynamic> e) {
-    final model = e['item'] as ItemModel;
-    final sm = ItemSavedModel()
-      ..dataMap = _compileList(e['dataMap'] as Map<String, bool>? ?? {})
-      ..count = e['count']
-      ..cost = e['cost'] as double? ?? 0.0
-      ..addenum = e['addenum'] as double? ?? 0.0
-      ..qouted = e['qouted'] as double? ?? 0.0
-      ..baseId = model.id;
-    return sm;
-  }
-
-  List<String> _compileList(Map<String, bool> map) {
-    return map.keys.toList();
+  void loadSavedItems() {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      return;
+    }
+    final loadedModels = isar.itemSavedItemsModels.where().findAllSync();
+    savedItems.assignAll(loadedModels);
   }
 
   void unwrapToCart(ItemSavedItemsModel model) async {
@@ -662,14 +434,6 @@ class ItemsController extends GetxController {
       Toaster.showError("Error ; $e");
       log(e.toString());
     }
-  }
-
-  Map<String, bool> _decodeDataMap(List<String> dataMap) {
-    Map<String, bool> data = {};
-    for (var e in dataMap) {
-      data[e] = true;
-    }
-    return data;
   }
 
   Future<({bool success, List<ItemReceitItem>? rejects})>
@@ -765,6 +529,58 @@ class ItemsController extends GetxController {
       Toaster.showError("There was error : $e");
       return (success: false, rejects: rejects);
     }
+  }
+
+  /*
+ =================================== PRICE EVALUATION ==============================================
+ */
+  void _calculatedTotalPrice() {
+    totalPrice.value = checkOutItems.fold(0.0, (prev, item) {
+      final count = item['count'] as int? ?? 0;
+      final addenum = item['addenum'] as double? ?? 0.0;
+      final qouted = item['qouted'] as double? ?? 0.0;
+      final model = item['item'] as ItemModel;
+      double price = count * (model.price + addenum + qouted);
+      if (item['discountId'] != null) {
+        double discount = (item['discount'] as num?)?.toDouble() ?? 0.0;
+        bool percentageDiscount = item['percentageDiscount'] as bool? ?? true;
+        price = percentageDiscount
+            ? price * (1 - discount / 100)
+            : price - discount;
+      }
+      return prev + price;
+    });
+    final totalDiscounts = selectedDiscounts.fold(0.0, (prev, data) {
+      return prev +
+          (!data.percentage
+              ? data.value
+              : totalPrice.value * (data.value / 100));
+    });
+    totalPrice.value -= totalDiscounts;
+  }
+
+  ItemSavedModel _getModel(Map<String, dynamic> e) {
+    final model = e['item'] as ItemModel;
+    final sm = ItemSavedModel()
+      ..dataMap = _compileList(e['dataMap'] as Map<String, bool>? ?? {})
+      ..count = e['count']
+      ..cost = e['cost'] as double? ?? 0.0
+      ..addenum = e['addenum'] as double? ?? 0.0
+      ..qouted = e['qouted'] as double? ?? 0.0
+      ..baseId = model.id;
+    return sm;
+  }
+
+  List<String> _compileList(Map<String, bool> map) {
+    return map.keys.toList();
+  }
+
+  Map<String, bool> _decodeDataMap(List<String> dataMap) {
+    Map<String, bool> data = {};
+    for (var e in dataMap) {
+      data[e] = true;
+    }
+    return data;
   }
 
   Future<ItemReceitModel?> refundItem(
@@ -880,19 +696,12 @@ class ItemsController extends GetxController {
     if (isar == null) {
       return;
     }
-    cartItems.value = isar.itemModels
-        .filter()
-        .isForSaleEqualTo(true)
-        .findAllSync();
-    fixedItems.value = isar.itemModels.where().findAllSync();
-  }
-
-  void _loadFixedCategories() {
-    final isar = Isar.getInstance();
-    if (isar == null) {
-      return;
-    }
+    cartItems.value = isar.itemModels.where().findAllSync();
+    modifiers.value = isar.itemModifiers.where().findAllSync();
+    discounts.value = isar.discountModels.where().findAllSync();
     categories.value = isar.itemCategoryModels.where().findAllSync();
+    final r = isar.itemReceitModels.where().sortByCreatedAtDesc().findAllSync();
+    receits.assignAll(r);
   }
 
   /*
@@ -917,7 +726,6 @@ class ItemsController extends GetxController {
     return true;
   }
 
-  RxList<DiscountModel> discounts = <DiscountModel>[].obs;
   RxBool syncingDiscounts = RxBool(false);
   RxString syncingDiscountsFailed = RxString("");
   void loadDiscounts({String search = '', int page = 1}) async {
@@ -941,14 +749,6 @@ class ItemsController extends GetxController {
         await isar.discountModels.putAll(discounts);
       });
     }
-  }
-
-  void _loadFixedDiscounts() {
-    final isar = Isar.getInstance();
-    if (isar == null) {
-      return;
-    }
-    discounts.value = isar.discountModels.where().findAllSync();
   }
 
   void deleteDiscount(String id) async {
@@ -1150,6 +950,209 @@ class ItemsController extends GetxController {
       return true;
     }
     Toaster.showError("payment reflected false");
+    return false;
+  }
+
+  /*
+    ===================================================================================================
+    ===================================================================================================
+    OPERATIONS SECTIONS
+*/
+  void addDiscountToProduct(DiscountModel model) {
+    if (selectedDiscounts.indexWhere((e) {
+          return e.hexId == model.hexId;
+        }) ==
+        -1) {
+      selectedDiscounts.add(model);
+      _calculatedTotalPrice();
+      return;
+    }
+    Toaster.showError("discount already added");
+  }
+
+  void removeDiscountFromProduct(DiscountModel model) {
+    int selectedIndex = selectedDiscounts.indexWhere((e) {
+      return e.hexId == model.hexId;
+    });
+    if (selectedIndex != -1) {
+      selectedDiscounts.removeAt(selectedIndex);
+      _calculatedTotalPrice();
+      return;
+    }
+    Toaster.showError("discount not selected already");
+  }
+
+  void removeSelectedItem(Map<String, dynamic> e) async {
+    final model = e['item'] as ItemModel;
+    int indexOfSelected = checkOutItems.indexWhere((e) {
+      final lmodel = e['item'] as ItemModel;
+      return lmodel.hexId == model.hexId;
+    });
+    if (indexOfSelected < 0) {
+      Toaster.showError("something went wrong");
+      return;
+    }
+    checkOutItems.removeAt(indexOfSelected);
+    _calculatedTotalPrice();
+  }
+
+  void incrItem(Map<String, dynamic> e, int increment) async {
+    final model = e['item'] as ItemModel;
+    int indexOfSelected = checkOutItems.indexWhere((e) {
+      final lmodel = e['item'] as ItemModel;
+      return lmodel.hexId == model.hexId;
+    });
+    if (indexOfSelected < 0) {
+      Toaster.showError("something went wrong");
+      return;
+    }
+    e['count'] += increment;
+    checkOutItems[indexOfSelected] = e;
+    _calculatedTotalPrice();
+  }
+
+  Future<void> removeAllSelected() async {
+    checkOutItems.clear();
+    selectedDiscounts.clear();
+    selectedCustomer.value = null;
+    totalPrice.value = 0;
+    loadCartItems();
+  }
+
+  void addSelectedItem(
+    ItemModel model, {
+    int count = -1,
+    String? discountId,
+    double qouted = 0.0,
+    double addenum = 0.0,
+    double discount = 0.0,
+    int restoreAmount = -1,
+    Map<String, bool>? dataMap,
+    bool percentageDiscount = true,
+  }) async {
+    final dataFound = checkOutItems.indexWhere((e) {
+      final id = e['id'];
+      if (id is int) {
+        return id == model.id;
+      }
+      return false;
+    });
+    if (dataFound == -1) {
+      checkOutItems.add({
+        'id': model.id,
+        'item': model,
+        "count": count < 0 ? 1 : count,
+        "addenum": addenum,
+        "qouted": qouted,
+        "dataMap": dataMap ?? <String, bool>{},
+        "hexId": model.hexId,
+        "cost": model.cost,
+        "discount": discount,
+        "discountId": discountId,
+        "restoreAmount": restoreAmount,
+        "percentageDiscount": percentageDiscount,
+      });
+      _calculatedTotalPrice();
+      return;
+    }
+    final modelFound = checkOutItems[dataFound];
+    modelFound['count'] = count < 0 ? modelFound['count'] + 1 : count;
+    modelFound['dataMap'] = dataMap ?? <String, bool>{};
+    modelFound['addenum'] = addenum;
+    modelFound['qouted'] = qouted;
+    modelFound['discount'] = discount;
+    modelFound['discountId'] = discountId;
+    modelFound['restoreAmount'] = restoreAmount;
+    modelFound['percentageDiscount'] = percentageDiscount;
+    checkOutItems[dataFound] = modelFound;
+    _calculatedTotalPrice();
+  }
+
+  RxBool creatingItem = RxBool(false);
+  Future<bool> createItem(ItemModel item, {update = true}) async {
+    if (syncingItems.value == true) {
+      Toaster.showError("syncing items please wait");
+      return false;
+    }
+    try {
+      dynamic response;
+      if (update) {
+        response = await Net.put(
+          "/admin/product/${item.hexId}",
+          data: item.toJson(),
+        );
+      } else {
+        response = await Net.post("/admin/product", data: item.toJson());
+      }
+      if (response.hasError) {
+        Toaster.showError(response.response);
+        return false;
+      }
+      final obj = ItemModel.fromJson(response.body['update']);
+      final isar = Isar.getInstance();
+      if (isar == null) {
+        Toaster.showError('Database not initialized');
+        return false;
+      }
+      await isar.writeTxn(() async {
+        if (update) {
+          await isar.itemModels.put(item);
+        } else {
+          await isar.itemModels.put(obj);
+        }
+      });
+      syncCartItemsOnBackground();
+      return true;
+    } catch (e) {
+      log("Error $e");
+      Toaster.showError('Failed to create item');
+      return false;
+    }
+  }
+
+  Future<bool> createCategory(
+    ItemCategoryModel category, {
+    update = true,
+  }) async {
+    if (categoriesSyncing.value == true) {
+      Toaster.showError("categories syncing please wait");
+      return false;
+    }
+    try {
+      dynamic response;
+      if (update) {
+        response = await Net.put(
+          "/admin/category/${category.hexId}",
+          data: category.toJson(),
+        );
+      } else {
+        response = await Net.post("/admin/category", data: category.toJson());
+      }
+      if (response.hasError) {
+        Toaster.showError(response.response);
+        return false;
+      }
+      final obj = ItemCategoryModel.fromJson(response.body['update']);
+      final isar = Isar.getInstance();
+      if (isar == null) {
+        Toaster.showError('Database not initialized');
+        return false;
+      }
+      await isar.writeTxn(() async {
+        if (update) {
+          category.name = obj.name;
+          category.color = obj.color;
+          await isar.itemCategoryModels.put(category);
+        } else {
+          await isar.itemCategoryModels.put(obj);
+        }
+      });
+      loadCategories();
+      return true;
+    } catch (e) {
+      log('Error adding category: $e');
+      Toaster.showError('Failed to add category');
+    }
     return false;
   }
 }

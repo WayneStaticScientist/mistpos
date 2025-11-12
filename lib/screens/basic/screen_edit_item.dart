@@ -4,29 +4,30 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/utils/sold_by.dart';
 import 'package:mistpos/models/inv_item.dart';
 import 'package:mistpos/utils/color_list.dart';
 import 'package:mistpos/utils/icons_list.dart';
 import 'package:iconify_flutter/icons/bx.dart';
-import 'package:mistpos/models/item_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
+import 'package:mistpos/models/item_unsaved_model.dart';
 import 'package:mistpos/screens/basic/modern_layout.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/models/item_categories_model.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:radio_group_v2/utils/radio_group_decoration.dart';
+import 'package:mistpos/controllers/items_unsaved_controller.dart';
 import 'package:radio_group_v2/widgets/views/radio_group.dart' as rg;
 import 'package:mistpos/widgets/buttons/mist_loaded_icon_button.dart';
 import 'package:radio_group_v2/widgets/view_models/radio_group_controller.dart';
 import 'package:mistpos/screens/inventory/screen_select_purchase_order_items.dart';
 
 class ScreenEditItem extends StatefulWidget {
-  final ItemModel model;
+  final ItemUnsavedModel model;
   const ScreenEditItem({super.key, required this.model});
 
   @override
@@ -37,6 +38,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
   final _soldByGroup = RadioGroupController();
   final _itemRepresentation = RadioGroupController();
   final _itemsController = Get.find<ItemsController>();
+  final _itemsUsavedController = Get.find<ItemsUnsavedController>();
   final _userController = Get.find<UserController>();
   final _formKey = GlobalKey<FormState>();
   late final _itemNameController = TextEditingController(
@@ -585,10 +587,15 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
         int.tryParse(_initialStockController.text) ?? 0;
     final soldBy = _soldByGroup.value as String;
     widget.model.soldBy = soldBy;
-    final response = await _itemsController.createItem(widget.model);
+    final response = await _itemsUsavedController.createItem(widget.model);
+    if (!mounted) {
+      return;
+    }
+    _itemsController.syncCartItemsOnBackground();
     setState(() {
       _isLoading = false;
     });
+
     if (response) {
       Get.back();
       Toaster.showSuccess('Item created successfully');

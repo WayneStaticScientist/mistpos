@@ -67,18 +67,23 @@ const UserSchema = CollectionSchema(
       name: r'password',
       type: IsarType.string,
     ),
-    r'pinnedInput': PropertySchema(
+    r'paynowActivated': PropertySchema(
       id: 10,
+      name: r'paynowActivated',
+      type: IsarType.bool,
+    ),
+    r'pinnedInput': PropertySchema(
+      id: 11,
       name: r'pinnedInput',
       type: IsarType.bool,
     ),
     r'role': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'role',
       type: IsarType.string,
     ),
     r'till': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'till',
       type: IsarType.long,
     )
@@ -143,9 +148,10 @@ void _userSerialize(
   writer.writeString(offsets[7], object.fullName);
   writer.writeString(offsets[8], object.hexId);
   writer.writeString(offsets[9], object.password);
-  writer.writeBool(offsets[10], object.pinnedInput);
-  writer.writeString(offsets[11], object.role);
-  writer.writeLong(offsets[12], object.till);
+  writer.writeBool(offsets[10], object.paynowActivated);
+  writer.writeBool(offsets[11], object.pinnedInput);
+  writer.writeString(offsets[12], object.role);
+  writer.writeLong(offsets[13], object.till);
 }
 
 User _userDeserialize(
@@ -165,9 +171,10 @@ User _userDeserialize(
     fullName: reader.readString(offsets[7]),
     hexId: reader.readStringOrNull(offsets[8]) ?? '',
     password: reader.readStringOrNull(offsets[9]),
-    pinnedInput: reader.readBool(offsets[10]),
-    role: reader.readString(offsets[11]),
-    till: reader.readLong(offsets[12]),
+    paynowActivated: reader.readBoolOrNull(offsets[10]) ?? false,
+    pinnedInput: reader.readBool(offsets[11]),
+    role: reader.readString(offsets[12]),
+    till: reader.readLong(offsets[13]),
   );
   object.id = id;
   return object;
@@ -201,10 +208,12 @@ P _userDeserializeProp<P>(
     case 9:
       return (reader.readStringOrNull(offset)) as P;
     case 10:
-      return (reader.readBool(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 11:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 12:
+      return (reader.readString(offset)) as P;
+    case 13:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1621,6 +1630,16 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
     });
   }
 
+  QueryBuilder<User, User, QAfterFilterCondition> paynowActivatedEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'paynowActivated',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<User, User, QAfterFilterCondition> pinnedInputEqualTo(
       bool value) {
     return QueryBuilder.apply(this, (query) {
@@ -1925,6 +1944,18 @@ extension UserQuerySortBy on QueryBuilder<User, User, QSortBy> {
     });
   }
 
+  QueryBuilder<User, User, QAfterSortBy> sortByPaynowActivated() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'paynowActivated', Sort.asc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> sortByPaynowActivatedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'paynowActivated', Sort.desc);
+    });
+  }
+
   QueryBuilder<User, User, QAfterSortBy> sortByPinnedInput() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'pinnedInput', Sort.asc);
@@ -2083,6 +2114,18 @@ extension UserQuerySortThenBy on QueryBuilder<User, User, QSortThenBy> {
     });
   }
 
+  QueryBuilder<User, User, QAfterSortBy> thenByPaynowActivated() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'paynowActivated', Sort.asc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> thenByPaynowActivatedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'paynowActivated', Sort.desc);
+    });
+  }
+
   QueryBuilder<User, User, QAfterSortBy> thenByPinnedInput() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'pinnedInput', Sort.asc);
@@ -2189,6 +2232,12 @@ extension UserQueryWhereDistinct on QueryBuilder<User, User, QDistinct> {
     });
   }
 
+  QueryBuilder<User, User, QDistinct> distinctByPaynowActivated() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'paynowActivated');
+    });
+  }
+
   QueryBuilder<User, User, QDistinct> distinctByPinnedInput() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'pinnedInput');
@@ -2273,6 +2322,12 @@ extension UserQueryProperty on QueryBuilder<User, User, QQueryProperty> {
   QueryBuilder<User, String?, QQueryOperations> passwordProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'password');
+    });
+  }
+
+  QueryBuilder<User, bool, QQueryOperations> paynowActivatedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'paynowActivated');
     });
   }
 

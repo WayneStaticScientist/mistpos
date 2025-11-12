@@ -2,7 +2,9 @@ import 'package:isar/isar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/instance_manager.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:mistpos/controllers/items_unsaved_controller.dart';
 import 'package:mistpos/models/gateway.dart';
+import 'package:mistpos/models/item_unsaved_model.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/models/item_model.dart';
@@ -32,6 +34,7 @@ void main() async {
     ItemModifierSchema,
     DiscountModelSchema,
     ItemReceitModelSchema,
+    ItemUnsavedModelSchema,
     ItemCategoryModelSchema,
     PrinterDeviceModelSchema,
     ItemSavedItemsModelSchema,
@@ -55,6 +58,7 @@ class MyApp extends StatelessWidget {
         Get.put(AdminController());
         Get.put(InventoryController());
         Get.put(DevicesController());
+        Get.put(ItemsUnsavedController());
       }),
 
       theme: AppTheme.lightTheme,

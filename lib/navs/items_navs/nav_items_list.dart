@@ -4,18 +4,18 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
-import 'package:mistpos/models/item_model.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
-import 'package:mistpos/controllers/items_controller.dart';
+import 'package:mistpos/models/item_unsaved_model.dart';
 import 'package:mistpos/widgets/buttons/card_buttons.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
-import 'package:mistpos/widgets/layouts/list_tile_item.dart';
-import 'package:mistpos/screens/basic/screen_edit_item.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
+import 'package:mistpos/screens/basic/screen_edit_item.dart';
+import 'package:mistpos/controllers/items_unsaved_controller.dart';
+import 'package:mistpos/widgets/layouts/list_mist_unsaved_list_tile.dart';
 
 class NavItemsList extends StatefulWidget {
   const NavItemsList({super.key});
@@ -27,14 +27,14 @@ class NavItemsList extends StatefulWidget {
 class _NavItemsListState extends State<NavItemsList> {
   String searchKey = "";
   late Timer? _debounce;
-  final _itemsController = Get.find<ItemsController>();
+  final _itemsUnsavedController = Get.find<ItemsUnsavedController>();
   final _searchController = TextEditingController();
   @override
   void initState() {
     super.initState();
     _startDebounce();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _itemsController.syncFixedItemsOnBackground();
+      _itemsUnsavedController.syncCartItemsOnBackground();
     });
   }
 
@@ -43,26 +43,29 @@ class _NavItemsListState extends State<NavItemsList> {
     return [
       MistSearchField(controller: _searchController, label: "Search Items"),
       Obx(() {
-        if (_itemsController.syncingFixedItems.value) {
+        if (_itemsUnsavedController.syncingItems.value &&
+            _itemsUnsavedController.cartItems.isEmpty) {
           return const Center(child: MistLoader1());
         }
-        if (_itemsController.fixedItems.isEmpty) {
+        if (_itemsUnsavedController.cartItems.isEmpty) {
           return _emptyWidget();
         }
         return ListView.builder(
           itemBuilder: (context, index) => InkWell(
-            onTap: () => _openEditor(_itemsController.fixedItems[index]),
+            onTap: () => _openEditor(_itemsUnsavedController.cartItems[index]),
             onLongPress: () =>
-                _openDeleteDialog(_itemsController.fixedItems[index]),
-            child: MistListTileItem(item: _itemsController.fixedItems[index]),
+                _openDeleteDialog(_itemsUnsavedController.cartItems[index]),
+            child: ListMistUnsavedListTile(
+              item: _itemsUnsavedController.cartItems[index],
+            ),
           ),
-          itemCount: _itemsController.fixedItems.length,
+          itemCount: _itemsUnsavedController.cartItems.length,
         );
       }).expanded1,
     ].column().padding(EdgeInsets.all(9));
   }
 
-  _openEditor(ItemModel model) {
+  _openEditor(ItemUnsavedModel model) {
     Get.bottomSheet(
       [
         CardButtons(
@@ -85,7 +88,7 @@ class _NavItemsListState extends State<NavItemsList> {
     );
   }
 
-  _openEditDialog(ItemModel model) {
+  _openEditDialog(ItemUnsavedModel model) {
     Get.back();
     final textController = TextEditingController();
     Get.dialog(
@@ -112,7 +115,7 @@ class _NavItemsListState extends State<NavItemsList> {
               model.stockQuantity = model.stockQuantity + amount;
               model.syncOnline = false;
               Get.back();
-              await _itemsController.createItem(model);
+              await _itemsUnsavedController.createItem(model);
               Toaster.showSuccess("stock updated");
             },
             child: Text("save"),
@@ -122,7 +125,7 @@ class _NavItemsListState extends State<NavItemsList> {
     );
   }
 
-  void _openDeleteDialog(ItemModel cartItem) {
+  void _openDeleteDialog(ItemUnsavedModel cartItem) {
     Get.dialog(
       AlertDialog(
         title: "Delete ${cartItem.name}".text(),
@@ -132,7 +135,7 @@ class _NavItemsListState extends State<NavItemsList> {
           'delete'.text().textButton(
             onPressed: () {
               Get.back();
-              _itemsController.deleteItem(cartItem.hexId);
+              _itemsUnsavedController.deleteItem(cartItem.hexId);
             },
           ),
         ],
@@ -157,7 +160,7 @@ class _NavItemsListState extends State<NavItemsList> {
     _debounce = Timer.periodic(const Duration(milliseconds: 500), (e) {
       if (_searchController.text.trim() != searchKey.trim()) {
         searchKey = _searchController.text;
-        _itemsController.syncFixedItemsOnBackground(search: searchKey);
+        _itemsUnsavedController.search(search: searchKey);
       }
     });
   }
