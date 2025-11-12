@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/screens/gateways/paynow/screen_paynow_payment.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/screens/basic/screen_card_payment.dart';
@@ -75,6 +76,10 @@ class _ScreenCheckoutState extends State<ScreenCheckout> {
   }
 
   void _cardPaymentHandler() {
+    if (_userController.user.value?.paynowActivated == true) {
+      Get.off(() => ScreenPaynowPayment());
+      return;
+    }
     Get.off(() => ScreenCardPayment());
   }
 }

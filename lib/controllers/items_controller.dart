@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
-import 'package:mistpos/models/embedded_discount_model.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:mistpos/models/user_model.dart';
@@ -17,6 +16,7 @@ import 'package:mistpos/models/item_modifier_model.dart';
 import 'package:mistpos/models/item_categories_model.dart';
 import 'package:mistpos/models/item_saved_items_model.dart';
 import 'package:mistpos/controllers/devices_controller.dart';
+import 'package:mistpos/models/embedded_discount_model.dart';
 
 class ItemsController extends GetxController {
   RxDouble totalPrice = RxDouble(0);
@@ -1067,5 +1067,89 @@ class ItemsController extends GetxController {
       return null;
     }
     return CustomerModel.fromJson(response.body['update']);
+  }
+
+  RxBool mobilePaymentProcessing = RxBool(false);
+  Future<bool> payMobile({
+    required String method,
+    required String phoneNumber,
+  }) async {
+    if (mobilePaymentProcessing.value) {
+      Toaster.showError("mobile payment still processing");
+      return false;
+    }
+    mobilePaymentProcessing.value = true;
+    final response = await Net.post(
+      '/cashier/paymobile/paynow',
+      data: {
+        "method": method,
+        "amount": totalPrice.value,
+        "phoneNumber": phoneNumber,
+      },
+    );
+    if (response.hasError) {
+      mobilePaymentProcessing.value = false;
+      Toaster.showError(response.response);
+      return false;
+    }
+    await Future.delayed(Duration(seconds: 30));
+    final result = await poll(response.body['pollUrl']);
+    mobilePaymentProcessing.value = false;
+    return result;
+  }
+
+  RxBool webProcessingPayment = RxBool(false);
+  Future<({String? redirectUrl, String? returnUrl, String? pollUrl})> payWeb(
+    String method,
+  ) async {
+    if (webProcessingPayment.value) {
+      Toaster.showError("mobile payment still processing");
+      return (redirectUrl: null, returnUrl: null, pollUrl: null);
+    }
+    webProcessingPayment.value = true;
+    final response = await Net.post(
+      '/cashier/payweb/paynow',
+      data: {"method": method, "amount": totalPrice.value},
+    );
+    webProcessingPayment.value = false;
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return (redirectUrl: null, returnUrl: null, pollUrl: null);
+    }
+    return (
+      redirectUrl: response.body['redirectUrl'] as String?,
+      returnUrl: response.body['returnUrl'] as String?,
+      pollUrl: response.body['pollUrl'] as String?,
+    );
+  }
+
+  Future<bool> poll(String pollUrl) async {
+    final poll = await Net.post(
+      '/cashier/paymobile/paynow/poll',
+      data: {"pollUrl": pollUrl},
+    );
+    if (poll.hasError) {
+      Toaster.showError(poll.response);
+      return false;
+    }
+    if (poll.body['paid'] == true) {
+      return true;
+    }
+    mobilePaymentProcessing.value = true;
+    Toaster.showError("payment failed >> retry again in 5 seconds");
+    await Future.delayed(Duration(seconds: 5));
+    final poll2 = await Net.post(
+      '/cashier/paymobile/paynow/poll',
+      data: {"pollUrl": pollUrl},
+    );
+    if (poll2.hasError) {
+      Toaster.showError(poll.response);
+      return false;
+    }
+    if (poll2.body['paid'] == true) {
+      return true;
+    }
+    Toaster.showError("payment reflected false");
+    return false;
   }
 }
