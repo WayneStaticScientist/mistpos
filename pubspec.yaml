@@ -62,6 +62,7 @@ dependencies:
   image_picker: ^1.2.0
   path: ^1.9.1
   flutter_barcode_listener: ^0.1.4
+  webview_flutter: ^4.13.0
 
 dev_dependencies:
   flutter_test:

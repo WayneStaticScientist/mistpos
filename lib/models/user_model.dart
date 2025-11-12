@@ -16,6 +16,7 @@ class User {
   final bool pinnedInput;
   final String companyName;
   final String baseCurrence;
+  final bool paynowActivated;
   final List<String> companies;
   final bool allowOfflinePurchase;
   User({
@@ -26,12 +27,13 @@ class User {
     required this.email,
     required this.country,
     required this.company,
+    this.companyName = '',
     required this.fullName,
     this.baseCurrence = '',
-    required this.pinnedInput,
-    this.allowOfflinePurchase = true,
     required this.companies,
-    this.companyName = '',
+    required this.pinnedInput,
+    this.paynowActivated = false,
+    this.allowOfflinePurchase = true,
   });
   factory User.fromMap(Map<String, dynamic> map) {
     return User(
@@ -51,6 +53,7 @@ class User {
       allowOfflinePurchase: map['allowOfflinePurchase'] as bool? ?? true,
       companyName: map['companyName'] as String? ?? '',
       baseCurrence: map['baseCurrence'] as String? ?? 'USD',
+      paynowActivated: map['paynowActivated'] as bool? ?? false,
     );
   }
   Map<String, dynamic> toMap() {
@@ -66,6 +69,7 @@ class User {
       'companyName': companyName,
       'pinnedInput': pinnedInput,
       'baseCurrence': baseCurrence,
+      'paynowActivated': paynowActivated,
       'allowOfflinePurchase': allowOfflinePurchase,
     };
   }

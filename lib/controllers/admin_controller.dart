@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:mistpos/models/sales_by_employee_model.dart';
+import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/employee_model.dart';
 import 'package:mistpos/models/company_model.dart';
@@ -217,5 +218,27 @@ class AdminController extends GetxController {
           .map((e) => SalesByEmployeeModel.fromJson(e))
           .toList();
     }
+  }
+
+  RxBool settingUpKeys = RxBool(false);
+  Future<User?> setupPaynowKeys({
+    required String integrationId,
+    required String integrationKey,
+  }) async {
+    if (settingUpKeys.value) {
+      Toaster.showError("already setting up keys");
+      return null;
+    }
+    settingUpKeys.value = true;
+    final result = await Net.post(
+      "/admin/paynow/keys",
+      data: {"integrationId": integrationId, "integrationKey": integrationKey},
+    );
+    settingUpKeys.value = false;
+    if (result.hasError) {
+      Toaster.showError(result.response);
+      return null;
+    }
+    return User.fromMap(result.body['update']);
   }
 }

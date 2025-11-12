@@ -33,5 +33,6 @@ class UserPermissions {
     ),
     PermissionStructure(name: "Delete Customers", value: "customer-*"),
     PermissionStructure(name: "Have Cashier Capabilites", value: "cashier"),
+    PermissionStructure(name: "Payment Integrations", value: "payment"),
   ];
 }
