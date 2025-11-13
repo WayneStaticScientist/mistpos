@@ -6,7 +6,8 @@ import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/controllers/items_controller.dart';
-import 'package:mistpos/screens/basic/screen_settings_page.dart';
+import 'package:mistpos/controllers/firebase_controller.dart';
+import 'package:mistpos/screens/basic/screen_notifications.dart';
 import 'package:mistpos/screens/basic/screens_select_customers.dart';
 import 'package:mistpos/screens/basic/screen_view_selected_customer.dart';
 
@@ -18,6 +19,7 @@ class SalesAppBar extends StatefulWidget {
 }
 
 class _SalesAppBarState extends State<SalesAppBar> {
+  final _fireController = Get.find<FirebaseController>();
   final _itemsListController = Get.find<ItemsController>();
 
   @override
@@ -58,9 +60,19 @@ class _SalesAppBarState extends State<SalesAppBar> {
             ),
           );
         }),
-        IconButton(
-          onPressed: () => Get.to(() => ScreenSettingsPage()),
-          icon: Iconify(Bx.cog, color: AppTheme.color(context)),
+        Obx(
+          () => _fireController.notificationSize.value > 0
+              ? Badge.count(
+                  count: _fireController.notificationSize.value,
+                  child: IconButton(
+                    onPressed: () => Get.to(() => ScreenNotifications()),
+                    icon: Iconify(Bx.bell, color: AppTheme.color(context)),
+                  ),
+                )
+              : IconButton(
+                  onPressed: () => Get.to(() => ScreenNotifications()),
+                  icon: Iconify(Bx.bell, color: AppTheme.color(context)),
+                ),
         ),
       ],
     );

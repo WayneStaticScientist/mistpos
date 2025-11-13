@@ -21,10 +21,10 @@ class ScreenMain extends StatefulWidget {
 
 class _ScreenMainState extends State<ScreenMain> {
   Timer? _validationTimer;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final _userController = Get.find<UserController>();
   final _itemsController = Get.find<ItemsController>();
   final _itemsSavedController = Get.find<ItemsUnsavedController>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _itemsInialized = false;
   late final _listNavs = {
     'sales': NavSale(),
@@ -49,11 +49,11 @@ class _ScreenMainState extends State<ScreenMain> {
           _userController.loading.value == false &&
           !_itemsInialized) {
         _itemsController.loadMofiers();
-        _itemsController.loadCartItems();
-        _itemsController.syncCartItemsOnBackground();
         _itemsController.loadSavedItems();
         _itemsController.loadReceits();
         _itemsController.loadDiscounts();
+        _itemsController.syncAllShifts();
+        _itemsController.syncCartItemsOnBackground();
         _itemsSavedController.syncCartItemsOnBackground();
         _itemsInialized = true;
       }

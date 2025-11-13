@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:exui/material.dart';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/models/app_settings_model.dart';
@@ -96,6 +98,7 @@ class _NavSaleState extends State<NavSale> {
   }
 
   _buildNormalFlowLayout() {
+    final model = AppSettingsModel.fromStorage();
     return Stack(
       children: [
         Positioned.fill(
@@ -193,7 +196,13 @@ class _NavSaleState extends State<NavSale> {
                 The items LIST 
                 ===============================================================================================
               */
-                _buidItemList(),
+                Obx(
+                  () =>
+                      _itemsListController.selectedShift.value == null &&
+                          model.prioritizeShift
+                      ? _makeShifts()
+                      : _buidItemList(),
+                ),
               ],
             ),
           ),
@@ -418,6 +427,70 @@ class _NavSaleState extends State<NavSale> {
       model,
       x: renderBox?.localToGlobal(Offset.zero).dx ?? 150,
       y: renderBox?.localToGlobal(Offset.zero).dy ?? 100,
+    );
+  }
+
+  Widget _makeShifts() {
+    return SliverToBoxAdapter(
+      child: [
+        18.gapHeight,
+        "No shifts Opened ".text(),
+        32.gapHeight,
+        "Open Shift".text().textButton(
+          onPressed: _initiateAlertShift,
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white,
+            backgroundColor: Get.theme.colorScheme.primary,
+          ),
+        ),
+      ].column(),
+    );
+  }
+
+  void _initiateAlertShift() {
+    final shiftAmount = TextEditingController();
+    if (_itemsListController.selectedShift.value != null) {
+      Toaster.showError("shift already opened");
+      return;
+    }
+    if (_userController.user.value == null) {
+      Toaster.showError("User underegister");
+      return;
+    }
+    Get.defaultDialog(
+      title: "Open Shift",
+      content:
+          [
+            "Specify Amount in drawer at start of shift".text(
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            8.gapHeight,
+            MistFormInput(
+              label: "Amount in drawer",
+              controller: shiftAmount,
+              icon: (_userController.user.value?.baseCurrence ?? 'USD').text(
+                style: TextStyle(fontSize: 8, color: Colors.grey),
+              ),
+            ),
+          ].column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+      actions: [
+        "Cancel".text().textButton(onPressed: () => Get.back()),
+        "open".text().textButton(
+          onPressed: () {
+            final amount = double.tryParse(shiftAmount.text);
+            if (amount == null || amount < 0) {
+              Toaster.showError("invalid number");
+              return;
+            }
+            Get.back();
+            Toaster.showSuccess("shift opened");
+            _itemsListController.openShift(amount, _userController.user.value!);
+          },
+        ),
+      ],
     );
   }
 }

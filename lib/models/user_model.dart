@@ -78,6 +78,7 @@ class User {
       'till': till,
       'role': role,
       'email': email,
+      "hextId": hexId,
       'company': company,
       'country': country,
       'password': password,
@@ -103,7 +104,9 @@ class User {
     GetStorage storage = GetStorage();
     Map<String, dynamic>? userData = storage.read('user');
     if (userData != null) {
-      return User.fromMap(userData);
+      final user = User.fromMap(userData);
+      user.hexId = userData['hextId'] ?? "";
+      return user;
     }
     return null;
   }

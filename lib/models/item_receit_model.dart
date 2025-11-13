@@ -71,8 +71,7 @@ class ItemReceitModel {
                 .map((e) => EmbeddedDiscountModel.fromJson(e))
                 .toList()
           : [],
-      createdAt:
-          DateTime.tryParse(data['createdAt'])?.toLocal() ?? DateTime.now(),
+      createdAt: DateTime.tryParse(data['createdAt']) ?? DateTime.now(),
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:isar/isar.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:mistpos/models/user_model.dart';
+import 'package:mistpos/models/shifts_model.dart';
 import 'package:mistpos/models/response_model.dart';
 import 'package:mistpos/models/discount_model.dart';
 import 'package:mistpos/models/customer_model.dart';
@@ -23,8 +24,10 @@ class ItemsController extends GetxController {
   RxDouble totalPrice = RxDouble(0);
   RxString selectedCategory = ''.obs;
   RxList<ItemModel> cartItems = <ItemModel>[].obs;
+  RxList<ShiftsModel> shifts = <ShiftsModel>[].obs;
   RxList<ItemModel> fixedItems = <ItemModel>[].obs;
   RxList<ItemModifier> modifiers = <ItemModifier>[].obs;
+  Rx<ShiftsModel?> selectedShift = Rx<ShiftsModel?>(null);
   RxList<DiscountModel> discounts = <DiscountModel>[].obs;
   RxList<CustomerModel> customers = <CustomerModel>[].obs;
   RxList<ItemReceitModel> receits = <ItemReceitModel>[].obs;
@@ -37,6 +40,7 @@ class ItemsController extends GetxController {
   @override
   void onInit() {
     _loadFixedItems();
+    reopenLastUnclosedShift();
     super.onInit();
   }
 
@@ -865,6 +869,9 @@ class ItemsController extends GetxController {
     ===================================================================================================
     ===================================================================================================
     OPERATIONS SECTIONS
+    ===================================================================================================
+    ===================================================================================================
+
 */
   void addDiscountToProduct(DiscountModel model) {
     if (selectedDiscounts.indexWhere((e) {
@@ -1124,6 +1131,14 @@ class ItemsController extends GetxController {
       await isar.writeTxn(() async {
         newReceitId = await isar.itemReceitModels.put(itemReceitModel);
       });
+      if (selectedShift.value != null) {
+        selectedShift.value!.totalSales += totalPrice.value;
+        selectedShift.value!.totalCustomers++;
+        selectedShift.value!.salesQuantity += checkOutItems.length;
+        await isar.writeTxn(() async {
+          isar.shiftsModels.put(selectedShift.value!);
+        });
+      }
       user.receitsCount++;
       User.saveToStorage(user);
       updateReceitsInBackground(newReceitId, itemReceitModel);
@@ -1138,6 +1153,7 @@ class ItemsController extends GetxController {
       checkOutItems.clear();
       selectedCustomer.value = null;
       totalPrice.value = 0;
+      loadReceitsStatic();
       return true;
     } catch (e) {
       Toaster.showError("There was error : $e");
@@ -1188,5 +1204,103 @@ class ItemsController extends GetxController {
       await Future.delayed(Duration(milliseconds: 500));
     }
     updatingUsyncedReceits.value = false;
+  }
+
+  /*
+  =========================================================================
+  =========================================================================
+  SHIFTS
+  =========================================================================
+  =========================================================================
+*/
+  void openShift(double amountInDrawer, User user) async {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      Toaster.showError("something went wrong on opening a shift");
+      return;
+    }
+    final count = await isar.shiftsModels.where().count();
+    final model = ShiftsModel(
+      cashDrawerEnd: amountInDrawer,
+      cashDrawerStart: amountInDrawer,
+      openShiftTime: DateTime.now(),
+      closeShiftTime: DateTime.now(),
+      userId: user.hexId,
+      shiftLabel: Labeller.getShiftLabeller(
+        fullName: user.fullName,
+        companyName: user.companyName,
+        count: count,
+      ),
+    );
+    await isar.writeTxn(() async {
+      await isar.shiftsModels.put(model);
+    });
+    selectedShift.value = model;
+  }
+
+  void closeShift(double amountInDrawer, User user) async {
+    if (selectedShift.value == null) {
+      Toaster.showError("something went wrong on closing a shift");
+      return;
+    }
+    final isar = Isar.getInstance();
+    if (isar == null || selectedShift.value == null) {
+      Toaster.showError("something went wrong on closing a shift");
+      return;
+    }
+    selectedShift.value!.shiftIsClosed = true;
+    selectedShift.value!.cashDrawerEnd = amountInDrawer;
+    selectedShift.value!.closeShiftTime = DateTime.now();
+    await isar.writeTxn(() async {
+      await isar.shiftsModels.put(selectedShift.value!);
+    });
+    selectedShift.value = null;
+  }
+
+  void reopenLastUnclosedShift() async {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      return;
+    }
+    selectedShift.value = await isar.shiftsModels
+        .filter()
+        .shiftIsClosedEqualTo(false)
+        .findFirst();
+  }
+
+  void loadShifts() async {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      return;
+    }
+    shifts.value = await isar.shiftsModels
+        .where()
+        .sortByOpenShiftTimeDesc()
+        .findAll();
+  }
+
+  void syncAllShifts() async {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      return;
+    }
+    final allShifts = isar.shiftsModels
+        .filter()
+        .shiftIsClosedEqualTo(true)
+        .and()
+        .syncedEqualTo(false)
+        .findAllSync();
+    for (final shift in allShifts) {
+      final response = await Net.post("/cashier/shifts", data: shift.toJson());
+      if (response.hasError) {
+        break;
+      }
+      final updatedShift = ShiftsModel.fromJson(response.body['update']);
+      await isar.writeTxn(() async {
+        shift.synced = true;
+        shift.userId = updatedShift.userId;
+        await isar.shiftsModels.put(shift);
+      });
+    }
   }
 }

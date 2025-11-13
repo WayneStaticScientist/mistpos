@@ -10,6 +10,7 @@ import 'package:mistpos/widgets/layouts/profile_tile.dart';
 import 'package:mistpos/screens/basic/screen_dashboard.dart';
 import 'package:mistpos/screens/currence/screen_currency.dart';
 import 'package:mistpos/screens/gateways/payment_gateway.dart';
+import 'package:mistpos/screens/basic/screen_shifts_screen.dart';
 import 'package:mistpos/screens/basic/screen_settings_page.dart';
 import 'package:mistpos/screens/basic/screen_devices_section.dart';
 
@@ -56,6 +57,11 @@ class MistMainNavigationView extends StatelessWidget {
               tileColor: selectedNav == 'items'
                   ? Colors.grey.withAlpha(30)
                   : null,
+            ),
+            ListTile(
+              leading: Iconify(Bx.time, color: AppTheme.color(context)),
+              title: Text('Shift'),
+              onTap: () => Get.to(() => ScreenShiftsScreen()),
             ),
             ListTile(
               leading: Iconify(Bx.devices, color: AppTheme.color(context)),

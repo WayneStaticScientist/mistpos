@@ -7,6 +7,7 @@ class AppSettingsModel {
   bool enableQrCode;
   int printerRecietLength = 32;
   int decimalPlaces = 2;
+  bool prioritizeShift = true;
   String receitLogoPath;
   AppSettingsModel({
     required this.externalBarCodeEnabled,
@@ -16,6 +17,7 @@ class AppSettingsModel {
     required this.printerRecietLength,
     required this.decimalPlaces,
     this.receitLogoPath = "",
+    this.prioritizeShift = true,
   });
   factory AppSettingsModel.fromJson(Map<String, dynamic> json) =>
       AppSettingsModel(
@@ -26,6 +28,7 @@ class AppSettingsModel {
         printerRecietLength: json["printerRecietLength"] ?? 32,
         decimalPlaces: json["decimalPlaces"] ?? 2,
         receitLogoPath: json["receitLogoPath"] ?? "",
+        prioritizeShift: json["prioritizeShift"] ?? true,
       );
   Map<String, dynamic> toJson() => {
     "externalBarCodeEnabled": externalBarCodeEnabled,
@@ -35,6 +38,7 @@ class AppSettingsModel {
     "printerRecietLength": printerRecietLength,
     "decimalPlaces": decimalPlaces,
     "receitLogoPath": receitLogoPath,
+    "prioritizeShift": prioritizeShift,
   };
   static AppSettingsModel fromStorage() {
     GetStorage box = GetStorage();

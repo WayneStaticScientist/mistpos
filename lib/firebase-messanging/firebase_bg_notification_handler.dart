@@ -76,9 +76,9 @@ Future<void> initializeLocalNotifications() async {
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     final RemoteNotification? notification = message.notification;
     final AndroidNotification? android = message.notification?.android;
-
     // If the notification payload is present and we're on Android, show a local notification
     if (notification != null && android != null) {
+      final String smallIcon = android.smallIcon ?? '@mipmap/ic_launcher';
       flutterLocalNotificationsPlugin.show(
         notification.hashCode, // Unique ID for the notification
         notification.title,
@@ -88,7 +88,7 @@ Future<void> initializeLocalNotifications() async {
             channel.id, // Use the same channel ID defined above
             channel.name,
             channelDescription: channel.description,
-            icon: android.smallIcon,
+            icon: smallIcon,
           ),
         ),
         // Include payload data for tap handling if needed

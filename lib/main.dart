@@ -8,6 +8,7 @@ import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:mistpos/models/shifts_model.dart';
 import 'package:mistpos/models/discount_model.dart';
 import 'package:mistpos/models/item_receit_model.dart';
 import 'package:mistpos/screens/basic/screen_main.dart';
@@ -25,6 +26,7 @@ import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:mistpos/models/item_saved_items_model.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:mistpos/controllers/devices_controller.dart';
+import 'package:mistpos/controllers/firebase_controller.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/controllers/items_unsaved_controller.dart';
 import 'package:mistpos/firebase-messanging/firebase_bg_notification_handler.dart';
@@ -37,6 +39,7 @@ void main() async {
   await Isar.open([
     GatewaySchema,
     ItemModelSchema,
+    ShiftsModelSchema,
     ItemModifierSchema,
     DiscountModelSchema,
     ItemReceitModelSchema,
@@ -66,6 +69,7 @@ class MyApp extends StatelessWidget {
         Get.put(InventoryController());
         Get.put(DevicesController());
         Get.put(ItemsUnsavedController());
+        Get.put(FirebaseController());
       }),
 
       theme: AppTheme.lightTheme,

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:mistpos/models/token_model.dart';
 import 'package:mistpos/models/response_model.dart';
@@ -42,10 +44,11 @@ class AuthenticationInterceptor extends Interceptor {
 
   static Future<ResponseModel> requestToken() async {
     final mobileDeviceIdentifier = await MobileDeviceIdentifier().getDeviceId();
+    log("Sending message ${User.fromStorage()?.toMap()}");
     try {
       final response = await dio.post(
         "${Net.baseUrl}/user/tokens",
-        data: User.fromStorage(),
+        data: User.fromStorage()?.toMap() ?? {},
         options: Options(
           headers: {
             "device": mobileDeviceIdentifier,

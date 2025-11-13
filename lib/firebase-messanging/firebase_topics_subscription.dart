@@ -1,17 +1,23 @@
+import 'dart:developer';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-Future<void> joinTopic(String groupId) async {
+Future<bool> joinTopic(String groupId) async {
   try {
     await FirebaseMessaging.instance.subscribeToTopic(groupId);
+    return true;
   } catch (e) {
-    rethrow;
+    return false;
   }
 }
 
-Future<void> leaveTopic(String groupId) async {
+Future<bool> leaveTopic(String groupId) async {
   try {
     await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
+    return true;
   } catch (e) {
-    rethrow;
+    log("FCM Topic Uns Subscription Error: $e");
+
+    return false;
   }
 }

@@ -22,13 +22,18 @@ const NotificationModelSchema = CollectionSchema(
       name: r'message',
       type: IsarType.string,
     ),
-    r'title': PropertySchema(
+    r'read': PropertySchema(
       id: 1,
+      name: r'read',
+      type: IsarType.bool,
+    ),
+    r'title': PropertySchema(
+      id: 2,
       name: r'title',
       type: IsarType.string,
     ),
     r'updatedAt': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -65,8 +70,9 @@ void _notificationModelSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.message);
-  writer.writeString(offsets[1], object.title);
-  writer.writeDateTime(offsets[2], object.updatedAt);
+  writer.writeBool(offsets[1], object.read);
+  writer.writeString(offsets[2], object.title);
+  writer.writeDateTime(offsets[3], object.updatedAt);
 }
 
 NotificationModel _notificationModelDeserialize(
@@ -77,8 +83,9 @@ NotificationModel _notificationModelDeserialize(
 ) {
   final object = NotificationModel(
     message: reader.readString(offsets[0]),
-    title: reader.readString(offsets[1]),
-    updatedAt: reader.readDateTime(offsets[2]),
+    read: reader.readBoolOrNull(offsets[1]) ?? false,
+    title: reader.readString(offsets[2]),
+    updatedAt: reader.readDateTime(offsets[3]),
   );
   object.id = id;
   return object;
@@ -94,8 +101,10 @@ P _notificationModelDeserializeProp<P>(
     case 0:
       return (reader.readString(offset)) as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 2:
+      return (reader.readString(offset)) as P;
+    case 3:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -391,6 +400,16 @@ extension NotificationModelQueryFilter
   }
 
   QueryBuilder<NotificationModel, NotificationModel, QAfterFilterCondition>
+      readEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'read',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<NotificationModel, NotificationModel, QAfterFilterCondition>
       titleEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -606,6 +625,20 @@ extension NotificationModelQuerySortBy
   }
 
   QueryBuilder<NotificationModel, NotificationModel, QAfterSortBy>
+      sortByRead() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'read', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NotificationModel, NotificationModel, QAfterSortBy>
+      sortByReadDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'read', Sort.desc);
+    });
+  }
+
+  QueryBuilder<NotificationModel, NotificationModel, QAfterSortBy>
       sortByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
@@ -664,6 +697,20 @@ extension NotificationModelQuerySortThenBy
   }
 
   QueryBuilder<NotificationModel, NotificationModel, QAfterSortBy>
+      thenByRead() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'read', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NotificationModel, NotificationModel, QAfterSortBy>
+      thenByReadDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'read', Sort.desc);
+    });
+  }
+
+  QueryBuilder<NotificationModel, NotificationModel, QAfterSortBy>
       thenByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
@@ -701,6 +748,13 @@ extension NotificationModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<NotificationModel, NotificationModel, QDistinct>
+      distinctByRead() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'read');
+    });
+  }
+
   QueryBuilder<NotificationModel, NotificationModel, QDistinct> distinctByTitle(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -727,6 +781,12 @@ extension NotificationModelQueryProperty
   QueryBuilder<NotificationModel, String, QQueryOperations> messageProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'message');
+    });
+  }
+
+  QueryBuilder<NotificationModel, bool, QQueryOperations> readProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'read');
     });
   }
 

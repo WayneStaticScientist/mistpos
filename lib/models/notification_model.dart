@@ -7,7 +7,9 @@ class NotificationModel {
   String title;
   String message;
   DateTime updatedAt;
+  bool read = false;
   NotificationModel({
+    this.read = false,
     required this.title,
     required this.message,
     required this.updatedAt,

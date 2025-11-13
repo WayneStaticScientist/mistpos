@@ -24,4 +24,16 @@ class Labeller {
     final sequenceNumber = count.toString().padLeft(6, '0');
     return '$companyPrefix-$userPrefix-${now.day}${now.month}${now.year}-$sequenceNumber';
   }
+
+  static String getShiftLabeller({
+    required String fullName,
+    required String companyName,
+    required int count, // This count must be managed and incremented externally
+  }) {
+    final companyPrefix = _getInitials(companyName);
+    final userPrefix = _getInitials(fullName);
+    final now = DateTime.now().toUtc();
+    final sequenceNumber = count.toString().padLeft(6, '0');
+    return '$companyPrefix-$userPrefix-${now.day}${now.month}${now.year}-$sequenceNumber';
+  }
 }
