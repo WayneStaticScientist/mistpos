@@ -21,6 +21,7 @@ class DevicesController extends GetxController {
     hasPrinterConnections.value = printer.isRoleConnected(
       PosPrinterRole.cashier,
     );
+    connectLastDevice();
   }
 
   bool isPrinterConnected() {
@@ -275,6 +276,29 @@ class DevicesController extends GetxController {
       return imageBytes;
     } catch (_) {
       return null;
+    }
+  }
+
+  void connectLastDevice() async {
+    final isar = Isar.getInstance();
+    final user = User.fromStorage();
+    if (isar == null || user == null) {
+      return;
+    }
+    final device = await isar.printerDeviceModels
+        .where()
+        .sortByIsConnected()
+        .findFirst();
+    if (device != null) {
+      await printer.registerDevice(
+        PosPrinterRole.cashier,
+        PrinterDevice(
+          id: user.hexId,
+          name: user.fullName,
+          type: PrinterType.bluetooth,
+          address: device.address,
+        ),
+      );
     }
   }
 }
