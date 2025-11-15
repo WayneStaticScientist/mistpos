@@ -1,3 +1,6 @@
+import java.util.Properties
+val localProperties = Properties()
+localProperties.load(project.rootProject.file("local.properties").inputStream())
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -40,10 +43,11 @@ android {
         applicationId = "aca.bicosatstudios.mistpos.mistpos"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdkVersion(localProperties.getProperty("flutter.minSdkVersion")?.toInt() ?: 21)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled = true
     }
 
     buildTypes {

@@ -1,24 +1,30 @@
+import 'dart:developer';
+
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
-import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:pdf_maker/pdf_maker.dart';
+import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/themes/app_theme.dart';
+import 'package:iconify_flutter/icons/bx.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/utils/currence_converter.dart';
-import 'package:date_picker_plus/date_picker_plus.dart';
+import 'package:mistpos/widgets/inputs/range_view.dart';
 import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:mistpos/widgets/layouts/card_overview.dart';
-import 'package:mistpos/widgets/loaders/small_loader.dart';
+import 'package:mistpos/utils/pdfdocuments/pdf_overview.dart';
 
 class NavAdminOverView extends StatefulWidget {
   const NavAdminOverView({super.key});
 
   @override
-  State<NavAdminOverView> createState() => _NavAdminOverViewState();
+  State<NavAdminOverView> createState() => NavAdminOverViewState();
 }
 
-class _NavAdminOverViewState extends State<NavAdminOverView> {
+class NavAdminOverViewState extends State<NavAdminOverView> {
   final _userController = Get.find<UserController>();
   final _adminController = Get.find<AdminController>();
   DateTime? _startDate;
@@ -34,168 +40,178 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
   Widget build(BuildContext context) {
     final weeklyStartDay = _weeklyRange.subtract(Duration(days: 6));
 
-    return ListView(
-      children: [
-        18.gapHeight,
-        SingleChildScrollView(
-          child:
-              [
-                    "Pick Range".text().textButton(onPressed: _pickdateRange),
-                    18.gapWidth,
-                    _startDate == null
-                        ? "First Day".text()
-                        : "${_startDate!.day}/${_startDate!.month}/${_startDate!.year}"
-                              .text(),
-                    18.gapWidth,
-                    "-".text(),
-                    18.gapWidth,
-                    _endDate == null
-                        ? "To day".text()
-                        : "${_endDate!.day}/${_endDate!.month}/${_endDate!.year}"
-                              .text(),
-                  ]
-                  .row()
-                  .onTap(_pickdateRange)
-                  .decoratedBox(
-                    decoration: BoxDecoration(color: AppTheme.surface(context)),
+    return Obx(() {
+      if (_adminController.loading.value) {
+        return MistLoader1().center();
+      }
+      return SingleChildScrollView(
+        child: Column(
+          children: [
+            18.gapHeight,
+            Wrap(
+              children: [
+                MistRangeView(
+                  label: "From Date",
+                  date: _startDate,
+                  onDatePicked: (time) {
+                    setState(() {
+                      _startDate = time;
+                    });
+                    _loadWithUpdatedTimeFrame();
+                  },
+                ),
+                MistRangeView(
+                  label: "To Date",
+                  date: _endDate,
+                  onDatePicked: (time) {
+                    setState(() {
+                      _endDate = time;
+                    });
+                    _loadWithUpdatedTimeFrame();
+                  },
+                ),
+              ],
+            ),
+            18.gapHeight,
+            "Product Overview".text(
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            18.gapHeight,
+            Obx(
+              () => SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: [
+                  CardOverview(
+                    label: "Total Products",
+                    value: _adminController.totalProducts.value.toString(),
                   ),
-        ),
-        18.gapHeight,
-        "Product Overview".text(
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        ),
-        18.gapHeight,
-        Obx(
-          () => ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              CardOverview(
-                label: "Total Products",
-                value: _adminController.totalProducts.value.toString(),
-              ),
-              18.gapWidth,
-              CardOverview(
-                label: "Total Items In Stock",
-                value:
-                    _adminController.statsPoducts.value?.totalStock
-                        .toString() ??
-                    "0",
-              ),
-              18.gapWidth,
-              CardOverview(
-                label: "Stock Value",
-                value: CurrenceConverter.getCurrenceFloatInStrings(
-                  _adminController.statsPoducts.value?.totalCost ?? 0,
-                  _userController.user.value?.baseCurrence ?? '',
-                ),
-              ),
-              18.gapWidth,
-              CardOverview(
-                label: "Total Revenue",
-                value: CurrenceConverter.getCurrenceFloatInStrings(
-                  _adminController.statsPoducts.value?.totalRevenue ?? 0,
-                  _userController.user.value?.baseCurrence ?? '',
-                ),
-              ),
-            ],
-          ).sizedBox(height: 110, width: double.infinity),
-        ),
-        18.gapHeight,
-        "Sales Overview".text(
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        ),
-        18.gapHeight,
-        Obx(
-          () => ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              CardOverview(
-                label: "Profit ",
-                value: CurrenceConverter.getCurrenceFloatInStrings(
-                  (_adminController.statsSales.value?.totalSales ?? 0) -
-                      (_adminController.statsSales.value?.totalCost ?? 0),
-                  _userController.user.value?.baseCurrence ?? '',
-                ),
-              ),
-              18.gapWidth,
-              CardOverview(
-                label: "Total Sales",
-                value: CurrenceConverter.getCurrenceFloatInStrings(
-                  _adminController.statsSales.value?.totalSales ?? 0,
-                  _userController.user.value?.baseCurrence ?? '',
-                ),
-              ),
-              18.gapWidth,
-              CardOverview(
-                label: "Active Cashiers",
-                value:
-                    _adminController.statsSales.value?.numberOfCashiers
-                        .toString() ??
-                    "0",
-              ),
-            ],
-          ).sizedBox(height: 110, width: double.infinity),
-        ),
+                  18.gapWidth,
+                  CardOverview(
+                    label: "Total Items In Stock",
+                    value:
+                        _adminController.statsPoducts.value?.totalStock
+                            .toString() ??
+                        "0",
+                  ),
+                  18.gapWidth,
+                  CardOverview(
+                    label: "Stock Value",
+                    value: CurrenceConverter.getCurrenceFloatInStrings(
+                      _adminController.statsPoducts.value?.totalCost ?? 0,
+                      _userController.user.value?.baseCurrence ?? '',
+                    ),
+                  ),
+                  18.gapWidth,
+                  CardOverview(
+                    label: "Total Revenue",
+                    value: CurrenceConverter.getCurrenceFloatInStrings(
+                      _adminController.statsPoducts.value?.totalRevenue ?? 0,
+                      _userController.user.value?.baseCurrence ?? '',
+                    ),
+                  ),
+                ].row(),
+              ).sizedBox(height: 150, width: double.infinity),
+            ),
+            18.gapHeight,
+            "Sales Overview".text(
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            18.gapHeight,
+            Obx(
+              () => SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: [
+                  CardOverview(
+                    label: "Profit ",
+                    value: CurrenceConverter.getCurrenceFloatInStrings(
+                      (_adminController.statsSales.value?.totalSales ?? 0) -
+                          (_adminController.statsSales.value?.totalCost ?? 0),
+                      _userController.user.value?.baseCurrence ?? '',
+                    ),
+                  ),
+                  18.gapWidth,
+                  CardOverview(
+                    label: "Total Sales",
+                    value: CurrenceConverter.getCurrenceFloatInStrings(
+                      _adminController.statsSales.value?.totalSales ?? 0,
+                      _userController.user.value?.baseCurrence ?? '',
+                    ),
+                  ),
+                  18.gapWidth,
+                  CardOverview(
+                    label: "Active Cashiers",
+                    value:
+                        _adminController.statsSales.value?.numberOfCashiers
+                            .toString() ??
+                        "0",
+                  ),
+                ].row(),
+              ).sizedBox(height: 150, width: double.infinity),
+            ),
 
-        Obx(
-          () =>
-              _adminController.statsSales.value?.cashiers != null &&
-                  _adminController.statsSales.value!.cashiers.isNotEmpty
-              ? [
-                  18.gapHeight,
-                  "Active Cashiers".text(
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                  18.gapHeight,
-                  ..._adminController.statsSales.value!.cashiers.map(
-                    (e) => Card(child: ListTile(title: e.name.text())),
-                  ),
-                ].column(crossAxisAlignment: CrossAxisAlignment.start)
-              : SizedBox(),
-        ),
-        44.gapHeight,
-        18.gapHeight,
-        SingleChildScrollView(
-          child:
-              [
-                    "Pick Range".text().textButton(onPressed: _pickWeek),
-                    18.gapWidth,
-                    "${weeklyStartDay.day}/${weeklyStartDay.month}/${weeklyStartDay.year}"
-                        .text(),
-                    18.gapWidth,
-                    "-".text(),
-                    18.gapWidth,
-                    _endDate == null
-                        ? "To day".text()
-                        : "${_weeklyRange.day}/${_weeklyRange.month}/${_weeklyRange.year}"
-                              .text(),
-                  ]
-                  .row()
-                  .onTap(_pickWeek)
-                  .decoratedBox(
-                    decoration: BoxDecoration(color: AppTheme.surface(context)),
-                  ),
-        ),
-        18.gapHeight,
-        "Weekly Profits".text(
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        ),
-        18.gapHeight,
-        _getWeeklyProfitsBarChart(),
-        32.gapHeight,
-        "Weekly Sales".text(
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        ),
-        18.gapHeight,
-        _getWeeklySalesChart(),
-        32.gapHeight,
-        "Weekly Visitors".text(
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        ),
-        18.gapHeight,
-        _getWeeklyVisitorsChart(),
-      ],
-    ).sizedBox(width: double.infinity);
+            Obx(
+              () =>
+                  _adminController.statsSales.value?.cashiers != null &&
+                      _adminController.statsSales.value!.cashiers.isNotEmpty
+                  ? [
+                      18.gapHeight,
+                      "Active Cashiers".text(
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      18.gapHeight,
+                      ..._adminController.statsSales.value!.cashiers.map(
+                        (e) => ListTile(
+                          title: e.name.text(),
+                          leading: Iconify(
+                            Bx.user,
+                            color: AppTheme.color(context),
+                          ),
+                        ),
+                      ),
+                    ].column(crossAxisAlignment: CrossAxisAlignment.start)
+                  : SizedBox(),
+            ),
+            32.gapHeight,
+            Wrap(
+              children: [
+                MistRangeView(label: "From Date", date: weeklyStartDay),
+                MistRangeView(
+                  label: "To Date",
+                  date: _weeklyRange,
+                  onDatePicked: (time) {
+                    setState(() {
+                      _weeklyRange = time;
+                    });
+                    _loadWithWeekTimeFrame();
+                  },
+                ),
+              ],
+            ),
+            18.gapHeight,
+            "Weekly Profits".text(
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            18.gapHeight,
+            _getWeeklyProfitsBarChart(),
+            32.gapHeight,
+            "Weekly Sales".text(
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            18.gapHeight,
+            _getWeeklySalesChart(),
+            32.gapHeight,
+            "Weekly Visitors".text(
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            18.gapHeight,
+            _getWeeklyVisitorsChart(),
+          ],
+        ).sizedBox(width: double.infinity),
+      );
+    });
   }
 
   _getWeeklyProfitsBarChart() {
@@ -207,8 +223,95 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
       if (list.isEmpty) {
         return "Weekly profit chart is empty".text();
       }
+
+      // --- MODERN STYLING VARIABLES ---
+      final primaryColor = Get.theme.colorScheme.primary;
+      final textColor = Get.theme.textTheme.bodyMedium?.color ?? Colors.black;
+
       return BarChart(
         BarChartData(
+          // Add padding around the chart area for better aesthetics
+          minY: 0,
+          alignment: BarChartAlignment.spaceAround,
+
+          // --- GRID AND BORDER ---
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false, // Cleaner look without vertical grid lines
+            getDrawingHorizontalLine: (value) {
+              return FlLine(
+                color: Get.theme.colorScheme.onSurface.withAlpha(100),
+                strokeWidth: 1,
+              );
+            },
+          ),
+          borderData: FlBorderData(
+            show: true,
+            border: Border(
+              bottom: BorderSide(color: textColor.withAlpha(150), width: 1),
+              left: BorderSide(color: Colors.transparent),
+              right: BorderSide(color: Colors.transparent),
+              top: BorderSide(color: Colors.transparent),
+            ),
+          ),
+
+          // --- AXIS TITLES ---
+          titlesData: FlTitlesData(
+            show: true,
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+
+            // Y-Axis Labels (Left Titles)
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 60,
+                getTitlesWidget: (value, meta) {
+                  return Text(
+                    CurrenceConverter.getCurrenceFloatk(
+                      value,
+                      _userController.user.value?.baseCurrence ?? '',
+                    ),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: textColor.withAlpha(200),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // X-Axis Labels (Bottom Titles)
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize:
+                    45, // Increased reserved space to fit rotated labels
+                getTitlesWidget: (value, meta) {
+                  final int index = value.toInt();
+                  if (index >= 0 && index < list.length) {
+                    // 🚀 FIX: Apply rotation to the Text widget
+                    return Transform.rotate(
+                      angle:
+                          -45 * (3.1415926535 / 180), // Rotate by -45 degrees
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          list[index].date,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: textColor.withAlpha(200),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  return Container();
+                },
+              ),
+            ),
+          ),
+
           // 1. Define the actual bars (data points)
           barGroups: [
             ...list.indexed.map(
@@ -217,44 +320,22 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
                 barRods: [
                   BarChartRodData(
                     toY: e.$2.totalProfit, // Bar height
-                    color: Get.theme.colorScheme.primary,
+                    color: primaryColor,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(4),
+                      topRight: Radius.circular(4),
+                    ), // Rounded tops for modern look
                     width: 15,
                   ),
                 ],
               ),
             ),
           ],
-          titlesData: FlTitlesData(
-            show: true,
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  return Text(list[value.toInt()].date);
-                },
-              ),
-            ),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 80,
-                getTitlesWidget: (value, meta) {
-                  return Text(
-                    CurrenceConverter.getCurrenceFloatk(
-                      value,
-                      _userController.user.value?.baseCurrence ?? '',
-                    ),
-                  );
-                },
-              ), // Y-axis labels
-            ),
-            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          ),
-          gridData: FlGridData(show: true),
-          borderData: FlBorderData(show: false), // Hide the chart border
         ),
-      ).sizedBox(height: 200, width: double.infinity);
+      ).sizedBox(
+        height: 250,
+        width: double.infinity,
+      ); // Increased height for better view
     });
   }
 
@@ -267,66 +348,127 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
       if (list.isEmpty) {
         return "Weekly sales chart is empty".text();
       }
+
+      // --- MODERN STYLING ENHANCEMENTS ---
+      final primaryColor = Get.theme.colorScheme.primary;
+      final textColor = Get.theme.textTheme.bodyMedium?.color ?? Colors.black;
+
       return LineChart(
         LineChartData(
-          lineBarsData: [
-            LineChartBarData(
-              spots: list.indexed.map((e) {
-                return FlSpot(
-                  e.$1.toDouble(), // X-value (index)
-                  e.$2.totalPaid.toDouble(), // Y-value (totalPaid)
-                );
-              }).toList(),
-              isCurved:
-                  true, // Set to true for a smooth curve, false for straight lines
-              color: Get
-                  .theme
-                  .colorScheme
-                  .primary, // Use the same color as the bar
-              barWidth: 3,
-              dotData: FlDotData(show: true), // Show dots at each data point
-              belowBarData: BarAreaData(
-                show: false,
-              ), // Optional: set to true to fill the area below the line
+          // Add padding around the chart area for better aesthetics
+          minY: 0,
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false, // Cleaner look without vertical grid lines
+            getDrawingHorizontalLine: (value) {
+              return FlLine(
+                color: Get.theme.colorScheme.onSurface.withAlpha(70),
+                strokeWidth: 1,
+              );
+            },
+          ),
+          borderData: FlBorderData(
+            show: true,
+            border: Border(
+              bottom: BorderSide(color: textColor.withAlpha(120), width: 1),
+              left: BorderSide(color: Colors.transparent),
+              right: BorderSide(color: Colors.transparent),
+              top: BorderSide(color: Colors.transparent),
             ),
-          ],
+          ),
+
+          // --- AXIS TITLES ---
           titlesData: FlTitlesData(
             show: true,
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 30,
-                getTitlesWidget: (value, meta) {
-                  // Check bounds to prevent errors
-                  final int index = value.toInt();
-                  if (index >= 0 && index < list.length) {
-                    return Text(list[index].date);
-                  }
-                  return Container();
-                },
-              ),
-            ),
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+
+            // Y-Axis Labels (Left Titles)
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                reservedSize: 80,
+                reservedSize: 60, // Reduced reserved space for a tighter look
                 getTitlesWidget: (value, meta) {
                   return Text(
                     CurrenceConverter.getCurrenceFloatk(
                       value,
                       _userController.user.value?.baseCurrence ?? '',
                     ),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: textColor.withAlpha(200),
+                    ),
                   );
-                }, // Y-axis labels
+                },
               ),
             ),
-            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+
+            // X-Axis Labels (Bottom Titles)
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize:
+                    45, // Increased reserved space to fit rotated labels
+                getTitlesWidget: (value, meta) {
+                  final int index = value.toInt();
+                  if (index >= 0 && index < list.length) {
+                    // 🚀 FIX: Apply rotation to the Text widget
+                    return Transform.rotate(
+                      angle:
+                          -45 *
+                          (3.1415926535 /
+                              180), // Rotate by -45 degrees (in radians)
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          list[index].date,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: textColor.withAlpha(200),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  return Container();
+                },
+              ),
+            ),
           ),
-          gridData: FlGridData(show: true),
-          borderData: FlBorderData(show: false), // Hide the chart border
+
+          // --- LINE DATA (The Curve) ---
+          lineBarsData: [
+            LineChartBarData(
+              spots: list.indexed.map((e) {
+                return FlSpot(e.$1.toDouble(), e.$2.totalPaid.toDouble());
+              }).toList(),
+              isCurved: true,
+              color: primaryColor,
+              barWidth: 3,
+              isStrokeCapRound: true,
+              dotData: FlDotData(
+                show: true,
+                getDotPainter: (spot, percent, barData, index) =>
+                    FlDotCirclePainter(
+                      radius: 4,
+                      color: primaryColor.withAlpha(
+                        100,
+                      ), // Darker dot for emphasis
+                      strokeColor: primaryColor.withAlpha(120),
+                      strokeWidth: 2,
+                    ),
+              ),
+              belowBarData: BarAreaData(
+                show: true, // Show area fill for a more modern look
+                color: primaryColor.withAlpha(120),
+              ),
+            ),
+          ],
         ),
-      ).sizedBox(height: 200, width: double.infinity);
+      ).sizedBox(
+        height: 250,
+        width: double.infinity,
+      ); // Increased height for aesthetics
     });
   }
 
@@ -339,8 +481,97 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
       if (list.isEmpty) {
         return "Weekly visitors chart is empty".text();
       }
+
+      // --- MODERN STYLING VARIABLES ---
+      final primaryColor = Get.theme.colorScheme.primary;
+      final textColor = Get.theme.textTheme.bodyMedium?.color ?? Colors.black;
+
       return BarChart(
         BarChartData(
+          // Add padding around the chart area for better aesthetics
+          minY: 0,
+          alignment: BarChartAlignment.spaceAround,
+
+          // --- GRID AND BORDER ---
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false, // Cleaner look without vertical grid lines
+            getDrawingHorizontalLine: (value) {
+              return FlLine(
+                color: Get.theme.colorScheme.onSurface.withAlpha(50),
+                strokeWidth: 1,
+              );
+            },
+          ),
+          borderData: FlBorderData(
+            show: true,
+            border: Border(
+              bottom: BorderSide(color: textColor.withAlpha(150), width: 1),
+              left: BorderSide(color: Colors.transparent),
+              right: BorderSide(color: Colors.transparent),
+              top: BorderSide(color: Colors.transparent),
+            ),
+          ),
+
+          // --- AXIS TITLES ---
+          titlesData: FlTitlesData(
+            show: true,
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+
+            // Y-Axis Labels (Left Titles) - Showing Visitor Count
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 40,
+                interval: 1.0,
+                getTitlesWidget: (value, meta) {
+                  // Show visitor count as integers
+                  if (value.toInt() > 0 || value == meta.min) {
+                    return Text(
+                      value.toInt().toString(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: textColor.withAlpha(200),
+                      ),
+                    );
+                  }
+                  return Container();
+                },
+              ),
+            ),
+
+            // X-Axis Labels (Bottom Titles) - Rotated Dates
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize:
+                    45, // Increased reserved space to fit rotated labels
+                getTitlesWidget: (value, meta) {
+                  final int index = value.toInt();
+                  if (index >= 0 && index < list.length) {
+                    // 🚀 FIX: Apply rotation to the Text widget
+                    return Transform.rotate(
+                      angle:
+                          -45 * (3.1415926535 / 180), // Rotate by -45 degrees
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          list[index].date,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: textColor.withAlpha(200),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  return Container();
+                },
+              ),
+            ),
+          ),
+
           // 1. Define the actual bars (data points)
           barGroups: [
             ...list.indexed.map(
@@ -349,87 +580,61 @@ class _NavAdminOverViewState extends State<NavAdminOverView> {
                 barRods: [
                   BarChartRodData(
                     toY: e.$2.uniqueCustomersCount.toDouble(), // Bar height
-                    color: Get.theme.colorScheme.primary,
+                    color: primaryColor,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(4),
+                      topRight: Radius.circular(4),
+                    ), // Rounded tops
                     width: 15,
                   ),
                 ],
               ),
             ),
           ],
-
-          // 2. Configure Titles (Axes)
-          titlesData: FlTitlesData(
-            show: true,
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  final int index = value.toInt();
-                  if (index >= 0 && index < list.length) {
-                    return Text(list[index].date);
-                  }
-                  return Container();
-                },
-              ),
-            ),
-
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 40,
-                interval: 1.0,
-                getTitlesWidget: (value, meta) {
-                  if (value.toInt() > 0) {
-                    return Text(
-                      value.toInt().toString(),
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    );
-                  }
-                  // Return an empty container for 0 or non-integer values
-                  return Container();
-                },
-              ), // Y-axis labels
-            ),
-
-            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          ),
-
-          // 3. Grid and Border
-          gridData: FlGridData(show: true),
-          borderData: FlBorderData(show: false), // Hide the chart border
         ),
-      ).sizedBox(height: 200, width: double.infinity);
+      ).sizedBox(
+        height: 250,
+        width: double.infinity,
+      ); // Increased height for better view
     });
   }
 
-  void _pickdateRange() async {
-    final date = await showRangePickerDialog(
-      context: context,
-      minDate: DateTime(2021, 1, 1),
-      maxDate: DateTime.now(),
-    );
-    if (date == null) return;
-    setState(() {
-      _startDate = date.start;
-      _endDate = date.end;
-    });
+  void _loadWithUpdatedTimeFrame() async {
     _adminController.getAdminStats(startDate: _startDate, endDate: _endDate);
   }
 
-  void _pickWeek() async {
-    final date = await showDatePicker(
-      context: context,
-      firstDate: DateTime(2021, 1, 1),
-      lastDate: DateTime.now(),
-    );
-    if (date == null) return;
-    setState(() {
-      _weeklyRange = date;
-    });
+  void _loadWithWeekTimeFrame() async {
     _adminController.getWeeklyProfits(endDate: _weeklyRange);
+  }
+
+  void printDocument() {
+    PDFMaker maker = PDFMaker();
+    final baseCurrency = _userController.user.value?.baseCurrence ?? '';
+    maker
+        .createPDF(
+          AdminOverviewPdf(
+            week: _weeklyRange,
+            endDate: _endDate ?? DateTime.now(),
+            startDate: _startDate ?? DateTime.now(),
+            baseCurrence: baseCurrency, // Now guaranteed to be non-null
+            statsProductModel: _adminController.statsPoducts.value,
+            totalProducts: _adminController.totalProducts.value,
+            statsSalesModel: _adminController.statsSales.value,
+          ),
+          setup: PageSetup(
+            context: context,
+            quality: 4.0,
+            scale: 1.0,
+            pageFormat: PageFormat.a4,
+            margins: 40,
+          ),
+        )
+        .then((file) {
+          _adminController.openFile(file);
+        })
+        .catchError((e) {
+          log("PDF Generation Error: $e");
+          Toaster.showError("Failed to generate PDF: $e");
+        });
   }
 }

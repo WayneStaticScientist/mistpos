@@ -3,7 +3,6 @@ import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/models/notification_model.dart';
 import 'package:mistpos/controllers/firebase_controller.dart';
-import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
 class ScreenReadNotification extends StatefulWidget {
   final NotificationModel notificationModel;
@@ -30,10 +29,7 @@ class _ScreenReadNotificationState extends State<ScreenReadNotification> {
       appBar: AppBar(title: widget.notificationModel.title.text()),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: HtmlWidget(
-          widget.notificationModel.message,
-          renderMode: RenderMode.listView,
-        ),
+        child: widget.notificationModel.message.text(),
       ),
     );
   }

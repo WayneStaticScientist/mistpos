@@ -1,37 +1,36 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:pdf_maker/pdf_maker.dart';
 import 'package:mistpos/utils/toast.dart';
+import 'package:pdf_maker/pdf_maker.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/utils/date_utils.dart';
-import 'package:mistpos/themes/app_theme.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/models/sales_by_payment.dart';
+import 'package:mistpos/utils/currence_converter.dart';
+import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
-import 'package:mistpos/controllers/admin_controller.dart';
-import 'package:mistpos/models/inventory_history_model.dart';
-import 'package:mistpos/controllers/inventory_controller.dart';
-import 'package:mistpos/utils/pdfdocuments/pdf_inventory_history.dart';
+import 'package:iconify_flutter/iconify_flutter.dart' show Iconify;
+import 'package:mistpos/utils/pdfdocuments/pdf_sales_by_employee.dart';
 
-class NavInventoryHistory extends StatefulWidget {
-  const NavInventoryHistory({super.key});
+class NavSalesByPayment extends StatefulWidget {
+  const NavSalesByPayment({super.key});
 
   @override
-  State<NavInventoryHistory> createState() => NavInventoryHistoryState();
+  State<NavSalesByPayment> createState() => NavSalesByPaymentState();
 }
 
-class NavInventoryHistoryState extends State<NavInventoryHistory> {
-  final _userController = Get.find<UserController>();
+class NavSalesByPaymentState extends State<NavSalesByPayment> {
   final _adminController = Get.find<AdminController>();
-  final _inventoryController = Get.find<InventoryController>();
+  final _userController = Get.find<UserController>();
   DateTime _startDate = DateTime.now().subtract(Duration(days: 7));
   DateTime _endDate = DateTime.now();
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _inventoryController.getInventoryHistory(_startDate, _endDate);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _adminController.getSalesPayment(_startDate, _endDate);
     });
   }
 
@@ -52,20 +51,20 @@ class NavInventoryHistoryState extends State<NavInventoryHistory> {
       ),
 
       Obx(() {
-        if (_inventoryController.loadingInventoryHistory.value) {
+        if (_adminController.loadingSalesByPayment.value) {
           return MistLoader1().center();
         }
-        if (_inventoryController.inventoryHistory.isEmpty) {
+        if (_adminController.salesByPayment.isEmpty) {
           return "No sales today".text().center();
         }
         return SingleChildScrollView(
-          child: _makeTable(_inventoryController.inventoryHistory),
+          child: _makeTable(_adminController.salesByPayment),
         );
       }).expanded1,
     ].column();
   }
 
-  Widget _makeTable(RxList<InventoryHistoryModel> historyModel) {
+  Widget _makeTable(RxList<SalesByPayment> salesByEmployee) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Table(
@@ -85,28 +84,50 @@ class NavInventoryHistoryState extends State<NavInventoryHistory> {
               borderRadius: BorderRadius.circular(10),
             ),
             children: [
-              Text('Item Name').padding(EdgeInsets.all(10)),
-              Text('Document Type').padding(EdgeInsets.all(10)),
-              Text('Quantity Change').padding(EdgeInsets.all(10)),
-              Text('Date').padding(EdgeInsets.all(10)),
+              Text('Payment Method').padding(EdgeInsets.all(10)),
+              Text('Gross Sales').padding(EdgeInsets.all(10)),
+              Text('Average Sales').padding(EdgeInsets.all(10)),
+              Text('Discounts').padding(EdgeInsets.all(10)),
+              Text('Refunds').padding(EdgeInsets.all(10)),
+              Text('Receipts').padding(EdgeInsets.all(10)),
+              Text('Customers').padding(EdgeInsets.all(10)),
             ],
           ),
-          ...historyModel.map((e) {
+          ...salesByEmployee.map((e) {
             return TableRow(
               children: [
                 Text(
-                  e.itemName ?? '-',
+                  e.paymentMethod,
                 ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
                 Text(
-                  e.documentType ?? "-",
+                  CurrenceConverter.getCurrenceFloatInStrings(
+                    e.grossSales,
+                    _userController.user.value?.baseCurrence ?? '',
+                  ),
                 ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
                 Text(
-                  e.quantityChange?.toString() ?? "-",
+                  CurrenceConverter.getCurrenceFloatInStrings(
+                    e.averageSalesPerReceipt,
+                    _userController.user.value?.baseCurrence ?? '',
+                  ),
                 ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
                 Text(
-                  e.createdAt != null
-                      ? MistDateUtils.getInformalShortDate(e.createdAt!)
-                      : "",
+                  CurrenceConverter.getCurrenceFloatInStrings(
+                    e.discounts,
+                    _userController.user.value?.baseCurrence ?? '',
+                  ),
+                ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
+                Text(
+                  CurrenceConverter.getCurrenceFloatInStrings(
+                    e.refunds,
+                    _userController.user.value?.baseCurrence ?? '',
+                  ),
+                ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
+                Text(
+                  e.numberOfReceipts.toString(),
+                ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
+                Text(
+                  e.uniqueCustomerCount.toString(),
                 ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
               ],
             );
@@ -127,7 +148,7 @@ class NavInventoryHistoryState extends State<NavInventoryHistory> {
       _endDate = date.end;
       _startDate = date.start;
     });
-    _inventoryController.getInventoryHistory(_startDate, _endDate);
+    _adminController.getSalesPayment(_startDate, _endDate);
   }
 
   void printDocument() async {
@@ -135,11 +156,11 @@ class NavInventoryHistoryState extends State<NavInventoryHistory> {
     final baseCurrency = _userController.user.value?.baseCurrence ?? '';
     maker
         .createPDF(
-          PdfInventoryHistory(
+          PdfSalesByEmployee(
             endDate: _endDate,
             startDate: _startDate,
             baseCurrence: baseCurrency,
-            invHistory: _inventoryController.inventoryHistory,
+            salesByEmployee: _adminController.salesByEmployee,
           ),
           setup: PageSetup(
             context: context,

@@ -1,28 +1,33 @@
 import 'package:exui/exui.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:iconify_flutter/icons/bx.dart';
-import 'package:mistpos/models/item_model.dart';
-import 'package:mistpos/themes/app_theme.dart';
+import 'package:mistpos/utils/toast.dart';
+import 'package:pdf_maker/pdf_maker.dart';
 import 'package:mistpos/utils/date_utils.dart';
+import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/themes/app_theme.dart';
+import 'package:mistpos/models/item_model.dart';
 import 'package:mistpos/widgets/layouts/chips.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/models/product_stats_model.dart';
 import 'package:mistpos/screens/basic/modern_layout.dart';
 import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
+import 'package:mistpos/utils/pdfdocuments/pdf_inv_evaluation.dart';
 
 class NavInventoryValuation extends StatefulWidget {
   const NavInventoryValuation({super.key});
 
   @override
-  State<NavInventoryValuation> createState() => _NavInventoryValuationState();
+  State<NavInventoryValuation> createState() => NavInventoryValuationState();
 }
 
-class _NavInventoryValuationState extends State<NavInventoryValuation> {
+class NavInventoryValuationState extends State<NavInventoryValuation> {
   final _userController = Get.find<UserController>();
+  final _adminController = Get.find<AdminController>();
   final _inventoryController = Get.find<InventoryController>();
   DateTime _startDate = DateTime.now().subtract(Duration(days: 7));
   DateTime _endDate = DateTime.now();
@@ -235,5 +240,37 @@ class _NavInventoryValuationState extends State<NavInventoryValuation> {
         ],
       ),
     ).sizedBox(width: double.infinity);
+  }
+
+  void printDocument() async {
+    if (_inventoryController.statsPoducts.value == null) {
+      Toaster.showError("Stats hasnt loaded yet | please wait them to load");
+      return;
+    }
+    PDFMaker maker = PDFMaker();
+    final baseCurrency = _userController.user.value?.baseCurrence ?? '';
+    maker
+        .createPDF(
+          PdfInvEvaluation(
+            endDate: _endDate,
+            startDate: _startDate,
+            baseCurrence: baseCurrency,
+            statsProductModel: _inventoryController.statsPoducts.value!,
+            inventoryProducts: _inventoryController.inventoryProducts,
+          ),
+          setup: PageSetup(
+            context: context,
+            quality: 4.0,
+            scale: 1.0,
+            pageFormat: PageFormat.a4,
+            margins: 40,
+          ),
+        )
+        .then((file) {
+          _adminController.openFile(file);
+        })
+        .catchError((e) {
+          Toaster.showError("Failed to generate PDF: $e");
+        });
   }
 }

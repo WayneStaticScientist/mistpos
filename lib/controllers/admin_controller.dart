@@ -1,7 +1,13 @@
+import 'dart:developer';
+import 'dart:typed_data';
+
 import 'package:get/get.dart';
-import 'package:mistpos/models/sales_by_employee_model.dart';
-import 'package:mistpos/models/user_model.dart';
+import 'package:mistpos/models/sales_by_payment.dart';
+import 'package:mistpos/models/shifts_stats_model.dart';
 import 'package:mistpos/utils/toast.dart';
+import 'package:open_file/open_file.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/models/employee_model.dart';
 import 'package:mistpos/models/company_model.dart';
 import 'package:mistpos/models/dialy_sale_model.dart';
@@ -9,6 +15,7 @@ import 'package:mistpos/services/network_wrapper.dart';
 import 'package:mistpos/models/sales_stats_model.dart';
 import 'package:mistpos/models/product_stats_model.dart';
 import 'package:mistpos/models/average_profit_model.dart';
+import 'package:mistpos/models/sales_by_employee_model.dart';
 
 class AdminController extends GetxController {
   RxBool loading = RxBool(false);
@@ -220,6 +227,46 @@ class AdminController extends GetxController {
     }
   }
 
+  RxBool loadingSalesByPayment = RxBool(false);
+  RxList<SalesByPayment> salesByPayment = RxList<SalesByPayment>();
+  Future<void> getSalesPayment(DateTime start, DateTime end) async {
+    if (loadingSalesByPayment.value) return;
+    loadingSalesByPayment.value = true;
+    final result = await Net.get(
+      "/admin/stats/sales/payments?endDate=${end.toIso8601String()}&startDate=${start.toIso8601String()}",
+    );
+    loadingSalesByPayment.value = false;
+    if (result.hasError) {
+      return;
+    }
+    if (result.body['list'] != null) {
+      List<dynamic> list = result.body['list'];
+      salesByPayment.value = list
+          .map((e) => SalesByPayment.fromJson(e))
+          .toList();
+    }
+  }
+
+  RxBool loadingShifts = RxBool(false);
+  RxList<ShiftsStatsModel> shiftsStats = RxList<ShiftsStatsModel>();
+  Future<void> getShifts(DateTime start, DateTime end) async {
+    if (loadingShifts.value) return;
+    loadingShifts.value = true;
+    final result = await Net.get(
+      "/admin/stats/sales/shifts?endDate=${end.toIso8601String()}&startDate=${start.toIso8601String()}",
+    );
+    loadingShifts.value = false;
+    if (result.hasError) {
+      return;
+    }
+    if (result.body['list'] != null) {
+      List<dynamic> list = result.body['list'];
+      shiftsStats.value = list
+          .map((e) => ShiftsStatsModel.fromJson(e))
+          .toList();
+    }
+  }
+
   RxBool settingUpKeys = RxBool(false);
   Future<User?> setupPaynowKeys({
     required String integrationId,
@@ -240,5 +287,34 @@ class AdminController extends GetxController {
       return null;
     }
     return User.fromMap(result.body['update']);
+  }
+
+  void openFile(Uint8List fileBytes) async {
+    try {
+      log("Opening file");
+      if (fileBytes.isEmpty) {
+        Toaster.showError("PDF generation failed: No bytes returned.");
+        return;
+      }
+      DateTime now = DateTime.now();
+      final String? selectedDirectory = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save PDF Report',
+        fileName:
+            'document-${now.day}-${now.month}-${now.year}.pdf', // Suggest a file name
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+        bytes: fileBytes,
+      );
+      log("ieeeeeeeeeeeeeeeee eeee");
+
+      if (selectedDirectory == null) {
+        Toaster.showError("PDF save cancelled by user.");
+        return;
+      }
+      Toaster.showSuccess("PDF saved successfully to: $selectedDirectory");
+      OpenFile.open(selectedDirectory);
+    } catch (e) {
+      Toaster.showError("There was error : $e");
+    }
   }
 }

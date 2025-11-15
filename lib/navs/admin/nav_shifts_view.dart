@@ -1,37 +1,36 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:pdf_maker/pdf_maker.dart';
 import 'package:mistpos/utils/toast.dart';
+import 'package:pdf_maker/pdf_maker.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/utils/date_utils.dart';
-import 'package:mistpos/themes/app_theme.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/utils/currence_converter.dart';
+import 'package:mistpos/models/shifts_stats_model.dart';
+import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
-import 'package:mistpos/controllers/admin_controller.dart';
-import 'package:mistpos/models/inventory_history_model.dart';
-import 'package:mistpos/controllers/inventory_controller.dart';
-import 'package:mistpos/utils/pdfdocuments/pdf_inventory_history.dart';
+import 'package:iconify_flutter/iconify_flutter.dart' show Iconify;
+import 'package:mistpos/utils/pdfdocuments/pdf_sales_by_shifts.dart';
 
-class NavInventoryHistory extends StatefulWidget {
-  const NavInventoryHistory({super.key});
+class NavShiftsView extends StatefulWidget {
+  const NavShiftsView({super.key});
 
   @override
-  State<NavInventoryHistory> createState() => NavInventoryHistoryState();
+  State<NavShiftsView> createState() => NavShiftsViewState();
 }
 
-class NavInventoryHistoryState extends State<NavInventoryHistory> {
-  final _userController = Get.find<UserController>();
+class NavShiftsViewState extends State<NavShiftsView> {
   final _adminController = Get.find<AdminController>();
-  final _inventoryController = Get.find<InventoryController>();
+  final _userController = Get.find<UserController>();
   DateTime _startDate = DateTime.now().subtract(Duration(days: 7));
   DateTime _endDate = DateTime.now();
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _inventoryController.getInventoryHistory(_startDate, _endDate);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _adminController.getShifts(_startDate, _endDate);
     });
   }
 
@@ -52,31 +51,29 @@ class NavInventoryHistoryState extends State<NavInventoryHistory> {
       ),
 
       Obx(() {
-        if (_inventoryController.loadingInventoryHistory.value) {
+        if (_adminController.loadingShifts.value) {
           return MistLoader1().center();
         }
-        if (_inventoryController.inventoryHistory.isEmpty) {
-          return "No sales today".text().center();
+        if (_adminController.shiftsStats.isEmpty) {
+          return "No Shifts".text().center();
         }
         return SingleChildScrollView(
-          child: _makeTable(_inventoryController.inventoryHistory),
+          child: _makeTable(_adminController.shiftsStats),
         );
       }).expanded1,
     ].column();
   }
 
-  Widget _makeTable(RxList<InventoryHistoryModel> historyModel) {
+  Widget _makeTable(RxList<ShiftsStatsModel> shifts) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Table(
         columnWidths: const <int, TableColumnWidth>{
           0: FixedColumnWidth(200.0), // Item
-          1: FixedColumnWidth(100.0),
+          1: FixedColumnWidth(130.0),
           2: FixedColumnWidth(100.0),
           3: FixedColumnWidth(100.0),
           4: FixedColumnWidth(80.0),
-          5: FixedColumnWidth(80.0),
-          6: FixedColumnWidth(80.0),
         },
         children: [
           TableRow(
@@ -85,28 +82,37 @@ class NavInventoryHistoryState extends State<NavInventoryHistory> {
               borderRadius: BorderRadius.circular(10),
             ),
             children: [
-              Text('Item Name').padding(EdgeInsets.all(10)),
-              Text('Document Type').padding(EdgeInsets.all(10)),
-              Text('Quantity Change').padding(EdgeInsets.all(10)),
-              Text('Date').padding(EdgeInsets.all(10)),
+              Text('Employee').padding(EdgeInsets.all(10)),
+              Text('Total Shift(hrs)').padding(EdgeInsets.all(10)),
+              Text('Total Sales').padding(EdgeInsets.all(10)),
+              Text('Total Items Sold').padding(EdgeInsets.all(10)),
+              Text('Average Sales').padding(EdgeInsets.all(10)),
             ],
           ),
-          ...historyModel.map((e) {
+          ...shifts.map((e) {
             return TableRow(
               children: [
                 Text(
-                  e.itemName ?? '-',
+                  e.userName,
                 ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
                 Text(
-                  e.documentType ?? "-",
+                  e.totalShiftHours.toString(),
                 ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
                 Text(
-                  e.quantityChange?.toString() ?? "-",
+                  CurrenceConverter.getCurrenceFloatInStrings(
+                    e.totalSales,
+                    _userController.user.value?.baseCurrence ?? '',
+                  ),
+                ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
+
+                Text(
+                  e.totalSalesQuantity.toString(),
                 ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
                 Text(
-                  e.createdAt != null
-                      ? MistDateUtils.getInformalShortDate(e.createdAt!)
-                      : "",
+                  CurrenceConverter.getCurrenceFloatInStrings(
+                    e.averageSalePerShift,
+                    _userController.user.value?.baseCurrence ?? '',
+                  ),
                 ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
               ],
             );
@@ -127,7 +133,7 @@ class NavInventoryHistoryState extends State<NavInventoryHistory> {
       _endDate = date.end;
       _startDate = date.start;
     });
-    _inventoryController.getInventoryHistory(_startDate, _endDate);
+    _adminController.getShifts(_startDate, _endDate);
   }
 
   void printDocument() async {
@@ -135,11 +141,11 @@ class NavInventoryHistoryState extends State<NavInventoryHistory> {
     final baseCurrency = _userController.user.value?.baseCurrence ?? '';
     maker
         .createPDF(
-          PdfInventoryHistory(
+          PdfSalesByShifts(
             endDate: _endDate,
             startDate: _startDate,
             baseCurrence: baseCurrency,
-            invHistory: _inventoryController.inventoryHistory,
+            salesByShifts: _adminController.shiftsStats,
           ),
           setup: PageSetup(
             context: context,

@@ -3,7 +3,7 @@ class MistDateUtils {
     return "${_getMonthName(dateTime.month)} ${dateTime.day}";
   }
 
-  static formatNormalDate(DateTime dateTime) {
+  static String formatNormalDate(DateTime dateTime) {
     return "${getWeekDayName(dateTime)} ${dateTime.day} ${_getMonthName(dateTime.month)} ${dateTime.year}";
   }
 

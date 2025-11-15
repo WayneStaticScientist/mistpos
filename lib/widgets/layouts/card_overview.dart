@@ -19,12 +19,20 @@ class CardOverview extends StatelessWidget {
           ),
         ]
         .column(crossAxisAlignment: CrossAxisAlignment.start)
-        .sizedBox(height: 150, width: 150)
+        .sizedBox(width: 150, height: 100)
         .padding(EdgeInsets.all(12))
         .decoratedBox(
           decoration: BoxDecoration(
             color: AppTheme.surface(context),
             borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(50),
+                spreadRadius: 0,
+                blurRadius: 15,
+                offset: Offset(0, 4),
+              ),
+            ],
           ),
         )
         .padding(EdgeInsets.symmetric(horizontal: 3));

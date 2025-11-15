@@ -49,7 +49,7 @@ class _MistAdminDashboardState extends State<MistAdminDashboard> {
                     : null,
               ),
               ListTile(
-                leading: Iconify(Carbon.sun, color: Colors.lime),
+                leading: Iconify(Carbon.sun, color: Colors.brown),
                 title: "Daily Sales".text(),
                 onTap: () => widget.onTap("Daily Sales"),
                 tileColor: widget.selectedTile == "Daily Sales"
@@ -57,10 +57,26 @@ class _MistAdminDashboardState extends State<MistAdminDashboard> {
                     : null,
               ),
               ListTile(
-                leading: Iconify(Carbon.user, color: Colors.lime),
+                leading: Iconify(Carbon.user, color: Colors.purpleAccent),
                 title: "Sales By Employee".text(),
                 onTap: () => widget.onTap("Sales By Employee"),
                 tileColor: widget.selectedTile == "Sales By Employee"
+                    ? Colors.grey.withAlpha(50)
+                    : null,
+              ),
+              ListTile(
+                leading: Iconify(Carbon.money, color: Colors.deepOrangeAccent),
+                title: "Sales By Payments".text(),
+                onTap: () => widget.onTap("Sales By Payments"),
+                tileColor: widget.selectedTile == "Sales By Payments"
+                    ? Colors.grey.withAlpha(50)
+                    : null,
+              ),
+              ListTile(
+                leading: Iconify(Carbon.train_time, color: Colors.deepPurple),
+                title: "Shifts".text(),
+                onTap: () => widget.onTap("Shifts"),
+                tileColor: widget.selectedTile == "Shifts"
                     ? Colors.grey.withAlpha(50)
                     : null,
               ),

@@ -1,24 +1,27 @@
+import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:iconify_flutter/iconify_flutter.dart' show Iconify;
+import 'package:mistpos/utils/toast.dart';
+import 'package:pdf_maker/pdf_maker.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/utils/date_utils.dart';
+import 'package:mistpos/utils/currence_converter.dart';
+import 'package:iconify_flutter/iconify_flutter.dart' show Iconify;
 import 'package:mistpos/controllers/admin_controller.dart';
+import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/models/sales_by_employee_model.dart';
-import 'package:mistpos/themes/app_theme.dart';
-import 'package:mistpos/utils/currence_converter.dart';
-import 'package:mistpos/utils/date_utils.dart';
-import 'package:mistpos/widgets/loaders/small_loader.dart';
+import 'package:mistpos/utils/pdfdocuments/pdf_sales_by_payment.dart';
 
 class NavSalesByEmployee extends StatefulWidget {
   const NavSalesByEmployee({super.key});
 
   @override
-  State<NavSalesByEmployee> createState() => _NavSalesByEmployeeState();
+  State<NavSalesByEmployee> createState() => NavSalesByEmployeeState();
 }
 
-class _NavSalesByEmployeeState extends State<NavSalesByEmployee> {
+class NavSalesByEmployeeState extends State<NavSalesByEmployee> {
   final _adminController = Get.find<AdminController>();
   final _userController = Get.find<UserController>();
   DateTime _startDate = DateTime.now().subtract(Duration(days: 7));
@@ -146,5 +149,32 @@ class _NavSalesByEmployeeState extends State<NavSalesByEmployee> {
       _startDate = date.start;
     });
     _adminController.getSalesByEmployee(_startDate, _endDate);
+  }
+
+  void printDocument() async {
+    PDFMaker maker = PDFMaker();
+    final baseCurrency = _userController.user.value?.baseCurrence ?? '';
+    maker
+        .createPDF(
+          PdfSalesByPayment(
+            endDate: _endDate,
+            startDate: _startDate,
+            baseCurrence: baseCurrency,
+            salesByPayment: _adminController.salesByPayment,
+          ),
+          setup: PageSetup(
+            context: context,
+            quality: 4.0,
+            scale: 1.0,
+            pageFormat: PageFormat.a4,
+            margins: 40,
+          ),
+        )
+        .then((file) {
+          _adminController.openFile(file);
+        })
+        .catchError((e) {
+          Toaster.showError("Failed to generate PDF: $e");
+        });
   }
 }
