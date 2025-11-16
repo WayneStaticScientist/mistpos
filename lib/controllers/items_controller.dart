@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
+import 'package:mistpos/models/tax_model.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:mistpos/models/user_model.dart';
@@ -612,8 +613,77 @@ class ItemsController extends GetxController {
     modifiers.value = isar.itemModifiers.where().findAllSync();
     discounts.value = isar.discountModels.where().findAllSync();
     categories.value = isar.itemCategoryModels.where().findAllSync();
+    taxes.value = isar.taxModels.where().findAllSync();
     final r = isar.itemReceitModels.where().sortByCreatedAtDesc().findAllSync();
     receits.assignAll(r);
+  }
+
+  /*
+  ==============================================
+  ==============================================
+                   Taxes |
+  ==============================================
+  ==============================================
+  */
+  Future<bool> addTaxes(dynamic data) async {
+    final response = await Net.post("/admin/tax", data: data);
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return false;
+    }
+    TaxModel tax = TaxModel.fromJson(response.body['update']);
+    final isar = Isar.getInstance();
+    if (isar != null) {
+      await isar.writeTxn(() async {
+        await isar.taxModels.put(tax);
+      });
+    }
+    loadTaxes();
+    return true;
+  }
+
+  Future<bool> updateTaxies(dynamic data, String id) async {
+    final response = await Net.put("/admin/tax/$id", data: data);
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return false;
+    }
+    loadTaxes();
+    return true;
+  }
+
+  Future<bool> deleteTax(String id) async {
+    final response = await Net.delete("/admin/tax/$id");
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return false;
+    }
+    loadTaxes();
+    return true;
+  }
+
+  RxBool syncingTaxes = RxBool(false);
+  RxString syncingTaxesFailed = RxString("");
+  RxList<TaxModel> taxes = RxList<TaxModel>([]);
+  void loadTaxes({String search = '', int page = 1}) async {
+    if (syncingTaxes.value) return;
+    syncingTaxes.value = true;
+    syncingTaxesFailed.value = "";
+    final response = await Net.get("/cashier/taxes?page=$page&search=$search");
+    syncingTaxes.value = false;
+    if (response.hasError) {
+      syncingTaxesFailed.value = response.response;
+      return;
+    }
+    final list = response.body['list'] as List<dynamic>? ?? [];
+    taxes.value = list.map((e) => TaxModel.fromJson(e)).toList();
+    final isar = Isar.getInstance();
+    if (isar != null) {
+      await isar.writeTxn(() async {
+        await isar.taxModels.where().deleteAll();
+        await isar.taxModels.putAll(taxes);
+      });
+    }
   }
 
   /*

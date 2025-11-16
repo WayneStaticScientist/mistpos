@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/instance_manager.dart';
 import 'package:mistpos/models/gateway.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:mistpos/models/tax_model.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/models/item_model.dart';
@@ -38,6 +39,7 @@ void main() async {
   final dir = await getApplicationDocumentsDirectory();
   await Isar.open([
     GatewaySchema,
+    TaxModelSchema,
     ItemModelSchema,
     ShiftsModelSchema,
     ItemModifierSchema,

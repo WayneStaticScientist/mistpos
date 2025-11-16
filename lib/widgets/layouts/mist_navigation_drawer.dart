@@ -1,6 +1,7 @@
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/instance_manager.dart';
+import 'package:mistpos/screens/basic/tax_list_screens.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/user_model.dart';
@@ -67,6 +68,11 @@ class MistMainNavigationView extends StatelessWidget {
               leading: Iconify(Bx.devices, color: AppTheme.color(context)),
               title: Text('Devices'),
               onTap: () => Get.to(() => ScreenDevicesSection()),
+            ),
+            ListTile(
+              leading: Iconify(Bx.calculator, color: AppTheme.color(context)),
+              title: Text('Tax'),
+              onTap: () => Get.to(() => TaxListScreens()),
             ),
             ListTile(
               leading: Iconify(Bx.cog, color: AppTheme.color(context)),

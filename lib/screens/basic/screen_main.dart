@@ -48,11 +48,12 @@ class _ScreenMainState extends State<ScreenMain> {
       if (_userController.user.value != null &&
           _userController.loading.value == false &&
           !_itemsInialized) {
+        _itemsController.loadTaxes();
         _itemsController.loadMofiers();
-        _itemsController.loadSavedItems();
         _itemsController.loadReceits();
         _itemsController.loadDiscounts();
         _itemsController.syncAllShifts();
+        _itemsController.loadSavedItems();
         _itemsController.syncCartItemsOnBackground();
         _itemsSavedController.syncCartItemsOnBackground();
         _itemsInialized = true;

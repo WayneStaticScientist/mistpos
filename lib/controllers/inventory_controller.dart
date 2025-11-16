@@ -1,21 +1,21 @@
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
-import 'package:mistpos/models/company_model.dart';
-import 'package:mistpos/models/exchange_rate_model.dart';
-import 'package:mistpos/models/inventory_history_model.dart';
-import 'package:mistpos/models/item_unsaved_model.dart';
-import 'package:mistpos/models/product_stats_model.dart';
-import 'package:mistpos/models/production_model.dart';
-import 'package:mistpos/models/transfer_order_model.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/inv_item.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:mistpos/models/item_model.dart';
+import 'package:mistpos/models/company_model.dart';
 import 'package:mistpos/models/supplier_model.dart';
+import 'package:mistpos/models/production_model.dart';
 import 'package:mistpos/services/network_wrapper.dart';
+import 'package:mistpos/models/product_stats_model.dart';
+import 'package:mistpos/models/item_unsaved_model.dart';
+import 'package:mistpos/models/transfer_order_model.dart';
+import 'package:mistpos/models/purchase_order_model.dart';
+import 'package:mistpos/models/exchange_rate_model.dart';
 import 'package:mistpos/models/inventory_child_count.dart';
 import 'package:mistpos/models/inventory_count_model.dart';
-import 'package:mistpos/models/purchase_order_model.dart';
 import 'package:mistpos/models/stock_adjustment_model.dart';
+import 'package:mistpos/models/inventory_history_model.dart';
 
 class InventoryController extends GetxController {
   RxList<SupplierModel> suppliers = RxList<SupplierModel>();
@@ -344,7 +344,11 @@ class InventoryController extends GetxController {
   RxList<InventoryChildCount> inventoryCountItems =
       RxList<InventoryChildCount>();
   RxString inventoryCountItemsError = RxString("");
-  void loadInventoryCountItems(String searchFilter, List<String> ids) async {
+  void loadInventoryCountItems(
+    String searchFilter,
+    List<String> ids, {
+    bool unwrap = false,
+  }) async {
     if (loadingInventoryCountItems.value) return;
     loadingInventoryCountItems.value = true;
     inventoryCountItemsError.value = "";
@@ -362,6 +366,21 @@ class InventoryController extends GetxController {
       inventoryCountItems.value = list
           .map((e) => InventoryChildCount.fromProduct(e))
           .toList();
+      if (unwrap) {
+        selectedInvItems.value = list.map((e) {
+          ItemModel model = ItemModel.fromJson(e);
+          return InvItem(
+            quantity: 1,
+            sku: model.sku,
+            id: model.hexId,
+            cost: model.cost,
+            name: model.name,
+            amount: model.cost,
+            barcode: model.barcode,
+            inStock: model.stockQuantity,
+          );
+        }).toList();
+      }
     }
   }
 
@@ -518,4 +537,7 @@ class InventoryController extends GetxController {
       inventoryProducts.value = list.map((e) => ItemModel.fromJson(e)).toList();
     }
   }
+
+  RxBool unwrappingToIds = RxBool(false);
+  void unwrapToIds(List<String> ids) {}
 }
