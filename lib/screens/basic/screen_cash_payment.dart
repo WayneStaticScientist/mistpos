@@ -235,7 +235,7 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
       return;
     }
     final state = await _itemsListController.addReceitFromItemModel(
-      amount,
+      CurrenceConverter.baseCurrency(amount),
       "cash",
       allowOfflinePurchase:
           _userController.user.value != null &&

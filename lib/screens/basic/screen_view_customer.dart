@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
@@ -56,22 +57,22 @@ class _ScreenViewCustomerState extends State<ScreenViewCustomer> {
                   .text(style: TextStyle(fontWeight: FontWeight.bold))
                   .padding(EdgeInsets.all(14)),
               ListTile(
-                leading: Iconify(Bx.user, color: Colors.white),
+                leading: Iconify(Bx.user, color: AppTheme.color(context)),
                 title: "Name".text(),
                 subtitle: selectedCustomer.fullName.text(),
               ),
               ListTile(
-                leading: Iconify(Bx.envelope, color: Colors.white),
+                leading: Iconify(Bx.envelope, color: AppTheme.color(context)),
                 title: "Email".text(),
                 subtitle: selectedCustomer.email.text(),
               ),
               ListTile(
-                leading: Iconify(Bx.phone, color: Colors.white),
+                leading: Iconify(Bx.phone, color: AppTheme.color(context)),
                 title: "Phone".text(),
                 subtitle: selectedCustomer.phoneNumber.text(),
               ),
               ListTile(
-                leading: Iconify(Bx.map, color: Colors.white),
+                leading: Iconify(Bx.map, color: AppTheme.color(context)),
                 title: "Address".text(),
                 subtitle: selectedCustomer.address.text(),
               ),
@@ -92,12 +93,12 @@ class _ScreenViewCustomerState extends State<ScreenViewCustomer> {
                   .text(style: TextStyle(fontWeight: FontWeight.bold))
                   .padding(EdgeInsets.all(14)),
               ListTile(
-                leading: Iconify(Bx.walk, color: Colors.white),
+                leading: Iconify(Bx.walk, color: AppTheme.color(context)),
                 title: "Visits".text(),
                 subtitle: selectedCustomer.visits.toString().text(),
               ),
               ListTile(
-                leading: Iconify(Bx.star, color: Colors.white),
+                leading: Iconify(Bx.star, color: AppTheme.color(context)),
                 title: "Points".text(),
                 trailing: Obx(
                   () => _itemsController.updatingCustomerPoints.value
@@ -110,7 +111,7 @@ class _ScreenViewCustomerState extends State<ScreenViewCustomer> {
                 subtitle: selectedCustomer.points.toStringAsFixed(2).text(),
               ),
               ListTile(
-                leading: Iconify(Bx.money, color: Colors.white),
+                leading: Iconify(Bx.money, color: AppTheme.color(context)),
                 title: "Total Amount Spent".text(),
                 subtitle: CurrenceConverter.getCurrenceFloatInStrings(
                   selectedCustomer.purchaseValue,
@@ -118,7 +119,7 @@ class _ScreenViewCustomerState extends State<ScreenViewCustomer> {
                 ).text(),
               ),
               ListTile(
-                leading: Iconify(Carbon.money, color: Colors.white),
+                leading: Iconify(Carbon.money, color: AppTheme.color(context)),
                 title: "Profit Brought".text(),
                 subtitle: CurrenceConverter.getCurrenceFloatInStrings(
                   selectedCustomer.inboundProfit,

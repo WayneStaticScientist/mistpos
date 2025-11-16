@@ -331,7 +331,7 @@ class _ScreenAddStockadjustmentsState extends State<ScreenAddStockadjustments> {
 
   void _changePrice(InvItem itemInv) {
     final proposedCostsPrice = TextEditingController(
-      text: itemInv.cost.toString(),
+      text: CurrenceConverter.selectedCurrency(itemInv.cost).toString(),
     );
     Get.defaultDialog(
       title: itemInv.name,
@@ -347,7 +347,7 @@ class _ScreenAddStockadjustmentsState extends State<ScreenAddStockadjustments> {
               Toaster.showError("Invalid cost");
               return;
             }
-            itemInv.cost = cost;
+            itemInv.cost = CurrenceConverter.baseCurrency(cost);
             itemInv.amount = itemInv.quantity * cost;
             _inventory.updateInvItem(itemInv);
             Get.back();

@@ -13,6 +13,10 @@ class StatsSalesModel {
   final double totalRevenue;
   final double totalAmount;
   final int numberOfCashiers;
+  final int totalReceipts;
+  final double totalRefunds;
+  final double totalDiscounts;
+  final double totalLossValue;
   final List<Cashier> cashiers;
 
   StatsSalesModel({
@@ -22,15 +26,23 @@ class StatsSalesModel {
     required this.cashiers,
     required this.totalCost,
     required this.totalRevenue,
+    required this.totalReceipts,
+    required this.totalDiscounts,
+    required this.totalRefunds,
+    required this.totalLossValue,
   });
 
   factory StatsSalesModel.fromJson(Map<String, dynamic> json) {
     return StatsSalesModel(
+      totalLossValue: (json['totalLossValue'] as num?)?.toDouble() ?? 0.0,
       totalRevenue: (json['totalRevenue'] as num?)?.toDouble() ?? 0.0,
       totalSales: (json['totalTotal'] as num?)?.toDouble() ?? 0.0,
       totalCost: (json['totalCosts'] as num?)?.toDouble() ?? 0.0,
       totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
       numberOfCashiers: json['numberOfCashiers'] ?? 0,
+      totalReceipts: json['totalReceipts'] ?? 0,
+      totalDiscounts: (json['totalDiscounts'] as num?)?.toDouble() ?? 0.0,
+      totalRefunds: (json['totalRefunds'] as num?)?.toDouble() ?? 0.0,
       cashiers: json['listCashiers'] != null
           ? (json['listCashiers'] as List<dynamic>)
                 .map((e) => Cashier.fromJson(e))

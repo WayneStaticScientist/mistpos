@@ -1,12 +1,12 @@
+import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/models/shifts_model.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
-import 'package:mistpos/screens/basic/modern_layout.dart';
 import 'package:mistpos/utils/currence_converter.dart';
-import 'package:mistpos/utils/date_utils.dart';
+import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/screens/basic/modern_layout.dart';
 
 class ScreenShiftView extends StatefulWidget {
   final ShiftsModel shift;
@@ -35,8 +35,9 @@ class _ScreenShiftViewState extends State<ScreenShiftView> {
                   .text(style: TextStyle(fontSize: 24)),
               [
                 "Shift Date : ".text(),
-                "${MistDateUtils.formatNormalDate(widget.shift.openShiftTime)}"
-                    .text(),
+                MistDateUtils.formatNormalDate(
+                  widget.shift.openShiftTime,
+                ).text(),
               ].row(),
               16.gapHeight,
               [

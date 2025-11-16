@@ -217,7 +217,7 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
       return;
     }
     if (_selectedIndex == "Inventory Valuation") {
-      _navInvHistoryKey.currentState?.printDocument();
+      _navInvEvaluation.currentState?.printDocument();
       return;
     }
     Toaster.showError("page is unprintable");

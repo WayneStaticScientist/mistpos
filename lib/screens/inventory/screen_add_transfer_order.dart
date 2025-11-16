@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/inv_item.dart';
 import 'package:iconify_flutter/icons/bx.dart';
@@ -192,13 +193,13 @@ class _ScreenAddTransferOrderState extends State<ScreenAddTransferOrder> {
       [
         CardButtons(
           onTap: () => {Get.back(), _edit(itemInv)},
-          icon: Iconify(Bx.edit, color: Colors.white),
+          icon: Iconify(Bx.edit, color: AppTheme.color(context)),
           label: "Edit",
           color: Get.theme.colorScheme.primary.withAlpha(50),
         ).expanded1,
         CardButtons(
           onTap: () => {Get.back(), _inventory.removeodel(itemInv)},
-          icon: Iconify(Bx.user_plus, color: Colors.white),
+          icon: Iconify(Bx.user_plus, color: AppTheme.color(context)),
           label: "Remove",
           color: Get.theme.colorScheme.secondary.withAlpha(50),
         ).expanded1,

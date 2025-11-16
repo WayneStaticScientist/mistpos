@@ -2,12 +2,17 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/themes/app_theme.dart';
+import 'package:mistpos/utils/toast.dart';
+import 'package:pdf_maker/pdf_maker.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/models/item_receit_model.dart';
 import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/controllers/admin_controller.dart';
+import 'package:mistpos/utils/pdfdocuments/pdf_receit.dart';
 import 'package:mistpos/screens/basic/screen_refund_cart.dart';
 
 class ScreenReceitView extends StatefulWidget {
@@ -19,6 +24,7 @@ class ScreenReceitView extends StatefulWidget {
 
 class _ScreenReceitViewState extends State<ScreenReceitView> {
   final _userController = Get.find<UserController>();
+  final _adminController = Get.find<AdminController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,6 +36,10 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
               () => ScreenRefundCart(receitModel: widget.receitModel),
             ),
             icon: Iconify(Bx.recycle, color: Colors.red),
+          ),
+          IconButton(
+            onPressed: _printReceit,
+            icon: Iconify(Bx.printer, color: AppTheme.color(context)),
           ),
         ],
       ),
@@ -155,5 +165,30 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
         ),
       ).constrained(maxWidth: ScreenSizes.maxWidth).padding(EdgeInsets.all(20)),
     );
+  }
+
+  void _printReceit() async {
+    PDFMaker maker = PDFMaker();
+    final baseCurrency = _userController.user.value?.baseCurrence ?? '';
+    maker
+        .createPDF(
+          PdfReceit(
+            baseCurrence: baseCurrency,
+            receitModel: widget.receitModel,
+          ),
+          setup: PageSetup(
+            context: context,
+            quality: 4.0,
+            scale: 1.0,
+            pageFormat: PageFormat.a4,
+            margins: 40,
+          ),
+        )
+        .then((file) {
+          _adminController.openFile(file);
+        })
+        .catchError((e) {
+          Toaster.showError("Failed to generate PDF: $e");
+        });
   }
 }

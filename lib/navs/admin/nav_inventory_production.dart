@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/production_model.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/date_utils.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
@@ -77,8 +78,9 @@ class _NavInventoryProductionState extends State<NavInventoryProduction> {
 
   Widget _buildTile(ProductionModel model) {
     return ListTile(
+      contentPadding: EdgeInsets.all(0),
       onTap: () => Get.to(() => ScreenViewProductions(model: model)),
-      leading: Iconify(Bx.food_menu, color: Colors.white),
+      leading: Iconify(Bx.food_menu, color: AppTheme.color(context)),
       subtitle: MistDateUtils.getInformalDate(model.createdAt!).text(),
       title: (model.label).text(),
     );

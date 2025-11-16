@@ -1,7 +1,7 @@
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/models/user_model.dart';
 import 'package:pdf_maker/pdf_maker.dart';
+import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/date_utils.dart';
 import 'package:iconify_flutter/icons/bx.dart';

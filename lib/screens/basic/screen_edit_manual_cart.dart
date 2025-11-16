@@ -37,7 +37,7 @@ class _ScreenEditManualCartState extends State<ScreenEditManualCart> {
       widget.map['dataMap'] as Map<String, bool>? ?? {};
   late final item = widget.map['item'] as ItemModel;
   late final priceTextController = TextEditingController(
-    text: (widget.map['addenum'] as double? ?? 0.0).toString(),
+    text: (CurrenceConverter.selectedCurrency(item.price)).toString(),
   );
   @override
   void initState() {
@@ -105,6 +105,7 @@ class _ScreenEditManualCartState extends State<ScreenEditManualCart> {
             ),
             MistFormInput(
               label: "Price Value",
+              icon: (_userController.user.value?.baseCurrence ?? 'USD').text(),
               keyboardType: TextInputType.number,
               controller: priceTextController,
             ),
@@ -227,11 +228,12 @@ class _ScreenEditManualCartState extends State<ScreenEditManualCart> {
       return;
     }
     if (item.price == 0) {
-      addenum = double.tryParse(priceTextController.text);
-      if (addenum == null) {
+      double? val = double.tryParse(priceTextController.text);
+      if (val == null || val <= 0) {
         Toaster.showError("invalid price");
         return;
       }
+      item.price = CurrenceConverter.baseCurrency(val);
     }
 
     _itemsListController.addSelectedItem(

@@ -6,6 +6,7 @@ import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/models/modifier_embedder.dart';
+import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/models/item_modifier_model.dart';
 import 'package:mistpos/widgets/buttons/mist_default.dart';
@@ -103,7 +104,9 @@ class _ScreenEditModifierState extends State<ScreenEditModifier> {
                       final index = indexedElement.$1; // The index
                       return ListTile(
                         title: e.key.text(),
-                        subtitle: "${e.value}".text(),
+                        subtitle: CurrenceConverter.selectedCurrencyInString(
+                          e.value,
+                        ).text(),
                         onTap: () => _editOption(e, index),
                         trailing: IconButton(
                           onPressed: () => _removeOption(e, index),
@@ -171,7 +174,9 @@ class _ScreenEditModifierState extends State<ScreenEditModifier> {
     }
     final mod = ModifierEmbedder();
     mod.key = _textFieldOptionsName.text;
-    mod.value = double.parse(_textFieldOptionsPrice.text);
+    mod.value = CurrenceConverter.baseCurrency(
+      double.parse(_textFieldOptionsPrice.text),
+    );
     if (_currentIndexEdit < 0) {
       setState(() {
         _textFieldOptionsName.clear();
@@ -195,7 +200,9 @@ class _ScreenEditModifierState extends State<ScreenEditModifier> {
   void _editOption(ModifierEmbedder e, int index) {
     setState(() {
       _textFieldOptionsName.text = e.key;
-      _textFieldOptionsPrice.text = e.value.toString();
+      _textFieldOptionsPrice.text = CurrenceConverter.selectedCurrency(
+        e.value,
+      ).toStringAsFixed(4);
       _currentIndexEdit = index;
     });
   }

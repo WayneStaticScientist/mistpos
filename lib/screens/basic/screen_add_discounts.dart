@@ -1,8 +1,9 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/models/discount_model.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/utils/toast.dart';
+import 'package:mistpos/models/discount_model.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/screens/basic/modern_layout.dart';
 import 'package:mistpos/controllers/items_controller.dart';
@@ -19,6 +20,7 @@ class _ScreenAddDiscountsState extends State<ScreenAddDiscounts> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _valueController = TextEditingController();
+  final _userController = Get.find<UserController>();
   final _itemController = Get.find<ItemsController>();
   bool _summation = false;
   bool _loading = false;
@@ -51,6 +53,10 @@ class _ScreenAddDiscountsState extends State<ScreenAddDiscounts> {
                 ),
                 18.gapHeight,
                 MistFormInput(
+                  icon: _summation
+                      ? (_userController.user.value?.baseCurrence ?? "USD")
+                            .text(style: TextStyle(fontSize: 8))
+                      : null,
                   label: "Value ${_summation ? '' : '0-99%'}",
                   underLineColor: Colors.grey,
                   controller: _valueController,

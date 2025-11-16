@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
@@ -45,10 +43,14 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
     text: widget.model.name,
   );
   late final _itemPriceController = TextEditingController(
-    text: widget.model.price.toStringAsFixed(2),
+    text: (CurrenceConverter.selectedCurrency(
+      widget.model.price,
+    )).toStringAsFixed(4),
   );
   late final _itemCostController = TextEditingController(
-    text: widget.model.cost.toStringAsFixed(2),
+    text: (CurrenceConverter.selectedCurrency(
+      widget.model.cost,
+    )).toStringAsFixed(4),
   );
   late final _itemSKUController = TextEditingController(text: widget.model.sku);
   late final _itemBarcodeController = TextEditingController(
@@ -67,7 +69,6 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
   @override
   void initState() {
     super.initState();
-    log("The item is ${widget.model.toJson()}");
     if (widget.model.isCompositeItem) {
       _inventorController.selectedInvItems.clear();
       _inventorController.selectedInvItems.addAll(widget.model.compositeItems);
@@ -284,18 +285,20 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
             activeColor: Get.theme.colorScheme.primary,
           ),
         ),
-        14.gapHeight,
-        MistFormInput(
-          label: "Item Price",
-          icon: (_userController.user.value?.baseCurrence ?? 'USD').text(
-            style: TextStyle(fontSize: 8),
+        if (!widget.model.isCompositeItem) ...[
+          14.gapHeight,
+          MistFormInput(
+            label: "Item Price",
+            icon: (_userController.user.value?.baseCurrence ?? 'USD').text(
+              style: TextStyle(fontSize: 8),
+            ),
+            underLineColor: Colors.grey.withAlpha(200),
+            controller: _itemPriceController,
           ),
-          underLineColor: Colors.grey.withAlpha(200),
-          controller: _itemPriceController,
-        ),
-        "Leaving this blank will default to item cost".text(
-          style: TextStyle(fontSize: 12, color: Colors.grey),
-        ),
+          "Leaving this blank will default to item cost".text(
+            style: TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+        ],
         14.gapHeight,
         MistFormInput(
           label: "Item Cost",
@@ -576,8 +579,8 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
     widget.model.soldBy = _soldByGroup.value as String;
     widget.model.compositeItems = _inventorController.selectedInvItems;
     widget.model.modifiers = _modifiers;
-    widget.model.price = price;
-    widget.model.cost = cost;
+    widget.model.price = CurrenceConverter.baseCurrency(price);
+    widget.model.cost = CurrenceConverter.baseCurrency(cost);
     widget.model.name = _itemNameController.text;
     widget.model.sku = _itemSKUController.text;
     widget.model.barcode = _itemBarcodeController.text;

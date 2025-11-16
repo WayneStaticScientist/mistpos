@@ -2,13 +2,13 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/controllers/user_controller.dart';
-import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
+import 'package:mistpos/utils/currence_converter.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 
@@ -74,6 +74,9 @@ class _ScreenManualCartState extends State<ScreenManualCart> {
             ),
             MistFormInput(
               label: "Price Value",
+              icon: (_userController.user.value?.baseCurrence ?? 'USD').text(
+                style: TextStyle(fontSize: 8),
+              ),
               keyboardType: TextInputType.number,
               controller: priceTextController,
             ),
@@ -181,11 +184,12 @@ class _ScreenManualCartState extends State<ScreenManualCart> {
       return;
     }
     if (widget.item.price == 0) {
-      addenum = double.tryParse(priceTextController.text);
-      if (addenum == null) {
+      final val = double.tryParse(priceTextController.text);
+      if (val == null) {
         Toaster.showError("invalid price");
         return;
       }
+      widget.item.price = CurrenceConverter.baseCurrency(val);
     }
     _itemsListController.addSelectedItem(
       widget.item,

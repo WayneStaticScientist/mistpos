@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/get_navigation.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/bx.dart';
 
 class Toaster {
   static void showError(String message) {
     Get.snackbar(
       'Error',
       message,
+      icon: Iconify(Bx.error, color: Colors.white),
       duration: const Duration(seconds: 1),
       backgroundColor: Get.theme.colorScheme.error,
       colorText: Get.theme.colorScheme.onError,
@@ -18,9 +21,10 @@ class Toaster {
     Get.snackbar(
       'Success',
       message,
+      icon: Iconify(Bx.check_circle, color: Colors.white),
       duration: const Duration(seconds: 1),
       backgroundColor: Colors.green,
-      colorText: Get.theme.colorScheme.onPrimary,
+      colorText: Colors.white,
       snackPosition: SnackPosition.BOTTOM,
     );
   }

@@ -1,9 +1,9 @@
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/models/user_model.dart';
-import 'package:mistpos/utils/date_utils.dart';
 import 'package:pdf_maker/pdf_maker.dart';
+import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/themes/app_theme.dart';
+import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/models/sales_stats_model.dart';
 import 'package:mistpos/models/product_stats_model.dart';
@@ -169,7 +169,42 @@ class AdminOverviewPdf extends BlankPage {
             ],
           ),
         ),
-
+        [
+          18.gapWidth,
+          CardOverview(
+            label: "Total Sales",
+            value: statsSalesModel?.totalReceipts.toString() ?? "0",
+          ),
+          18.gapWidth,
+          CardOverview(
+            color: Colors.green.withAlpha(150),
+            label: "Discounts",
+            value: CurrenceConverter.getCurrenceFloatInStrings(
+              statsSalesModel?.totalDiscounts ?? 0,
+              baseCurrence,
+            ),
+          ),
+        ].row(),
+        [
+          18.gapWidth,
+          CardOverview(
+            color: Colors.blue.withAlpha(50),
+            label: "Total Refunds",
+            value: CurrenceConverter.getCurrenceFloatInStrings(
+              statsSalesModel?.totalRefunds ?? 0,
+              baseCurrence,
+            ),
+          ),
+          18.gapWidth,
+          CardOverview(
+            color: Colors.red.withAlpha(120),
+            label: "Total Loss",
+            value: CurrenceConverter.getCurrenceFloatInStrings(
+              statsSalesModel?.totalLossValue ?? 0,
+              baseCurrence,
+            ),
+          ),
+        ].row(),
         // 5. Weekly Summary Footer
         SizedBox(height: 44),
         SizedBox(height: 18), // Added another height for padding

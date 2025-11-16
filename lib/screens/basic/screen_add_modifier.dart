@@ -1,14 +1,13 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/controllers/user_controller.dart';
-import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/models/modifier_embedder.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/models/item_modifier_model.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/widgets/buttons/mist_default.dart';
 import 'package:mistpos/widgets/buttons/mist_loaded_icon_button.dart';
@@ -86,10 +85,9 @@ class _ScreenAddModifierState extends State<ScreenAddModifier> {
                     ...options.map<Widget>(
                       (e) => ListTile(
                         title: "${e['key']}".text(),
-                        subtitle: CurrenceConverter.getCurrenceFloatInStrings(
-                          (e['value'] as num?)?.toDouble() ?? 0.0,
-                          _userController.user.value?.baseCurrence ?? '',
-                        ).text(),
+                        subtitle:
+                            ("${_userController.user.value?.baseCurrence.toUpperCase() ?? 'USD'}${(e['value'] as num?)?.toDouble() ?? 0.0}")
+                                .text(),
                         onTap: () => _editOption(e),
                         trailing: IconButton(
                           onPressed: () => _removeOption(e),
@@ -125,6 +123,8 @@ class _ScreenAddModifierState extends State<ScreenAddModifier> {
                   18.gapHeight,
                   MistFormInput(
                     label: "Price",
+                    icon: (_userController.user.value?.baseCurrence ?? "USD")
+                        .text(style: TextStyle(fontSize: 8)),
                     validateString: "Option Price is required",
                     keyboardType: TextInputType.number,
                     underLineColor: Colors.grey.withAlpha(200),

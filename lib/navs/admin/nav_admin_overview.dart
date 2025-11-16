@@ -145,6 +145,41 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
                             .toString() ??
                         "0",
                   ),
+                  18.gapWidth,
+                  CardOverview(
+                    label: "Total Sales",
+                    value:
+                        _adminController.statsSales.value?.totalReceipts
+                            .toString() ??
+                        "0",
+                  ),
+                  18.gapWidth,
+                  CardOverview(
+                    color: Colors.green.withAlpha(150),
+                    label: "Discounts",
+                    value: CurrenceConverter.getCurrenceFloatInStrings(
+                      _adminController.statsSales.value?.totalDiscounts ?? 0,
+                      _userController.user.value?.baseCurrence ?? '',
+                    ),
+                  ),
+                  18.gapWidth,
+                  CardOverview(
+                    color: Colors.blue.withAlpha(50),
+                    label: "Total Refunds",
+                    value: CurrenceConverter.getCurrenceFloatInStrings(
+                      _adminController.statsSales.value?.totalRefunds ?? 0,
+                      _userController.user.value?.baseCurrence ?? '',
+                    ),
+                  ),
+                  18.gapWidth,
+                  CardOverview(
+                    color: Colors.red.withAlpha(120),
+                    label: "Total Loss",
+                    value: CurrenceConverter.getCurrenceFloatInStrings(
+                      _adminController.statsSales.value?.totalLossValue ?? 0,
+                      _userController.user.value?.baseCurrence ?? '',
+                    ),
+                  ),
                 ].row(),
               ).sizedBox(height: 150, width: double.infinity),
             ),

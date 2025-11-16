@@ -3,6 +3,7 @@ import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/discount_model.dart';
+import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/screens/basic/modern_layout.dart';
 import 'package:mistpos/controllers/items_controller.dart';
@@ -19,7 +20,11 @@ class _ScreenEditDiscountState extends State<ScreenEditDiscount> {
   final _formKey = GlobalKey<FormState>();
   late final _nameController = TextEditingController(text: widget.model.name);
   late final _valueController = TextEditingController(
-    text: widget.model.value.toString(),
+    text: widget.model.percentage
+        ? widget.model.value.toString()
+        : CurrenceConverter.selectedCurrency(
+            widget.model.value,
+          ).toStringAsFixed(4),
   );
   bool _loading = false;
   final _itemController = Get.find<ItemsController>();
@@ -94,7 +99,9 @@ class _ScreenEditDiscountState extends State<ScreenEditDiscount> {
       _loading = true;
     });
     widget.model.name = _nameController.text;
-    widget.model.value = double.parse(_valueController.text);
+    widget.model.value = CurrenceConverter.baseCurrency(
+      double.parse(_valueController.text),
+    );
     final response = await _itemController.updateDiscount(
       widget.model.toJson(),
       widget.model.hexId,

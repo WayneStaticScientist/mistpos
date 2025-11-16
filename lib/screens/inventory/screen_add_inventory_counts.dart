@@ -168,7 +168,7 @@ class _ScreenAddInventoryCountsState extends State<ScreenAddInventoryCounts> {
     });
     final order = InventoryCountModel(
       id: '',
-      countBasedOn: _countBasedOn ?? "*",
+      countBasedOn: _countBasedOn ?? '-',
       senderId: '',
       company: '',
       notes: _notesController.text,

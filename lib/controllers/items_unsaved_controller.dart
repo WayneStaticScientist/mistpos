@@ -101,7 +101,7 @@ class ItemsUnsavedController extends GetxController {
     syncingItems.value = true;
     syncingItemsFailed.value = "";
     final response = await Net.get(
-      "/cashier/products?page=$page&search=$search&category=$category",
+      "/cashier/products?page=$page&search=$search&category=$category&composite=$isCompositeItems",
     );
     syncingItems.value = false;
     if (response.hasError) {
