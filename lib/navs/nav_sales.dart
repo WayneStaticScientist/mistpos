@@ -9,6 +9,7 @@ import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/widgets/sales_widgets/sales_tax_list.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/models/app_settings_model.dart';
@@ -260,6 +261,7 @@ class _NavSaleState extends State<NavSale> {
 
   _buidItemList() {
     if (_selectedListGroup == "discounts") return SalesDiscountsList();
+    if (_selectedListGroup == "tax") return SalesTaxList();
     return SalesItemList(onTap: (a, b) => _handleWidgetClick(a, b));
   }
 

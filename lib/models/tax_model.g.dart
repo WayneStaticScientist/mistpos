@@ -22,18 +22,23 @@ const TaxModelSchema = CollectionSchema(
       name: r'activated',
       type: IsarType.bool,
     ),
-    r'label': PropertySchema(
+    r'hexId': PropertySchema(
       id: 1,
+      name: r'hexId',
+      type: IsarType.string,
+    ),
+    r'label': PropertySchema(
+      id: 2,
       name: r'label',
       type: IsarType.string,
     ),
     r'selectedIds': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'selectedIds',
       type: IsarType.stringList,
     ),
     r'value': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'value',
       type: IsarType.double,
     )
@@ -58,6 +63,7 @@ int _taxModelEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 + object.hexId.length * 3;
   bytesCount += 3 + object.label.length * 3;
   bytesCount += 3 + object.selectedIds.length * 3;
   {
@@ -76,9 +82,10 @@ void _taxModelSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeBool(offsets[0], object.activated);
-  writer.writeString(offsets[1], object.label);
-  writer.writeStringList(offsets[2], object.selectedIds);
-  writer.writeDouble(offsets[3], object.value);
+  writer.writeString(offsets[1], object.hexId);
+  writer.writeString(offsets[2], object.label);
+  writer.writeStringList(offsets[3], object.selectedIds);
+  writer.writeDouble(offsets[4], object.value);
 }
 
 TaxModel _taxModelDeserialize(
@@ -89,9 +96,10 @@ TaxModel _taxModelDeserialize(
 ) {
   final object = TaxModel(
     activated: reader.readBool(offsets[0]),
-    label: reader.readString(offsets[1]),
-    selectedIds: reader.readStringList(offsets[2]) ?? [],
-    value: reader.readDouble(offsets[3]),
+    hexId: reader.readStringOrNull(offsets[1]) ?? '',
+    label: reader.readString(offsets[2]),
+    selectedIds: reader.readStringList(offsets[3]) ?? [],
+    value: reader.readDouble(offsets[4]),
   );
   object.id = id;
   return object;
@@ -107,10 +115,12 @@ P _taxModelDeserializeProp<P>(
     case 0:
       return (reader.readBool(offset)) as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? '') as P;
     case 2:
-      return (reader.readStringList(offset) ?? []) as P;
+      return (reader.readString(offset)) as P;
     case 3:
+      return (reader.readStringList(offset) ?? []) as P;
+    case 4:
       return (reader.readDouble(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -212,6 +222,136 @@ extension TaxModelQueryFilter
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'activated',
         value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TaxModel, TaxModel, QAfterFilterCondition> hexIdEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaxModel, TaxModel, QAfterFilterCondition> hexIdGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaxModel, TaxModel, QAfterFilterCondition> hexIdLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaxModel, TaxModel, QAfterFilterCondition> hexIdBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'hexId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaxModel, TaxModel, QAfterFilterCondition> hexIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaxModel, TaxModel, QAfterFilterCondition> hexIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaxModel, TaxModel, QAfterFilterCondition> hexIdContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'hexId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaxModel, TaxModel, QAfterFilterCondition> hexIdMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'hexId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaxModel, TaxModel, QAfterFilterCondition> hexIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hexId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<TaxModel, TaxModel, QAfterFilterCondition> hexIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'hexId',
+        value: '',
       ));
     });
   }
@@ -704,6 +844,18 @@ extension TaxModelQuerySortBy on QueryBuilder<TaxModel, TaxModel, QSortBy> {
     });
   }
 
+  QueryBuilder<TaxModel, TaxModel, QAfterSortBy> sortByHexId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hexId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TaxModel, TaxModel, QAfterSortBy> sortByHexIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hexId', Sort.desc);
+    });
+  }
+
   QueryBuilder<TaxModel, TaxModel, QAfterSortBy> sortByLabel() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'label', Sort.asc);
@@ -740,6 +892,18 @@ extension TaxModelQuerySortThenBy
   QueryBuilder<TaxModel, TaxModel, QAfterSortBy> thenByActivatedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'activated', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TaxModel, TaxModel, QAfterSortBy> thenByHexId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hexId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TaxModel, TaxModel, QAfterSortBy> thenByHexIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hexId', Sort.desc);
     });
   }
 
@@ -788,6 +952,13 @@ extension TaxModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<TaxModel, TaxModel, QDistinct> distinctByHexId(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'hexId', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<TaxModel, TaxModel, QDistinct> distinctByLabel(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -819,6 +990,12 @@ extension TaxModelQueryProperty
   QueryBuilder<TaxModel, bool, QQueryOperations> activatedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'activated');
+    });
+  }
+
+  QueryBuilder<TaxModel, String, QQueryOperations> hexIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'hexId');
     });
   }
 

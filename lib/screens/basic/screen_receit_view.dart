@@ -2,10 +2,10 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:pdf_maker/pdf_maker.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:mistpos/utils/currence_converter.dart';
@@ -60,6 +60,7 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
             [
                   18.gapHeight,
                   ListTile(
+                    contentPadding: EdgeInsets.all(0),
                     title: "Employee : ${widget.receitModel.cashier}".text(),
                     subtitle: "POS : pos 1".text(),
                   ),
@@ -76,6 +77,7 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                       }
                     }
                     return ListTile(
+                      contentPadding: EdgeInsets.all(0),
                       subtitle: [
                         "${e.count.toString()} x ${CurrenceConverter.getCurrenceFloatInStrings(e.price + e.addenum, _userController.user.value?.baseCurrence ?? '')}"
                             .text(),
@@ -125,9 +127,22 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                     ),
                     18.gapHeight,
                   ],
+                  if (widget.receitModel.miniTax.isNotEmpty) ...[
+                    Divider(color: Colors.grey.withAlpha(80), thickness: 1),
+                    "Taxes".text(),
+                    12.gapHeight,
+                    ...widget.receitModel.miniTax.map(
+                      (e) => [
+                        e.label.text(),
+                        14.gapWidth,
+                        "${e.value}%".text(),
+                      ].row(),
+                    ),
+                  ],
                   Divider(color: Colors.grey.withAlpha(80), thickness: 1),
                   18.gapHeight,
                   ListTile(
+                    contentPadding: EdgeInsets.all(0),
                     title: 'Total'.text(),
                     trailing: CurrenceConverter.getCurrenceFloatInStrings(
                       widget.receitModel.total,
@@ -135,6 +150,7 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                     ).text(),
                   ),
                   ListTile(
+                    contentPadding: EdgeInsets.all(0),
                     title: widget.receitModel.payment.text(),
                     trailing: CurrenceConverter.getCurrenceFloatInStrings(
                       widget.receitModel.amount,
@@ -146,6 +162,7 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                   widget.receitModel.createdAt.toString().text(),
                   18.gapHeight,
                   ListTile(
+                    contentPadding: EdgeInsets.all(0),
                     title: 'Change'.text(),
                     tileColor: Colors.green,
                     textColor: Colors.white,

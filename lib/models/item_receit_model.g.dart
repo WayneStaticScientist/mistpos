@@ -74,8 +74,13 @@ const ItemReceitModelSchema = CollectionSchema(
       name: r'synced',
       type: IsarType.bool,
     ),
-    r'total': PropertySchema(
+    r'tax': PropertySchema(
       id: 11,
+      name: r'tax',
+      type: IsarType.double,
+    ),
+    r'total': PropertySchema(
+      id: 12,
       name: r'total',
       type: IsarType.double,
     )
@@ -161,7 +166,8 @@ void _itemReceitModelSerialize(
   writer.writeString(offsets[8], object.label);
   writer.writeString(offsets[9], object.payment);
   writer.writeBool(offsets[10], object.synced);
-  writer.writeDouble(offsets[11], object.total);
+  writer.writeDouble(offsets[11], object.tax);
+  writer.writeDouble(offsets[12], object.total);
 }
 
 ItemReceitModel _itemReceitModelDeserialize(
@@ -194,7 +200,8 @@ ItemReceitModel _itemReceitModelDeserialize(
     label: reader.readStringOrNull(offsets[8]) ?? "",
     payment: reader.readString(offsets[9]),
     synced: reader.readBoolOrNull(offsets[10]) ?? false,
-    total: reader.readDouble(offsets[11]),
+    tax: reader.readDoubleOrNull(offsets[11]) ?? 0,
+    total: reader.readDouble(offsets[12]),
   );
   object.id = id;
   return object;
@@ -242,6 +249,8 @@ P _itemReceitModelDeserializeProp<P>(
     case 10:
       return (reader.readBoolOrNull(offset) ?? false) as P;
     case 11:
+      return (reader.readDoubleOrNull(offset) ?? 0) as P;
+    case 12:
       return (reader.readDouble(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1474,6 +1483,72 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      taxEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'tax',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      taxGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'tax',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      taxLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'tax',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      taxBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'tax',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
       totalEqualTo(
     double value, {
     double epsilon = Query.epsilon,
@@ -1681,6 +1756,18 @@ extension ItemReceitModelQuerySortBy
     });
   }
 
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortByTax() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tax', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortByTaxDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tax', Sort.desc);
+    });
+  }
+
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortByTotal() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'total', Sort.asc);
@@ -1828,6 +1915,18 @@ extension ItemReceitModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenByTax() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tax', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenByTaxDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tax', Sort.desc);
+    });
+  }
+
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenByTotal() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'total', Sort.asc);
@@ -1901,6 +2000,12 @@ extension ItemReceitModelQueryWhereDistinct
   QueryBuilder<ItemReceitModel, ItemReceitModel, QDistinct> distinctBySynced() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'synced');
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QDistinct> distinctByTax() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'tax');
     });
   }
 
@@ -1986,6 +2091,12 @@ extension ItemReceitModelQueryProperty
   QueryBuilder<ItemReceitModel, bool, QQueryOperations> syncedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'synced');
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, double, QQueryOperations> taxProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'tax');
     });
   }
 

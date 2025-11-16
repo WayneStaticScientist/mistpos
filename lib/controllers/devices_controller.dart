@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:isar/isar.dart';
+import 'package:mistpos/models/tax_model.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/models/customer_model.dart';
@@ -163,6 +164,7 @@ class DevicesController extends GetxController {
     ItemReceitModel itemReceitModel,
     User user,
     CustomerModel? customer,
+    List<TaxModel> salesTaxes,
   ) {
     final printer = PosUniversalPrinter.instance;
     final b = EscPosBuilder();
@@ -237,6 +239,16 @@ class DevicesController extends GetxController {
               )
             : '${discount.discount}%';
         String label = '${discount.name ?? '-no=name-'} - $discountStr';
+        b.text(label);
+      }
+    }
+    if (salesTaxes.isNotEmpty) {
+      b.feed(1);
+      b.text('--- Taxes ---', align: PosAlign.center, bold: true);
+      b.feed(1);
+      for (final tax in salesTaxes) {
+        final taxString = '${tax.value}%';
+        String label = '${tax.label} - $taxString';
         b.text(label);
       }
     }

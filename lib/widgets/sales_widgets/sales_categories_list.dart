@@ -37,6 +37,7 @@ class _SalesCategoriesListState extends State<SalesCategoriesList> {
                     value: "discounts",
                     child: "Discounts".text(),
                   ),
+                  DropdownMenuItem(value: "tax", child: "Taxs".text()),
                 ],
                 onChanged: widget.onChange,
               ).paddingZero

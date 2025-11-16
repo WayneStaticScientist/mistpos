@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/screens/basic/screens_seleected_discounts_view.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/utils/avatars.dart';
 import 'package:mistpos/themes/app_theme.dart';
@@ -15,6 +14,7 @@ import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/screens/basic/screen_edit_manual_cart.dart';
+import 'package:mistpos/screens/basic/screens_seleected_discounts_view.dart';
 
 class ScreenSelectedItemsReadjust extends StatefulWidget {
   const ScreenSelectedItemsReadjust({super.key});

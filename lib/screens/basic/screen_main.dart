@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:get/get.dart';
+import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/navs/nav_admin.dart';
 import 'package:mistpos/navs/nav_items.dart';
@@ -73,6 +74,22 @@ class _ScreenMainState extends State<ScreenMain> {
     return Scaffold(
       key: _scaffoldKey,
       body: _listNavs[_currentNav] ?? SizedBox.shrink(),
+      bottomNavigationBar: Obx(
+        () => _itemsController.salesTaxes.isNotEmpty && _currentNav == 'sales'
+            ? [
+                    "${_itemsController.salesTaxes.length} Taxes affecting"
+                        .text(
+                          style: TextStyle(fontSize: 12, color: Colors.white),
+                        ),
+                  ]
+                  .row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                  )
+                  .padding(EdgeInsets.all(12))
+                  .decoratedBox(decoration: BoxDecoration(color: Colors.red))
+            : SizedBox(),
+      ),
       drawer: Obx(
         () => MistMainNavigationView(
           selectedNav: _currentNav,

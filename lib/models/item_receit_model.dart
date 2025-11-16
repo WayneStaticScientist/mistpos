@@ -1,6 +1,7 @@
 import 'package:isar/isar.dart';
-import 'package:mistpos/models/embedded_discount_model.dart';
+import 'package:mistpos/models/mini_tax.dart';
 import 'package:mistpos/models/item_receit_item.dart';
+import 'package:mistpos/models/embedded_discount_model.dart';
 part 'item_receit_model.g.dart';
 
 @collection
@@ -9,6 +10,7 @@ class ItemReceitModel {
   final String cashier;
   final String payment;
   final double change;
+  double tax;
   double amount;
   double total;
   bool synced = false;
@@ -16,6 +18,7 @@ class ItemReceitModel {
   String hexId = "";
   String? customerId;
   String label;
+  List<MiniTax> miniTax;
   List<ItemReceitItem> items = [];
   List<EmbeddedDiscountModel> discounts = [];
   ItemReceitModel({
@@ -27,9 +30,11 @@ class ItemReceitModel {
     required this.cashier,
     required this.payment,
     required this.createdAt,
+    this.miniTax = const [],
+    this.tax = 0,
     this.customerId,
-    this.synced = false,
     this.label = "",
+    this.synced = false,
     this.discounts = const [],
   });
   Map<String, dynamic> toJson() {
@@ -42,6 +47,8 @@ class ItemReceitModel {
       "total": total,
       "synced": synced,
       "label": label,
+      "tax": tax,
+      'miniTax': miniTax.map((e) => e.toJson()).toList(),
       "createdAt": createdAt.toIso8601String(),
       "discounts": discounts
           .map<Map<String, dynamic>>((e) => e.toJson())
@@ -59,6 +66,12 @@ class ItemReceitModel {
                 .toList()
           : [],
       label: data['label'] ?? "-",
+      miniTax: data['miniTax'] != null
+          ? (data['miniTax'] as List<dynamic>)
+                .map((e) => MiniTax.fromJson(e))
+                .toList()
+          : [],
+      tax: (data['tax'] as num?)?.toDouble() ?? 0.0,
       synced: data['synced'] ?? false,
       hexId: data['_id'],
       total: (data['total'] as num?)?.toDouble() ?? 0.0,

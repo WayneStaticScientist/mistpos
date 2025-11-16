@@ -2,8 +2,9 @@ import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
-import 'package:mistpos/models/tax_model.dart';
+import 'package:mistpos/models/mini_tax.dart';
 import 'package:mistpos/utils/toast.dart';
+import 'package:mistpos/models/tax_model.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/models/shifts_model.dart';
@@ -24,6 +25,7 @@ import 'package:mistpos/models/embedded_discount_model.dart';
 class ItemsController extends GetxController {
   RxDouble totalPrice = RxDouble(0);
   RxString selectedCategory = ''.obs;
+  RxList<TaxModel> salesTaxes = <TaxModel>[].obs;
   RxList<ItemModel> cartItems = <ItemModel>[].obs;
   RxList<ShiftsModel> shifts = <ShiftsModel>[].obs;
   RxList<ItemModel> fixedItems = <ItemModel>[].obs;
@@ -470,6 +472,20 @@ class ItemsController extends GetxController {
               : totalPrice.value * (data.value / 100));
     });
     totalPrice.value -= totalDiscounts;
+    final totalTax = salesTaxes.fold(0.0, (prev, data) {
+      if (data.selectedIds.isNotEmpty) {
+        final totalPriceAdded = checkOutItems.fold(0.0, (prv, cv) {
+          final model = cv['item'] as ItemModel;
+          if (data.selectedIds.contains(model.hexId)) {
+            return prv + (model.price * data.value) / 100;
+          }
+          return prv;
+        });
+        return prev + totalPriceAdded;
+      }
+      return prev + (totalPrice.value * data.value) / 100;
+    });
+    totalPrice.value += totalTax;
   }
 
   ItemSavedModel _getModel(Map<String, dynamic> e) {
@@ -978,6 +994,9 @@ class ItemsController extends GetxController {
       return;
     }
     checkOutItems.removeAt(indexOfSelected);
+    if (checkOutItems.isEmpty) {
+      salesTaxes.clear();
+    }
     _calculatedTotalPrice();
   }
 
@@ -997,6 +1016,7 @@ class ItemsController extends GetxController {
   }
 
   Future<void> removeAllSelected() async {
+    salesTaxes.clear();
     checkOutItems.clear();
     selectedDiscounts.clear();
     selectedCustomer.value = null;
@@ -1015,6 +1035,17 @@ class ItemsController extends GetxController {
     Map<String, bool>? dataMap,
     bool percentageDiscount = true,
   }) async {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      Toaster.showError("Database initilization error");
+      return;
+    }
+    if (checkOutItems.isEmpty) {
+      salesTaxes.value = isar.taxModels
+          .filter()
+          .activatedEqualTo(true)
+          .findAllSync();
+    }
     final dataFound = checkOutItems.indexWhere((e) {
       final id = e['id'];
       if (id is int) {
@@ -1170,6 +1201,15 @@ class ItemsController extends GetxController {
           count: user.receitsCount,
           companyName: user.companyName,
         ),
+        miniTax: salesTaxes
+            .map(
+              (e) => MiniTax(
+                label: e.label,
+                value: e.value,
+                sumOfItems: e.selectedIds.length,
+              ),
+            )
+            .toList(),
         payment: payment,
         amount: payedAmount,
         synced: false,
@@ -1197,6 +1237,20 @@ class ItemsController extends GetxController {
         createdAt: DateTime.now(),
         total: totalPrice.value,
       );
+      final totalTax = salesTaxes.fold(0.0, (prev, data) {
+        if (data.selectedIds.isNotEmpty) {
+          final totalPriceAdded = checkOutItems.fold(0.0, (prv, cv) {
+            final model = cv['item'] as ItemModel;
+            if (data.selectedIds.contains(model.hexId)) {
+              return prv + (model.price * data.value) / 100;
+            }
+            return prv;
+          });
+          return prev + totalPriceAdded;
+        }
+        return prev + (totalPrice.value * data.value) / 100;
+      });
+      itemReceitModel.tax = totalTax;
       int newReceitId = -1;
       await isar.writeTxn(() async {
         newReceitId = await isar.itemReceitModels.put(itemReceitModel);
@@ -1217,8 +1271,10 @@ class ItemsController extends GetxController {
           itemReceitModel,
           user,
           selectedCustomer.value,
+          salesTaxes,
         );
       }
+      salesTaxes.clear();
       discounts.clear();
       checkOutItems.clear();
       selectedCustomer.value = null;
@@ -1372,5 +1428,24 @@ class ItemsController extends GetxController {
         await isar.shiftsModels.put(shift);
       });
     }
+  }
+
+  void removeSalesTax(TaxModel tax) {
+    int index = salesTaxes.indexWhere((e) => e.hexId == tax.hexId);
+    if (index < 0) {
+      Toaster.showError("something went wrong");
+      return;
+    }
+    salesTaxes.removeAt(index);
+    _calculatedTotalPrice();
+  }
+
+  void restoreTaxs() async {
+    final isar = Isar.getInstance();
+    if (isar == null) {
+      return;
+    }
+    salesTaxes.value = isar.taxModels.where().findAllSync();
+    _calculatedTotalPrice();
   }
 }
