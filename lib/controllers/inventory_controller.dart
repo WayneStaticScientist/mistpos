@@ -563,4 +563,113 @@ class InventoryController extends GetxController {
 
   RxBool unwrappingToIds = RxBool(false);
   void unwrapToIds(List<String> ids) {}
+
+  RxBool mobilePaymentProcessing = RxBool(false);
+  Future subscribeMobile({
+    required String method,
+    required double amount,
+    required String subKey,
+    required String phoneNumber,
+  }) async {
+    if (mobilePaymentProcessing.value) {
+      Toaster.showError("mobile payment still processing");
+      return false;
+    }
+    mobilePaymentProcessing.value = true;
+    final response = await Net.post(
+      '/admin/subscribe/paymobile',
+      data: {
+        "method": method,
+        "amount": amount,
+        "subKey": subKey,
+        "phoneNumber": phoneNumber,
+      },
+    );
+    if (response.hasError) {
+      mobilePaymentProcessing.value = false;
+      Toaster.showError(response.response);
+      return false;
+    }
+    await Future.delayed(Duration(seconds: 30));
+    final result = await poll(response.body['pollUrl'], subKey);
+    mobilePaymentProcessing.value = false;
+    return result;
+  }
+
+  RxBool webProcessingPayment = RxBool(false);
+  Future<({String? redirectUrl, String? returnUrl, String? pollUrl})> payWeb(
+    String method,
+    double amount,
+    String subKey,
+  ) async {
+    if (webProcessingPayment.value) {
+      Toaster.showError("mobile payment still processing");
+      return (redirectUrl: null, returnUrl: null, pollUrl: null);
+    }
+    webProcessingPayment.value = true;
+    final response = await Net.post(
+      '/admin/subscribe/payweb',
+      data: {"method": method, "amount": amount, "subKey": subKey},
+    );
+    webProcessingPayment.value = false;
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return (redirectUrl: null, returnUrl: null, pollUrl: null);
+    }
+    return (
+      redirectUrl: response.body['redirectUrl'] as String?,
+      returnUrl: response.body['returnUrl'] as String?,
+      pollUrl: response.body['pollUrl'] as String?,
+    );
+  }
+
+  Future<bool> poll(String pollUrl, String subKey) async {
+    final poll = await Net.post(
+      '/admin/subscribe/paymobile/poll',
+      data: {"pollUrl": pollUrl, "subKey": subKey},
+    );
+    if (poll.hasError) {
+      Toaster.showError(poll.response);
+      return false;
+    }
+    if (poll.body['paid'] == true) {
+      company.value = CompanyModel.fromJson(poll.body['company']);
+      company.value!.saveToStorage();
+      return true;
+    }
+    mobilePaymentProcessing.value = true;
+    Toaster.showError("payment failed >> retry again in 5 seconds");
+    await Future.delayed(Duration(seconds: 5));
+    final poll2 = await Net.post(
+      '/admin/subscribe/paymobile/poll',
+      data: {"pollUrl": pollUrl},
+    );
+    if (poll2.hasError) {
+      Toaster.showError(poll2.response);
+      return false;
+    }
+    if (poll2.body['paid'] == true) {
+      company.value = CompanyModel.fromJson(poll2.body['company']);
+      company.value!.saveToStorage();
+      return true;
+    }
+    Toaster.showError("payment reflected false");
+    return false;
+  }
+
+  RxBool loadingFreeTrial = RxBool(false);
+  void registerFreeTrial() async {
+    if (loadingFreeTrial.value) return;
+    loadingFreeTrial.value = true;
+    final result = await Net.post("/admin/subscribe/freeTrial");
+    loadingFreeTrial.value = false;
+    if (result.hasError) {
+      Toaster.showError(result.response);
+      return;
+    }
+    company.value = CompanyModel.fromJson(result.body['company']);
+    company.value!.saveToStorage();
+    Toaster.showSuccess("Free trial started successfully");
+    return;
+  }
 }

@@ -1,3 +1,4 @@
+import 'package:get_storage/get_storage.dart';
 import 'package:mistpos/models/exchange_rate_model.dart';
 import 'package:mistpos/models/subscripiton_model.dart';
 
@@ -37,5 +38,16 @@ class CompanyModel {
       "exchangeRates": exchangeRates.toJson(),
       "subscriptionType": subscriptionType.toJson(),
     };
+  }
+
+  void saveToStorage() {
+    GetStorage storage = GetStorage();
+    storage.write("company", toJson());
+  }
+
+  static CompanyModel? fromStorage() {
+    GetStorage storage = GetStorage();
+    if (!storage.hasData("company")) return null;
+    return CompanyModel.fromJson(storage.read("company"));
   }
 }

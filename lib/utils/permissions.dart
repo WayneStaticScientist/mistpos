@@ -35,5 +35,6 @@ class UserPermissions {
     PermissionStructure(name: "Have Cashier Capabilites", value: "cashier"),
     PermissionStructure(name: "Payment Integrations", value: "payment"),
     PermissionStructure(name: "Add/Remove and manage taxes", value: "tax"),
+    PermissionStructure(name: "Subscribe to paid plans", value: "subscribe"),
   ];
 }

@@ -3,35 +3,33 @@ import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:mistpos/controllers/user_controller.dart';
-import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
-import 'package:mistpos/controllers/devices_controller.dart';
+import 'package:mistpos/controllers/inventory_controller.dart';
 
-class ScreenWebhookPaymentUrl extends StatefulWidget {
+class ScreenWebHookSubscription extends StatefulWidget {
   final double amount;
   final String pollUrl;
+  final String subKey;
   final String returnUrl;
   final String webHookUrl;
   final String paymentInfo;
-  const ScreenWebhookPaymentUrl({
+  const ScreenWebHookSubscription({
     super.key,
     required this.amount,
     required this.pollUrl,
+    required this.subKey,
     required this.returnUrl,
     required this.webHookUrl,
     required this.paymentInfo,
   });
 
   @override
-  State<ScreenWebhookPaymentUrl> createState() =>
-      _ScreenWebhookPaymentUrlState();
+  State<ScreenWebHookSubscription> createState() =>
+      _ScreenWebHookSubscriptionState();
 }
 
-class _ScreenWebhookPaymentUrlState extends State<ScreenWebhookPaymentUrl> {
-  final _itemsController = Get.find<ItemsController>();
-  final _printer = Get.find<DevicesController>();
-  final _userController = Get.find<UserController>();
+class _ScreenWebHookSubscriptionState extends State<ScreenWebHookSubscription> {
+  final _inventoryController = Get.find<InventoryController>();
   late WebViewController _controller;
   bool _loading = true;
   @override
@@ -73,7 +71,7 @@ class _ScreenWebhookPaymentUrlState extends State<ScreenWebhookPaymentUrl> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Online Payment")),
+      appBar: AppBar(title: const Text("Subscribe")),
       body: Stack(
         children: [
           Positioned.fill(child: WebViewWidget(controller: _controller)),
@@ -90,20 +88,12 @@ class _ScreenWebhookPaymentUrlState extends State<ScreenWebhookPaymentUrl> {
     setState(() {
       _loading = true;
     });
-    final respone = await _itemsController.poll(widget.pollUrl);
+    final respone = await _inventoryController.poll(
+      widget.pollUrl,
+      widget.subKey,
+    );
     if (respone) {
-      _itemsController.addReceitFromItemModel(
-        widget.amount,
-        widget.paymentInfo,
-        allowOfflinePurchase:
-            _userController.user.value != null &&
-            _userController.user.value!.allowOfflinePurchase,
-        user: _userController.user.value!,
-        printReceits: _printer.isPrinterConnected(),
-      );
-      if (mounted) {
-        Get.back();
-      }
+      Get.back();
       Toaster.showSuccess("payment succesfully");
     }
   }

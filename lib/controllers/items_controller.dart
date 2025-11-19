@@ -2,8 +2,8 @@ import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
-import 'package:mistpos/models/mini_tax.dart';
 import 'package:mistpos/utils/toast.dart';
+import 'package:mistpos/models/mini_tax.dart';
 import 'package:mistpos/models/tax_model.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:mistpos/models/user_model.dart';
