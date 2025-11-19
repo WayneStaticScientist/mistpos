@@ -10,7 +10,6 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/screens/inventory/screem_edit_supplier.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class NavInventorySuppliersList extends StatefulWidget {
   const NavInventorySuppliersList({super.key});
@@ -42,30 +41,45 @@ class _NavInventorySuppliersListState extends State<NavInventorySuppliersList> {
 
   @override
   Widget build(BuildContext context) {
-    return [
-      MistSearchField(label: "Search Suppliers", controller: _searchController),
-      Expanded(
-        child: SmartRefresher(
-          controller: _refreshController,
-          enablePullUp: true,
-          onRefresh: () async {
-            _iventoryController.loadSuppliers(page: 1, search: _searchTerm);
-            _refreshController.refreshCompleted();
-          },
-          child: Obx(
+    return SmartRefresher(
+      controller: _refreshController,
+      enablePullUp: true,
+      onLoading: () async {
+        if (_iventoryController.supplierPage.value <
+            _iventoryController.supplierTotalPages.value) {
+          await _iventoryController.loadSuppliers(
+            page: _iventoryController.supplierPage.value + 1,
+            search: _searchTerm,
+          );
+          _refreshController.loadComplete();
+        } else {
+          _refreshController.loadNoData();
+        }
+      },
+      onRefresh: () async {
+        _iventoryController.loadSuppliers(page: 1, search: _searchTerm);
+        _refreshController.refreshCompleted();
+        _refreshController.loadComplete();
+      },
+      child: ListView(
+        children: [
+          MistSearchField(
+            label: "Search Suppliers",
+            controller: _searchController,
+          ),
+          Obx(
             () => ListView.builder(
+              shrinkWrap: true, // IMPORTANT
+              physics: NeverScrollableScrollPhysics(),
               itemBuilder: (context, index) {
-                if (index < _iventoryController.suppliers.length) {
-                  return _buildTile(_iventoryController.suppliers[index]);
-                }
-                return _buildLoader();
+                return _buildTile(_iventoryController.suppliers[index]);
               },
-              itemCount: _iventoryController.suppliers.length + 1,
+              itemCount: _iventoryController.suppliers.length,
             ),
           ),
-        ),
+        ],
       ),
-    ].column().padding(EdgeInsets.all(14));
+    );
   }
 
   Widget _buildTile(SupplierModel model) {
@@ -78,35 +92,13 @@ class _NavInventorySuppliersListState extends State<NavInventorySuppliersList> {
     );
   }
 
-  Widget _buildLoader() {
-    if (_iventoryController.supplierPage >=
-        _iventoryController.supplierPage.value) {
-      return ['No more Suppliers'.text()]
-          .row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-          )
-          .padding(EdgeInsets.all(14));
-    }
-    return [
-          LoadingAnimationWidget.staggeredDotsWave(
-            color: Colors.white,
-            size: 200,
-          ),
-        ]
-        .row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-        )
-        .padding(EdgeInsets.all(14));
-  }
-
   void _initializeTimer() {
     _debounce = Timer.periodic(Duration(milliseconds: 500), (timer) {
       final searchTerm = _searchController.text;
       if (_searchTerm != searchTerm) {
         _searchTerm = searchTerm;
         _iventoryController.loadSuppliers(search: _searchTerm, page: 1);
+        _refreshController.loadComplete();
       }
     });
   }

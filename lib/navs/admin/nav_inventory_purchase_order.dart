@@ -4,15 +4,14 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
-import 'package:mistpos/inventory/constants.dart';
 import 'package:mistpos/utils/date_utils.dart';
+import 'package:mistpos/inventory/constants.dart';
 import 'package:mistpos/widgets/layouts/chips.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/models/purchase_order_model.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:mistpos/screens/inventory/screen_view_purchase_order.dart';
 
 class NavInventoryPurchaseOrder extends StatefulWidget {
@@ -30,6 +29,7 @@ class _NavInventoryPurchaseOrderState extends State<NavInventoryPurchaseOrder> {
   String _searchTerm = "";
   String _statusFilter = "";
   Timer? _debounce;
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +43,7 @@ class _NavInventoryPurchaseOrderState extends State<NavInventoryPurchaseOrder> {
   void dispose() {
     _debounce?.cancel();
     _searchController.dispose();
+    _refreshController.dispose(); // Important to dispose the RefreshController
     super.dispose();
   }
 
@@ -50,51 +51,65 @@ class _NavInventoryPurchaseOrderState extends State<NavInventoryPurchaseOrder> {
   Widget build(BuildContext context) {
     return SmartRefresher(
       controller: _refreshController,
-      enablePullUp: true,
+      enablePullUp: true, // Enable pull-up loading
+      // Pull-to-refresh logic
       onRefresh: () async {
-        loadInventoryPurchaseOrders();
-        await Future.delayed(Duration(milliseconds: 800));
+        await loadInventoryPurchaseOrders();
         _refreshController.refreshCompleted();
       },
-      child: [
-        MistSearchField(label: "Search ", controller: _searchController),
-        ListView(
-          scrollDirection: Axis.horizontal,
-          children: Inventory.purchaseOrderStatus
-              .map(
-                (e) =>
-                    MistChip(
-                      label: e['label'] ?? '',
-                      selected: _statusFilter == e['value'],
-                    ).onTap(() {
-                      setState(() {
-                        _statusFilter = e['value'] ?? '';
-                      });
-                      loadInventoryPurchaseOrders();
-                    }),
-              )
-              .toList(),
-        ).sizedBox(height: 60, width: double.infinity),
-        Expanded(
-          child: Obx(
+
+      // 💡 INFINITE SCROLLING LOGIC (onLoading)
+      onLoading: () async {
+        if (_inventory.purchaseOrderPage.value <
+            _inventory.purchaseOrderTotalPages.value) {
+          await _inventory.loadPurchaseOrders(
+            page: _inventory.purchaseOrderPage.value + 1,
+            search: _searchTerm,
+            status: _statusFilter,
+          );
+          _refreshController.loadComplete();
+        } else {
+          _refreshController.loadNoData();
+        }
+      },
+      child: ListView(
+        children: [
+          MistSearchField(label: "Search ", controller: _searchController),
+          ListView(
+            scrollDirection: Axis.horizontal,
+            children: Inventory.purchaseOrderStatus
+                .map(
+                  (e) =>
+                      MistChip(
+                        label: e['label'] ?? '',
+                        selected: _statusFilter == e['value'],
+                      ).onTap(() {
+                        setState(() {
+                          _statusFilter = e['value'] ?? '';
+                        });
+                        loadInventoryPurchaseOrders();
+                      }),
+                )
+                .toList(),
+          ).sizedBox(height: 60, width: double.infinity),
+          Obx(
             () =>
                 _inventory.purchaseOrders.isEmpty &&
                     !_inventory.purchaseOrdersLoading.value
-                ? "No Purchase Orders found . Click + to add new purchaseOrder"
+                ? "No Purchase Orders found. Click + to add new purchaseOrder"
                       .text()
                       .center()
                 : ListView.builder(
+                    shrinkWrap: true, // IMPORTANT
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: _inventory.purchaseOrders.length,
                     itemBuilder: (context, index) {
-                      if (index < _inventory.purchaseOrders.length) {
-                        return _buildTile(_inventory.purchaseOrders[index]);
-                      }
-                      return _buildLoader();
+                      return _buildTile(_inventory.purchaseOrders[index]);
                     },
-                    itemCount: _inventory.purchaseOrders.length + 1,
                   ),
           ),
-        ),
-      ].column().padding(EdgeInsets.all(14)),
+        ],
+      ),
     );
   }
 
@@ -109,34 +124,12 @@ class _NavInventoryPurchaseOrderState extends State<NavInventoryPurchaseOrder> {
     );
   }
 
-  Widget _buildLoader() {
-    if (_inventory.purchaseOrderPage.value >=
-        _inventory.purchaseOrderTotalPages.value) {
-      return ['No more Purchase Orders'.text()]
-          .row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-          )
-          .padding(EdgeInsets.all(14));
-    }
-    return [
-          LoadingAnimationWidget.staggeredDotsWave(
-            color: Colors.white,
-            size: 200,
-          ),
-        ]
-        .row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-        )
-        .padding(EdgeInsets.all(14));
-  }
-
   void _initializeTimer() {
     _debounce = Timer.periodic(Duration(milliseconds: 500), (timer) {
       final searchTerm = _searchController.text;
       if (_searchTerm != searchTerm) {
         _searchTerm = searchTerm;
+        // Start a new search from page 1
         _inventory.loadPurchaseOrders(
           search: _searchTerm,
           page: 1,
@@ -152,6 +145,7 @@ class _NavInventoryPurchaseOrderState extends State<NavInventoryPurchaseOrder> {
       search: _searchTerm,
       status: _statusFilter,
     );
+    _refreshController.loadComplete();
   }
 
   Widget _getIcon(String status) {

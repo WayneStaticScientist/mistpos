@@ -75,7 +75,7 @@ class NavSalesByEmployeeState extends State<NavSalesByEmployee> {
           3: FixedColumnWidth(100.0),
           4: FixedColumnWidth(80.0),
           5: FixedColumnWidth(80.0),
-          6: FixedColumnWidth(80.0),
+          6: FixedColumnWidth(100.0),
         },
         children: [
           TableRow(

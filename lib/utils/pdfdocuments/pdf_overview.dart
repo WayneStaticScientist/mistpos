@@ -89,7 +89,7 @@ class AdminOverviewPdf extends BlankPage {
         ),
         SizedBox(height: 18),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             CardOverview(
               label: "Total Products",
@@ -100,16 +100,6 @@ class AdminOverviewPdf extends BlankPage {
               label: "Total Items In Stock",
               value: statsProductModel?.totalStock.toString() ?? "0",
             ),
-          ],
-        ).sizedBox(
-          height: 110, // Retained the fixed height for consistency
-          width: double.infinity,
-        ),
-
-        SizedBox(height: 18),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
             CardOverview(
               label: "Stock Value",
               value: CurrenceConverter.getCurrenceFloatInStrings(
@@ -118,6 +108,16 @@ class AdminOverviewPdf extends BlankPage {
               ),
             ),
             SizedBox(width: 18),
+          ],
+        ).sizedBox(
+          height: 110, // Retained the fixed height for consistency
+          width: double.infinity,
+        ),
+
+        SizedBox(height: 18),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
             CardOverview(
               label: "Total Revenue",
               value: CurrenceConverter.getCurrenceFloatInStrings(
@@ -181,6 +181,14 @@ class AdminOverviewPdf extends BlankPage {
             label: "Discounts",
             value: CurrenceConverter.getCurrenceFloatInStrings(
               statsSalesModel?.totalDiscounts ?? 0,
+              baseCurrence,
+            ),
+          ),
+          18.gapWidth,
+          CardOverview(
+            label: "Taxes",
+            value: CurrenceConverter.getCurrenceFloatInStrings(
+              statsSalesModel?.totalTaxs ?? 0,
               baseCurrence,
             ),
           ),

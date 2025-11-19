@@ -1,8 +1,11 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/widgets/layouts/receits_layout_view.dart';
 
 class NavReceits extends StatefulWidget {
-  const NavReceits({super.key});
+  final GlobalKey<ScaffoldState>? scaffoldKey;
+
+  const NavReceits({super.key, this.scaffoldKey});
 
   @override
   State<NavReceits> createState() => _NavReceitsState();
@@ -11,17 +14,16 @@ class NavReceits extends StatefulWidget {
 class _NavReceitsState extends State<NavReceits> {
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        SliverAppBar(
-          pinned: true,
-          floating: true,
-          snap: true,
-          title: Text('Receipts'),
+    return Scaffold(
+      appBar: AppBar(
+        leading: DrawerButton(
+          onPressed: () => widget.scaffoldKey?.currentState?.openDrawer(),
         ),
-        SliverPadding(padding: EdgeInsetsGeometry.all(10)),
-        SliverFillRemaining(child: ReceitsLayoutView()),
-      ],
+        title: Text('Receipts'),
+        foregroundColor: Colors.white,
+        backgroundColor: Get.theme.colorScheme.primary,
+      ),
+      body: ReceitsLayoutView(),
     );
   }
 }

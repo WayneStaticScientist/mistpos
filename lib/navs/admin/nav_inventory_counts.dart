@@ -12,7 +12,6 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/models/inventory_count_model.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:mistpos/screens/inventory/screen_view_inventory_count.dart';
 
 class NavInventoryCounts extends StatefulWidget {
@@ -53,42 +52,54 @@ class _NavInventoryCountsState extends State<NavInventoryCounts> {
         await Future.delayed(Duration(milliseconds: 800));
         _refreshController.refreshCompleted();
       },
-      child: [
-        MistSearchField(
-          label: "Search Inventory Counts",
-          controller: _searchController,
-        ),
-        Wrap(
-          alignment: WrapAlignment.start,
-          children: Inventory.inventoryCountStatus
-              .map(
-                (e) =>
-                    MistChip(
-                      label: e['label'] ?? '',
-                      selected: _statusFilter == e['value'],
-                    ).onTap(() {
-                      setState(() {
-                        _statusFilter = e['value'] ?? '';
-                      });
-                      loadInventoryCounts();
-                    }),
-              )
-              .toList(),
-        ).sizedBox(width: double.infinity),
-        Expanded(
-          child: Obx(
+      onLoading: () async {
+        if (_iventoryController.inventoryCountsPage.value <
+            _iventoryController.inventoryCountsTotalPages.value) {
+          await _iventoryController.loadInventoriesCounts(
+            page: _iventoryController.inventoryCountsPage.value + 1,
+            search: _searchTerm,
+            status: _statusFilter,
+          );
+          _refreshController.loadComplete();
+        } else {
+          _refreshController.loadNoData();
+        }
+      },
+      child: ListView(
+        children: [
+          MistSearchField(
+            label: "Search Inventory Counts",
+            controller: _searchController,
+          ),
+          Wrap(
+            alignment: WrapAlignment.start,
+            children: Inventory.inventoryCountStatus
+                .map(
+                  (e) =>
+                      MistChip(
+                        label: e['label'] ?? '',
+                        selected: _statusFilter == e['value'],
+                      ).onTap(() {
+                        setState(() {
+                          _statusFilter = e['value'] ?? '';
+                        });
+                        loadInventoryCounts();
+                      }),
+                )
+                .toList(),
+          ).sizedBox(width: double.infinity),
+          Obx(
             () => ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
               itemBuilder: (context, index) {
-                if (index < _iventoryController.inventoryCounts.length) {
-                  return _buildTile(_iventoryController.inventoryCounts[index]);
-                }
-                return _buildLoader();
+                return _buildTile(_iventoryController.inventoryCounts[index]);
               },
-              itemCount: _iventoryController.inventoryCounts.length + 1,
+              itemCount: _iventoryController.inventoryCounts.length,
             ),
           ),
-        ),
-      ].column().padding(EdgeInsets.all(14)),
+        ],
+      ),
     );
   }
 
@@ -114,29 +125,6 @@ class _NavInventoryCountsState extends State<NavInventoryCounts> {
     );
   }
 
-  Widget _buildLoader() {
-    if (_iventoryController.inventoryCountsPage >=
-        _iventoryController.inventoryCountsPage.value) {
-      return ['No more Inventory Counts'.text()]
-          .row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-          )
-          .padding(EdgeInsets.all(14));
-    }
-    return [
-          LoadingAnimationWidget.staggeredDotsWave(
-            color: Colors.white,
-            size: 200,
-          ),
-        ]
-        .row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-        )
-        .padding(EdgeInsets.all(14));
-  }
-
   void _initializeTimer() {
     _debounce = Timer.periodic(Duration(milliseconds: 500), (timer) {
       final searchTerm = _searchController.text;
@@ -147,12 +135,13 @@ class _NavInventoryCountsState extends State<NavInventoryCounts> {
     });
   }
 
-  void loadInventoryCounts() {
-    _iventoryController.loadInventoriesCounts(
+  Future<void> loadInventoryCounts() async {
+    await _iventoryController.loadInventoriesCounts(
       page: 1,
       search: _searchTerm,
       status: _statusFilter,
     );
+    _refreshController.loadComplete();
   }
 
   Widget _getTrailing(String status) {

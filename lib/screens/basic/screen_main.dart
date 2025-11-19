@@ -29,7 +29,7 @@ class _ScreenMainState extends State<ScreenMain> {
   bool _itemsInialized = false;
   late final _listNavs = {
     'sales': NavSale(),
-    "receipts": NavReceits(),
+    "receipts": NavReceits(scaffoldKey: _scaffoldKey),
     "admin": NavAdmin(scaffoldKey: _scaffoldKey),
     "items": NavItems(scaffoldKey: _scaffoldKey),
   };

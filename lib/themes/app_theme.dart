@@ -6,7 +6,7 @@ class AppTheme {
     colorScheme: const ColorScheme.light(
       primary: Color.fromARGB(255, 20, 89, 180),
       secondary: Colors.orange,
-      surface: Color.fromARGB(248, 255, 255, 255),
+      surface: Color.fromARGB(255, 245, 245, 245),
     ),
   );
 

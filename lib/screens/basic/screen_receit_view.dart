@@ -162,7 +162,7 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                   widget.receitModel.createdAt.toString().text(),
                   18.gapHeight,
                   ListTile(
-                    contentPadding: EdgeInsets.all(0),
+                    contentPadding: EdgeInsets.all(5),
                     title: 'Change'.text(),
                     tileColor: Colors.green,
                     textColor: Colors.white,

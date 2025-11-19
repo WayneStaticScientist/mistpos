@@ -243,33 +243,53 @@ class ItemsController extends GetxController {
   }
 
   //loads receits background
+  RxInt receitsPage = RxInt(1);
+  RxInt receitsTotalPages = RxInt(2);
   RxBool receitsLoading = RxBool(false);
+  RxString receitsHasError = RxString("");
   Future<void> loadReceits({int page = 1, String search = ''}) async {
     if (receitsLoading.value) return;
     final isar = Isar.getInstance();
     if (isar == null) {
       return;
     }
+    receitsHasError.value = "";
     receitsLoading.value = true;
     final response = await Net.get(
       "/cashier/receits?page=$page&search=$search",
     );
     receitsLoading.value = false;
     if (!response.hasError) {
+      receitsPage.value = response.body['currentPage'] as int;
+      receitsTotalPages.value = response.body['totalPages'] as int;
       if (response.body['list'] != null) {
         final list = response.body['list'] as List<dynamic>;
-        receits.assignAll(
-          list.map((e) => ItemReceitModel.fromJson(e)).toList(),
-        );
+        final lv = list.map((e) => ItemReceitModel.fromJson(e)).toList();
+        if (page == 1) {
+          receits.assignAll(lv);
+        } else {
+          receits.addAll(lv);
+        }
+        await isar.writeTxn(() async {
+          if (page == 1) {
+            await isar.itemReceitModels
+                .filter()
+                .syncedEqualTo(true)
+                .deleteAll();
+            await isar.itemReceitModels.putAll(receits);
+          } else {
+            await isar.itemReceitModels.putAll(receits);
+          }
+        });
+        return;
       }
-      await isar.writeTxn(() async {
-        await isar.itemReceitModels.filter().syncedEqualTo(true).deleteAll();
-        await isar.itemReceitModels.putAll(receits);
-      });
-      return;
     }
     final r = isar.itemReceitModels.where().sortByCreatedAtDesc().findAllSync();
-    receits.assignAll(r);
+    if (page == 1) {
+      receits.assignAll(r);
+    } else {
+      receits.addAll(r);
+    }
     _updateUnsyncedReceits();
   }
 

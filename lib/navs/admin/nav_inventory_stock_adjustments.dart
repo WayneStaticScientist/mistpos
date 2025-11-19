@@ -10,7 +10,6 @@ import 'package:mistpos/widgets/layouts/chips.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
-import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/models/stock_adjustment_model.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/screens/inventory/screen_view_stock_adjustment.dart';
@@ -49,60 +48,74 @@ class _NavInventoryStockAdjustmentsState
 
   @override
   Widget build(BuildContext context) {
-    return [
-      MistSearchField(label: "Search ", controller: _searchController),
-      ListView(
-        scrollDirection: Axis.horizontal,
+    return SmartRefresher(
+      controller: _refreshController,
+      enablePullUp: true,
+      onRefresh: () async {
+        await _inventory.loadStockAdjustments(
+          page: 1,
+          search: _searchTerm,
+          status: _statusFilter,
+        );
+        _refreshController.refreshCompleted();
+        _refreshController.loadComplete();
+      },
+      onLoading: () async {
+        if (_inventory.stockAdjustOrderPage.value <
+            _inventory.stockAdjustOrderTotalPages.value) {
+          await _inventory.loadStockAdjustments(
+            page: _inventory.stockAdjustOrderPage.value + 1,
+            search: _searchTerm,
+            status: _statusFilter,
+          );
+          _refreshController.loadComplete();
+        } else {
+          _refreshController.loadNoData();
+        }
+      },
+      child: ListView(
         children: [
-          MistChip(label: "All", selected: _statusFilter == "").onTap(() {
-            setState(() {
-              _statusFilter = '';
-            });
-            loadInventoryStockerOrders();
-          }),
-          ...Inventory.adjustStockReasons.map(
-            (e) =>
-                MistChip(
-                  label: e['label'] ?? '',
-                  selected: _statusFilter == e['value'],
-                ).onTap(() {
-                  setState(() {
-                    _statusFilter = e['value'] ?? '';
-                  });
-                  loadInventoryStockerOrders();
-                }),
-          ),
-        ],
-      ).sizedBox(width: double.infinity, height: 70),
-      Expanded(
-        child: SmartRefresher(
-          controller: _refreshController,
-          enablePullUp: true,
-          onRefresh: () async {
-            loadInventoryStockerOrders();
-            await Future.delayed(Duration(milliseconds: 800));
-            _refreshController.refreshCompleted();
-          },
-          child: Obx(
+          MistSearchField(label: "Search ", controller: _searchController),
+          ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              MistChip(label: "All", selected: _statusFilter == "").onTap(() {
+                setState(() {
+                  _statusFilter = '';
+                });
+                loadInventoryStockerOrders();
+              }),
+              ...Inventory.adjustStockReasons.map(
+                (e) =>
+                    MistChip(
+                      label: e['label'] ?? '',
+                      selected: _statusFilter == e['value'],
+                    ).onTap(() {
+                      setState(() {
+                        _statusFilter = e['value'] ?? '';
+                      });
+                      loadInventoryStockerOrders();
+                    }),
+              ),
+            ],
+          ).sizedBox(width: double.infinity, height: 70),
+          Obx(
             () =>
                 _inventory.stockerOrders.isEmpty &&
                     !_inventory.stockAdjustOrdersLoading.value
-                ? "No Purchase Orders found . Click + to add new purchaseOrder"
-                      .text()
-                      .center()
+                ? "No Stock Adjustments Found ".text().center()
                 : ListView.builder(
+                    shrinkWrap: true, // IMPORTANT
+                    physics: NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
-                      if (index < _inventory.stockerOrders.length) {
-                        return _buildTile(_inventory.stockerOrders[index]);
-                      }
-                      return _buildLoader();
+                      return _buildTile(_inventory.stockerOrders[index]);
                     },
-                    itemCount: _inventory.stockerOrders.length + 1,
+                    itemCount: _inventory.stockerOrders.length,
                   ),
           ),
-        ),
+        ],
       ),
-    ].column().padding(EdgeInsets.all(14));
+    );
   }
 
   Widget _buildTile(StockAdjustmentModel model) {
@@ -130,25 +143,6 @@ class _NavInventoryStockAdjustmentsState
     );
   }
 
-  Widget _buildLoader() {
-    if (_inventory.purchaseOrderPage.value >=
-            _inventory.purchaseOrderTotalPages.value &&
-        !_inventory.stockAdjustOrdersLoading.value) {
-      return ['No more Stock Adjustments'.text()]
-          .row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-          )
-          .padding(EdgeInsets.all(14));
-    }
-    return [MistLoader1()]
-        .row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-        )
-        .padding(EdgeInsets.all(14));
-  }
-
   void _initializeTimer() {
     _debounce = Timer.periodic(Duration(milliseconds: 500), (timer) {
       final searchTerm = _searchController.text;
@@ -163,13 +157,12 @@ class _NavInventoryStockAdjustmentsState
     });
   }
 
-  void loadInventoryStockerOrders() {
-    Future.microtask(() {
-      _inventory.loadStockAdjustments(
-        page: 1,
-        search: _searchTerm,
-        status: _statusFilter,
-      );
-    });
+  void loadInventoryStockerOrders() async {
+    await _inventory.loadStockAdjustments(
+      page: 1,
+      search: _searchTerm,
+      status: _statusFilter,
+    );
+    _refreshController.loadComplete();
   }
 }

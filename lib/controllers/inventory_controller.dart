@@ -87,7 +87,7 @@ class InventoryController extends GetxController {
   RxBool suppliersLoading = RxBool(false);
   RxInt supplierPage = RxInt(1);
   RxInt supplierTotalPages = RxInt(2);
-  void loadSuppliers({String search = '', int page = 1}) async {
+  Future<void> loadSuppliers({String search = '', int page = 1}) async {
     if (suppliersLoading.value) return;
     suppliersLoading.value = true;
     final result = await Net.get("/admin/suppliers?search=$search&page=$page");
@@ -99,9 +99,12 @@ class InventoryController extends GetxController {
     supplierTotalPages.value = result.body['totalPages'] ?? 0;
     if (result.body['list'] != null) {
       List<dynamic> usersList = result.body['list'];
-      suppliers.assignAll(
-        usersList.map((e) => SupplierModel.fromJson(e)).toList(),
-      );
+      final lv = usersList.map((e) => SupplierModel.fromJson(e)).toList();
+      if (page == 1) {
+        suppliers.assignAll(lv);
+      } else {
+        suppliers.addAll(lv);
+      }
     }
     suppliersLoading.value = false;
   }
@@ -144,9 +147,12 @@ class InventoryController extends GetxController {
     purchaseOrderTotalPages.value = response.body['totalPages'];
     if (response.body['list'] != null) {
       List<dynamic> list = response.body['list'];
-      purchaseOrders.value = list
-          .map((e) => PurchaseOrderModel.fromJson(e))
-          .toList();
+      final lv = list.map((e) => PurchaseOrderModel.fromJson(e)).toList();
+      if (page == 1) {
+        purchaseOrders.value = lv;
+      } else {
+        purchaseOrders.addAll(lv);
+      }
     }
   }
 
@@ -222,7 +228,7 @@ class InventoryController extends GetxController {
   RxInt stockAdjustOrderPage = RxInt(1);
   RxInt stockAdjustOrderTotalPages = RxInt(1);
   RxBool stockAdjustOrdersLoading = RxBool(false);
-  void loadStockAdjustments({
+  Future<void> loadStockAdjustments({
     int page = 1,
     String search = '',
     String status = '',
@@ -241,9 +247,12 @@ class InventoryController extends GetxController {
     stockAdjustOrderTotalPages.value = response.body['totalPages'];
     if (response.body['list'] != null) {
       List<dynamic> list = response.body['list'];
-      stockerOrders.value = list
-          .map((e) => StockAdjustmentModel.fromJson(e))
-          .toList();
+      final lv = list.map((e) => StockAdjustmentModel.fromJson(e)).toList();
+      if (page == 1) {
+        stockerOrders.value = lv;
+      } else {
+        stockerOrders.addAll(lv);
+      }
     }
   }
 
@@ -288,9 +297,12 @@ class InventoryController extends GetxController {
     transferOrderTotalPages.value = response.body['totalPages'];
     if (response.body['list'] != null) {
       List<dynamic> list = response.body['list'];
-      transferOrders.value = list
-          .map((e) => TransferOrderModel.fromJson(e))
-          .toList();
+      final lv = list.map((e) => TransferOrderModel.fromJson(e)).toList();
+      if (page == 1) {
+        transferOrders.value = lv;
+      } else {
+        transferOrders.addAll(lv);
+      }
     }
   }
 
@@ -316,7 +328,8 @@ class InventoryController extends GetxController {
   }
 
   RxBool inventoryCountsLoading = RxBool(false);
-  void loadInventoriesCounts({
+  RxString inventoryCountsError = RxString("");
+  Future<void> loadInventoriesCounts({
     int page = 1,
     String search = '',
     String status = '',
@@ -334,9 +347,12 @@ class InventoryController extends GetxController {
     inventoryCountsTotalPages.value = response.body['totalPages'];
     if (response.body['list'] != null) {
       List<dynamic> list = response.body['list'];
-      inventoryCounts.value = list
-          .map((e) => InventoryCountModel.fromJson(e))
-          .toList();
+      final lv = list.map((e) => InventoryCountModel.fromJson(e)).toList();
+      if (page == 1) {
+        inventoryCounts.value = lv;
+      } else {
+        inventoryCounts.addAll(lv);
+      }
     }
   }
 
@@ -416,16 +432,23 @@ class InventoryController extends GetxController {
   RxBool productionsLoading = RxBool(false);
   RxInt productionsTotalPages = RxInt(1);
   RxList<ProductionModel> productions = RxList<ProductionModel>();
-  void loadProductions({int page = 1, String search = ''}) async {
+  Future<void> loadProductions({int page = 1, String search = ''}) async {
     final response = await Net.get(
       "/admin/inventory/productions?page=$page&search=$search",
     );
     if (response.hasError) {
       return;
     }
+    productionsPage.value = response.body['currentPage'];
+    productionsTotalPages.value = response.body['totalPages'];
     if (response.body['list'] != null) {
       List<dynamic> list = response.body['list'];
-      productions.value = list.map((e) => ProductionModel.fromJson(e)).toList();
+      final lv = list.map((e) => ProductionModel.fromJson(e)).toList();
+      if (page == 1) {
+        productions.value = lv;
+      } else {
+        productions.addAll(lv);
+      }
     }
   }
 
