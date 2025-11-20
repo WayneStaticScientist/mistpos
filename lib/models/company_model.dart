@@ -8,6 +8,7 @@ class CompanyModel {
   String name;
   ExchangeRateModel exchangeRates;
   SubscriptionModel subscriptionType;
+
   String hexId;
   CompanyModel({
     required this.owner,
@@ -31,10 +32,10 @@ class CompanyModel {
   }
   Map<String, dynamic> toJson() {
     return {
+      "_id": hexId,
       "name": name,
       "owner": owner,
       "email": email,
-      "_id": hexId,
       "exchangeRates": exchangeRates.toJson(),
       "subscriptionType": subscriptionType.toJson(),
     };

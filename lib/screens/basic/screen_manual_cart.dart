@@ -147,7 +147,9 @@ class _ScreenManualCartState extends State<ScreenManualCart> {
           return Card(
             child: ListTile(
               title: e.key.text(),
-              subtitle: "${e.value}".text(),
+              subtitle: CurrenceConverter.selectedCurrencyInString(
+                e.value,
+              ).text(),
               tileColor: dataMap.containsKey("$id-${e.key}${e.value}")
                   ? Get.theme.colorScheme.primary
                   : null,

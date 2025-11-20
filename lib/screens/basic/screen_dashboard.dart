@@ -3,6 +3,7 @@ import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/utils/subscriptions.dart';
 import 'package:mistpos/navs/admin/daily_sales.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
@@ -17,6 +18,7 @@ import 'package:mistpos/screens/basic/screen_add_store.dart';
 import 'package:mistpos/navs/admin/nav_transfer_orders.dart';
 import 'package:mistpos/navs/admin/nav_inventory_counts.dart';
 import 'package:mistpos/navs/admin/nav_sales_by_payment.dart';
+import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/navs/admin/screen_list_customers.dart';
 import 'package:mistpos/navs/admin/nav_inventory_history.dart';
 import 'package:mistpos/navs/admin/nav_sales_by_employee.dart';
@@ -50,6 +52,7 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
   final _dailySalesKey = GlobalKey<DailySalesState>();
   final _userController = Get.find<UserController>();
   final _adminController = Get.find<AdminController>();
+  final _inventoryController = Get.find<InventoryController>();
   final _adminOverviewKey = GlobalKey<NavAdminOverViewState>();
   final _salesByEmployeeKeys = GlobalKey<NavSalesByEmployeeState>();
   final _salesByPayment = GlobalKey<NavSalesByPaymentState>();
@@ -124,24 +127,11 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
         ],
       ),
       drawer: isLargeScreen ? null : _makeDrawer(true),
-      floatingActionButton:
-          [
-            "Employees",
-            "Customers",
-            'Stores',
-            "Transfer Orders",
-            "Productions",
-            "Inventory Counts",
-            "Suppliers",
-            "Purchase Orders",
-            "Stock Adjustments",
-          ].contains(_selectedIndex)
-          ? FloatingActionButton(
-              onPressed: _add,
-              elevation: 0,
-              child: Icon(Icons.add, color: Colors.white),
-            )
-          : SizedBox.shrink(),
+      floatingActionButton: Obx(
+        () => _getInventorButton(
+          _inventoryController.company.value?.subscriptionType.type ?? 'free',
+        ),
+      ),
     );
   }
 
@@ -221,5 +211,31 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
       return;
     }
     Toaster.showError("page is unprintable");
+  }
+
+  final listConstants = [
+    "Employees",
+    "Customers",
+    'Stores',
+    "Transfer Orders",
+    "Productions",
+    "Inventory Counts",
+    "Suppliers",
+    "Purchase Orders",
+    "Stock Adjustments",
+  ];
+  Widget _getInventorButton(String s) {
+    final visibilityCreteria =
+        MistSubscriptionUtils.twinSubs.indexWhere(
+          (element) =>
+              element.key == _selectedIndex && element.plans.contains(s),
+        ) !=
+        -1;
+
+    return FloatingActionButton(
+      onPressed: _add,
+      elevation: 0,
+      child: Icon(Icons.add, color: Colors.white),
+    ).visibleIf(visibilityCreteria);
   }
 }

@@ -9,6 +9,7 @@ class AppSettingsModel {
   int decimalPlaces = 2;
   bool prioritizeShift = true;
   String receitLogoPath;
+  bool hasAlertedAboutFreeVersion = false;
   AppSettingsModel({
     required this.externalBarCodeEnabled,
     required this.useSystemDarkMode,
@@ -18,6 +19,7 @@ class AppSettingsModel {
     required this.decimalPlaces,
     this.receitLogoPath = "",
     this.prioritizeShift = true,
+    this.hasAlertedAboutFreeVersion = false,
   });
   factory AppSettingsModel.fromJson(Map<String, dynamic> json) =>
       AppSettingsModel(
@@ -29,16 +31,18 @@ class AppSettingsModel {
         decimalPlaces: json["decimalPlaces"] ?? 2,
         receitLogoPath: json["receitLogoPath"] ?? "",
         prioritizeShift: json["prioritizeShift"] ?? true,
+        hasAlertedAboutFreeVersion: json["hasAlertedAboutFreeVersion"] ?? false,
       );
   Map<String, dynamic> toJson() => {
-    "externalBarCodeEnabled": externalBarCodeEnabled,
-    "useSystemDarkMode": useSystemDarkMode,
     "darkMode": darkMode,
     "enableQrCode": enableQrCode,
-    "printerRecietLength": printerRecietLength,
     "decimalPlaces": decimalPlaces,
     "receitLogoPath": receitLogoPath,
     "prioritizeShift": prioritizeShift,
+    "useSystemDarkMode": useSystemDarkMode,
+    "printerRecietLength": printerRecietLength,
+    "externalBarCodeEnabled": externalBarCodeEnabled,
+    "hasAlertedAboutFreeVersion": hasAlertedAboutFreeVersion,
   };
   static AppSettingsModel fromStorage() {
     GetStorage box = GetStorage();

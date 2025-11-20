@@ -18,7 +18,9 @@ dependencies {
   // When using the BoM, don't specify versions in Firebase dependencies
   implementation("com.google.firebase:firebase-analytics")
   implementation("com.google.firebase:firebase-messaging")
-
+  implementation("com.google.android.gms:play-services-basement:18.2.0")
+  implementation("com.google.android.gms:play-services-base:18.2.0")
+  implementation("com.google.android.gms:play-services-safetynet:18.0.1")
   // Add the dependencies for any other desired Firebase products
   // https://firebase.google.com/docs/android/setup#available-libraries
 }

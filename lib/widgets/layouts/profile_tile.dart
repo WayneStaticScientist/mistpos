@@ -1,6 +1,7 @@
 import 'package:exui/exui.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/models/company_model.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/screens/auth/screen_user_profile.dart';
 
@@ -18,38 +19,55 @@ class _ProfileTileState extends State<ProfileTile> {
     if (_userController.user.value == null) {
       return const SizedBox.shrink();
     }
+    final company = CompanyModel.fromStorage();
     return Obx(() {
       final user = _userController.user.value!;
       return [
-            CircleAvatar(
-              child: user.fullName[0].text(
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            12.gapWidth,
             [
-                  user.fullName.text(),
-                  "role : ${user.role}".text(
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  user.companyName.text(
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ]
-                .column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                )
-                .expanded1,
-            12.gapWidth,
-            "Till ${user.till.toString()}"
-                .text(style: TextStyle(fontSize: 12, color: Colors.grey))
-                .visibleIf(user.role == "cashier"),
-            12.gapWidth,
+              CircleAvatar(
+                child: user.fullName[0].text(
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              12.gapWidth,
+              [
+                    user.fullName.text(),
+                    "role : ${user.role}".text(
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    user.companyName.text(
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ]
+                  .column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                  )
+                  .expanded1,
+              12.gapWidth,
+              "Till ${user.till.toString()}"
+                  .text(style: TextStyle(fontSize: 12, color: Colors.grey))
+                  .visibleIf(user.role == "cashier"),
+              12.gapWidth,
+            ].row(),
+            if (company != null) ...[
+              8.gapHeight,
+              "Version: ${company.subscriptionType.type}".text(
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              if (company.subscriptionType.type != "free") ...[
+                "Expiry Date: ${company.subscriptionType.validUntil != null ? company.subscriptionType.validUntil!.toLocal().toString().split(' ').first : 'N/A'}"
+                    .text(style: TextStyle(fontSize: 12, color: Colors.grey)),
+                8.gapHeight,
+              ],
+            ],
           ]
-          .row()
+          .column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+          )
           .onTap(_dropDown)
           .padding(EdgeInsets.symmetric(horizontal: 9, vertical: 12));
     });

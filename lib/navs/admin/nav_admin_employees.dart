@@ -2,13 +2,16 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/utils/subscriptions.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:mistpos/controllers/admin_controller.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:mistpos/controllers/user_controller.dart';
-import 'package:mistpos/screens/basic/screem_edit_employee.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/controllers/admin_controller.dart';
+import 'package:mistpos/controllers/inventory_controller.dart';
+import 'package:mistpos/screens/basic/screem_edit_employee.dart';
+import 'package:mistpos/widgets/layouts/subscription_alert.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class NavAdminEmployees extends StatefulWidget {
   const NavAdminEmployees({super.key});
@@ -20,6 +23,7 @@ class NavAdminEmployees extends StatefulWidget {
 class _NavAdminEmployeesState extends State<NavAdminEmployees> {
   final _userController = Get.find<UserController>();
   final _adminController = Get.find<AdminController>();
+  final _inventoryController = Get.find<InventoryController>();
   final RefreshController _refreshController = RefreshController(
     initialRefresh: false,
   );
@@ -36,20 +40,28 @@ class _NavAdminEmployeesState extends State<NavAdminEmployees> {
 
   @override
   Widget build(BuildContext context) {
-    return SmartRefresher(
-      controller: _refreshController,
-      header: WaterDropHeader(),
-      onRefresh: _onRefresh,
-      child: ListView(
-        children: [
-          Obx(
-            () => _adminController.loadingEmployess.value
-                ? _buildLoader()
-                : _listEmployees(),
-          ),
-        ],
-      ),
-    );
+    return Obx(() {
+      if (_inventoryController.company.value == null ||
+          !(MistSubscriptionUtils.enterpriseList.contains(
+            _inventoryController.company.value!.subscriptionType.type,
+          ))) {
+        return SubscriptionAlert();
+      }
+      return SmartRefresher(
+        controller: _refreshController,
+        header: WaterDropHeader(),
+        onRefresh: _onRefresh,
+        child: ListView(
+          children: [
+            Obx(
+              () => _adminController.loadingEmployess.value
+                  ? _buildLoader()
+                  : _listEmployees(),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildLoader() {

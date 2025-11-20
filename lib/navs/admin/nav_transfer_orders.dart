@@ -5,6 +5,9 @@ import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/date_utils.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/utils/subscriptions.dart';
+import 'package:mistpos/widgets/layouts/subscription_alert.dart';
+import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
@@ -43,46 +46,62 @@ class _NavTransferOrdersState extends State<NavTransferOrders> {
 
   @override
   Widget build(BuildContext context) {
-    return SmartRefresher(
-      controller: _refreshController,
-      enablePullUp: true,
-      onRefresh: () async {
-        _iventoryController.loadTransferOrders(page: 1, search: _searchTerm);
-        _refreshController.refreshCompleted();
-        _refreshController.loadComplete();
-      },
-      onLoading: () async {
-        if (_iventoryController.transferOrderPage.value <
-            _iventoryController.transferOrderTotalPages.value) {
-          await _iventoryController.loadTransferOrders(
-            page: _iventoryController.transferOrderPage.value + 1,
-            search: _searchTerm,
-          );
+    return Obx(() {
+      if (_iventoryController.company.value == null ||
+          !(MistSubscriptionUtils.proList.contains(
+            _iventoryController.company.value!.subscriptionType.type,
+          ))) {
+        return SubscriptionAlert();
+      }
+      return SmartRefresher(
+        controller: _refreshController,
+        enablePullUp: true,
+        onRefresh: () async {
+          _iventoryController.loadTransferOrders(page: 1, search: _searchTerm);
+          _refreshController.refreshCompleted();
           _refreshController.loadComplete();
-        } else {
-          _refreshController.loadNoData();
-        }
-      },
-      child: ListView(
-        children: [
-          MistSearchField(
-            label: "Search Transfer Orders",
-            controller: _searchController,
-          ),
-          10.gapHeight,
-          Obx(
-            () => ListView.builder(
-              shrinkWrap: true,
-              physics: BouncingScrollPhysics(),
-              itemBuilder: (context, index) {
-                return _buildTile(_iventoryController.transferOrders[index]);
-              },
-              itemCount: _iventoryController.transferOrders.length,
+        },
+        onLoading: () async {
+          if (_iventoryController.transferOrderPage.value <
+              _iventoryController.transferOrderTotalPages.value) {
+            await _iventoryController.loadTransferOrders(
+              page: _iventoryController.transferOrderPage.value + 1,
+              search: _searchTerm,
+            );
+            _refreshController.loadComplete();
+          } else {
+            _refreshController.loadNoData();
+          }
+        },
+        child: ListView(
+          children: [
+            MistSearchField(
+              label: "Search Transfer Orders",
+              controller: _searchController,
             ),
-          ),
-        ],
-      ),
-    );
+            10.gapHeight,
+            Obx(() {
+              if (_iventoryController.transferOrders.isEmpty &&
+                  _iventoryController.loadingTransferOrders.value) {
+                return MistLoader1().center();
+              }
+              if (_iventoryController.transferOrders.isEmpty &&
+                  !_iventoryController.loadingTransferOrders.value) {
+                return "No Transfer Orders Found ".text().center();
+              }
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: BouncingScrollPhysics(),
+                itemBuilder: (context, index) {
+                  return _buildTile(_iventoryController.transferOrders[index]);
+                },
+                itemCount: _iventoryController.transferOrders.length,
+              );
+            }),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildTile(TransferOrderModel model) {

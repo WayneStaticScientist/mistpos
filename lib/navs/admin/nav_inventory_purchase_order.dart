@@ -6,7 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/inventory/constants.dart';
+import 'package:mistpos/utils/subscriptions.dart';
 import 'package:mistpos/widgets/layouts/chips.dart';
+import 'package:mistpos/widgets/layouts/subscription_alert.dart';
+import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/models/purchase_order_model.dart';
@@ -49,68 +52,79 @@ class _NavInventoryPurchaseOrderState extends State<NavInventoryPurchaseOrder> {
 
   @override
   Widget build(BuildContext context) {
-    return SmartRefresher(
-      controller: _refreshController,
-      enablePullUp: true, // Enable pull-up loading
-      // Pull-to-refresh logic
-      onRefresh: () async {
-        await loadInventoryPurchaseOrders();
-        _refreshController.refreshCompleted();
-      },
+    return Obx(() {
+      if (_inventory.company.value == null ||
+          !(MistSubscriptionUtils.proList.contains(
+            _inventory.company.value!.subscriptionType.type,
+          ))) {
+        return SubscriptionAlert();
+      }
+      return SmartRefresher(
+        controller: _refreshController,
+        enablePullUp: true,
+        onRefresh: () async {
+          await loadInventoryPurchaseOrders();
+          _refreshController.refreshCompleted();
+        },
 
-      // 💡 INFINITE SCROLLING LOGIC (onLoading)
-      onLoading: () async {
-        if (_inventory.purchaseOrderPage.value <
-            _inventory.purchaseOrderTotalPages.value) {
-          await _inventory.loadPurchaseOrders(
-            page: _inventory.purchaseOrderPage.value + 1,
-            search: _searchTerm,
-            status: _statusFilter,
-          );
-          _refreshController.loadComplete();
-        } else {
-          _refreshController.loadNoData();
-        }
-      },
-      child: ListView(
-        children: [
-          MistSearchField(label: "Search ", controller: _searchController),
-          ListView(
-            scrollDirection: Axis.horizontal,
-            children: Inventory.purchaseOrderStatus
-                .map(
-                  (e) =>
-                      MistChip(
-                        label: e['label'] ?? '',
-                        selected: _statusFilter == e['value'],
-                      ).onTap(() {
-                        setState(() {
-                          _statusFilter = e['value'] ?? '';
-                        });
-                        loadInventoryPurchaseOrders();
-                      }),
-                )
-                .toList(),
-          ).sizedBox(height: 60, width: double.infinity),
-          Obx(
-            () =>
-                _inventory.purchaseOrders.isEmpty &&
-                    !_inventory.purchaseOrdersLoading.value
-                ? "No Purchase Orders found. Click + to add new purchaseOrder"
-                      .text()
-                      .center()
-                : ListView.builder(
-                    shrinkWrap: true, // IMPORTANT
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: _inventory.purchaseOrders.length,
-                    itemBuilder: (context, index) {
-                      return _buildTile(_inventory.purchaseOrders[index]);
-                    },
-                  ),
-          ),
-        ],
-      ),
-    );
+        // 💡 INFINITE SCROLLING LOGIC (onLoading)
+        onLoading: () async {
+          if (_inventory.purchaseOrderPage.value <
+              _inventory.purchaseOrderTotalPages.value) {
+            await _inventory.loadPurchaseOrders(
+              page: _inventory.purchaseOrderPage.value + 1,
+              search: _searchTerm,
+              status: _statusFilter,
+            );
+            _refreshController.loadComplete();
+          } else {
+            _refreshController.loadNoData();
+          }
+        },
+        child: ListView(
+          children: [
+            MistSearchField(label: "Search ", controller: _searchController),
+            ListView(
+              scrollDirection: Axis.horizontal,
+              children: Inventory.purchaseOrderStatus
+                  .map(
+                    (e) =>
+                        MistChip(
+                          label: e['label'] ?? '',
+                          selected: _statusFilter == e['value'],
+                        ).onTap(() {
+                          setState(() {
+                            _statusFilter = e['value'] ?? '';
+                          });
+                          loadInventoryPurchaseOrders();
+                        }),
+                  )
+                  .toList(),
+            ).sizedBox(height: 60, width: double.infinity),
+            Obx(() {
+              if (_inventory.purchaseOrdersLoading.value &&
+                  _inventory.purchaseOrders.isEmpty) {
+                return MistLoader1().center();
+              }
+              if (_inventory.purchaseOrders.isEmpty &&
+                  !_inventory.purchaseOrdersLoading.value) {
+                return "No Purchase Orders found. Click + to add new purchaseOrder"
+                    .text()
+                    .center();
+              }
+              return ListView.builder(
+                shrinkWrap: true, // IMPORTANT
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: _inventory.purchaseOrders.length,
+                itemBuilder: (context, index) {
+                  return _buildTile(_inventory.purchaseOrders[index]);
+                },
+              );
+            }),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildTile(PurchaseOrderModel model) {

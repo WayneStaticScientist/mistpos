@@ -6,8 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/inventory/constants.dart';
 import 'package:mistpos/utils/date_utils.dart';
+import 'package:mistpos/utils/subscriptions.dart';
 import 'package:mistpos/widgets/layouts/chips.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/widgets/layouts/subscription_alert.dart';
+import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/models/stock_adjustment_model.dart';
@@ -48,74 +51,86 @@ class _NavInventoryStockAdjustmentsState
 
   @override
   Widget build(BuildContext context) {
-    return SmartRefresher(
-      controller: _refreshController,
-      enablePullUp: true,
-      onRefresh: () async {
-        await _inventory.loadStockAdjustments(
-          page: 1,
-          search: _searchTerm,
-          status: _statusFilter,
-        );
-        _refreshController.refreshCompleted();
-        _refreshController.loadComplete();
-      },
-      onLoading: () async {
-        if (_inventory.stockAdjustOrderPage.value <
-            _inventory.stockAdjustOrderTotalPages.value) {
+    return Obx(() {
+      if (_inventory.company.value == null ||
+          !(MistSubscriptionUtils.proList.contains(
+            _inventory.company.value!.subscriptionType.type,
+          ))) {
+        return SubscriptionAlert();
+      }
+      return SmartRefresher(
+        controller: _refreshController,
+        enablePullUp: true,
+        onRefresh: () async {
           await _inventory.loadStockAdjustments(
-            page: _inventory.stockAdjustOrderPage.value + 1,
+            page: 1,
             search: _searchTerm,
             status: _statusFilter,
           );
+          _refreshController.refreshCompleted();
           _refreshController.loadComplete();
-        } else {
-          _refreshController.loadNoData();
-        }
-      },
-      child: ListView(
-        children: [
-          MistSearchField(label: "Search ", controller: _searchController),
-          ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              MistChip(label: "All", selected: _statusFilter == "").onTap(() {
-                setState(() {
-                  _statusFilter = '';
-                });
-                loadInventoryStockerOrders();
-              }),
-              ...Inventory.adjustStockReasons.map(
-                (e) =>
-                    MistChip(
-                      label: e['label'] ?? '',
-                      selected: _statusFilter == e['value'],
-                    ).onTap(() {
-                      setState(() {
-                        _statusFilter = e['value'] ?? '';
-                      });
-                      loadInventoryStockerOrders();
-                    }),
-              ),
-            ],
-          ).sizedBox(width: double.infinity, height: 70),
-          Obx(
-            () =>
-                _inventory.stockerOrders.isEmpty &&
-                    !_inventory.stockAdjustOrdersLoading.value
-                ? "No Stock Adjustments Found ".text().center()
-                : ListView.builder(
-                    shrinkWrap: true, // IMPORTANT
-                    physics: NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return _buildTile(_inventory.stockerOrders[index]);
-                    },
-                    itemCount: _inventory.stockerOrders.length,
-                  ),
-          ),
-        ],
-      ),
-    );
+        },
+        onLoading: () async {
+          if (_inventory.stockAdjustOrderPage.value <
+              _inventory.stockAdjustOrderTotalPages.value) {
+            await _inventory.loadStockAdjustments(
+              page: _inventory.stockAdjustOrderPage.value + 1,
+              search: _searchTerm,
+              status: _statusFilter,
+            );
+            _refreshController.loadComplete();
+          } else {
+            _refreshController.loadNoData();
+          }
+        },
+        child: ListView(
+          children: [
+            MistSearchField(label: "Search ", controller: _searchController),
+            ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                MistChip(label: "All", selected: _statusFilter == "").onTap(() {
+                  setState(() {
+                    _statusFilter = '';
+                  });
+                  loadInventoryStockerOrders();
+                }),
+                ...Inventory.adjustStockReasons.map(
+                  (e) =>
+                      MistChip(
+                        label: e['label'] ?? '',
+                        selected: _statusFilter == e['value'],
+                      ).onTap(() {
+                        setState(() {
+                          _statusFilter = e['value'] ?? '';
+                        });
+                        loadInventoryStockerOrders();
+                      }),
+                ),
+              ],
+            ).sizedBox(width: double.infinity, height: 70),
+            Obx(() {
+              if (_inventory.stockerOrders.isEmpty &&
+                  _inventory.stockAdjustOrdersLoading.value) {
+                return MistLoader1().center();
+              }
+              if (_inventory.stockerOrders.isEmpty &&
+                  !_inventory.stockAdjustOrdersLoading.value) {
+                return "No Stock Adjustments Found ".text().center();
+              }
+              return ListView.builder(
+                shrinkWrap: true, // IMPORTANT
+                physics: NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  return _buildTile(_inventory.stockerOrders[index]);
+                },
+                itemCount: _inventory.stockerOrders.length,
+              );
+            }),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildTile(StockAdjustmentModel model) {

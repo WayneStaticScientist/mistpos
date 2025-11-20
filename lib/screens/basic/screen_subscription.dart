@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/utils/subscriptions.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/widgets/layouts/centered_error.dart';
@@ -87,6 +88,7 @@ class _ScreenSubscriptionState extends State<ScreenSubscription> {
           Obx(
             () => SubscriptionCard(
               title: 'Free Plan',
+              onSubscribe: _freePlan,
               selectedPlan: _controller.company.value!.subscriptionType.type,
               plan: MistSubscriptionUtils.freePlan,
               price: 0.0,
@@ -198,6 +200,33 @@ class _ScreenSubscriptionState extends State<ScreenSubscription> {
       onConfirm: () {
         Get.back();
         _controller.registerFreeTrial();
+      },
+      textCancel: "Cancel",
+    );
+  }
+
+  void _freePlan() {
+    String planType = _controller.company.value!.subscriptionType.type;
+    int daysLeft =
+        _controller.company.value!.subscriptionType.validUntil
+            ?.difference(DateTime.now())
+            .inDays ??
+        0;
+    if (planType != MistSubscriptionUtils.trialPlan && daysLeft > 0) {
+      Toaster.showError(
+        "You can only switch to Free Plan after Period has overwhelmed.",
+      );
+      return;
+    }
+    Get.defaultDialog(
+      title: "Free Plan",
+      middleText:
+          "This will switch you to the free plan. You will have "
+          "access to basic features with limited support.",
+      textConfirm: "OK",
+      onConfirm: () {
+        Get.back();
+        _controller.registerFreePlan();
       },
       textCancel: "Cancel",
     );

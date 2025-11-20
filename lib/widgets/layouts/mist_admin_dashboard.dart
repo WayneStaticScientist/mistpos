@@ -1,9 +1,12 @@
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/utils/subscriptions.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/layouts/profile_tile.dart';
+import 'package:mistpos/controllers/inventory_controller.dart';
 
 class MistAdminDashboard extends StatefulWidget {
   final String userName;
@@ -23,6 +26,7 @@ class MistAdminDashboard extends StatefulWidget {
 }
 
 class _MistAdminDashboardState extends State<MistAdminDashboard> {
+  final _inventoryController = Get.find<InventoryController>();
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -141,106 +145,190 @@ class _MistAdminDashboardState extends State<MistAdminDashboard> {
               ),
             ],
           ),
-          ExpansionTile(
-            title: "Inventory".text(),
-            collapsedBackgroundColor:
-                [
-                  "Transfer Orders",
-                  "Productions",
-                  "Inventory Counts",
-                  "Suppliers",
-                  "Purchase Orders",
-                  "Stock Adjustments",
-                ].contains(widget.selectedTile)
-                ? Colors.grey.withAlpha(50)
-                : null,
-            leading: Iconify(
-              Carbon.inventory_management,
-              color: Colors.deepOrangeAccent,
-            ),
-            shape: RoundedRectangleBorder(),
-            childrenPadding: EdgeInsets.symmetric(horizontal: 14),
-            children: [
-              ListTile(
-                leading: Iconify(Carbon.purchase, color: Colors.blueAccent),
-                title: "Purchase Orders".text(),
-                onTap: () => widget.onTap("Purchase Orders"),
-                tileColor: widget.selectedTile == "Purchase Orders"
-                    ? Colors.grey.withAlpha(50)
-                    : null,
+          Obx(() {
+            bool isSubscribed = MistSubscriptionUtils.proList.contains(
+              _inventoryController.company.value?.subscriptionType.type,
+            );
+            bool enterprise = MistSubscriptionUtils.enterpriseList.contains(
+              _inventoryController.company.value?.subscriptionType.type,
+            );
+            return ExpansionTile(
+              iconColor: isSubscribed ? null : Colors.red,
+              collapsedIconColor: isSubscribed ? null : Colors.red,
+              title: "Inventory".text(
+                style: TextStyle(color: isSubscribed ? null : Colors.red),
               ),
-              ListTile(
-                leading: Iconify(Bx.cart, color: Colors.purpleAccent),
-                title: "Stock Adjustments".text(),
-                onTap: () => widget.onTap("Stock Adjustments"),
-                tileColor: widget.selectedTile == "Stock Adjustments"
-                    ? Colors.grey.withAlpha(50)
-                    : null,
+              collapsedBackgroundColor:
+                  [
+                    "Transfer Orders",
+                    "Productions",
+                    "Inventory Counts",
+                    "Suppliers",
+                    "Purchase Orders",
+                    "Stock Adjustments",
+                  ].contains(widget.selectedTile)
+                  ? Colors.grey.withAlpha(50)
+                  : null,
+              leading: Iconify(
+                Carbon.inventory_management,
+                color: isSubscribed ? Colors.indigo : Colors.red,
               ),
-              ListTile(
-                leading: Iconify(Carbon.user_multiple, color: Colors.green),
-                title: "Suppliers".text(),
-                onTap: () => widget.onTap("Suppliers"),
-                tileColor: widget.selectedTile == "Suppliers"
-                    ? Colors.grey.withAlpha(50)
-                    : null,
-              ),
-              ListTile(
-                leading: Iconify(
-                  Carbon.study_transfer,
-                  color: Colors.orangeAccent,
+              shape: RoundedRectangleBorder(),
+              childrenPadding: EdgeInsets.symmetric(horizontal: 14),
+              children: [
+                ListTile(
+                  leading: Iconify(
+                    Carbon.purchase,
+                    color: isSubscribed ? Colors.blueAccent : Colors.red,
+                  ),
+                  title: "Purchase Orders".text(
+                    style: TextStyle(color: isSubscribed ? null : Colors.red),
+                  ),
+                  onTap: () => widget.onTap("Purchase Orders"),
+                  trailing: isSubscribed
+                      ? null
+                      : Iconify(Bx.lock, color: Colors.red, size: 16),
+                  tileColor: widget.selectedTile == "Purchase Orders"
+                      ? Colors.grey.withAlpha(50)
+                      : null,
                 ),
-                title: "Transfer Orders".text(),
-                onTap: () => widget.onTap("Transfer Orders"),
-                tileColor: widget.selectedTile == "Transfer Orders"
-                    ? Colors.grey.withAlpha(50)
-                    : null,
-              ),
-              ListTile(
-                leading: Iconify(
-                  Carbon.inventory_management,
-                  color: Colors.indigo,
+                ListTile(
+                  leading: Iconify(
+                    Bx.cart,
+                    color: isSubscribed ? Colors.purpleAccent : Colors.red,
+                  ),
+                  title: "Stock Adjustments".text(
+                    style: TextStyle(color: enterprise ? null : Colors.red),
+                  ),
+                  trailing: isSubscribed
+                      ? null
+                      : Iconify(Bx.lock, color: Colors.red, size: 16),
+                  onTap: () => widget.onTap("Stock Adjustments"),
+                  tileColor: widget.selectedTile == "Stock Adjustments"
+                      ? Colors.grey.withAlpha(50)
+                      : null,
                 ),
-                title: "Inventory Counts".text(),
-                onTap: () => widget.onTap("Inventory Counts"),
-                tileColor: widget.selectedTile == "Inventory Counts"
-                    ? Colors.grey.withAlpha(50)
-                    : null,
+                ListTile(
+                  leading: Iconify(
+                    Carbon.user_multiple,
+                    color: isSubscribed ? Colors.green : Colors.red,
+                  ),
+                  title: "Suppliers".text(
+                    style: TextStyle(color: isSubscribed ? null : Colors.red),
+                  ),
+                  trailing: isSubscribed
+                      ? null
+                      : Iconify(Bx.lock, color: Colors.red, size: 16),
+                  onTap: () => widget.onTap("Suppliers"),
+                  tileColor: widget.selectedTile == "Suppliers"
+                      ? Colors.grey.withAlpha(50)
+                      : null,
+                ),
+                ListTile(
+                  leading: Iconify(
+                    Carbon.study_transfer,
+                    color: isSubscribed ? Colors.orangeAccent : Colors.red,
+                  ),
+                  title: "Transfer Orders".text(
+                    style: TextStyle(color: isSubscribed ? null : Colors.red),
+                  ),
+                  trailing: isSubscribed
+                      ? null
+                      : Iconify(Bx.lock, color: Colors.red, size: 16),
+                  onTap: () => widget.onTap("Transfer Orders"),
+                  tileColor: widget.selectedTile == "Transfer Orders"
+                      ? Colors.grey.withAlpha(50)
+                      : null,
+                ),
+                ListTile(
+                  leading: Iconify(
+                    Carbon.inventory_management,
+                    color: isSubscribed ? Colors.indigo : Colors.red,
+                  ),
+                  title: "Inventory Counts".text(
+                    style: TextStyle(color: isSubscribed ? null : Colors.red),
+                  ),
+                  trailing: isSubscribed
+                      ? null
+                      : Iconify(Bx.lock, color: Colors.red, size: 16),
+                  onTap: () => widget.onTap("Inventory Counts"),
+                  tileColor: widget.selectedTile == "Inventory Counts"
+                      ? Colors.grey.withAlpha(50)
+                      : null,
+                ),
+                ListTile(
+                  leading: Iconify(
+                    Carbon.product,
+                    color: enterprise ? Colors.lightBlue : Colors.red,
+                  ),
+                  title: "Productions".text(
+                    style: TextStyle(color: enterprise ? null : Colors.red),
+                  ),
+                  onTap: () => widget.onTap("Productions"),
+                  trailing: enterprise
+                      ? null
+                      : Iconify(Bx.lock, color: Colors.red, size: 16),
+                  tileColor: widget.selectedTile == "Productions"
+                      ? Colors.grey.withAlpha(50)
+                      : null,
+                ),
+                ListTile(
+                  leading: Iconify(
+                    Carbon.timer,
+
+                    color: isSubscribed ? Colors.lightGreenAccent : Colors.red,
+                  ),
+                  title: "Inventory History".text(
+                    style: TextStyle(color: isSubscribed ? null : Colors.red),
+                  ),
+                  trailing: isSubscribed
+                      ? null
+                      : Iconify(Bx.lock, color: Colors.red, size: 16),
+                  onTap: () => widget.onTap("Inventory History"),
+                  tileColor: widget.selectedTile == "Inventory History"
+                      ? Colors.grey.withAlpha(50)
+                      : null,
+                ),
+                ListTile(
+                  leading: Iconify(
+                    Carbon.math_curve,
+                    color: isSubscribed ? Colors.teal : Colors.red,
+                  ),
+                  title: "Inventory Valuation".text(
+                    style: TextStyle(color: isSubscribed ? null : Colors.red),
+                  ),
+                  trailing: isSubscribed
+                      ? null
+                      : Iconify(Bx.lock, color: Colors.red, size: 16),
+                  onTap: () => widget.onTap("Inventory Valuation"),
+                  tileColor: widget.selectedTile == "Inventory Valuation"
+                      ? Colors.grey.withAlpha(50)
+                      : null,
+                ),
+              ],
+            );
+          }),
+          Obx(() {
+            bool isSubscribed =
+                _inventoryController.company.value?.subscriptionType.type !=
+                'free';
+            return ListTile(
+              leading: Iconify(
+                Carbon.two_person_lift,
+                color: isSubscribed ? Colors.cyan : Colors.red,
               ),
-              ListTile(
-                leading: Iconify(Carbon.product, color: Colors.lightBlue),
-                title: "Productions".text(),
-                onTap: () => widget.onTap("Productions"),
-                tileColor: widget.selectedTile == "Productions"
-                    ? Colors.grey.withAlpha(50)
-                    : null,
+              title: "Employees".text(
+                style: TextStyle(color: isSubscribed ? null : Colors.red),
               ),
-              ListTile(
-                leading: Iconify(Carbon.timer, color: Colors.lightGreenAccent),
-                title: "Inventory History".text(),
-                onTap: () => widget.onTap("Inventory History"),
-                tileColor: widget.selectedTile == "Inventory History"
-                    ? Colors.grey.withAlpha(50)
-                    : null,
-              ),
-              ListTile(
-                leading: Iconify(Carbon.math_curve, color: Colors.teal),
-                title: "Inventory Valuation".text(),
-                onTap: () => widget.onTap("Inventory Valuation"),
-                tileColor: widget.selectedTile == "Inventory Valuation"
-                    ? Colors.grey.withAlpha(50)
-                    : null,
-              ),
-            ],
-          ),
-          ListTile(
-            leading: Iconify(Carbon.two_person_lift, color: Colors.cyan),
-            title: "Employees".text(),
-            onTap: () => widget.onTap("Employees"),
-            tileColor: widget.selectedTile == "Employees"
-                ? Colors.grey.withAlpha(50)
-                : null,
-          ),
+              trailing: isSubscribed
+                  ? null
+                  : Iconify(Bx.lock, color: Colors.red, size: 16),
+              onTap: () => widget.onTap("Employees"),
+              tileColor: widget.selectedTile == "Employees"
+                  ? Colors.grey.withAlpha(50)
+                  : null,
+            );
+          }),
           ListTile(
             leading: Iconify(Carbon.person_favorite, color: Colors.teal),
             title: "Customers".text(),

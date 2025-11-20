@@ -16,7 +16,7 @@ import 'package:mistpos/screens/basic/screen_shifts_screen.dart';
 import 'package:mistpos/screens/basic/screen_settings_page.dart';
 import 'package:mistpos/screens/basic/screen_devices_section.dart';
 
-class MistMainNavigationView extends StatelessWidget {
+class MistMainNavigationView extends StatefulWidget {
   final Function(String value) onTap;
   final User? user;
   final String selectedNav;
@@ -27,6 +27,11 @@ class MistMainNavigationView extends StatelessWidget {
     this.user,
   });
 
+  @override
+  State<MistMainNavigationView> createState() => _MistMainNavigationViewState();
+}
+
+class _MistMainNavigationViewState extends State<MistMainNavigationView> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -39,24 +44,24 @@ class MistMainNavigationView extends StatelessWidget {
             ListTile(
               leading: Iconify(Bx.cart, color: AppTheme.color(context)),
               title: Text('Sales'),
-              onTap: () => onTap('sales'),
-              tileColor: selectedNav == 'sales'
+              onTap: () => widget.onTap('sales'),
+              tileColor: widget.selectedNav == 'sales'
                   ? Colors.grey.withAlpha(50)
                   : null,
             ),
             ListTile(
               leading: Iconify(Bx.receipt, color: AppTheme.color(context)),
               title: Text('Receipts'),
-              tileColor: selectedNav == 'receipts'
+              tileColor: widget.selectedNav == 'receipts'
                   ? Colors.grey.withAlpha(50)
                   : null,
-              onTap: () => onTap('receipts'),
+              onTap: () => widget.onTap('receipts'),
             ),
             ListTile(
               leading: Iconify(Bx.category, color: AppTheme.color(context)),
               title: Text('Items'),
-              onTap: () => onTap('items'),
-              tileColor: selectedNav == 'items'
+              onTap: () => widget.onTap('items'),
+              tileColor: widget.selectedNav == 'items'
                   ? Colors.grey.withAlpha(30)
                   : null,
             ),
@@ -110,7 +115,7 @@ class MistMainNavigationView extends StatelessWidget {
             ListTile(
               leading: Iconify(Bx.help_circle, color: AppTheme.color(context)),
               title: Text('Help & Support'),
-              onTap: () => onTap('help'),
+              onTap: () => widget.onTap('help'),
             ),
           ],
         ),

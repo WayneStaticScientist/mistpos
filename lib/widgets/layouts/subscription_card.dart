@@ -33,7 +33,7 @@ class SubscriptionCard extends StatelessWidget {
         fillColor ??
         (selectedPlan == plan
             ? Colors.green
-            : Get.theme.primaryColor); // Deep Purple
+            : Get.theme.colorScheme.primary); // Deep Purple
     final Color secondaryColor = fillColor ?? Color(0xFF4527A0); // Indigo
     final Color accentColor =
         Get.theme.colorScheme.secondary; // Amber for the CTA button
@@ -128,16 +128,7 @@ class SubscriptionCard extends StatelessWidget {
                     children: [
                       Icon(Icons.check_circle, color: primaryColor, size: 20),
                       const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          feature,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.black87,
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
+                      feature.text().expanded1, // Takes up remaining space
                     ],
                   ),
                 );

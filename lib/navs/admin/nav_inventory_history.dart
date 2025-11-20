@@ -6,12 +6,14 @@ import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/themes/app_theme.dart';
+import 'package:mistpos/utils/subscriptions.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:mistpos/models/inventory_history_model.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
+import 'package:mistpos/widgets/layouts/subscription_alert.dart';
 import 'package:mistpos/utils/pdfdocuments/pdf_inventory_history.dart';
 
 class NavInventoryHistory extends StatefulWidget {
@@ -37,32 +39,39 @@ class NavInventoryHistoryState extends State<NavInventoryHistory> {
 
   @override
   Widget build(BuildContext context) {
-    return [
-      14.gapHeight,
-      [
-        Iconify(Bx.calendar, color: AppTheme.color(context)),
-        8.gapWidth,
+    return Obx(() {
+      if (_inventoryController.company.value == null ||
+          !(MistSubscriptionUtils.proList.contains(
+            _inventoryController.company.value!.subscriptionType.type,
+          ))) {
+        return SubscriptionAlert();
+      }
+      return [
+        14.gapHeight,
+        [
+          Iconify(Bx.calendar, color: AppTheme.color(context)),
+          8.gapWidth,
 
-        "From ${MistDateUtils.getInformalShortDate(_startDate)} - ${(DateUtils.isSameDay(_endDate, DateTime.now()) ? "Today " : MistDateUtils.getInformalShortDate(_endDate))}"
-            .text()
-            .visibleIfNotNull(_startDate),
-      ].row(mainAxisAlignment: MainAxisAlignment.center).onTap(_changeDateRange),
-      "Tap on the date icon to change date ranges".text(
-        style: TextStyle(color: Colors.grey, fontSize: 12),
-      ),
-
-      Obx(() {
-        if (_inventoryController.loadingInventoryHistory.value) {
-          return MistLoader1().center();
-        }
-        if (_inventoryController.inventoryHistory.isEmpty) {
-          return "No sales today".text().center();
-        }
-        return SingleChildScrollView(
-          child: _makeTable(_inventoryController.inventoryHistory),
-        );
-      }).expanded1,
-    ].column();
+          "From ${MistDateUtils.getInformalShortDate(_startDate)} - ${(DateUtils.isSameDay(_endDate, DateTime.now()) ? "Today " : MistDateUtils.getInformalShortDate(_endDate))}"
+              .text()
+              .visibleIfNotNull(_startDate),
+        ].row(mainAxisAlignment: MainAxisAlignment.center).onTap(_changeDateRange),
+        "Tap on the date icon to change date ranges".text(
+          style: TextStyle(color: Colors.grey, fontSize: 12),
+        ),
+        Obx(() {
+          if (_inventoryController.loadingInventoryHistory.value) {
+            return MistLoader1().center();
+          }
+          if (_inventoryController.inventoryHistory.isEmpty) {
+            return "No sales today".text().center();
+          }
+          return SingleChildScrollView(
+            child: _makeTable(_inventoryController.inventoryHistory),
+          );
+        }).expanded1,
+      ].column();
+    });
   }
 
   Widget _makeTable(RxList<InventoryHistoryModel> historyModel) {

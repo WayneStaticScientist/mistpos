@@ -21,6 +21,7 @@ import 'package:radio_group_v2/utils/radio_group_decoration.dart';
 import 'package:mistpos/controllers/items_unsaved_controller.dart';
 import 'package:radio_group_v2/widgets/views/radio_group.dart' as rg;
 import 'package:mistpos/widgets/buttons/mist_loaded_icon_button.dart';
+import 'package:flutter_barcode_scanner_plus/flutter_barcode_scanner_plus.dart';
 import 'package:radio_group_v2/widgets/view_models/radio_group_controller.dart';
 import 'package:mistpos/screens/inventory/screen_select_purchase_order_items.dart';
 
@@ -64,7 +65,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
   late final _reorderLevelController = TextEditingController(
     text: widget.model.lowStockThreshold.toString(),
   );
-  late final List<String> _modifiers = widget.model.modifiers ?? [];
+  late final List<String> _modifiers = List.from(widget.model.modifiers ?? []);
   bool _isLoading = false;
   @override
   void initState() {
@@ -325,6 +326,10 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
           label: "Barcode",
           icon: Iconify(Bx.barcode_reader, color: Colors.grey.withAlpha(200)),
           underLineColor: Colors.grey.withAlpha(200),
+          suffixIcon: IconButton(
+            onPressed: _scanBarCode,
+            icon: Iconify(Bx.barcode_reader, color: Colors.red),
+          ),
         ),
       ],
     );
@@ -515,6 +520,26 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
             crossAxisAlignment: CrossAxisAlignment.start,
           ),
     );
+  }
+
+  void _scanBarCode() async {
+    String barcodeScanResult;
+    try {
+      barcodeScanResult = await FlutterBarcodeScanner.scanBarcode(
+        '#ff6666', // Line color
+        'Cancel',
+        true,
+        ScanMode.BARCODE, // Scan mode
+      );
+    } catch (e) {
+      Toaster.showError("Error : $e");
+      return;
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _itemBarcodeController.text = barcodeScanResult;
+    });
   }
 
   _editItem(InvItem e) {

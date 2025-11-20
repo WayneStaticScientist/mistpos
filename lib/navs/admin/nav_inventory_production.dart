@@ -7,6 +7,9 @@ import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/models/production_model.dart';
+import 'package:mistpos/utils/subscriptions.dart';
+import 'package:mistpos/widgets/layouts/subscription_alert.dart';
+import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
@@ -44,46 +47,58 @@ class _NavInventoryProductionState extends State<NavInventoryProduction> {
 
   @override
   Widget build(BuildContext context) {
-    return SmartRefresher(
-      controller: _refreshController,
-      enablePullUp: true,
-      onRefresh: () async {
-        loadInventoryProductions();
-        await Future.delayed(Duration(milliseconds: 800));
-        _refreshController.refreshCompleted();
-      },
-      onLoading: () async {
-        if (_inventory.productionsPage.value <
-            _inventory.productionsTotalPages.value) {
-          await _inventory.loadProductions(
-            page: _inventory.productionsPage.value + 1,
-            search: _searchTerm,
-          );
-          _refreshController.loadComplete();
-        } else {
-          _refreshController.loadNoData();
-        }
-      },
-      child: ListView(
-        children: [
-          MistSearchField(label: "Search ", controller: _searchController),
-          Obx(
-            () =>
-                _inventory.productions.isEmpty &&
-                    !_inventory.productionsLoading.value
-                ? "No Productions click + to add new production".text().center()
-                : ListView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return _buildTile(_inventory.productions[index]);
-                    },
-                    itemCount: _inventory.productions.length,
-                  ),
-          ),
-        ],
-      ),
-    );
+    return Obx(() {
+      if (_inventory.company.value == null ||
+          !(MistSubscriptionUtils.enterpriseList.contains(
+            _inventory.company.value!.subscriptionType.type,
+          ))) {
+        return SubscriptionAlert();
+      }
+      return SmartRefresher(
+        controller: _refreshController,
+        enablePullUp: true,
+        onRefresh: () async {
+          loadInventoryProductions();
+          await Future.delayed(Duration(milliseconds: 800));
+          _refreshController.refreshCompleted();
+        },
+        onLoading: () async {
+          if (_inventory.productionsPage.value <
+              _inventory.productionsTotalPages.value) {
+            await _inventory.loadProductions(
+              page: _inventory.productionsPage.value + 1,
+              search: _searchTerm,
+            );
+            _refreshController.loadComplete();
+          } else {
+            _refreshController.loadNoData();
+          }
+        },
+        child: ListView(
+          children: [
+            MistSearchField(label: "Search ", controller: _searchController),
+            Obx(() {
+              if (_inventory.productions.isEmpty &&
+                  _inventory.productionsLoading.value) {
+                return MistLoader1().center();
+              }
+              if (_inventory.productions.isEmpty &&
+                  !_inventory.productionsLoading.value) {
+                "No Productions click + to add new production".text().center();
+              }
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  return _buildTile(_inventory.productions[index]);
+                },
+                itemCount: _inventory.productions.length,
+              );
+            }),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildTile(ProductionModel model) {

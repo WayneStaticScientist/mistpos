@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/inv_item.dart';
 import 'package:iconify_flutter/icons/bx.dart';
@@ -10,7 +9,6 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/models/transfer_order_model.dart';
-import 'package:mistpos/widgets/buttons/card_buttons.dart';
 import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:mistpos/screens/basic/modern_layout.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
@@ -149,26 +147,7 @@ class _ScreenAddTransferOrderState extends State<ScreenAddTransferOrder> {
                         Obx(
                           () => _inventory.selectedInvItems.isEmpty
                               ? "No items selected".text()
-                              : ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: _inventory.selectedInvItems.length,
-                                  itemBuilder: (context, index) {
-                                    final e =
-                                        _inventory.selectedInvItems[index];
-                                    return ListTile(
-                                      onTap: () => Future.microtask(
-                                        () => _showBottomBar(e),
-                                      ),
-                                      leading: CircleAvatar(
-                                        child: "${(e.quantity)}".text(
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                      subtitle: "in stock ${e.inStock}".text(),
-                                      title: e.name.text(),
-                                    );
-                                  },
-                                ),
+                              : _makeTable(),
                         ),
                       ]
                       .column(
@@ -188,23 +167,40 @@ class _ScreenAddTransferOrderState extends State<ScreenAddTransferOrder> {
     );
   }
 
-  _showBottomBar(InvItem itemInv) {
-    Get.bottomSheet(
-      [
-        CardButtons(
-          onTap: () => {Get.back(), _edit(itemInv)},
-          icon: Iconify(Bx.edit, color: AppTheme.color(context)),
-          label: "Edit",
-          color: Get.theme.colorScheme.primary.withAlpha(50),
-        ).expanded1,
-        CardButtons(
-          onTap: () => {Get.back(), _inventory.removeodel(itemInv)},
-          icon: Iconify(Bx.user_plus, color: AppTheme.color(context)),
-          label: "Remove",
-          color: Get.theme.colorScheme.secondary.withAlpha(50),
-        ).expanded1,
-      ].row().padding(EdgeInsets.only(top: 18)).safeArea(),
-      backgroundColor: Get.theme.colorScheme.surface,
+  Widget _makeTable() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: DataTable(
+        columns: [
+          DataColumn(label: "Item Name".text()),
+          DataColumn(label: "In Stock".text()),
+          DataColumn(label: "Quantity".text()),
+          DataColumn(label: "".text()),
+        ],
+        rows: _inventory.selectedInvItems
+            .map(
+              (e) => DataRow(
+                cells: [
+                  DataCell(e.name.text()),
+                  DataCell("${e.inStock}".text()),
+                  DataCell(
+                    "${e.quantity}".text().textButton(
+                      onPressed: () => _edit(e),
+                    ),
+                  ),
+                  DataCell(
+                    IconButton(
+                      onPressed: () {
+                        _inventory.removeodel(e);
+                      },
+                      icon: Icon(Icons.close),
+                    ),
+                  ),
+                ],
+              ),
+            )
+            .toList(),
+      ),
     );
   }
 

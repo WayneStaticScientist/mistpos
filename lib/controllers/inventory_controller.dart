@@ -672,4 +672,30 @@ class InventoryController extends GetxController {
     Toaster.showSuccess("Free trial started successfully");
     return;
   }
+
+  void registerFreePlan() async {
+    if (loadingFreeTrial.value) return;
+    loadingFreeTrial.value = true;
+    final result = await Net.post("/admin/subscribe/freePlan");
+    loadingFreeTrial.value = false;
+    if (result.hasError) {
+      Toaster.showError(result.response);
+      return;
+    }
+    company.value = CompanyModel.fromJson(result.body['company']);
+    company.value!.saveToStorage();
+    Toaster.showSuccess("Free plan started successfully");
+    return;
+  }
+
+  void closeLocalNotification() async {
+    final result = await Net.post("/admin/subscribe/closeLocalNotification");
+    if (result.hasError) {
+      return;
+    }
+    company.value = CompanyModel.fromJson(result.body['company']);
+    company.value!.saveToStorage();
+    Toaster.showSuccess("Free trial started successfully");
+    return;
+  }
 }

@@ -4,14 +4,17 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
-import 'package:mistpos/inventory/constants.dart';
 import 'package:mistpos/utils/date_utils.dart';
+import 'package:mistpos/inventory/constants.dart';
+import 'package:mistpos/utils/subscriptions.dart';
 import 'package:mistpos/widgets/layouts/chips.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
+import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/models/inventory_count_model.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
+import 'package:mistpos/widgets/layouts/subscription_alert.dart';
 import 'package:mistpos/screens/inventory/screen_view_inventory_count.dart';
 
 class NavInventoryCounts extends StatefulWidget {
@@ -44,63 +47,79 @@ class _NavInventoryCountsState extends State<NavInventoryCounts> {
 
   @override
   Widget build(BuildContext context) {
-    return SmartRefresher(
-      controller: _refreshController,
-      enablePullUp: true,
-      onRefresh: () async {
-        loadInventoryCounts();
-        await Future.delayed(Duration(milliseconds: 800));
-        _refreshController.refreshCompleted();
-      },
-      onLoading: () async {
-        if (_iventoryController.inventoryCountsPage.value <
-            _iventoryController.inventoryCountsTotalPages.value) {
-          await _iventoryController.loadInventoriesCounts(
-            page: _iventoryController.inventoryCountsPage.value + 1,
-            search: _searchTerm,
-            status: _statusFilter,
-          );
-          _refreshController.loadComplete();
-        } else {
-          _refreshController.loadNoData();
-        }
-      },
-      child: ListView(
-        children: [
-          MistSearchField(
-            label: "Search Inventory Counts",
-            controller: _searchController,
-          ),
-          Wrap(
-            alignment: WrapAlignment.start,
-            children: Inventory.inventoryCountStatus
-                .map(
-                  (e) =>
-                      MistChip(
-                        label: e['label'] ?? '',
-                        selected: _statusFilter == e['value'],
-                      ).onTap(() {
-                        setState(() {
-                          _statusFilter = e['value'] ?? '';
-                        });
-                        loadInventoryCounts();
-                      }),
-                )
-                .toList(),
-          ).sizedBox(width: double.infinity),
-          Obx(
-            () => ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemBuilder: (context, index) {
-                return _buildTile(_iventoryController.inventoryCounts[index]);
-              },
-              itemCount: _iventoryController.inventoryCounts.length,
+    return Obx(() {
+      if (_iventoryController.company.value == null ||
+          !(MistSubscriptionUtils.proList.contains(
+            _iventoryController.company.value!.subscriptionType.type,
+          ))) {
+        return SubscriptionAlert();
+      }
+      return SmartRefresher(
+        controller: _refreshController,
+        enablePullUp: true,
+        onRefresh: () async {
+          loadInventoryCounts();
+          await Future.delayed(Duration(milliseconds: 800));
+          _refreshController.refreshCompleted();
+        },
+        onLoading: () async {
+          if (_iventoryController.inventoryCountsPage.value <
+              _iventoryController.inventoryCountsTotalPages.value) {
+            await _iventoryController.loadInventoriesCounts(
+              page: _iventoryController.inventoryCountsPage.value + 1,
+              search: _searchTerm,
+              status: _statusFilter,
+            );
+            _refreshController.loadComplete();
+          } else {
+            _refreshController.loadNoData();
+          }
+        },
+        child: ListView(
+          children: [
+            MistSearchField(
+              label: "Search Inventory Counts",
+              controller: _searchController,
             ),
-          ),
-        ],
-      ),
-    );
+            Wrap(
+              alignment: WrapAlignment.start,
+              children: Inventory.inventoryCountStatus
+                  .map(
+                    (e) =>
+                        MistChip(
+                          label: e['label'] ?? '',
+                          selected: _statusFilter == e['value'],
+                        ).onTap(() {
+                          setState(() {
+                            _statusFilter = e['value'] ?? '';
+                          });
+                          loadInventoryCounts();
+                        }),
+                  )
+                  .toList(),
+            ).sizedBox(width: double.infinity),
+            Obx(() {
+              if (_iventoryController.inventoryCounts.isEmpty &&
+                  _iventoryController.inventoryCountsLoading.value) {
+                return MistLoader1().center();
+              }
+              if (_iventoryController.inventoryCounts.isEmpty &&
+                  !_iventoryController.inventoryCountsLoading.value) {
+                return "No Inventory Counts found".text().center();
+              }
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  return _buildTile(_iventoryController.inventoryCounts[index]);
+                },
+                itemCount: _iventoryController.inventoryCounts.length,
+              );
+            }),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildTile(InventoryCountModel model) {

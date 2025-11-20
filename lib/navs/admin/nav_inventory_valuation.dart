@@ -1,5 +1,5 @@
-import 'package:exui/exui.dart';
 import 'package:get/get.dart';
+import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:pdf_maker/pdf_maker.dart';
@@ -7,6 +7,7 @@ import 'package:mistpos/utils/date_utils.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/models/item_model.dart';
+import 'package:mistpos/utils/subscriptions.dart';
 import 'package:mistpos/widgets/layouts/chips.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/utils/currence_converter.dart';
@@ -16,6 +17,7 @@ import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
+import 'package:mistpos/widgets/layouts/subscription_alert.dart';
 import 'package:mistpos/utils/pdfdocuments/pdf_inv_evaluation.dart';
 
 class NavInventoryValuation extends StatefulWidget {
@@ -45,74 +47,86 @@ class NavInventoryValuationState extends State<NavInventoryValuation> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: [
-        14.gapHeight,
-        [
-          Iconify(Bx.calendar, color: AppTheme.color(context)),
-          8.gapWidth,
+    return Obx(() {
+      if (_inventoryController.company.value == null ||
+          !(MistSubscriptionUtils.proList.contains(
+            _inventoryController.company.value!.subscriptionType.type,
+          ))) {
+        return SubscriptionAlert();
+      }
+      return SingleChildScrollView(
+        child: [
+          14.gapHeight,
+          [
+                Iconify(Bx.calendar, color: AppTheme.color(context)),
+                8.gapWidth,
 
-          "From ${MistDateUtils.getInformalShortDate(_startDate)} - ${(DateUtils.isSameDay(_endDate, DateTime.now()) ? "Today " : MistDateUtils.getInformalShortDate(_endDate))}"
-              .text()
-              .visibleIfNotNull(_startDate),
-        ].row(mainAxisAlignment: MainAxisAlignment.center).onTap(_changeDateRange),
-        "Tap on the date icon to change date ranges".text(
-          style: TextStyle(color: Colors.grey, fontSize: 12),
-        ),
+                "From ${MistDateUtils.getInformalShortDate(_startDate)} - ${(DateUtils.isSameDay(_endDate, DateTime.now()) ? "Today " : MistDateUtils.getInformalShortDate(_endDate))}"
+                    .text()
+                    .visibleIfNotNull(_startDate),
+              ]
+              .row(mainAxisAlignment: MainAxisAlignment.center)
+              .onTap(_changeDateRange),
+          "Tap on the date icon to change date ranges".text(
+            style: TextStyle(color: Colors.grey, fontSize: 12),
+          ),
 
-        Obx(() {
-          if (_inventoryController.loadingInventoryValuation.value) {
-            return MistLoader1();
-          }
-          if (_inventoryController.statsPoducts.value == null) {
-            return "No value for that specified time".text();
-          }
-          return _makeSummary(_inventoryController.statsPoducts.value!);
-        }),
-        18.gapHeight,
-        Obx(() {
-          if (_inventoryController.loadingInventoryProducts.value) {
-            return SizedBox();
-          }
-          return "Inventory Products".text();
-        }),
+          Obx(() {
+            if (_inventoryController.loadingInventoryValuation.value) {
+              return MistLoader1();
+            }
+            if (_inventoryController.statsPoducts.value == null) {
+              return "No value for that specified time".text();
+            }
+            return _makeSummary(_inventoryController.statsPoducts.value!);
+          }),
+          18.gapHeight,
+          Obx(() {
+            if (_inventoryController.loadingInventoryProducts.value) {
+              return SizedBox();
+            }
+            return "Inventory Products".text();
+          }),
 
-        Obx(() {
-          if (_inventoryController.loadingInventoryProducts.value) {
-            return SizedBox();
-          }
-          return ListView(
-            scrollDirection: Axis.horizontal,
-            children: List.generate(
-              _inventoryController.inventoryProductsTotalPages.value,
-              (e) =>
-                  MistChip(
-                        label: (e + 1).toString(),
-                        selected:
-                            e ==
-                            _inventoryController.inventoryProductsPage.value -
-                                1,
-                      )
-                      .onTap(() {
-                        _inventoryController.loadInventoryProducts(page: e + 1);
-                      })
-                      .padding(EdgeInsets.symmetric(horizontal: 5)),
-            ),
-          ).sizedBox(height: 50);
-        }),
-        18.gapHeight,
-        Obx(() {
-          if (_inventoryController.loadingInventoryProducts.value) {
-            return MistLoader1();
-          }
-          if (_inventoryController.inventoryProducts.isEmpty) {
-            return "No products found".text();
-          }
+          Obx(() {
+            if (_inventoryController.loadingInventoryProducts.value) {
+              return SizedBox();
+            }
+            return ListView(
+              scrollDirection: Axis.horizontal,
+              children: List.generate(
+                _inventoryController.inventoryProductsTotalPages.value,
+                (e) =>
+                    MistChip(
+                          label: (e + 1).toString(),
+                          selected:
+                              e ==
+                              _inventoryController.inventoryProductsPage.value -
+                                  1,
+                        )
+                        .onTap(() {
+                          _inventoryController.loadInventoryProducts(
+                            page: e + 1,
+                          );
+                        })
+                        .padding(EdgeInsets.symmetric(horizontal: 5)),
+              ),
+            ).sizedBox(height: 50);
+          }),
+          18.gapHeight,
+          Obx(() {
+            if (_inventoryController.loadingInventoryProducts.value) {
+              return MistLoader1();
+            }
+            if (_inventoryController.inventoryProducts.isEmpty) {
+              return "No products found".text();
+            }
 
-          return _makeTable(_inventoryController.inventoryProducts);
-        }),
-      ].column(),
-    );
+            return _makeTable(_inventoryController.inventoryProducts);
+          }),
+        ].column(),
+      );
+    });
   }
 
   void _changeDateRange() async {
