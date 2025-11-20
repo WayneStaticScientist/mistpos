@@ -75,7 +75,7 @@ class ItemModel {
 
   factory ItemModel.fromJson(Map<String, dynamic> json) {
     return ItemModel(
-      hexId: json["_id"],
+      hexId: json["_id"] ?? "",
       isForSale: json["isForSale"] as bool? ?? true,
       color: json["color"] as int?,
       sku: json["sku"] as String? ?? "",

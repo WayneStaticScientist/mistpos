@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:get/get.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/user_model.dart';
@@ -152,24 +150,25 @@ class UserController extends GetxController {
   }
 
   RxBool switchingStore = RxBool(false);
-  void switchStore(String key) async {
+  Future<bool> switchStore(String key) async {
     if (user.value == null) {
-      return;
+      return false;
     }
     if (key.trim().isEmpty) {
-      return Toaster.showError("Store is required");
+      Toaster.showError("Store is required");
+      return false;
     }
     switchingStore.value = true;
     final response = await Net.put("/user/company/$key");
     switchingStore.value = false;
     if (response.hasError) {
       Toaster.showError(response.response);
-      return;
+      return false;
     }
-    log("The update is ${response.body['update']}}");
     user.value = User.fromMap(response.body['update']);
     User.saveToStorage(user.value!);
     Toaster.showSuccess("Currency switched successfully");
+    return true;
   }
 
   Future<({User? user, String error})> getUserById(String senderId) async {

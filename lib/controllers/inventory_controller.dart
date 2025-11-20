@@ -1,3 +1,9 @@
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/inv_item.dart';
@@ -697,5 +703,124 @@ class InventoryController extends GetxController {
     company.value!.saveToStorage();
     Toaster.showSuccess("Free trial started successfully");
     return;
+  }
+
+  RxString itemsError = RxString("");
+  RxBool loadingItems = RxBool(false);
+  RxList<ItemModel> items = RxList<ItemModel>();
+  void loadItems() async {
+    if (loadingItems.value) return;
+    loadingItems.value = true;
+    itemsError.value = "";
+    final response = await Net.get("/cashier/products");
+    loadingItems.value = false;
+    if (response.hasError) {
+      itemsError.value = response.response;
+      return;
+    }
+    if (response.body['list'] != null) {
+      List<dynamic> list = response.body['list'];
+      items.value = list.map((e) => ItemModel.fromJson(e)).toList();
+    }
+  }
+
+  RxBool exporting = false.obs;
+  void exportItems() async {
+    if (loadingItems.value) {
+      Toaster.showError("Items are loading please wait");
+      return;
+    }
+    if (exporting.value) {
+      Toaster.showError("Exporting please wait");
+      return;
+    }
+    exporting.value = true;
+    List<Map> dataList = items.map((e) => e.toJson()).toList();
+    final fileBytes = Uint8List.fromList(utf8.encode(jsonEncode(dataList)));
+    try {
+      DateTime now = DateTime.now();
+      final String? selectedDirectory = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save Mist List',
+        fileName:
+            'document-${now.day}-${now.month}-${now.year}.mist', // Suggest a file name
+        type: FileType.custom,
+        allowedExtensions: ['mist'],
+        bytes: fileBytes,
+      );
+      exporting.value = false;
+      if (selectedDirectory == null) {
+        Toaster.showError("Product List failed to Saved to external ");
+        return;
+      }
+      Toaster.showSuccess(
+        "Product List saved successfully to: $selectedDirectory",
+      );
+    } catch (e) {
+      exporting.value = false;
+      Toaster.showError("There was error : $e");
+    }
+  }
+
+  RxBool importing = false.obs;
+  Future<bool> importItems() async {
+    try {
+      final file = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['mist'],
+      );
+      if (file == null) {
+        Toaster.showError("No file selected");
+        return false;
+      }
+      final platformFile = file.files.first;
+      Uint8List? fileBytes;
+      if (platformFile.bytes != null) {
+        fileBytes = platformFile.bytes;
+      }
+      // 2. If bytes are null, read the file from the path (common on mobile/desktop)
+      else if (platformFile.path != null) {
+        final file = File(platformFile.path!);
+        fileBytes = await file.readAsBytes();
+      }
+
+      if (fileBytes == null) {
+        Toaster.showError("Could not read file contents.");
+        importing.value = false;
+        return false;
+      }
+      importing.value = true;
+      String jsonString = utf8.decode(fileBytes);
+      final dataList = jsonDecode(jsonString);
+      if (dataList is! List) {
+        Toaster.showError("Invalid file format");
+        importing.value = true;
+        return false;
+      }
+      items.value = dataList.map((e) => ItemModel.fromJson(e)).toList();
+      importing.value = false;
+    } catch (e) {
+      log("error : $e");
+      importing.value = false;
+      Toaster.showError("There was error : $e");
+      return false;
+    }
+    return true;
+  }
+
+  RxBool uploadingItems = false.obs;
+  void uploadItems() async {
+    if (uploadingItems.value) {
+      Toaster.showError("uploading items please wait");
+    }
+    final result = await Net.post(
+      "/admin/items/upload",
+      data: items.map((e) => e.toJson()).toList(),
+    );
+    if (result.hasError) {
+      Toaster.showError(result.response);
+      return;
+    }
+    Toaster.showSuccess("Items uploaded successfully");
+    uploadingItems.value = false;
   }
 }

@@ -1,9 +1,6 @@
-import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:get/get.dart';
-import 'package:mistpos/models/sales_by_payment.dart';
-import 'package:mistpos/models/shifts_stats_model.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:open_file/open_file.dart';
 import 'package:file_picker/file_picker.dart';
@@ -11,7 +8,9 @@ import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/models/employee_model.dart';
 import 'package:mistpos/models/company_model.dart';
 import 'package:mistpos/models/dialy_sale_model.dart';
+import 'package:mistpos/models/sales_by_payment.dart';
 import 'package:mistpos/services/network_wrapper.dart';
+import 'package:mistpos/models/shifts_stats_model.dart';
 import 'package:mistpos/models/sales_stats_model.dart';
 import 'package:mistpos/models/product_stats_model.dart';
 import 'package:mistpos/models/average_profit_model.dart';
@@ -291,7 +290,6 @@ class AdminController extends GetxController {
 
   void openFile(Uint8List fileBytes) async {
     try {
-      log("Opening file");
       if (fileBytes.isEmpty) {
         Toaster.showError("PDF generation failed: No bytes returned.");
         return;
@@ -305,8 +303,6 @@ class AdminController extends GetxController {
         allowedExtensions: ['pdf'],
         bytes: fileBytes,
       );
-      log("ieeeeeeeeeeeeeeeee eeee");
-
       if (selectedDirectory == null) {
         Toaster.showError("PDF save cancelled by user.");
         return;

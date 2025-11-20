@@ -1,19 +1,20 @@
+import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:iconify_flutter/icons/bx.dart';
-import 'package:iconify_flutter/icons/tabler.dart';
-import 'package:mistpos/controllers/admin_controller.dart';
-import 'package:mistpos/controllers/user_controller.dart';
-import 'package:mistpos/models/company_model.dart';
-import 'package:mistpos/screens/basic/modern_layout.dart';
-import 'package:mistpos/screens/currence/edit_currencies.dart';
-import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/toast.dart';
+import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/themes/app_theme.dart';
+import 'package:iconify_flutter/icons/tabler.dart';
+import 'package:mistpos/models/company_model.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
+import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/screens/basic/modern_layout.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
+import 'package:mistpos/controllers/admin_controller.dart';
+import 'package:mistpos/controllers/inventory_controller.dart';
+import 'package:mistpos/screens/currence/edit_currencies.dart';
 
 class ScreenViewCompany extends StatefulWidget {
   final CompanyModel company;
@@ -26,6 +27,7 @@ class ScreenViewCompany extends StatefulWidget {
 class _ScreenViewCompanyState extends State<ScreenViewCompany> {
   final _userController = Get.find<UserController>();
   final _adminController = Get.find<AdminController>();
+  final _inventoryController = Get.find<InventoryController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,7 +130,10 @@ class _ScreenViewCompanyState extends State<ScreenViewCompany> {
     );
   }
 
-  void _switch() {
-    _userController.switchStore(widget.company.hexId);
+  void _switch() async {
+    final result = await _userController.switchStore(widget.company.hexId);
+    if (result) {
+      _inventoryController.loadCompany();
+    }
   }
 }
