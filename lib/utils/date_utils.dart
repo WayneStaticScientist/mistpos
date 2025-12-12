@@ -97,4 +97,8 @@ class MistDateUtils {
         return "";
     }
   }
+
+  static formatSortableDate(DateTime createdAt) {
+    return "${createdAt.year}-${createdAt.month}-${createdAt.day}";
+  }
 }

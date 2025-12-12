@@ -105,6 +105,7 @@ class _ScreenSubscriptionState extends State<ScreenSubscription> {
               plan: MistSubscriptionUtils.basicPlan,
               features: [
                 "Basic Features",
+                "Add/Edit stock",
                 "Full Support",
                 "Sales Reports",
                 "Manage Cashiers",
@@ -130,6 +131,7 @@ class _ScreenSubscriptionState extends State<ScreenSubscription> {
               plan: MistSubscriptionUtils.proPlan,
               features: [
                 "Basic Features",
+                "Add/Edit stock",
                 "Full Support",
                 "Sales Reports",
                 "Manage Cashiers",
@@ -153,6 +155,7 @@ class _ScreenSubscriptionState extends State<ScreenSubscription> {
               price: 15.00,
               features: [
                 "Basic Features",
+                "Add/Edit stock",
                 "Full Support",
                 "Sales Reports",
                 "Manage Cashiers",

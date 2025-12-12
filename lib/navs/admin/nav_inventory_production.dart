@@ -1,19 +1,19 @@
 import 'dart:async';
 
-import 'package:exui/exui.dart';
 import 'package:get/get.dart';
+import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/date_utils.dart';
-import 'package:mistpos/models/production_model.dart';
 import 'package:mistpos/utils/subscriptions.dart';
-import 'package:mistpos/widgets/layouts/subscription_alert.dart';
-import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:mistpos/models/production_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
+import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
+import 'package:mistpos/widgets/layouts/subscription_alert.dart';
 import 'package:mistpos/screens/inventory/screen_view_productions.dart';
 
 class NavInventoryProduction extends StatefulWidget {
@@ -33,9 +33,15 @@ class _NavInventoryProductionState extends State<NavInventoryProduction> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_inventory.company.value == null ||
+          !(MistSubscriptionUtils.enterpriseList.contains(
+            _inventory.company.value!.subscriptionType.type,
+          ))) {
+        return;
+      }
       _inventory.loadProductions(page: 1);
+      _initializeTimer();
     });
-    _initializeTimer();
   }
 
   @override

@@ -141,6 +141,9 @@ class InventoryController extends GetxController {
     String supplier = '',
   }) async {
     if (purchaseOrdersLoading.value) return;
+    if (page == 1) {
+      purchaseOrders.value = [];
+    }
     purchaseOrdersLoading.value = true;
     final response = await Net.get(
       "/admin/inventory/purchase-orders?page=$page&search=$search&status=$status&supplier=$supplier",
@@ -241,6 +244,9 @@ class InventoryController extends GetxController {
     String supplier = '',
   }) async {
     if (stockAdjustOrdersLoading.value) return;
+    if (page == 1) {
+      stockerOrders.value = [];
+    }
     stockAdjustOrdersLoading.value = true;
     final response = await Net.get(
       "/admin/inventory/stock-adjusts?page=$page&search=$search&status=$status",
@@ -341,6 +347,9 @@ class InventoryController extends GetxController {
     String status = '',
   }) async {
     if (inventoryCountsLoading.value) return;
+    if (page == 1) {
+      inventoryCounts.value = [];
+    }
     inventoryCountsLoading.value = true;
     final response = await Net.get(
       "/admin/inventory/counts?page=$page&search=$search&status=$status",
@@ -597,7 +606,7 @@ class InventoryController extends GetxController {
       return false;
     }
     await Future.delayed(Duration(seconds: 30));
-    final result = await poll(response.body['pollUrl'], subKey);
+    final result = await poll(response.body['id']);
     mobilePaymentProcessing.value = false;
     return result;
   }
@@ -615,7 +624,7 @@ class InventoryController extends GetxController {
     webProcessingPayment.value = true;
     final response = await Net.post(
       '/admin/subscribe/payweb',
-      data: {"method": method, "amount": amount, "subKey": subKey},
+      data: {"method": method, "amount": amount, "plan": subKey},
     );
     webProcessingPayment.value = false;
     if (response.hasError) {
@@ -629,10 +638,10 @@ class InventoryController extends GetxController {
     );
   }
 
-  Future<bool> poll(String pollUrl, String subKey) async {
+  Future<bool> poll(String pollId) async {
     final poll = await Net.post(
       '/admin/subscribe/paymobile/poll',
-      data: {"pollUrl": pollUrl, "subKey": subKey},
+      data: {"pollId": pollId},
     );
     if (poll.hasError) {
       Toaster.showError(poll.response);
@@ -648,7 +657,7 @@ class InventoryController extends GetxController {
     await Future.delayed(Duration(seconds: 5));
     final poll2 = await Net.post(
       '/admin/subscribe/paymobile/poll',
-      data: {"pollUrl": pollUrl},
+      data: {"pollId": pollId},
     );
     if (poll2.hasError) {
       Toaster.showError(poll2.response);

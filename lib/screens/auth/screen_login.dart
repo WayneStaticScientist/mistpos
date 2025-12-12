@@ -62,6 +62,10 @@ class _ScreenLoginState extends State<ScreenLogin> {
                 Get.to(() => ScreenCreateAccount());
               },
             ),
+            18.gapHeight,
+            "Forgot Password ? ".text(textAlign: TextAlign.center).onTap(() {
+              Get.to(() => ScreenCreateAccount());
+            }),
           ].column(),
         ).constrained(maxWidth: 800).center().padding(EdgeInsets.all(14)),
       ),

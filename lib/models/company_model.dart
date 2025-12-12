@@ -6,6 +6,7 @@ class CompanyModel {
   String owner;
   String email;
   String name;
+  bool verified;
   ExchangeRateModel exchangeRates;
   SubscriptionModel subscriptionType;
 
@@ -15,6 +16,7 @@ class CompanyModel {
     required this.email,
     required this.name,
     required this.hexId,
+    this.verified = false,
     required this.exchangeRates,
     required this.subscriptionType,
   });
@@ -23,6 +25,7 @@ class CompanyModel {
       name: json['name'] ?? "-",
       owner: json['owner'],
       email: json['email'],
+      verified: json['verified'] ?? false,
       hexId: json['_id'] ?? "",
       subscriptionType: json['subscriptionType'] != null
           ? SubscriptionModel.fromJson(json['subscriptionType'])
@@ -36,6 +39,7 @@ class CompanyModel {
       "name": name,
       "owner": owner,
       "email": email,
+      "verified": verified,
       "exchangeRates": exchangeRates.toJson(),
       "subscriptionType": subscriptionType.toJson(),
     };

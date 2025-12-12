@@ -41,6 +41,12 @@ class NavInventoryValuationState extends State<NavInventoryValuation> {
         start: _startDate,
         end: _endDate,
       );
+      if (_inventoryController.company.value == null ||
+          !(MistSubscriptionUtils.proList.contains(
+            _inventoryController.company.value!.subscriptionType.type,
+          ))) {
+        return;
+      }
       _inventoryController.loadInventoryProducts();
     });
   }

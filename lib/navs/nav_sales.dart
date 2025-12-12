@@ -106,11 +106,11 @@ class _NavSaleState extends State<NavSale> {
           child: SmartRefresher(
             enablePullUp: true,
             onRefresh: () async {
-              await _itemsListController.loadCartItems(
-                page: 1,
-                search: _searchTerm,
-              );
+              await _itemsListController.syncCartItemsOnBackground();
               _refreshController.refreshCompleted();
+              setState(() {
+                _searchTerm = '';
+              });
             },
             controller: _refreshController,
             child: CustomScrollView(
@@ -346,10 +346,6 @@ class _NavSaleState extends State<NavSale> {
     double x = 0,
     double y = 0,
   }) async {
-    if (_itemsListController.syncingItems.value) {
-      Toaster.showError("items syncing please wait");
-      return;
-    }
     if (model.price == 0 ||
         (model.modifiers != null && model.modifiers!.isNotEmpty)) {
       Get.to(() => ScreenManualCart(item: model));

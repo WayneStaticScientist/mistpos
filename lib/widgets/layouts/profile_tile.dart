@@ -1,9 +1,11 @@
 import 'package:exui/exui.dart';
+import 'package:exui/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/models/company_model.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/screens/auth/screen_user_profile.dart';
+import 'package:mistpos/services/network_wrapper.dart';
 
 class ProfileTile extends StatefulWidget {
   const ProfileTile({super.key});
@@ -63,6 +65,15 @@ class _ProfileTileState extends State<ProfileTile> {
                 8.gapHeight,
               ],
             ],
+            "Verify Company"
+                .text(style: TextStyle(color: Colors.red))
+                .outlinedButton(
+                  onPressed: () => Net.launchVerificationUrl(),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.red),
+                  ),
+                )
+                .visibleIfNot(company?.verified ?? false),
           ]
           .column(
             mainAxisSize: MainAxisSize.min,

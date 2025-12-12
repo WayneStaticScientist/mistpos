@@ -17,6 +17,7 @@ import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/models/item_categories_model.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
+import 'package:mistpos/widgets/layouts/list_of_all_icons.dart';
 import 'package:radio_group_v2/utils/radio_group_decoration.dart';
 import 'package:mistpos/controllers/items_unsaved_controller.dart';
 import 'package:radio_group_v2/widgets/views/radio_group.dart' as rg;
@@ -196,7 +197,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
                 iconPath,
                 size: 40,
                 color: widget.model.shape == iconPath
-                    ? Color(int.parse('0x${widget.model.color!}'))
+                    ? Color(int.parse('${widget.model.color!}'))
                     : Colors.grey,
               ).padding(EdgeInsets.all(4)),
             ),
@@ -454,7 +455,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
         ),
         rg.RadioGroup(
           controller: _itemRepresentation,
-          values: ["Icons And Color", "Image Only"],
+          values: ["Icons And Color"],
           indexOfDefault: 0,
           orientation: rg.RadioGroupOrientation.horizontal,
           decoration: RadioGroupDecoration(
@@ -464,7 +465,29 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
         ),
         32.gapHeight,
         _itemAndColorPicker(),
-        _iconPicker(), // Implement this widget as needed
+        _iconPicker(),
+        'PickMore Icons'.text().textIconButton(
+          onPressed: () async {
+            final result = await pickListIcon();
+            if (result != null) {
+              setState(() {
+                widget.model.shape = result;
+              });
+            }
+          },
+        ),
+        16.gapHeight,
+        'Selected Icon'.text(),
+        8.gapHeight,
+        if (widget.model.shape != null)
+          [
+            Iconify(
+              widget.model.shape!,
+              size: 60,
+              color: Color(int.parse('${widget.model.color!}')),
+            ),
+          ].row(),
+        // Implement this widget as needed
       ],
     );
   }

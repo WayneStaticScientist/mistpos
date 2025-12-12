@@ -16,6 +16,7 @@ import 'package:mistpos/screens/basic/modern_layout.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/models/item_categories_model.dart';
+import 'package:mistpos/widgets/layouts/list_of_all_icons.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:radio_group_v2/radio_group_v2.dart' as rg;
 import 'package:mistpos/controllers/inventory_controller.dart';
@@ -155,7 +156,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
                 ),
                 rg.RadioGroup(
                   controller: _itemRepresentation,
-                  values: ["Icons And Color", "Image Only"],
+                  values: ["Icons And Color"],
                   indexOfDefault: 0,
                   orientation: rg.RadioGroupOrientation.horizontal,
                   decoration: RadioGroupDecoration(
@@ -166,6 +167,20 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
                 32.gapHeight,
                 _itemAndColorPicker(),
                 _iconPicker(),
+                'PickMore Icons'.text().textIconButton(
+                  onPressed: () async {
+                    final result = await pickListIcon();
+                    if (result != null) {
+                      setState(() {
+                        _selectedIcon = result;
+                      });
+                    }
+                  },
+                ),
+                16.gapHeight,
+                'Selected Icon'.text(),
+                8.gapHeight,
+                [Iconify(_selectedIcon, size: 60, color: _selectedColor)].row(),
               ],
             ),
           ],

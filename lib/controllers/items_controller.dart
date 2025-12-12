@@ -149,9 +149,6 @@ class ItemsController extends GetxController {
           .findAllSync();
       cartItems.assignAll(loadedItems);
     }
-    if (search.trim().isEmpty && category.trim().isEmpty) {
-      syncCartItemsOnBackground();
-    }
   }
 
   //sync background
@@ -283,14 +280,11 @@ class ItemsController extends GetxController {
         });
         return;
       }
+      _updateUnsyncedReceits();
+      return;
     }
     final r = isar.itemReceitModels.where().sortByCreatedAtDesc().findAllSync();
-    if (page == 1) {
-      receits.assignAll(r);
-    } else {
-      receits.addAll(r);
-    }
-    _updateUnsyncedReceits();
+    receits.assignAll(r);
   }
 
   /*
@@ -704,11 +698,9 @@ class ItemsController extends GetxController {
   void loadTaxes({String search = '', int page = 1}) async {
     if (syncingTaxes.value) return;
     syncingTaxes.value = true;
-    syncingTaxesFailed.value = "";
     final response = await Net.get("/cashier/taxes?page=$page&search=$search");
     syncingTaxes.value = false;
     if (response.hasError) {
-      syncingTaxesFailed.value = response.response;
       return;
     }
     final list = response.body['list'] as List<dynamic>? ?? [];
@@ -755,7 +747,6 @@ class ItemsController extends GetxController {
     );
     syncingDiscounts.value = false;
     if (response.hasError) {
-      syncingDiscountsFailed.value = response.response;
       return;
     }
     final list = response.body['list'] as List<dynamic>? ?? [];
@@ -1330,7 +1321,7 @@ class ItemsController extends GetxController {
       await isar.itemReceitModels.put(receivedModel);
     });
     loadReceits();
-    syncCartItemsOnBackground();
+    //syncCartItemsOnBackground();
   }
 
   RxBool updatingUsyncedReceits = RxBool(true);

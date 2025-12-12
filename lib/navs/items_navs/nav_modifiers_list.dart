@@ -2,6 +2,9 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/models/company_model.dart';
+import 'package:mistpos/screens/basic/screen_subscription.dart';
+import 'package:mistpos/utils/subscriptions.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/themes/app_theme.dart';
@@ -57,6 +60,13 @@ class _NavModifiersListState extends State<NavModifiersList> {
   }
 
   void _editModifier(ItemModifier modifier) {
+    final company = CompanyModel.fromStorage();
+    if (company?.subscriptionType.type == MistSubscriptionUtils.freePlan ||
+        company?.subscriptionType.type == null) {
+      Toaster.showError("Please upgrade subscription to add/edit/remove items");
+      Get.to(() => ScreenSubscription());
+      return;
+    }
     Get.to(() => ScreenEditModifier(modifier: modifier));
   }
 

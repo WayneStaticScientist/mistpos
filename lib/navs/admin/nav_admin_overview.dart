@@ -73,9 +73,11 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
               ],
             ),
             18.gapHeight,
-            "Product Overview".text(
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
+            [
+              "Product Overview".text(
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+            ].row(),
             18.gapHeight,
             Obx(
               () => SingleChildScrollView(
@@ -113,9 +115,11 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
               ).sizedBox(height: 150, width: double.infinity),
             ),
             18.gapHeight,
-            "Sales Overview".text(
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
+            [
+              "Sales Overview".text(
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+            ].row(),
             18.gapHeight,
             Obx(
               () => SingleChildScrollView(

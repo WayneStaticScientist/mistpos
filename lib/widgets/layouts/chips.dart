@@ -1,6 +1,7 @@
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mistpos/themes/app_theme.dart';
 
 class MistChip extends StatelessWidget {
   final String label;
@@ -26,7 +27,7 @@ class MistChip extends StatelessWidget {
       ),
       backgroundColor: selected
           ? Get.theme.colorScheme.primary
-          : (Get.isDarkMode ? Colors.black : Colors.white),
+          : AppTheme.surface(context),
     ).paddingZero.padding(EdgeInsets.all(5));
   }
 }

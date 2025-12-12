@@ -1,3 +1,7 @@
+import com.android.build.gradle.BaseExtension
+import com.android.build.gradle.AppPlugin
+import com.android.build.gradle.LibraryPlugin
+import org.gradle.kotlin.dsl.*
 allprojects {
     repositories {
         google()
@@ -13,7 +17,19 @@ subprojects {
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
 subprojects {
-    project.evaluationDependsOn(":app")
+    //project.evaluationDependsOn(":app")
+    afterEvaluate {
+        // Use withType to check if any Android plugin is applied
+        project.plugins.withType<com.android.build.gradle.BasePlugin> {
+            // Get the extension as a generic BaseExtension (works for both app and library)
+            project.extensions.configure<com.android.build.gradle.BaseExtension>("android") {
+                // Inside this configure block, 'this' refers to the BaseExtension object.
+                // We use the properties directly on the extension instance.
+                compileSdkVersion(36)
+                defaultConfig.targetSdk = 36
+            }
+        }
+    }
 }
 
 tasks.register<Delete>("clean") {

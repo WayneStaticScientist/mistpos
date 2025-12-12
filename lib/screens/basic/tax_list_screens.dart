@@ -2,12 +2,15 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/models/company_model.dart';
 import 'package:mistpos/models/tax_model.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/screens/basic/screen_add_tax.dart';
 import 'package:mistpos/screens/basic/screen_edit_tax.dart';
+import 'package:mistpos/screens/basic/screen_subscription.dart';
+import 'package:mistpos/utils/subscriptions.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 
@@ -61,7 +64,20 @@ class _TaxListScreensState extends State<TaxListScreens> {
         );
       }),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.to(() => ScreenAddTax()),
+        elevation: 0,
+        onPressed: () {
+          final company = CompanyModel.fromStorage();
+          if (company?.subscriptionType.type ==
+                  MistSubscriptionUtils.freePlan ||
+              company?.subscriptionType.type == null) {
+            Toaster.showError(
+              "Please upgrade subscription to add/edit/remove items",
+            );
+            Get.to(() => ScreenSubscription());
+            return;
+          }
+          Get.to(() => ScreenAddTax());
+        },
         child: Icon(Icons.add, color: Colors.white),
       ),
     );
@@ -73,7 +89,18 @@ class _TaxListScreensState extends State<TaxListScreens> {
       trailing: (tax.activated
           ? Iconify(Bx.check, color: Colors.green)
           : Iconify(Bx.x, color: Colors.red)),
-      onTap: () => Get.to(() => ScreenEditTax(tax: tax)),
+      onTap: () {
+        final company = CompanyModel.fromStorage();
+        if (company?.subscriptionType.type == MistSubscriptionUtils.freePlan ||
+            company?.subscriptionType.type == null) {
+          Toaster.showError(
+            "Please upgrade subscription to add/edit/remove items",
+          );
+          Get.to(() => ScreenSubscription());
+          return;
+        }
+        Get.to(() => ScreenEditTax(tax: tax));
+      },
       subtitle:
           (tax.selectedIds.isEmpty
                   ? "All items"

@@ -1,13 +1,17 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:dio/dio.dart';
+import 'package:mistpos/utils/toast.dart';
+import 'package:mistpos/models/token_model.dart';
+import 'package:mistpos/services/url_services.dart';
 import 'package:mistpos/models/response_model.dart';
 import 'package:mistpos/services/auth_interceptor.dart';
+import 'package:mobile_device_identifier/mobile_device_identifier.dart';
 
 class Net {
   static Dio? _dio;
-  static const String baseUrl = "http://192.168.1.200:3000/v1";
-  // static const String baseUrl =
-  //     "https://mistpos-server-production.up.railway.app/v1";
+  // static const String baseUrl = "http://10.0.2.2:3001/v1";
+  static const String baseUrl = "https://api.mistpos.co.zw/v1";
   static Future<ResponseModel> get(String url) async {
     if (Net._dio == null) {
       initDio();
@@ -16,7 +20,46 @@ class Net {
       final response = await _dio!.get(url);
       return ResponseModel(hasError: false, response: "", body: response.data);
     } on DioException catch (e) {
+      log("There was error $e");
       return getError(e);
+    }
+  }
+
+  static Future<void> lauchDashboardUrl() async {
+    try {
+      UrlLauncherService.launchUrl(
+        'https://dashboard.mistpos.co.zw/auth?id=${(TokenModel.fromStorage().refreshToken)}&device=${(await MobileDeviceIdentifier().getDeviceId())}',
+      );
+    } catch (e) {
+      Toaster.showError("Failed to launch dashboard");
+    }
+  }
+
+  static Future<void> launchVerificationUrl() async {
+    try {
+      UrlLauncherService.launchUrl(
+        'https://dashboard.mistpos.co.zw/redirect/verification?id=${(TokenModel.fromStorage().refreshToken)}&device=${(await MobileDeviceIdentifier().getDeviceId())}',
+      );
+    } catch (e) {
+      Toaster.showError("Failed to launch dashboard");
+    }
+  }
+
+  static Future<void> launchForgotPassword() async {
+    try {
+      UrlLauncherService.launchUrl('https://dashboard.mistpos.co.zw/reset');
+    } catch (e) {
+      Toaster.showError("Failed to launch password reset , try again later");
+    }
+  }
+
+  static Future<void> launchSupport() async {
+    try {
+      UrlLauncherService.launchUrl(
+        'https://dashboard.mistpos.co.zw/?query=support',
+      );
+    } catch (e) {
+      Toaster.showError("Failed to launch support , try again later");
     }
   }
 

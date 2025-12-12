@@ -56,7 +56,7 @@ class _ScreenWebHookSubscriptionState extends State<ScreenWebHookSubscription> {
             if (request.url.toLowerCase().trim().startsWith(
               widget.returnUrl.toLowerCase().trim(),
             )) {
-              _processReceit();
+              _processReceit(widget.returnUrl);
               return NavigationDecision.prevent;
             }
             return NavigationDecision.navigate;
@@ -84,14 +84,17 @@ class _ScreenWebHookSubscriptionState extends State<ScreenWebHookSubscription> {
     );
   }
 
-  void _processReceit() async {
+  void _processReceit(String id) async {
     setState(() {
       _loading = true;
     });
-    final respone = await _inventoryController.poll(
-      widget.pollUrl,
-      widget.subKey,
-    );
+    int lastIndex = id.lastIndexOf("/");
+    if (lastIndex < 0 || lastIndex >= id.length) {
+      Toaster.showError("invalid id reported");
+      return;
+    }
+    String replace = id.substring(lastIndex + 1);
+    final respone = await _inventoryController.poll(replace);
     if (respone) {
       Get.back();
       Toaster.showSuccess("payment succesfully");

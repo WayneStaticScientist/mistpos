@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
@@ -45,7 +44,6 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
       final maxScroll = _scrollController.position.maxScrollExtent;
       final currentScroll = _scrollController.position.pixels;
       if (currentScroll >= maxScroll * 0.95) {
-        log("The items loaded more (Triggered near bottom)");
         _syncReceits(_itemsListController.receitsPage.value + 1, _searchKey);
       }
     });
@@ -94,7 +92,7 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
                     physics: const NeverScrollableScrollPhysics(),
                     elements: _itemsListController.receits,
                     groupBy: (element) =>
-                        MistDateUtils.formatNormalDate(element.createdAt),
+                        MistDateUtils.formatSortableDate(element.createdAt),
                     groupSeparatorBuilder: (String groupByValue) =>
                         // ... (Your separator logic)
                         Text(groupByValue /* ... styles ... */)
@@ -112,16 +110,12 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
                         [MistLoader1()]
                             .row(mainAxisAlignment: MainAxisAlignment.center)
                             .visibleIf(
-                              _itemsListController.receitsPage.value <
-                                      _itemsListController
-                                          .receitsTotalPages
-                                          .value &&
-                                  _itemsListController.receitsLoading.value,
+                              _itemsListController.receitsLoading.value,
                             ),
                       ].column(mainAxisSize: MainAxisSize.min);
                     },
                     itemComparator: (item1, item2) =>
-                        item1.createdAt.compareTo(item2.createdAt),
+                        -item1.createdAt.compareTo(item2.createdAt),
                     useStickyGroupSeparators: true,
                     floatingHeader: true,
                     order: GroupedListOrder.DESC,

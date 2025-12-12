@@ -7,11 +7,11 @@ import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/screens/basic/screem_edit_employee.dart';
 import 'package:mistpos/widgets/layouts/subscription_alert.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class NavAdminEmployees extends StatefulWidget {
   const NavAdminEmployees({super.key});
@@ -35,14 +35,19 @@ class _NavAdminEmployeesState extends State<NavAdminEmployees> {
   @override
   void initState() {
     super.initState();
-    _adminController.fetchEmployees();
+    if (_inventoryController.company.value != null ||
+        (MistSubscriptionUtils.basicList.contains(
+          _inventoryController.company.value!.subscriptionType.type,
+        ))) {
+      _adminController.fetchEmployees();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       if (_inventoryController.company.value == null ||
-          !(MistSubscriptionUtils.enterpriseList.contains(
+          !(MistSubscriptionUtils.basicList.contains(
             _inventoryController.company.value!.subscriptionType.type,
           ))) {
         return SubscriptionAlert();
@@ -67,10 +72,7 @@ class _NavAdminEmployeesState extends State<NavAdminEmployees> {
   Widget _buildLoader() {
     return [
       18.gapHeight,
-      LoadingAnimationWidget.staggeredDotsWave(
-        color: Get.theme.colorScheme.primary,
-        size: 50,
-      ),
+      MistLoader1(),
       18.gapHeight,
       "Loading Employees".text(),
     ].column(
@@ -98,10 +100,7 @@ class _NavAdminEmployeesState extends State<NavAdminEmployees> {
                       Get.to(() => ScreenEditEmployee(employeeModel: e)),
                   leading: CircleAvatar(
                     backgroundColor: Get.theme.colorScheme.primary,
-                    child: Iconify(
-                      Bx.user,
-                      color: Get.theme.colorScheme.onPrimary,
-                    ),
+                    child: Iconify(Bx.user, color: Colors.white),
                   ),
                   title: e.fullName.text(),
                   subtitle: _userController.user.value?.hexId == e.id

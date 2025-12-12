@@ -2,14 +2,18 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/screens/basic/screen_edit_discount.dart';
+import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/utils/subscriptions.dart';
+import 'package:mistpos/models/company_model.dart';
 import 'package:mistpos/models/discount_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:mistpos/controllers/items_controller.dart';
-import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/utils/currence_converter.dart';
+import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/controllers/items_controller.dart';
+import 'package:mistpos/screens/basic/screen_edit_discount.dart';
+import 'package:mistpos/screens/basic/screen_subscription.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 
 class NavDiscountsList extends StatefulWidget {
@@ -22,6 +26,7 @@ class NavDiscountsList extends StatefulWidget {
 class _NavDiscountsListState extends State<NavDiscountsList> {
   final _userController = Get.find<UserController>();
   final _itemController = Get.find<ItemsController>();
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -42,6 +47,16 @@ class _NavDiscountsListState extends State<NavDiscountsList> {
           final model = _itemController.discounts[index];
           return ListTile(
             onTap: () {
+              final company = CompanyModel.fromStorage();
+              if (company?.subscriptionType.type ==
+                      MistSubscriptionUtils.freePlan ||
+                  company?.subscriptionType.type == null) {
+                Toaster.showError(
+                  "Please upgrade subscription to add/edit/remove items",
+                );
+                Get.to(() => ScreenSubscription());
+                return;
+              }
               Get.to(() => ScreenEditDiscount(model: model));
             },
             leading: Iconify(Bx.bxs_discount, color: AppTheme.color(context)),

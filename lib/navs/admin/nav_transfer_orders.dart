@@ -30,8 +30,14 @@ class _NavTransferOrdersState extends State<NavTransferOrders> {
   Timer? _debounce;
   @override
   void initState() {
-    _initializeTimer();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_iventoryController.company.value == null ||
+          !(MistSubscriptionUtils.proList.contains(
+            _iventoryController.company.value!.subscriptionType.type,
+          ))) {
+        return;
+      }
+      _initializeTimer();
       _iventoryController.loadTransferOrders(page: 1);
     });
     super.initState();

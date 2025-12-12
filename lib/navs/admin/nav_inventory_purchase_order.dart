@@ -37,9 +37,15 @@ class _NavInventoryPurchaseOrderState extends State<NavInventoryPurchaseOrder> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_inventory.company.value == null ||
+          !(MistSubscriptionUtils.proList.contains(
+            _inventory.company.value!.subscriptionType.type,
+          ))) {
+        return;
+      }
       _inventory.loadPurchaseOrders(page: 1);
+      _initializeTimer();
     });
-    _initializeTimer();
   }
 
   @override

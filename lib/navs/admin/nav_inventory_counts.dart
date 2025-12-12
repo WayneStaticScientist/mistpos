@@ -33,8 +33,13 @@ class _NavInventoryCountsState extends State<NavInventoryCounts> {
   Timer? _debounce;
   @override
   void initState() {
-    loadInventoryCounts();
-    _initializeTimer();
+    if (_iventoryController.company.value != null &&
+        (MistSubscriptionUtils.proList.contains(
+          _iventoryController.company.value!.subscriptionType.type,
+        ))) {
+      loadInventoryCounts();
+      _initializeTimer();
+    }
     super.initState();
   }
 

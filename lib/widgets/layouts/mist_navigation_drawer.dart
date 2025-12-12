@@ -5,6 +5,7 @@ import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/services/network_wrapper.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:mistpos/widgets/layouts/profile_tile.dart';
 import 'package:mistpos/screens/basic/screen_dashboard.dart';
@@ -113,9 +114,19 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
               },
             ),
             ListTile(
+              leading: Iconify(
+                Bx.network_chart,
+                color: AppTheme.color(context),
+              ),
+              title: Text('Online Dashboard'),
+              onTap: () {
+                Net.lauchDashboardUrl();
+              },
+            ),
+            ListTile(
               leading: Iconify(Bx.help_circle, color: AppTheme.color(context)),
               title: Text('Help & Support'),
-              onTap: () => widget.onTap('help'),
+              onTap: () => Net.launchSupport(),
             ),
           ],
         ),

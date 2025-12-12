@@ -33,6 +33,12 @@ class NavInventoryHistoryState extends State<NavInventoryHistory> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_inventoryController.company.value == null ||
+          !(MistSubscriptionUtils.proList.contains(
+            _inventoryController.company.value!.subscriptionType.type,
+          ))) {
+        return;
+      }
       _inventoryController.getInventoryHistory(_startDate, _endDate);
     });
   }

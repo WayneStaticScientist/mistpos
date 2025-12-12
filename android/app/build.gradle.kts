@@ -1,6 +1,14 @@
 import java.util.Properties
+import java.io.FileInputStream
 val localProperties = Properties()
 localProperties.load(project.rootProject.file("local.properties").inputStream())
+
+val signingProps = Properties()
+val signingPropsFile = project.rootProject.file("key.properties")
+if (signingPropsFile.exists()) {
+    signingProps.load(FileInputStream(signingPropsFile))
+}
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -11,23 +19,20 @@ plugins {
 dependencies {
   coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
   // Import the Firebase BoM
-  implementation(platform("com.google.firebase:firebase-bom:34.5.0"))
+  implementation(platform("com.google.firebase:firebase-bom:34.6.0")) // <-- Use 34.6.0 or the latest
   
 
   // TODO: Add the dependencies for Firebase products you want to use
   // When using the BoM, don't specify versions in Firebase dependencies
   implementation("com.google.firebase:firebase-analytics")
   implementation("com.google.firebase:firebase-messaging")
-  implementation("com.google.android.gms:play-services-basement:18.2.0")
-  implementation("com.google.android.gms:play-services-base:18.2.0")
-  implementation("com.google.android.gms:play-services-safetynet:18.0.1")
   // Add the dependencies for any other desired Firebase products
   // https://firebase.google.com/docs/android/setup#available-libraries
 }
 
 android {
     namespace = "aca.bicosatstudios.mistpos.mistpos"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = "27.0.12077973"
     
     compileOptions {
@@ -46,19 +51,35 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdkVersion(localProperties.getProperty("flutter.minSdkVersion")?.toInt() ?: 21)
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled = true
     }
+    
+   signingConfigs {
+        create("release") {
+            // Accessing the properties using getProperty() is the safe Kotlin DSL way
+            storeFile = file(signingProps.getProperty("storeFile"))
+            storePassword = signingProps.getProperty("storePassword")
+            keyAlias = signingProps.getProperty("keyAlias")
+            keyPassword = signingProps.getProperty("keyPassword")
+        }
+    }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Apply the newly created signing config
+            signingConfig = signingConfigs.getByName("release")
+
+            // Add your code shrinking/obfuscation rules here (recommended)
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
+
+ 
 }
 
 flutter {

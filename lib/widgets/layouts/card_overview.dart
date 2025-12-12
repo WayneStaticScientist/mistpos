@@ -38,10 +38,7 @@ class CardOverview extends StatelessWidget {
         .sizedBox(width: 150, height: 100)
         .padding(EdgeInsets.all(12))
         .decoratedBox(
-          decoration: BoxDecoration(
-            color: color ?? AppTheme.surface(context),
-            borderRadius: BorderRadius.circular(20),
-          ),
+          decoration: BoxDecoration(color: color ?? AppTheme.surface(context)),
         )
         .padding(EdgeInsets.symmetric(horizontal: 3));
   }

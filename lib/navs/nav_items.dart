@@ -1,17 +1,21 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/utils/subscriptions.dart';
+import 'package:mistpos/models/company_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/controllers/items_controller.dart';
-import 'package:mistpos/screens/basic/screen_add_discounts.dart';
 import 'package:mistpos/screens/basic/screen_add_item.dart';
 import 'package:mistpos/navs/items_navs/nav_items_list.dart';
 import 'package:mistpos/navs/items_navs/nav_category_list.dart';
 import 'package:mistpos/screens/basic/screen_add_modifier.dart';
 import 'package:mistpos/screens/basic/screen_add_category.dart';
+import 'package:mistpos/screens/basic/screen_add_discounts.dart';
 import 'package:mistpos/navs/items_navs/nav_modifiers_list.dart';
 import 'package:mistpos/navs/items_navs/nav_discounts_list.dart';
+import 'package:mistpos/screens/basic/screen_subscription.dart';
 
 class NavItems extends StatefulWidget {
   final GlobalKey<ScaffoldState>? scaffoldKey;
@@ -52,61 +56,63 @@ class _NavItemsState extends State<NavItems> {
         ],
       ),
       body: _navOptions.elementAt(_selectedIndex),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        fixedColor: Get.theme.colorScheme.primary,
-        unselectedItemColor: Get.isDarkMode ? Colors.white70 : Colors.black54,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Iconify(
-              Bx.cart_alt,
-              color: _selectedIndex == 0
-                  ? Get.theme.colorScheme.primary
-                  : Get.isDarkMode
-                  ? Colors.white70
-                  : Colors.black54,
+      bottomNavigationBar: SafeArea(
+        child: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+          fixedColor: Get.theme.colorScheme.primary,
+          unselectedItemColor: Get.isDarkMode ? Colors.white70 : Colors.black54,
+          items: <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Iconify(
+                Bx.cart_alt,
+                color: _selectedIndex == 0
+                    ? Get.theme.colorScheme.primary
+                    : Get.isDarkMode
+                    ? Colors.white70
+                    : Colors.black54,
+              ),
+              label: 'Items',
             ),
-            label: 'Items',
-          ),
-          BottomNavigationBarItem(
-            icon: Iconify(
-              Bx.category,
-              color: _selectedIndex == 1
-                  ? Get.theme.colorScheme.primary
-                  : Get.isDarkMode
-                  ? Colors.white70
-                  : Colors.black54,
+            BottomNavigationBarItem(
+              icon: Iconify(
+                Bx.category,
+                color: _selectedIndex == 1
+                    ? Get.theme.colorScheme.primary
+                    : Get.isDarkMode
+                    ? Colors.white70
+                    : Colors.black54,
+              ),
+              label: 'Categories',
             ),
-            label: 'Categories',
-          ),
-          BottomNavigationBarItem(
-            icon: Iconify(
-              Bx.edit_alt,
-              color: _selectedIndex == 2
-                  ? Get.theme.colorScheme.primary
-                  : Get.isDarkMode
-                  ? Colors.white70
-                  : Colors.black54,
+            BottomNavigationBarItem(
+              icon: Iconify(
+                Bx.edit_alt,
+                color: _selectedIndex == 2
+                    ? Get.theme.colorScheme.primary
+                    : Get.isDarkMode
+                    ? Colors.white70
+                    : Colors.black54,
+              ),
+              label: 'Modifiers',
             ),
-            label: 'Modifiers',
-          ),
-          BottomNavigationBarItem(
-            icon: Iconify(
-              Bx.tag,
-              color: _selectedIndex == 3
-                  ? Get.theme.colorScheme.primary
-                  : Get.isDarkMode
-                  ? Colors.white70
-                  : Colors.black54,
+            BottomNavigationBarItem(
+              icon: Iconify(
+                Bx.tag,
+                color: _selectedIndex == 3
+                    ? Get.theme.colorScheme.primary
+                    : Get.isDarkMode
+                    ? Colors.white70
+                    : Colors.black54,
+              ),
+              label: 'Discounts',
             ),
-            label: 'Discounts',
-          ),
-        ],
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _add,
@@ -117,6 +123,14 @@ class _NavItemsState extends State<NavItems> {
   }
 
   void _add() {
+    final company = CompanyModel.fromStorage();
+    if (company?.subscriptionType.type == MistSubscriptionUtils.freePlan ||
+        company?.subscriptionType.type == null) {
+      Toaster.showError("Please upgrade subscription to add/edit/remove items");
+      Get.to(() => ScreenSubscription());
+      return;
+    }
+
     if (_selectedIndex == 0) {
       Get.to(() => ScreenAddItem());
     } else if (_selectedIndex == 1) {

@@ -108,10 +108,6 @@ class _ScreenManualCartState extends State<ScreenManualCart> {
   }
 
   void _inc() {
-    if (count >= widget.item.stockQuantity && widget.item.trackStock) {
-      Toaster.showError("stock out");
-      return;
-    }
     setState(() {
       count++;
     });

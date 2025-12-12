@@ -6,7 +6,11 @@ import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/controllers/items_controller.dart';
+import 'package:mistpos/models/company_model.dart';
 import 'package:mistpos/models/item_categories_model.dart';
+import 'package:mistpos/screens/basic/screen_subscription.dart';
+import 'package:mistpos/utils/subscriptions.dart';
+import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/widgets/buttons/card_buttons.dart';
 import 'package:mistpos/screens/basic/screen_edit_category.dart';
 
@@ -60,6 +64,13 @@ class _NavCategoryListState extends State<NavCategoryList> {
   }
 
   _openEditor(ItemCategoryModel model) {
+    final company = CompanyModel.fromStorage();
+    if (company?.subscriptionType.type == MistSubscriptionUtils.freePlan ||
+        company?.subscriptionType.type == null) {
+      Toaster.showError("Please upgrade subscription to add/edit/remove items");
+      Get.to(() => ScreenSubscription());
+      return;
+    }
     Get.bottomSheet(
       [
         CardButtons(
