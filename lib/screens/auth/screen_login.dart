@@ -3,6 +3,7 @@ import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/services/network_wrapper.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/screens/auth/screen_create_account.dart';
@@ -64,7 +65,7 @@ class _ScreenLoginState extends State<ScreenLogin> {
             ),
             18.gapHeight,
             "Forgot Password ? ".text(textAlign: TextAlign.center).onTap(() {
-              Get.to(() => ScreenCreateAccount());
+              Net.launchForgotPassword();
             }),
           ].column(),
         ).constrained(maxWidth: 800).center().padding(EdgeInsets.all(14)),
