@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
+import 'package:mistpos/utils/sdk_int.dart';
+import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
@@ -170,6 +172,30 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                   style: TextStyle(color: Colors.grey, fontSize: 12),
                 ),
                 leading: Iconify(Bx.font_size, color: AppTheme.color(context)),
+              ),
+            ],
+          ),
+          24.gapColumn,
+          MistMordernLayout(
+            label: "Heath Status",
+            children: [
+              FutureBuilder(
+                future: getAndroidSdkInt(),
+                builder: (context, snapnshot) {
+                  if (snapnshot.connectionState == ConnectionState.waiting) {
+                    return MistLoader1();
+                  }
+                  if (snapnshot.hasError) {
+                    return "Error : ${snapnshot.error}".text();
+                  }
+                  return ListTile(
+                    contentPadding: EdgeInsets.all(0),
+                    textColor: snapnshot.data! < 24 ? Colors.red : Colors.green,
+                    title: snapnshot.data! < 24
+                        ? 'Old Http Client'.text()
+                        : 'New Http Client'.text(),
+                  );
+                },
               ),
             ],
           ),

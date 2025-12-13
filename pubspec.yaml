@@ -70,6 +70,7 @@ dependencies:
   pdf_maker: ^1.1.0
   open_file: ^3.5.10
   file_picker: ^10.3.6
+  device_info_plus: ^12.3.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:dio/dio.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/models/token_model.dart';
 import 'package:mistpos/models/response_model.dart';
@@ -14,7 +17,7 @@ class AuthenticationInterceptor extends Interceptor {
   ) async {
     options.headers["Authorization"] =
         TokenModel.fromStorage().accessTokenHeader;
-    options.headers["device"] = await MobileDeviceIdentifier().getDeviceId();
+    options.headers["device"] = await getDeviceId();
     options.headers['User-Agent'] = 'Mistpos';
     return handler.next(options);
   }
@@ -27,8 +30,7 @@ class AuthenticationInterceptor extends Interceptor {
         if (!response.hasError) {
           err.requestOptions.headers["Authorization"] =
               TokenModel.fromStorage().accessTokenHeader;
-          err.requestOptions.headers["device"] = await MobileDeviceIdentifier()
-              .getDeviceId();
+          err.requestOptions.headers["device"] = await getDeviceId();
           final retryResponse = await dio.fetch(err.requestOptions);
 
           return handler.resolve(retryResponse);
@@ -41,7 +43,7 @@ class AuthenticationInterceptor extends Interceptor {
   }
 
   static Future<ResponseModel> requestToken() async {
-    final mobileDeviceIdentifier = await MobileDeviceIdentifier().getDeviceId();
+    final mobileDeviceIdentifier = await getDeviceId();
     try {
       final response = await dio.post(
         "${Net.baseUrl}/user/tokens",
@@ -74,4 +76,16 @@ class AuthenticationInterceptor extends Interceptor {
       return response;
     }
   }
+}
+
+Future<String> getDeviceId() async {
+  String? id = await MobileDeviceIdentifier().getDeviceId();
+  if (id != null && id.trim().isNotEmpty) return id;
+  GetStorage box = GetStorage();
+  id = box.read('deviceIdapp');
+  if (id != null && id.trim().isNotEmpty) return id;
+  id =
+      "x${10000 + Random().nextInt(100000)}-${DateTime.now().toIso8601String()}";
+  box.write("deviceIdapp", id);
+  return id;
 }

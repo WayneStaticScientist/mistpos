@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
+import 'package:mistpos/utils/sdk_int.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/token_model.dart';
 import 'package:mistpos/services/url_services.dart';
 import 'package:mistpos/models/response_model.dart';
 import 'package:mistpos/services/auth_interceptor.dart';
-import 'package:mobile_device_identifier/mobile_device_identifier.dart';
 
 class Net {
   static Dio? _dio;
@@ -14,7 +16,7 @@ class Net {
   static const String baseUrl = "https://api.mistpos.co.zw/v1";
   static Future<ResponseModel> get(String url) async {
     if (Net._dio == null) {
-      initDio();
+      await initDio();
     }
     try {
       final response = await _dio!.get(url);
@@ -28,7 +30,7 @@ class Net {
   static Future<void> lauchDashboardUrl() async {
     try {
       UrlLauncherService.launchUrl(
-        'https://dashboard.mistpos.co.zw/auth?id=${(TokenModel.fromStorage().refreshToken)}&device=${(await MobileDeviceIdentifier().getDeviceId())}',
+        'https://dashboard.mistpos.co.zw/auth?id=${(TokenModel.fromStorage().refreshToken)}&device=${(await getDeviceId())}',
       );
     } catch (e) {
       Toaster.showError("Failed to launch dashboard");
@@ -38,7 +40,7 @@ class Net {
   static Future<void> launchVerificationUrl() async {
     try {
       UrlLauncherService.launchUrl(
-        'https://dashboard.mistpos.co.zw/redirect/verification?id=${(TokenModel.fromStorage().refreshToken)}&device=${(await MobileDeviceIdentifier().getDeviceId())}',
+        'https://dashboard.mistpos.co.zw/redirect/verification?id=${(TokenModel.fromStorage().refreshToken)}&device=${(await getDeviceId())}',
       );
     } catch (e) {
       Toaster.showError("Failed to launch dashboard");
@@ -69,7 +71,7 @@ class Net {
     Options? options,
   }) async {
     if (Net._dio == null) {
-      initDio();
+      await initDio();
     }
     try {
       final response = await _dio!.post(url, data: data, options: options);
@@ -85,7 +87,7 @@ class Net {
     Options? options,
   }) async {
     if (Net._dio == null) {
-      initDio();
+      await initDio();
     }
     try {
       final response = await _dio!.put(url, data: data, options: options);
@@ -101,7 +103,7 @@ class Net {
     Options? options,
   }) async {
     if (Net._dio == null) {
-      initDio();
+      await initDio();
     }
     try {
       final response = await _dio!.delete(url, data: data, options: options);
@@ -111,9 +113,21 @@ class Net {
     }
   }
 
-  static void initDio() {
+  static Future<void> initDio() async {
     _dio = Dio(BaseOptions(baseUrl: baseUrl));
     _dio!.interceptors.add(AuthenticationInterceptor());
+    if (Platform.isAndroid && await getAndroidSdkInt() < 24) {
+      _dio!.httpClientAdapter = IOHttpClientAdapter(
+        createHttpClient: () {
+          final client = HttpClient();
+          client.badCertificateCallback =
+              (X509Certificate cert, String host, int port) => true;
+          client.maxConnectionsPerHost = 5;
+
+          return client;
+        },
+      );
+    }
   }
 
   static Future<ResponseModel> getError(DioException e) async {
