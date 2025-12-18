@@ -79,12 +79,13 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
 
       child: ListView(
         controller: _scrollController,
+        padding: EdgeInsets.all(8),
         children: [
           MistSearchField(
             controller: _searchController,
             label: "Search Receits",
           ).padding(const EdgeInsets.symmetric(horizontal: 10, vertical: 5)),
-
+          18.gapHeight,
           Obx(
             () => _itemsListController.receits.isNotEmpty
                 ? GroupedListView<ItemReceitModel, String>(
@@ -95,14 +96,18 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
                         MistDateUtils.formatSortableDate(element.createdAt),
                     groupSeparatorBuilder: (String groupByValue) =>
                         // ... (Your separator logic)
-                        Text(groupByValue /* ... styles ... */)
-                            .row()
-                            .padding(const EdgeInsets.all(10))
-                            .decoratedBox(
-                              decoration: BoxDecoration(
-                                color: AppTheme.surface(context),
+                        groupByValue
+                            .split(" ")
+                            .skip(1)
+                            .join(" ")
+                            .text(
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Get.theme.colorScheme.primary,
                               ),
-                            ),
+                            )
+                            .row()
+                            .padding(const EdgeInsets.all(10)),
                     itemBuilder: (context, ItemReceitModel element) {
                       return [
                         _buildItem(element),

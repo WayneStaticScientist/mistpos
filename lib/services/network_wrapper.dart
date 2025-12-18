@@ -129,7 +129,13 @@ class Net {
       );
     }
   }
+  // static Future<ResponseModel> testFunction(){
+  //   try{
+  //     /v1/test
+  //   }catch(e){
 
+  //   }
+  // }
   static Future<ResponseModel> getError(DioException e) async {
     String errorMessage = "An unknown error occurred.";
     dynamic errorBody;
@@ -248,7 +254,7 @@ class Net {
         default:
           return ResponseModel(
             statusCode: -100,
-            response: 'Unexpected Network Connection Error',
+            response: "Error : $e",
             hasError: true,
             body: null,
           );

@@ -62,11 +62,11 @@ class _SalesAppBarState extends State<SalesAppBar> {
         }),
         Obx(
           () => _fireController.notificationSize.value > 0
-              ? Badge.count(
-                  count: _fireController.notificationSize.value,
-                  child: IconButton(
-                    onPressed: () => Get.to(() => ScreenNotifications()),
-                    icon: Iconify(Bx.bell, color: AppTheme.color(context)),
+              ? IconButton(
+                  onPressed: () => Get.to(() => ScreenNotifications()),
+                  icon: Badge.count(
+                    count: _fireController.notificationSize.value,
+                    child: Iconify(Bx.bell, color: AppTheme.color(context)),
                   ),
                 )
               : IconButton(

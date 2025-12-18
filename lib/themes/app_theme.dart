@@ -12,6 +12,7 @@ class AppTheme {
 
   static final ThemeData darkTheme = ThemeData(
     useMaterial3: true,
+
     colorScheme: const ColorScheme.dark(
       primary: Color.fromARGB(255, 20, 89, 180),
       secondary: Colors.orange,

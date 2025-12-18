@@ -93,22 +93,23 @@ class _ScreenMainState extends State<ScreenMain> {
     return Scaffold(
       key: _scaffoldKey,
       body: _listNavs[_currentNav] ?? SizedBox.shrink(),
-      bottomNavigationBar: Obx(
-        () => _itemsController.salesTaxes.isNotEmpty && _currentNav == 'sales'
-            ? [
-                    "${_itemsController.salesTaxes.length} Taxes affecting"
-                        .text(
-                          style: TextStyle(fontSize: 12, color: Colors.white),
-                        ),
-                  ]
-                  .row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                  )
-                  .padding(EdgeInsets.all(12))
-                  .decoratedBox(decoration: BoxDecoration(color: Colors.red))
-            : SizedBox(),
-      ),
+      bottomSheet: Obx(() {
+        final countedTaxes = _itemsController.salesTaxes
+            .where((tax) => tax.activated)
+            .toList();
+        return [
+              "${countedTaxes.length} Taxes affecting".text(
+                style: TextStyle(fontSize: 12, color: Colors.white),
+              ),
+            ]
+            .row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+            )
+            .padding(EdgeInsets.all(4))
+            .decoratedBox(decoration: BoxDecoration(color: Colors.red))
+            .visibleIf(countedTaxes.isNotEmpty && _currentNav == 'sales');
+      }),
       drawer: Obx(
         () => MistMainNavigationView(
           selectedNav: _currentNav,

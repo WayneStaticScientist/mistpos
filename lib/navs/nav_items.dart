@@ -56,63 +56,61 @@ class _NavItemsState extends State<NavItems> {
         ],
       ),
       body: _navOptions.elementAt(_selectedIndex),
-      bottomNavigationBar: SafeArea(
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-          fixedColor: Get.theme.colorScheme.primary,
-          unselectedItemColor: Get.isDarkMode ? Colors.white70 : Colors.black54,
-          items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Iconify(
-                Bx.cart_alt,
-                color: _selectedIndex == 0
-                    ? Get.theme.colorScheme.primary
-                    : Get.isDarkMode
-                    ? Colors.white70
-                    : Colors.black54,
-              ),
-              label: 'Items',
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        fixedColor: Get.theme.colorScheme.primary,
+        unselectedItemColor: Get.isDarkMode ? Colors.white70 : Colors.black54,
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Iconify(
+              Bx.cart_alt,
+              color: _selectedIndex == 0
+                  ? Get.theme.colorScheme.primary
+                  : Get.isDarkMode
+                  ? Colors.white70
+                  : Colors.black54,
             ),
-            BottomNavigationBarItem(
-              icon: Iconify(
-                Bx.category,
-                color: _selectedIndex == 1
-                    ? Get.theme.colorScheme.primary
-                    : Get.isDarkMode
-                    ? Colors.white70
-                    : Colors.black54,
-              ),
-              label: 'Categories',
+            label: 'Items',
+          ),
+          BottomNavigationBarItem(
+            icon: Iconify(
+              Bx.category,
+              color: _selectedIndex == 1
+                  ? Get.theme.colorScheme.primary
+                  : Get.isDarkMode
+                  ? Colors.white70
+                  : Colors.black54,
             ),
-            BottomNavigationBarItem(
-              icon: Iconify(
-                Bx.edit_alt,
-                color: _selectedIndex == 2
-                    ? Get.theme.colorScheme.primary
-                    : Get.isDarkMode
-                    ? Colors.white70
-                    : Colors.black54,
-              ),
-              label: 'Modifiers',
+            label: 'Categories',
+          ),
+          BottomNavigationBarItem(
+            icon: Iconify(
+              Bx.edit_alt,
+              color: _selectedIndex == 2
+                  ? Get.theme.colorScheme.primary
+                  : Get.isDarkMode
+                  ? Colors.white70
+                  : Colors.black54,
             ),
-            BottomNavigationBarItem(
-              icon: Iconify(
-                Bx.tag,
-                color: _selectedIndex == 3
-                    ? Get.theme.colorScheme.primary
-                    : Get.isDarkMode
-                    ? Colors.white70
-                    : Colors.black54,
-              ),
-              label: 'Discounts',
+            label: 'Modifiers',
+          ),
+          BottomNavigationBarItem(
+            icon: Iconify(
+              Bx.tag,
+              color: _selectedIndex == 3
+                  ? Get.theme.colorScheme.primary
+                  : Get.isDarkMode
+                  ? Colors.white70
+                  : Colors.black54,
             ),
-          ],
-        ),
+            label: 'Discounts',
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _add,

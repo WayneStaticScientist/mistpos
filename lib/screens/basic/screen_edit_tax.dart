@@ -24,7 +24,6 @@ class ScreenEditTax extends StatefulWidget {
 
 class _ScreenEditTaxState extends State<ScreenEditTax> {
   bool _isLoading = false;
-  bool _activated = true;
   final _formKey = GlobalKey<FormState>();
   final _itemsController = Get.find<ItemsController>();
   final _invenController = Get.find<InventoryController>();
@@ -83,7 +82,7 @@ class _ScreenEditTaxState extends State<ScreenEditTax> {
                   14.gapHeight,
                   ListTile(
                     onTap: () => setState(() {
-                      _activated = !_activated;
+                      widget.tax.activated = !widget.tax.activated;
                     }),
                     contentPadding: EdgeInsets.zero,
                     subtitle: "Select wether it should be applied".text(
@@ -91,10 +90,10 @@ class _ScreenEditTaxState extends State<ScreenEditTax> {
                     ),
                     title: "Activated".text(),
                     leading: Checkbox(
-                      value: _activated,
+                      value: widget.tax.activated,
                       onChanged: (e) {
                         setState(() {
-                          _activated = e ?? false;
+                          widget.tax.activated = e ?? false;
                         });
                       },
                     ),
@@ -190,16 +189,10 @@ class _ScreenEditTaxState extends State<ScreenEditTax> {
     setState(() {
       _isLoading = true;
     });
-
+    widget.tax.label = _itemNameController.text;
+    widget.tax.value = amount;
     final response = await _itemsController.updateTaxies(
-      TaxModel(
-        label: _itemNameController.text.trim(),
-        value: amount,
-        activated: _activated,
-        selectedIds: _invenController.selectedInvItems
-            .map((e) => e.id)
-            .toList(),
-      ).toJson(),
+      widget.tax.toJson(),
       widget.tax.hexId,
     );
     if (response) {

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:isar/isar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/instance_manager.dart';
@@ -13,7 +11,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:mistpos/models/shifts_model.dart';
 import 'package:mistpos/models/discount_model.dart';
-import 'package:mistpos/channels/security_channel.dart';
 import 'package:mistpos/models/item_receit_model.dart';
 import 'package:mistpos/screens/basic/screen_main.dart';
 import 'package:get/get_navigation/get_navigation.dart';
@@ -55,9 +52,6 @@ void main() async {
     ItemSavedItemsModelSchema,
   ], directory: dir.path);
   await GetStorage.init();
-  final securityService = SecurityProviderService();
-  log("Attempting to install security provider for older devices...");
-  await securityService.updateSecurityProvider();
   runApp(const MyApp());
   Get.put(ItemsController());
 }

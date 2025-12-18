@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/utils/date_utils.dart';
@@ -31,6 +32,8 @@ class _ScreenNotificationsState extends State<ScreenNotifications> {
     WidgetsBinding.instance.addPostFrameCallback((time) {
       _firebaseController.listAllNotifications();
       _firebaseController.notificationSize.value = 0;
+      GetStorage storage = GetStorage();
+      storage.write("notifications", 0);
     });
     _initDebouncer();
   }
