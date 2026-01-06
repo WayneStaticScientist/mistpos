@@ -34,6 +34,14 @@ class NavInventoryHistoryState extends State<NavInventoryHistory> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_inventoryController.company.value == null ||
+          MistDateUtils.getDaysDifference(
+                _inventoryController
+                    .company
+                    .value!
+                    .subscriptionType
+                    .validUntil!,
+              ) <
+              0 ||
           !(MistSubscriptionUtils.proList.contains(
             _inventoryController.company.value!.subscriptionType.type,
           ))) {
@@ -47,6 +55,14 @@ class NavInventoryHistoryState extends State<NavInventoryHistory> {
   Widget build(BuildContext context) {
     return Obx(() {
       if (_inventoryController.company.value == null ||
+          MistDateUtils.getDaysDifference(
+                _inventoryController
+                    .company
+                    .value!
+                    .subscriptionType
+                    .validUntil!,
+              ) <
+              0 ||
           !(MistSubscriptionUtils.proList.contains(
             _inventoryController.company.value!.subscriptionType.type,
           ))) {

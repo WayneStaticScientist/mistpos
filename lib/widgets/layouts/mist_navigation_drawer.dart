@@ -2,6 +2,7 @@ import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/instance_manager.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/screens/support/sales_help.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/icons/bx.dart';
@@ -22,6 +23,7 @@ import 'package:mistpos/screens/basic/screen_devices_section.dart';
 class MistMainNavigationView extends StatefulWidget {
   final Function(String value) onTap;
   final User? user;
+
   final String selectedNav;
   const MistMainNavigationView({
     super.key,
@@ -35,6 +37,7 @@ class MistMainNavigationView extends StatefulWidget {
 }
 
 class _MistMainNavigationViewState extends State<MistMainNavigationView> {
+  final _userController = Get.find<UserController>();
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -67,6 +70,9 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
               tileColor: widget.selectedNav == 'items'
                   ? Colors.grey.withAlpha(30)
                   : null,
+            ).visibleIf(
+              _userController.user.value?.role.toLowerCase() == 'admin' ||
+                  _userController.user.value?.role.toLowerCase() == 'manager',
             ),
             ListTile(
               leading: Iconify(Bx.time, color: AppTheme.color(context)),
@@ -94,6 +100,9 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
               leading: Iconify(Bx.analyse, color: AppTheme.color(context)),
               title: Text('Subscriptions'),
               onTap: () => Get.to(() => ScreenSubscription()),
+            ).visibleIf(
+              _userController.user.value?.role.toLowerCase() == 'admin' ||
+                  _userController.user.value?.role.toLowerCase() == 'manager',
             ),
             ListTile(
               leading: Iconify(Bx.bxl_visa, color: AppTheme.color(context)),
@@ -114,6 +123,9 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
                 Get.back();
                 Get.to(() => ScreenDashboard());
               },
+            ).visibleIf(
+              _userController.user.value?.role.toLowerCase() == 'admin' ||
+                  _userController.user.value?.role.toLowerCase() == 'manager',
             ),
             ListTile(
               leading: Iconify(
@@ -124,6 +136,9 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
               onTap: () {
                 Net.lauchDashboardUrl();
               },
+            ).visibleIf(
+              _userController.user.value?.role.toLowerCase() == 'admin' ||
+                  _userController.user.value?.role.toLowerCase() == 'manager',
             ),
             ListTile(
               leading: Iconify(

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/supplier_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/utils/subscriptions.dart';
 import 'package:mistpos/widgets/layouts/subscription_alert.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
@@ -31,6 +32,10 @@ class _NavInventorySuppliersListState extends State<NavInventorySuppliersList> {
   @override
   void initState() {
     if (_iventoryController.company.value != null &&
+        MistDateUtils.getDaysDifference(
+              _iventoryController.company.value!.subscriptionType.validUntil!,
+            ) >=
+            0 &&
         !(MistSubscriptionUtils.proList.contains(
           _iventoryController.company.value!.subscriptionType.type,
         ))) {
@@ -51,6 +56,10 @@ class _NavInventorySuppliersListState extends State<NavInventorySuppliersList> {
   Widget build(BuildContext context) {
     return Obx(() {
       if (_iventoryController.company.value == null ||
+          MistDateUtils.getDaysDifference(
+                _iventoryController.company.value!.subscriptionType.validUntil!,
+              ) <
+              0 ||
           !(MistSubscriptionUtils.proList.contains(
             _iventoryController.company.value!.subscriptionType.type,
           ))) {

@@ -38,6 +38,10 @@ class _NavInventoryPurchaseOrderState extends State<NavInventoryPurchaseOrder> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_inventory.company.value == null ||
+          MistDateUtils.getDaysDifference(
+                _inventory.company.value!.subscriptionType.validUntil!,
+              ) <
+              0 ||
           !(MistSubscriptionUtils.proList.contains(
             _inventory.company.value!.subscriptionType.type,
           ))) {
@@ -60,6 +64,10 @@ class _NavInventoryPurchaseOrderState extends State<NavInventoryPurchaseOrder> {
   Widget build(BuildContext context) {
     return Obx(() {
       if (_inventory.company.value == null ||
+          MistDateUtils.getDaysDifference(
+                _inventory.company.value!.subscriptionType.validUntil!,
+              ) <
+              0 ||
           !(MistSubscriptionUtils.proList.contains(
             _inventory.company.value!.subscriptionType.type,
           ))) {

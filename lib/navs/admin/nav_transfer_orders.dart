@@ -32,6 +32,10 @@ class _NavTransferOrdersState extends State<NavTransferOrders> {
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_iventoryController.company.value == null ||
+          MistDateUtils.getDaysDifference(
+                _iventoryController.company.value!.subscriptionType.validUntil!,
+              ) <
+              0 ||
           !(MistSubscriptionUtils.proList.contains(
             _iventoryController.company.value!.subscriptionType.type,
           ))) {
@@ -54,6 +58,10 @@ class _NavTransferOrdersState extends State<NavTransferOrders> {
   Widget build(BuildContext context) {
     return Obx(() {
       if (_iventoryController.company.value == null ||
+          MistDateUtils.getDaysDifference(
+                _iventoryController.company.value!.subscriptionType.validUntil!,
+              ) <
+              0 ||
           !(MistSubscriptionUtils.proList.contains(
             _iventoryController.company.value!.subscriptionType.type,
           ))) {

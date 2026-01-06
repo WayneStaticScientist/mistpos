@@ -34,6 +34,10 @@ class _NavInventoryCountsState extends State<NavInventoryCounts> {
   @override
   void initState() {
     if (_iventoryController.company.value != null &&
+        MistDateUtils.getDaysDifference(
+              _iventoryController.company.value!.subscriptionType.validUntil!,
+            ) >=
+            0 &&
         (MistSubscriptionUtils.proList.contains(
           _iventoryController.company.value!.subscriptionType.type,
         ))) {
@@ -54,6 +58,10 @@ class _NavInventoryCountsState extends State<NavInventoryCounts> {
   Widget build(BuildContext context) {
     return Obx(() {
       if (_iventoryController.company.value == null ||
+          MistDateUtils.getDaysDifference(
+                _iventoryController.company.value!.subscriptionType.validUntil!,
+              ) <
+              0 ||
           !(MistSubscriptionUtils.proList.contains(
             _iventoryController.company.value!.subscriptionType.type,
           ))) {

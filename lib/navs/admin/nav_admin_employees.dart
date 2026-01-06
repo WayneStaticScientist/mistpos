@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/utils/subscriptions.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -35,10 +36,14 @@ class _NavAdminEmployeesState extends State<NavAdminEmployees> {
   @override
   void initState() {
     super.initState();
-    if (_inventoryController.company.value != null ||
+    if (_inventoryController.company.value != null &&
         (MistSubscriptionUtils.basicList.contains(
           _inventoryController.company.value!.subscriptionType.type,
-        ))) {
+        )) &&
+        MistDateUtils.getDaysDifference(
+              _inventoryController.company.value!.subscriptionType.validUntil!,
+            ) >=
+            0) {
       _adminController.fetchEmployees();
     }
   }
@@ -47,6 +52,14 @@ class _NavAdminEmployeesState extends State<NavAdminEmployees> {
   Widget build(BuildContext context) {
     return Obx(() {
       if (_inventoryController.company.value == null ||
+          MistDateUtils.getDaysDifference(
+                _inventoryController
+                    .company
+                    .value!
+                    .subscriptionType
+                    .validUntil!,
+              ) <
+              0 ||
           !(MistSubscriptionUtils.basicList.contains(
             _inventoryController.company.value!.subscriptionType.type,
           ))) {

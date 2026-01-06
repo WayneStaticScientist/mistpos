@@ -25,6 +25,9 @@ class _ProfileTileState extends State<ProfileTile> {
       return const SizedBox.shrink();
     }
     final company = CompanyModel.fromStorage();
+    final daysLeft = company != null
+        ? MistDateUtils.getDaysDifference(company.subscriptionType.validUntil!)
+        : 0;
     return Obx(() {
       final user = _userController.user.value!;
       return [
@@ -70,7 +73,9 @@ class _ProfileTileState extends State<ProfileTile> {
                 if (company.subscriptionType.validUntil != null &&
                     company.subscriptionType.type != "free") ...[
                   4.gapWidth,
-                  "${MistDateUtils.getDaysDifference(company.subscriptionType.validUntil!)} days left"
+                  (daysLeft < 0
+                          ? "Expired"
+                          : "${MistDateUtils.getDaysDifference(company.subscriptionType.validUntil!)} days left")
                       .text(
                         style: TextStyle(
                           color:

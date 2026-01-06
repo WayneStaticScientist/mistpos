@@ -42,6 +42,14 @@ class NavInventoryValuationState extends State<NavInventoryValuation> {
         end: _endDate,
       );
       if (_inventoryController.company.value == null ||
+          MistDateUtils.getDaysDifference(
+                _inventoryController
+                    .company
+                    .value!
+                    .subscriptionType
+                    .validUntil!,
+              ) <
+              0 ||
           !(MistSubscriptionUtils.proList.contains(
             _inventoryController.company.value!.subscriptionType.type,
           ))) {
@@ -55,6 +63,14 @@ class NavInventoryValuationState extends State<NavInventoryValuation> {
   Widget build(BuildContext context) {
     return Obx(() {
       if (_inventoryController.company.value == null ||
+          MistDateUtils.getDaysDifference(
+                _inventoryController
+                    .company
+                    .value!
+                    .subscriptionType
+                    .validUntil!,
+              ) <
+              0 ||
           !(MistSubscriptionUtils.proList.contains(
             _inventoryController.company.value!.subscriptionType.type,
           ))) {

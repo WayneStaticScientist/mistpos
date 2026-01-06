@@ -6,6 +6,7 @@ import 'package:mistpos/utils/toast.dart';
 import 'package:pdf_maker/pdf_maker.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/themes/app_theme.dart';
+import 'package:mistpos/models/tax_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:mistpos/utils/currence_converter.dart';
@@ -13,6 +14,7 @@ import 'package:mistpos/models/item_receit_model.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:mistpos/utils/pdfdocuments/pdf_receit.dart';
+import 'package:mistpos/controllers/devices_controller.dart';
 import 'package:mistpos/screens/basic/screen_refund_cart.dart';
 
 class ScreenReceitView extends StatefulWidget {
@@ -186,6 +188,21 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
 
   void _printReceit() async {
     PDFMaker maker = PDFMaker();
+    DevicesController.printReceitToBackround(
+      widget.receitModel,
+      _userController.user.value!,
+      null,
+      widget.receitModel.miniTax
+          .map(
+            (e) => TaxModel(
+              label: e.label,
+              value: e.value,
+              activated: true,
+              selectedIds: [],
+            ),
+          )
+          .toList(),
+    );
     final baseCurrency = _userController.user.value?.baseCurrence ?? '';
     maker
         .createPDF(

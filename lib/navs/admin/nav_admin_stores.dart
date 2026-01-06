@@ -3,6 +3,7 @@ import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/utils/subscriptions.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
@@ -43,6 +44,14 @@ class _NavAdminStoresState extends State<NavAdminStores> {
   Widget build(BuildContext context) {
     return Obx(() {
       if (_inventoryController.company.value == null ||
+          MistDateUtils.getDaysDifference(
+                _inventoryController
+                    .company
+                    .value!
+                    .subscriptionType
+                    .validUntil!,
+              ) <
+              0 ||
           !(MistSubscriptionUtils.basicList.contains(
             _inventoryController.company.value!.subscriptionType.type,
           ))) {

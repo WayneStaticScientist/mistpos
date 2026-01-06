@@ -34,6 +34,10 @@ class _NavInventoryProductionState extends State<NavInventoryProduction> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_inventory.company.value == null ||
+          MistDateUtils.getDaysDifference(
+                _inventory.company.value!.subscriptionType.validUntil!,
+              ) <
+              0 ||
           !(MistSubscriptionUtils.enterpriseList.contains(
             _inventory.company.value!.subscriptionType.type,
           ))) {
@@ -55,6 +59,10 @@ class _NavInventoryProductionState extends State<NavInventoryProduction> {
   Widget build(BuildContext context) {
     return Obx(() {
       if (_inventory.company.value == null ||
+          MistDateUtils.getDaysDifference(
+                _inventory.company.value!.subscriptionType.validUntil!,
+              ) <
+              0 ||
           !(MistSubscriptionUtils.enterpriseList.contains(
             _inventory.company.value!.subscriptionType.type,
           ))) {
