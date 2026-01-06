@@ -79,14 +79,17 @@ class UserController extends GetxController {
 
   RxList<User> relatedAccounts = RxList<User>();
   RxBool loadingRelatedAccounts = RxBool(false);
+  RxString relatedAccountsError = RxString("");
   Future<void> findRelatedAccounts({String searchKey = ''}) async {
     if (user.value == null || loadingRelatedAccounts.value) {
       return;
     }
     loadingRelatedAccounts.value = true;
+    relatedAccountsError.value = "";
     final response = await Net.get("/filtered-users?search=$searchKey");
     loadingRelatedAccounts.value = false;
     if (response.hasError) {
+      relatedAccountsError.value = response.response;
       return;
     }
     if (response.body['list'] != null) {

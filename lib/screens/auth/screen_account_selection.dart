@@ -65,7 +65,22 @@ class _ScreenAccountSelectionState extends State<ScreenAccountSelection> {
                               _userController.relatedAccounts[index],
                             );
                           }
-                          return _buildLoader();
+                          if (_userController.loadingRelatedAccounts.value) {
+                            return _buildLoader();
+                          }
+                          if (_userController.relatedAccountsError.isNotEmpty) {
+                            return [
+                                  _userController.relatedAccountsError.value
+                                      .text(),
+                                ]
+                                .row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                )
+                                .padding(EdgeInsets.symmetric(vertical: 50));
+                          }
+                          return ["No more accounts".text()]
+                              .row(mainAxisAlignment: MainAxisAlignment.center)
+                              .padding(EdgeInsets.symmetric(vertical: 50));
                         },
                         itemCount: _userController.relatedAccounts.length + 1,
                       ),

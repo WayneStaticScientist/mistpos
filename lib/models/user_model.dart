@@ -60,7 +60,7 @@ class User {
       companyName: map['companyName'] as String? ?? '',
       baseCurrence: (map['baseCurrence'] as String? ?? 'USD').isEmpty
           ? 'USD'
-          : map['baseCurrence'] as String,
+          : (map['baseCurrence'] as String? ?? "USD"),
       paynowActivated: map['paynowActivated'] as bool? ?? false,
       receitsCount: map['receitsCount'] as int? ?? 0,
       permissions: (map['permissions'] == null)
