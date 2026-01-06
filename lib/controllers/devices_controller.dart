@@ -271,7 +271,7 @@ class DevicesController extends GetxController {
     if (enableQrCode) {
       b.feed(1);
       b.text("--- QR CODE ---", align: PosAlign.center, bold: true);
-      b.qrCode(itemReceitModel.hexId);
+      b.qrCode(itemReceitModel.label);
       b.feed(1);
     }
     b.text('--- END ---', align: PosAlign.center);

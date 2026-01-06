@@ -15,6 +15,11 @@ class MistDateUtils {
     return "${_getShortMonthName(dateTime.month)} ${dateTime.day}, ${dateTime.year}";
   }
 
+  static int getDaysDifference(DateTime to) {
+    final from = DateTime.now();
+    return to.difference(from).inDays;
+  }
+
   static String getWeekDayName(DateTime dateTime) {
     switch (dateTime.weekday) {
       case DateTime.monday:

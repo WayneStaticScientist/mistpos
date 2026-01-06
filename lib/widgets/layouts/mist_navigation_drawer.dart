@@ -1,6 +1,8 @@
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/instance_manager.dart';
+import 'package:iconify_flutter/icons/carbon.dart';
+import 'package:mistpos/screens/support/sales_help.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/user_model.dart';
@@ -122,6 +124,14 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
               onTap: () {
                 Net.lauchDashboardUrl();
               },
+            ),
+            ListTile(
+              leading: Iconify(
+                Carbon.information,
+                color: AppTheme.color(context),
+              ),
+              title: Text('Sales Help'),
+              onTap: () => Get.to(() => SalesHelp()),
             ),
             ListTile(
               leading: Iconify(Bx.help_circle, color: AppTheme.color(context)),

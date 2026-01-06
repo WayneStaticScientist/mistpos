@@ -28,10 +28,19 @@ class _NavReceitsState extends State<NavReceits> {
             () => IconButton(
               onPressed: () {},
               icon: CircularProgressIndicator(
-                color: Colors.white,
+                color: Colors.green,
                 strokeWidth: 2,
               ).sizedBox(height: 20, width: 20),
             ).visibleIf(_receitsController.updatingUsyncedReceits.value),
+          ),
+          Obx(
+            () => IconButton(
+              onPressed: () {},
+              icon: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ).sizedBox(height: 20, width: 20),
+            ).visibleIf(_receitsController.receitsLoading.value),
           ),
         ],
         foregroundColor: Colors.white,

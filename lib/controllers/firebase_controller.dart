@@ -56,6 +56,7 @@ class FirebaseController extends GetxController {
         .titleContains(search, caseSensitive: false)
         .or()
         .messageContains(search, caseSensitive: false)
+        .sortByUpdatedAtDesc()
         .findAll();
     notifications.assignAll(notifyAsync);
   }

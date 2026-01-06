@@ -2,10 +2,13 @@ import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/company_model.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/screens/auth/screen_user_profile.dart';
 import 'package:mistpos/services/network_wrapper.dart';
+import 'package:mistpos/utils/date_utils.dart';
 
 class ProfileTile extends StatefulWidget {
   const ProfileTile({super.key});
@@ -60,9 +63,40 @@ class _ProfileTileState extends State<ProfileTile> {
                 style: TextStyle(fontSize: 12, color: Colors.grey),
               ),
               if (company.subscriptionType.type != "free") ...[
-                "Expiry Date: ${company.subscriptionType.validUntil != null ? company.subscriptionType.validUntil!.toLocal().toString().split(' ').first : 'N/A'}"
-                    .text(style: TextStyle(fontSize: 12, color: Colors.grey)),
-                8.gapHeight,
+                [
+                  "Expiry Date: ${company.subscriptionType.validUntil != null ? MistDateUtils.getInformalShortDate(company.subscriptionType.validUntil!) : 'N/A'}"
+                      .text(style: TextStyle(fontSize: 12, color: Colors.grey)),
+                ].row(),
+                if (company.subscriptionType.validUntil != null &&
+                    company.subscriptionType.type != "free") ...[
+                  4.gapWidth,
+                  "${MistDateUtils.getDaysDifference(company.subscriptionType.validUntil!)} days left"
+                      .text(
+                        style: TextStyle(
+                          color:
+                              MistDateUtils.getDaysDifference(
+                                    company.subscriptionType.validUntil!,
+                                  ) <=
+                                  7
+                              ? Colors.red
+                              : Colors.green,
+                        ),
+                      )
+                      .textIconButton(
+                        onPressed: () {},
+                        icon: Iconify(
+                          Bx.time,
+                          size: 14,
+                          color:
+                              MistDateUtils.getDaysDifference(
+                                    company.subscriptionType.validUntil!,
+                                  ) <=
+                                  7
+                              ? Colors.red
+                              : Colors.green,
+                        ),
+                      ),
+                ],
               ],
             ],
             "Verify Company"

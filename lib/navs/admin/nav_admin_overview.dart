@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:mistpos/screens/basic/modern_layout.dart';
 import 'package:pdf_maker/pdf_maker.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/themes/app_theme.dart';
@@ -238,23 +239,21 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
               ],
             ),
             18.gapHeight,
-            "Weekly Profits".text(
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            MistMordernLayout(
+              label: "Weekly Profit",
+              children: [14.gapHeight, _getWeeklyProfitsBarChart()],
             ),
-            18.gapHeight,
-            _getWeeklyProfitsBarChart(),
             32.gapHeight,
-            "Weekly Sales".text(
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            MistMordernLayout(
+              label: "Weekly Sales",
+              children: [14.gapHeight, _getWeeklySalesChart()],
             ),
-            18.gapHeight,
-            _getWeeklySalesChart(),
+
             32.gapHeight,
-            "Weekly Visitors".text(
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            MistMordernLayout(
+              label: "Weekly Visits",
+              children: [14.gapHeight, _getWeeklyVisitorsChart()],
             ),
-            18.gapHeight,
-            _getWeeklyVisitorsChart(),
           ],
         ).sizedBox(width: double.infinity),
       );
@@ -280,7 +279,39 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
           // Add padding around the chart area for better aesthetics
           minY: 0,
           alignment: BarChartAlignment.spaceAround,
-
+          barTouchData: BarTouchData(
+            enabled: true,
+            touchTooltipData: BarTouchTooltipData(
+              getTooltipColor: (group) =>
+                  Get.theme.colorScheme.surface, // Background color
+              tooltipPadding: const EdgeInsets.all(8),
+              tooltipMargin: 8,
+              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                return BarTooltipItem(
+                  // Access your list data using the group.x (index)
+                  '${list[group.x].date}\n',
+                  TextStyle(
+                    color: Get.theme.colorScheme.onSurface,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                  children: [
+                    TextSpan(
+                      text: CurrenceConverter.getCurrenceFloatk(
+                        rod.toY,
+                        _userController.user.value?.baseCurrence ?? '',
+                      ),
+                      style: TextStyle(
+                        color: primaryColor, // Your primary color
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
           // --- GRID AND BORDER ---
           gridData: FlGridData(
             show: true,
@@ -402,6 +433,42 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
 
       return LineChart(
         LineChartData(
+          lineTouchData: LineTouchData(
+            enabled: true,
+            handleBuiltInTouches: true,
+            touchTooltipData: LineTouchTooltipData(
+              getTooltipColor: (touchedSpot) => Get.theme.colorScheme.surface,
+              tooltipPadding: const EdgeInsets.all(8),
+              getTooltipItems: (List<LineBarSpot> touchedSpots) {
+                return touchedSpots.map((LineBarSpot touchedSpot) {
+                  final textStyle = TextStyle(
+                    color: Get.theme.colorScheme.onSurface,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  );
+
+                  return LineTooltipItem(
+                    // Using the x value as index to get the date from your list
+                    '${list[touchedSpot.x.toInt()].date}\n',
+                    textStyle,
+                    children: [
+                      TextSpan(
+                        text: CurrenceConverter.getCurrenceFloatk(
+                          touchedSpot.y,
+                          _userController.user.value?.baseCurrence ?? '',
+                        ),
+                        style: TextStyle(
+                          color: primaryColor,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList();
+              },
+            ),
+          ),
           // Add padding around the chart area for better aesthetics
           minY: 0,
           gridData: FlGridData(
@@ -535,6 +602,35 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
 
       return BarChart(
         BarChartData(
+          barTouchData: BarTouchData(
+            enabled: true,
+            touchTooltipData: BarTouchTooltipData(
+              getTooltipColor: (group) => Get.theme.colorScheme.surface,
+              tooltipPadding: const EdgeInsets.all(8),
+              tooltipMargin: 8,
+              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                return BarTooltipItem(
+                  '${list[group.x].date}\n',
+                  TextStyle(
+                    color: Get.theme.colorScheme.onSurface,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                  children: [
+                    TextSpan(
+                      // Show as a whole number since you can't have half a visitor
+                      text: '${rod.toY.toInt()} Visitors',
+                      style: TextStyle(
+                        color: primaryColor,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
           // Add padding around the chart area for better aesthetics
           minY: 0,
           alignment: BarChartAlignment.spaceAround,

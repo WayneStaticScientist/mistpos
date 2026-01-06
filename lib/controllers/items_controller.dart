@@ -284,6 +284,9 @@ class ItemsController extends GetxController {
     receits.assignAll(r);
   }
 
+  Future<void> updateUnsyncedReceits() async {
+    await _updateUnsyncedReceits();
+  }
   /*
  =================================== MODIFIERS LOADING ==============================================
  */
@@ -1316,16 +1319,18 @@ class ItemsController extends GetxController {
       return;
     }
     final receivedModel = ItemReceitModel.fromJson(response.body['update']);
+    log("Receit synced with id ${receivedModel.toJson()}");
     await isar.writeTxn(() async {
       receivedModel.id = id;
       await isar.itemReceitModels.put(receivedModel);
     });
+    loadReceitsStatic();
     loadReceits();
-    //syncCartItemsOnBackground();
+    syncCartItemsOnBackground();
   }
 
   RxBool updatingUsyncedReceits = RxBool(false);
-  void _updateUnsyncedReceits() async {
+  Future<void> _updateUnsyncedReceits() async {
     if (updatingUsyncedReceits.value) return;
     final isar = Isar.getInstance();
     if (isar == null) {
@@ -1341,6 +1346,9 @@ class ItemsController extends GetxController {
       await Future.delayed(Duration(milliseconds: 500));
     }
     updatingUsyncedReceits.value = false;
+    if (allUnsynced.isNotEmpty) {
+      syncCartItemsOnBackground();
+    }
   }
 
   /*

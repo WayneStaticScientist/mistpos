@@ -14,7 +14,6 @@ import 'package:mistpos/models/item_receit_model.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/widgets/inputs/search_field.dart';
 import 'package:mistpos/controllers/user_controller.dart';
-import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/screens/basic/screen_receit_view.dart';
 
@@ -112,11 +111,6 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
                       return [
                         _buildItem(element),
                         14.gapHeight,
-                        [MistLoader1()]
-                            .row(mainAxisAlignment: MainAxisAlignment.center)
-                            .visibleIf(
-                              _itemsListController.receitsLoading.value,
-                            ),
                       ].column(mainAxisSize: MainAxisSize.min);
                     },
                     itemComparator: (item1, item2) =>

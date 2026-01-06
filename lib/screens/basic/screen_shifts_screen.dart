@@ -2,10 +2,9 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/screens/basic/screen_shift_view.dart';
-import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/models/shifts_model.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
@@ -14,6 +13,7 @@ import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/screens/basic/modern_layout.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/items_controller.dart';
+import 'package:mistpos/screens/basic/screen_shift_view.dart';
 import 'package:mistpos/widgets/buttons/mist_form_button.dart';
 
 class ScreenShiftsScreen extends StatefulWidget {
@@ -43,7 +43,24 @@ class _ScreenShiftsScreenState extends State<ScreenShiftsScreen> {
           [
                 Obx(
                   () => _itemsListController.selectedShift.value == null
-                      ? SizedBox()
+                      ? MistMordernLayout(
+                              label: "No shifts open",
+                              children: [
+                                18.gapHeight,
+                                "Shifts closed".text(
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                                18.gapHeight,
+                                MistFormButton(
+                                  label: "Open Shift",
+                                  onTap: _initiateAlertShift,
+                                ),
+                              ],
+                            )
+                            .sizedBox(width: double.infinity)
+                            .visibleIf(
+                              _itemsListController.selectedShift.value == null,
+                            )
                       : MistMordernLayout(
                               label: "Current Shift",
                               children: [
@@ -75,27 +92,6 @@ class _ScreenShiftsScreenState extends State<ScreenShiftsScreen> {
                             .visibleIf(
                               _itemsListController.selectedShift.value != null,
                             ),
-                ),
-                Obx(
-                  () =>
-                      MistMordernLayout(
-                            label: "No shifts open",
-                            children: [
-                              18.gapHeight,
-                              "Shifts closed".text(
-                                style: TextStyle(color: Colors.red),
-                              ),
-                              18.gapHeight,
-                              MistFormButton(
-                                label: "Open Shift",
-                                onTap: _initiateAlertShift,
-                              ),
-                            ],
-                          )
-                          .sizedBox(width: double.infinity)
-                          .visibleIf(
-                            _itemsListController.selectedShift.value == null,
-                          ),
                 ),
                 14.gapHeight,
                 ["Other shifts".text()].row(),

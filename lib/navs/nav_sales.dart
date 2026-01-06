@@ -107,6 +107,7 @@ class _NavSaleState extends State<NavSale> {
             enablePullUp: true,
             onRefresh: () async {
               await _itemsListController.syncCartItemsOnBackground();
+              await _itemsListController.updateUnsyncedReceits();
               _refreshController.refreshCompleted();
               setState(() {
                 _searchTerm = '';

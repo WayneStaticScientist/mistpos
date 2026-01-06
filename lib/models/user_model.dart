@@ -32,7 +32,7 @@ class User {
     required this.company,
     this.companyName = '',
     required this.fullName,
-    this.baseCurrence = '',
+    this.baseCurrence = 'USD',
     this.receitsCount = 0,
     required this.companies,
     required this.subscriptions,
@@ -58,7 +58,9 @@ class User {
       pinnedInput: map['pinnedInput'] as bool? ?? false,
       allowOfflinePurchase: map['allowOfflinePurchase'] as bool? ?? true,
       companyName: map['companyName'] as String? ?? '',
-      baseCurrence: map['baseCurrence'] as String? ?? 'USD',
+      baseCurrence: (map['baseCurrence'] as String? ?? 'USD').isEmpty
+          ? 'USD'
+          : map['baseCurrence'] as String,
       paynowActivated: map['paynowActivated'] as bool? ?? false,
       receitsCount: map['receitsCount'] as int? ?? 0,
       permissions: (map['permissions'] == null)
