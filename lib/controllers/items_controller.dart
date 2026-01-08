@@ -565,7 +565,11 @@ class ItemsController extends GetxController {
       await isar.writeTxn(() async {
         await isar.itemReceitModels.put(model);
       });
-      final itemModel = await isar.itemModels.get(e.baseId);
+      final itemModel = await isar.itemModels
+          .where()
+          .filter()
+          .hexIdEqualTo(e.itemId)
+          .findFirst();
       if (itemModel == null) {
         Toaster.showError("item not found");
         return null;
