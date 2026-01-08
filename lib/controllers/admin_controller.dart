@@ -178,8 +178,12 @@ class AdminController extends GetxController {
     return true;
   }
 
+  RxBool companyLoading = RxBool(false);
   Future<bool> updateCompany(Map<String, dynamic> data, String id) async {
+    if (companyLoading.value) return false;
+    companyLoading.value = true;
     final result = await Net.put("/admin/company/$id", data: data);
+    companyLoading.value = false;
     if (result.hasError) {
       Toaster.showError(result.response);
       return false;

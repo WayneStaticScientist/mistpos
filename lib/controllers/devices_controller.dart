@@ -182,7 +182,11 @@ class DevicesController extends GetxController {
         b.feed(1);
       }
     }
-    b.text(user.companyName.toString(), align: PosAlign.center, bold: true);
+    b.text(
+      user.companyName.toUpperCase().toString(),
+      align: PosAlign.center,
+      bold: true,
+    );
     b.feed(2);
     b.text('Company: ${user.companyName.toString()}', align: PosAlign.center);
     b.text('Role: ${user.role.toString()}');
@@ -333,7 +337,11 @@ class DevicesController extends GetxController {
         b.feed(1);
       }
     }
-    b.text(user.companyName.toString(), align: PosAlign.center, bold: true);
+    b.text(
+      user.companyName.toUpperCase().toString(),
+      align: PosAlign.center,
+      bold: true,
+    );
     b.feed(2);
     b.text('Company: ${user.companyName.toString()}', align: PosAlign.center);
     b.text('Role: ${user.role.toString()}');
@@ -383,7 +391,7 @@ class DevicesController extends GetxController {
       shift.cashDrawerEnd,
       user.baseCurrence,
     );
-    String cashEndLabel = "Starting cash :";
+    String cashEndLabel = "End cash :";
     b.text(
       padRight(
             cashEndLabel.substring(
@@ -393,6 +401,23 @@ class DevicesController extends GetxController {
             receitWidth - cashEnd.length,
           ) +
           cashEnd,
+    );
+
+    final difference = CurrenceConverter.getCurrenceFloatInStrings(
+      shift.cashDrawerEnd - shift.cashDrawerStart,
+      user.baseCurrence,
+    );
+
+    String differenceLabel = "Difference :";
+    b.text(
+      padRight(
+            differenceLabel.substring(
+              0,
+              math.min(differenceLabel.length, (receitWidth * 0.65).toInt()),
+            ),
+            receitWidth - difference.length,
+          ) +
+          difference,
     );
 
     final totalCustomers = shift.totalCustomers.toString();

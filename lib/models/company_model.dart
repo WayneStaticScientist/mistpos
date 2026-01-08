@@ -7,6 +7,7 @@ class CompanyModel {
   String email;
   String name;
   bool verified;
+  bool showSalesCount;
   ExchangeRateModel exchangeRates;
   SubscriptionModel subscriptionType;
 
@@ -18,15 +19,17 @@ class CompanyModel {
     required this.hexId,
     this.verified = false,
     required this.exchangeRates,
+    required this.showSalesCount,
     required this.subscriptionType,
   });
   factory CompanyModel.fromJson(Map<String, dynamic> json) {
     return CompanyModel(
-      name: json['name'] ?? "-",
       owner: json['owner'],
       email: json['email'],
-      verified: json['verified'] ?? false,
       hexId: json['_id'] ?? "",
+      name: json['name'] ?? "-",
+      verified: json['verified'] ?? false,
+      showSalesCount: json['showSalesCount'] ?? false,
       subscriptionType: json['subscriptionType'] != null
           ? SubscriptionModel.fromJson(json['subscriptionType'])
           : SubscriptionModel(),
@@ -40,6 +43,7 @@ class CompanyModel {
       "owner": owner,
       "email": email,
       "verified": verified,
+      "showSalesCount": showSalesCount,
       "exchangeRates": exchangeRates.toJson(),
       "subscriptionType": subscriptionType.toJson(),
     };

@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/utils/avatars.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:mistpos/utils/currence_converter.dart';
@@ -16,6 +17,7 @@ class MistListTileItem extends StatefulWidget {
 
 class _MistListTileItemState extends State<MistListTileItem> {
   final _userController = Get.find<UserController>();
+  final _invController = Get.find<InventoryController>();
   @override
   Widget build(BuildContext context) {
     return [
@@ -24,18 +26,23 @@ class _MistListTileItemState extends State<MistListTileItem> {
           [
                 widget.item.name.text(),
                 if (widget.item.trackStock)
-                  Text(
-                    "${widget.item.stockQuantity} in stock",
-                    style: TextStyle(
-                      color:
-                          widget.item.stockQuantity <
-                              widget.item.lowStockThreshold
-                          ? Colors.red
-                          : null,
-                    ),
-                  ).visibleIfNot(
-                    widget.item.isCompositeItem && !widget.item.useProduction,
-                  ),
+                  Obx(() {
+                    bool showCount =
+                        _invController.company.value?.showSalesCount == true;
+                    if (!showCount) return SizedBox();
+                    return Text(
+                      "${widget.item.stockQuantity} in stock",
+                      style: TextStyle(
+                        color:
+                            widget.item.stockQuantity <
+                                widget.item.lowStockThreshold
+                            ? Colors.red
+                            : null,
+                      ),
+                    ).visibleIfNot(
+                      widget.item.isCompositeItem && !widget.item.useProduction,
+                    );
+                  }),
               ]
               .column(
                 crossAxisAlignment: CrossAxisAlignment.start,

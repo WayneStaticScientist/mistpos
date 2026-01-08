@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
+import 'package:mistpos/controllers/admin_controller.dart';
+import 'package:mistpos/controllers/inventory_controller.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/utils/sdk_int.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:path/path.dart' as p;
@@ -26,6 +29,9 @@ class ScreenSettingsPage extends StatefulWidget {
 }
 
 class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
+  final _user = Get.find<UserController>();
+  final _invController = Get.find<InventoryController>();
+  final _adminController = Get.find<AdminController>();
   @override
   Widget build(BuildContext context) {
     final model = AppSettingsModel.fromStorage();
@@ -175,6 +181,54 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
               ),
             ],
           ),
+          Obx(
+            () => 24.gapColumn.visibleIf(
+              _user.user.value?.role == 'admin' ||
+                  _user.user.value?.role == 'manager',
+            ),
+          ),
+          Obx(
+            () =>
+                MistMordernLayout(
+                  label: "Item",
+                  children: [
+                    ListTile(
+                      trailing: Obx(
+                        () => _adminController.companyLoading.value
+                            ? CircularProgressIndicator()
+                            : Switch(
+                                value:
+                                    _invController
+                                        .company
+                                        .value
+                                        ?.showSalesCount ??
+                                    false,
+                                onChanged: (c) {
+                                  _updateCompanyModel(c);
+                                },
+                              ),
+                      ),
+                      onTap: () => _updateCompanyModel(
+                        !(_invController.company.value?.showSalesCount ??
+                            false),
+                      ),
+                      contentPadding: EdgeInsets.all(0),
+                      title: Text("Show Sales Item Quantitiess"),
+                      subtitle: "show quantities of items left in sales screen"
+                          .text(
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          ),
+                      leading: Iconify(
+                        Bx.font_size,
+                        color: AppTheme.color(context),
+                      ),
+                    ),
+                  ],
+                ).visibleIf(
+                  _user.user.value?.role == 'admin' ||
+                      _user.user.value?.role == 'manager',
+                ),
+          ),
           24.gapColumn,
           MistMordernLayout(
             label: "Heath Status",
@@ -321,5 +375,24 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
         ),
       ],
     );
+  }
+
+  void _updateCompanyModel(bool bool) async {
+    final company = _invController.company.value;
+    if (company == null) {
+      Toaster.showError("Failed to initialize , company not found");
+      return;
+    }
+    company.showSalesCount = bool;
+    final response = await _adminController.updateCompany(
+      company.toJson(),
+      company.hexId,
+    );
+    if (response) {
+      _invController.company.value = company;
+      _invController.company.refresh();
+      company.saveToStorage();
+      Toaster.showSuccess('status updated ');
+    }
   }
 }

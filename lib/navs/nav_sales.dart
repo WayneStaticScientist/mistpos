@@ -51,7 +51,6 @@ class _NavSaleState extends State<NavSale> {
   final _userController = Get.find<UserController>();
   final _itemsListController = Get.find<ItemsController>();
   final TextEditingController _searchController = TextEditingController();
-
   @override
   void initState() {
     super.initState();
