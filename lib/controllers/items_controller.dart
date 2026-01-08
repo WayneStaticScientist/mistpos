@@ -440,9 +440,6 @@ class ItemsController extends GetxController {
           });
         } else {
           // Handle case where original item is not found (optional)
-          log(
-            'Warning: Original ItemModel not found for baseId: ${savedItem.baseId}',
-          );
         }
       }
 
@@ -457,7 +454,6 @@ class ItemsController extends GetxController {
       loadSavedItems();
     } catch (e) {
       Toaster.showError("Error ; $e");
-      log(e.toString());
     }
   }
 
@@ -561,7 +557,6 @@ class ItemsController extends GetxController {
         Toaster.showError("$count should be less than ${e.count}");
         return null;
       }
-      model.items[index] = e;
       await isar.writeTxn(() async {
         await isar.itemReceitModels.put(model);
       });
@@ -1140,7 +1135,6 @@ class ItemsController extends GetxController {
       syncCartItemsOnBackground();
       return true;
     } catch (e) {
-      log("Error $e");
       Toaster.showError('Failed to create item');
       return false;
     }
@@ -1186,7 +1180,6 @@ class ItemsController extends GetxController {
       loadCategories();
       return true;
     } catch (e) {
-      log('Error adding category: $e');
       Toaster.showError('Failed to add category');
     }
     return false;
@@ -1325,7 +1318,6 @@ class ItemsController extends GetxController {
       return;
     }
     final receivedModel = ItemReceitModel.fromJson(response.body['update']);
-    log("Receit synced with id ${receivedModel.toJson()}");
     await isar.writeTxn(() async {
       receivedModel.id = id;
       await isar.itemReceitModels.put(receivedModel);

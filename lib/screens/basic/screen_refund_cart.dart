@@ -26,7 +26,7 @@ class _ScreenRefundCartState extends State<ScreenRefundCart> {
   @override
   void initState() {
     super.initState();
-    localReceit = localReceit;
+    localReceit = widget.receitModel;
   }
 
   @override
