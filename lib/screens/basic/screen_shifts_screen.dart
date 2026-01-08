@@ -192,6 +192,23 @@ class _ScreenShiftsScreenState extends State<ScreenShiftsScreen> {
       content: [
         "Close shift at ${closeTime.hour.toString().padLeft(2, '0')}:${closeTime.minute} "
             .text(),
+        Obx(
+          () => ListTile(
+            onTap: () {
+              _itemsListController.printReceitOfShift.value =
+                  !_itemsListController.printReceitOfShift.value;
+            },
+            title: "Print Reciet".text(),
+            trailing: Checkbox(
+              value: _itemsListController.printReceitOfShift.value,
+              onChanged: (e) => setState(() {
+                _itemsListController.printReceitOfShift.value =
+                    !_itemsListController.printReceitOfShift.value;
+              }),
+              semanticLabel: "Print Receit",
+            ),
+          ),
+        ),
         MistFormInput(
           label: "Amount in cash drawer",
           controller: cashDrawerAmount,

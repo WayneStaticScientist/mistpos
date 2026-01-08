@@ -146,8 +146,13 @@ class _ScreenEditTaxState extends State<ScreenEditTax> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                     );
                   }
-                  if (_invenController.selectedInvItems.isEmpty) {
+                  if (_invenController.selectedInvItems.isEmpty &&
+                      widget.tax.selectedIds.isNotEmpty) {
                     return "Something went wrong check your internet connection and try again"
+                        .text(style: TextStyle(color: Colors.red));
+                  }
+                  if (_invenController.selectedInvItems.isEmpty) {
+                    return "If no items are selected it will apply to all items"
                         .text(style: TextStyle(color: Colors.red));
                   }
                   return ListView.builder(

@@ -2,7 +2,9 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:isar/isar.dart';
+import 'package:mistpos/models/shifts_model.dart';
 import 'package:mistpos/models/tax_model.dart';
+import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/models/customer_model.dart';
@@ -218,6 +220,8 @@ class DevicesController extends GetxController {
             " - ${(item.percentageDiscount ? '${item.discount}%' : CurrenceConverter.getCurrenceFloatInStrings(item.discount, user.baseCurrence))}";
       }
       b.text(priceModel);
+      String refundModel = "refund  ${item.originalCount} ->  ${item.count}";
+      b.text(refundModel);
     }
     // --- SEPARATOR ---
     b.text('.' * receitWidth);
@@ -312,5 +316,171 @@ class DevicesController extends GetxController {
         ),
       );
     }
+  }
+
+  static void printShift(ShiftsModel shift, User user) {
+    final printer = PosUniversalPrinter.instance;
+    final b = EscPosBuilder();
+    final model = AppSettingsModel.fromStorage();
+    int receitWidth = model.printerRecietLength;
+    bool enableQrCode = model.enableQrCode;
+    String padRight(String text, int length) => text.padRight(length, ' ');
+    if (model.receitLogoPath.isNotEmpty) {
+      final rasterImage = getRasterImage(model.receitLogoPath);
+      if (rasterImage != null) {
+        b.feed(1);
+        b.raster(rasterImage);
+        b.feed(1);
+      }
+    }
+    b.text(user.companyName.toString(), align: PosAlign.center, bold: true);
+    b.feed(2);
+    b.text('Company: ${user.companyName.toString()}', align: PosAlign.center);
+    b.text('Role: ${user.role.toString()}');
+    b.text('Pos: ${user.till.toString()}');
+    b.text('Cashier: ${user.fullName.toUpperCase().trim()}');
+    b.text(
+      'Time: ${DateTime.now().toString().substring(0, 19)}',
+      align: PosAlign.center,
+    );
+    b.feed(1);
+    b.text('.' * receitWidth);
+    b.text('*** SHIFT ***', align: PosAlign.center, bold: true);
+    final totalSales = CurrenceConverter.getCurrenceFloatInStrings(
+      shift.totalSales,
+      user.baseCurrence,
+    );
+
+    String totalSalesLabel = "Total Sales :";
+    b.text(
+      padRight(
+            totalSalesLabel.substring(
+              0,
+              math.min(totalSalesLabel.length, (receitWidth * 0.65).toInt()),
+            ),
+            receitWidth - totalSales.length,
+          ) +
+          totalSales,
+    );
+
+    final startingCash = CurrenceConverter.getCurrenceFloatInStrings(
+      shift.cashDrawerStart,
+      user.baseCurrence,
+    );
+    String startingCashLabel = "Starting cash :";
+    b.text(
+      padRight(
+            startingCashLabel.substring(
+              0,
+              math.min(startingCashLabel.length, (receitWidth * 0.65).toInt()),
+            ),
+            receitWidth - startingCash.length,
+          ) +
+          startingCash,
+    );
+
+    final cashEnd = CurrenceConverter.getCurrenceFloatInStrings(
+      shift.cashDrawerEnd,
+      user.baseCurrence,
+    );
+    String cashEndLabel = "Starting cash :";
+    b.text(
+      padRight(
+            cashEndLabel.substring(
+              0,
+              math.min(cashEndLabel.length, (receitWidth * 0.65).toInt()),
+            ),
+            receitWidth - cashEnd.length,
+          ) +
+          cashEnd,
+    );
+
+    final totalCustomers = shift.totalCustomers.toString();
+    String totalCustomersLabel = "Total Customers: ";
+    b.text(
+      padRight(
+            totalCustomersLabel.substring(
+              0,
+              math.min(
+                totalCustomersLabel.length,
+                (receitWidth * 0.65).toInt(),
+              ),
+            ),
+            receitWidth - totalCustomers.length,
+          ) +
+          totalCustomers,
+    );
+
+    final salesQuantity = shift.salesQuantity.toString();
+    String salesQuantityLabel = "Total Sales :";
+    b.text(
+      padRight(
+            salesQuantityLabel.substring(
+              0,
+              math.min(salesQuantityLabel.length, (receitWidth * 0.65).toInt()),
+            ),
+            receitWidth - salesQuantity.length,
+          ) +
+          salesQuantity,
+    );
+    b.feed(1);
+    b.text('.' * receitWidth);
+    b.text('Time', align: PosAlign.center);
+    b.feed(1);
+
+    final shiftStart =
+        "${shift.openShiftTime.hour.toString().padLeft(2, '0')}:${shift.openShiftTime.minute.toString().padLeft(2, '0')}";
+    String shiftStartLabel = "Shift Start :";
+    b.text(
+      padRight(
+            shiftStartLabel.substring(
+              0,
+              math.min(shiftStartLabel.length, (receitWidth * 0.65).toInt()),
+            ),
+            receitWidth - shiftStart.length,
+          ) +
+          shiftStart,
+    );
+
+    final shiftEnd =
+        "${shift.closeShiftTime.hour.toString().padLeft(2, '0')}:${shift.closeShiftTime.minute.toString().padLeft(2, '0')}";
+    String shiftEndLabel = "Shift End :";
+    b.text(
+      padRight(
+            shiftEndLabel.substring(
+              0,
+              math.min(shiftEndLabel.length, (receitWidth * 0.65).toInt()),
+            ),
+            receitWidth - shiftEnd.length,
+          ) +
+          shiftEnd,
+    );
+
+    b.text(
+      "${shift.closeShiftTime.difference(shift.openShiftTime).inHours.toString()} Hours of shift",
+      align: PosAlign.center,
+    );
+
+    final dateInit = MistDateUtils.getInformalShortDate(shift.openShiftTime);
+    String dateInitLabel = "Date :";
+    b.text(
+      padRight(
+            dateInitLabel.substring(
+              0,
+              math.min(dateInitLabel.length, (receitWidth * 0.65).toInt()),
+            ),
+            receitWidth - dateInit.length,
+          ) +
+          dateInit,
+    );
+    if (enableQrCode) {
+      b.feed(1);
+      b.text("--- QR CODE ---", align: PosAlign.center, bold: true);
+      b.qrCode(shift.shiftLabel);
+      b.feed(1);
+    }
+    b.feed(1);
+    b.cut();
+    printer.printEscPos(PosPrinterRole.cashier, b);
   }
 }

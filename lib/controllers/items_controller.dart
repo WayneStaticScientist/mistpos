@@ -25,6 +25,7 @@ import 'package:mistpos/models/embedded_discount_model.dart';
 class ItemsController extends GetxController {
   RxDouble totalPrice = RxDouble(0);
   RxString selectedCategory = ''.obs;
+  RxBool printReceitOfShift = RxBool(false);
   RxList<TaxModel> salesTaxes = <TaxModel>[].obs;
   RxList<ItemModel> cartItems = <ItemModel>[].obs;
   RxList<ShiftsModel> shifts = <ShiftsModel>[].obs;
@@ -1381,12 +1382,16 @@ class ItemsController extends GetxController {
       await isar.shiftsModels.put(model);
     });
     selectedShift.value = model;
+    loadShifts();
   }
 
   void closeShift(double amountInDrawer, User user) async {
     if (selectedShift.value == null) {
       Toaster.showError("something went wrong on closing a shift");
       return;
+    }
+    if (printReceitOfShift.value) {
+      DevicesController.printShift(selectedShift.value!, user);
     }
     final isar = Isar.getInstance();
     if (isar == null || selectedShift.value == null) {
@@ -1399,6 +1404,7 @@ class ItemsController extends GetxController {
     await isar.writeTxn(() async {
       await isar.shiftsModels.put(selectedShift.value!);
     });
+    loadShifts();
     selectedShift.value = null;
   }
 

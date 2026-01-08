@@ -39,8 +39,6 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
 
   @override
   Widget build(BuildContext context) {
-    final weeklyStartDay = _weeklyRange.subtract(Duration(days: 6));
-
     return Obx(() {
       if (_adminController.loading.value) {
         return MistLoader1().center();
@@ -225,9 +223,8 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
             32.gapHeight,
             Wrap(
               children: [
-                MistRangeView(label: "From Date", date: weeklyStartDay),
                 MistRangeView(
-                  label: "To Date",
+                  label: "Choose End Day",
                   date: _weeklyRange,
                   onDatePicked: (time) {
                     setState(() {

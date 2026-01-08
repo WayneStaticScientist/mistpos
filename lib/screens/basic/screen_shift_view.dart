@@ -1,6 +1,10 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/controllers/devices_controller.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/models/shifts_model.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
@@ -23,7 +27,22 @@ class _ScreenShiftViewState extends State<ScreenShiftView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: widget.shift.shiftLabel.text()),
+      appBar: AppBar(
+        title: widget.shift.shiftLabel.text(),
+        actions: [
+          Obx(
+            () => _userController.user.value != null
+                ? IconButton(
+                    onPressed: () => DevicesController.printShift(
+                      widget.shift,
+                      _userController.user.value!,
+                    ),
+                    icon: Iconify(Bx.printer, color: AppTheme.color(context)),
+                  )
+                : SizedBox(),
+          ),
+        ],
+      ),
       body: ListView(
         padding: EdgeInsets.all(8),
         children: [

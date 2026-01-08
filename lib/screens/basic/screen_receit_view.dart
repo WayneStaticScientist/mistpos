@@ -80,8 +80,12 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                     }
                     return ListTile(
                       contentPadding: EdgeInsets.all(0),
+                      leading: e.refunded
+                          ? Iconify(Bx.refresh, color: Colors.red)
+                          : null,
                       subtitle: [
                         "${e.count.toString()} x ${CurrenceConverter.getCurrenceFloatInStrings(e.price + e.addenum, _userController.user.value?.baseCurrence ?? '')}"
+                                "${e.refunded ? "   ${e.originalCount} -> ${e.count} " : ''}"
                             .text(),
                         12.gapWidth,
                         (e.percentageDiscount

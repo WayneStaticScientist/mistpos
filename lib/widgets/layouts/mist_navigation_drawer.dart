@@ -88,6 +88,9 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
               leading: Iconify(Bx.calculator, color: AppTheme.color(context)),
               title: Text('Tax'),
               onTap: () => Get.to(() => TaxListScreens()),
+            ).visibleIf(
+              _userController.user.value?.role.toLowerCase() == 'admin' ||
+                  _userController.user.value?.role.toLowerCase() == 'manager',
             ),
             ListTile(
               leading: Iconify(Bx.cog, color: AppTheme.color(context)),
@@ -95,19 +98,36 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
               onTap: () => Get.to(() => ScreenSettingsPage()),
             ),
             Divider(color: Colors.grey.withAlpha(50)),
-            "Payments".text(style: TextStyle(fontSize: 12)).paddingLeft(12),
+            "Payments"
+                .text(style: TextStyle(fontSize: 12))
+                .paddingLeft(12)
+                .visibleIf(
+                  _userController.user.value?.role.toLowerCase() == 'admin' ||
+                      _userController.user.value?.role.toLowerCase() ==
+                          'manager',
+                ),
             ListTile(
-              leading: Iconify(Bx.analyse, color: AppTheme.color(context)),
-              title: Text('Subscriptions'),
-              onTap: () => Get.to(() => ScreenSubscription()),
-            ).visibleIf(
-              _userController.user.value?.role.toLowerCase() == 'admin' ||
-                  _userController.user.value?.role.toLowerCase() == 'manager',
-            ),
+                  leading: Iconify(Bx.analyse, color: AppTheme.color(context)),
+                  title: Text('Subscriptions'),
+                  onTap: () => Get.to(() => ScreenSubscription()),
+                )
+                .visibleIf(
+                  _userController.user.value?.role.toLowerCase() == 'admin' ||
+                      _userController.user.value?.role.toLowerCase() ==
+                          'manager',
+                )
+                .visibleIf(
+                  _userController.user.value?.role.toLowerCase() == 'admin' ||
+                      _userController.user.value?.role.toLowerCase() ==
+                          'manager',
+                ),
             ListTile(
               leading: Iconify(Bx.bxl_visa, color: AppTheme.color(context)),
               title: Text('Payment Getways'),
               onTap: () => Get.to(() => ScreenPaymentGetway()),
+            ).visibleIf(
+              _userController.user.value?.role.toLowerCase() == 'admin' ||
+                  _userController.user.value?.role.toLowerCase() == 'manager',
             ),
             Divider(color: Colors.grey.withAlpha(50)),
             "System".text(style: TextStyle(fontSize: 12)).paddingLeft(12),
@@ -115,6 +135,9 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
               leading: Iconify(Bx.money, color: AppTheme.color(context)),
               title: Text('Currencies'),
               onTap: () => Get.to(() => ScreenCurrency()),
+            ).visibleIf(
+              _userController.user.value?.role.toLowerCase() == 'admin' ||
+                  _userController.user.value?.role.toLowerCase() == 'manager',
             ),
             ListTile(
               leading: Iconify(Bx.bar_chart, color: AppTheme.color(context)),
