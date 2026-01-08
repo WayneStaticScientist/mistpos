@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -808,7 +807,6 @@ class InventoryController extends GetxController {
       items.value = dataList.map((e) => ItemModel.fromJson(e)).toList();
       importing.value = false;
     } catch (e) {
-      log("error : $e");
       importing.value = false;
       Toaster.showError("There was error : $e");
       return false;

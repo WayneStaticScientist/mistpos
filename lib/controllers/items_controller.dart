@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 import 'package:mistpos/utils/toast.dart';

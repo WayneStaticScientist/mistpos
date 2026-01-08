@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
@@ -773,7 +771,6 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
           _adminController.openFile(file);
         })
         .catchError((e) {
-          log("PDF Generation Error: $e");
           Toaster.showError("Failed to generate PDF: $e");
         });
   }

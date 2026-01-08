@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 import 'package:mistpos/utils/toast.dart';
@@ -91,7 +89,6 @@ class FirebaseController extends GetxController {
         if (await joinTopic("inventory_${user.company}")) {
           user.subscriptions.add("inventory_${user.company}");
           User.saveToStorage(user);
-          log("User is ${user.toMap()}");
         }
       }
     } else {
@@ -126,9 +123,7 @@ class FirebaseController extends GetxController {
       notificationSize.value = notificationSize.value + 1;
       showLocalNotification(message);
       listAllNotifications();
-    } catch (_) {
-      log("errror sssssssss");
-    }
+    } catch (_) {}
   }
 
   void showLocalNotification(RemoteMessage message) {

@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
@@ -12,7 +13,7 @@ Future<int> getAndroidSdkInt() async {
       return androidInfo.version.sdkInt;
     } catch (e) {
       // Log error if device info could not be retrieved
-      print('Error getting Android SDK version: $e');
+      log('Error getting Android SDK version: $e');
       return -1;
     }
   }
