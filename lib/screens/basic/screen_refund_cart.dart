@@ -20,16 +20,22 @@ class ScreenRefundCart extends StatefulWidget {
 
 class _ScreenRefundCartState extends State<ScreenRefundCart> {
   bool _loading = false;
+  late ItemReceitModel localReceit;
   final _itemController = Get.find<ItemsController>();
   final _userController = Get.find<UserController>();
+  @override
+  void initState() {
+    super.initState();
+    localReceit = localReceit;
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false, // 1. Blocks the automatic "silent" back navigation
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        final updatedReceipt = widget.receitModel;
-        Get.back(result: updatedReceipt);
+        Get.back(result: localReceit);
       },
       child: Scaffold(
         appBar: AppBar(title: "Refund Cart".text()),
@@ -43,7 +49,7 @@ class _ScreenRefundCartState extends State<ScreenRefundCart> {
             : SingleChildScrollView(
                 child: [
                   18.gapHeight,
-                  ...widget.receitModel.items.indexed.map(
+                  ...localReceit.items.indexed.map(
                     (e) => ListTile(
                       tileColor: e.$2.refunded
                           ? Colors.red.withAlpha(100)
@@ -65,14 +71,14 @@ class _ScreenRefundCartState extends State<ScreenRefundCart> {
                   ListTile(
                     title: 'Total'.text(),
                     trailing: CurrenceConverter.getCurrenceFloatInStrings(
-                      widget.receitModel.total,
+                      localReceit.total,
                       _userController.user.value?.baseCurrence ?? '',
                     ).text(),
                   ),
                   ListTile(
-                    title: widget.receitModel.payment.text(),
+                    title: localReceit.payment.text(),
                     trailing: CurrenceConverter.getCurrenceFloatInStrings(
-                      widget.receitModel.amount,
+                      localReceit.amount,
                       _userController.user.value?.baseCurrence ?? '',
                     ).text(),
                   ),
@@ -152,7 +158,7 @@ class _ScreenRefundCartState extends State<ScreenRefundCart> {
       _loading = true;
     });
     final state = await _itemController.refundItem(
-      widget.receitModel,
+      localReceit,
       e,
       count,
       index,
@@ -167,9 +173,7 @@ class _ScreenRefundCartState extends State<ScreenRefundCart> {
       return;
     }
     setState(() {
-      widget.receitModel.items = state.items;
-      widget.receitModel.total = state.total;
-      widget.receitModel.amount = state.amount;
+      localReceit = state;
     });
     Toaster.showSuccess("refunded");
   }

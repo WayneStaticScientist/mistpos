@@ -581,7 +581,7 @@ class ItemsController extends GetxController {
         });
       }
       loadReceits();
-      return model;
+      return modelUpdate;
     } catch (e) {
       Toaster.showError("There was error : $e");
       return null;
