@@ -24,51 +24,61 @@ class _ScreenRefundCartState extends State<ScreenRefundCart> {
   final _userController = Get.find<UserController>();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: "Refund Cart".text()),
-      body: _loading
-          ? Center(
-              child: CircularProgressIndicator().sizedBox(
-                height: 40,
-                width: 40,
-              ),
-            )
-          : SingleChildScrollView(
-              child: [
-                18.gapHeight,
-                ...widget.receitModel.items.indexed.map(
-                  (e) => ListTile(
-                    tileColor: e.$2.refunded ? Colors.red.withAlpha(100) : null,
-                    onTap: () => _refund(e.$1, e.$2),
-                    subtitle:
-                        "${e.$2.count.toString()} x ${CurrenceConverter.getCurrenceFloatInStrings(e.$2.price + e.$2.addenum, _userController.user.value?.baseCurrence ?? '')}"
-                            .text(),
-                    title: e.$2.name.text(),
+    return PopScope(
+      canPop: false, // 1. Blocks the automatic "silent" back navigation
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        final updatedReceipt = widget.receitModel;
+        Get.back(result: updatedReceipt);
+      },
+      child: Scaffold(
+        appBar: AppBar(title: "Refund Cart".text()),
+        body: _loading
+            ? Center(
+                child: CircularProgressIndicator().sizedBox(
+                  height: 40,
+                  width: 40,
+                ),
+              )
+            : SingleChildScrollView(
+                child: [
+                  18.gapHeight,
+                  ...widget.receitModel.items.indexed.map(
+                    (e) => ListTile(
+                      tileColor: e.$2.refunded
+                          ? Colors.red.withAlpha(100)
+                          : null,
+                      onTap: () => _refund(e.$1, e.$2),
+                      subtitle:
+                          "${e.$2.count.toString()} x ${CurrenceConverter.getCurrenceFloatInStrings(e.$2.price + e.$2.addenum, _userController.user.value?.baseCurrence ?? '')}"
+                              .text(),
+                      title: e.$2.name.text(),
+                      trailing: CurrenceConverter.getCurrenceFloatInStrings(
+                        (e.$2.price + e.$2.addenum) * e.$2.count,
+                        _userController.user.value?.baseCurrence ?? '',
+                      ).text(),
+                    ),
+                  ),
+                  18.gapHeight,
+                  Divider(color: Colors.grey, thickness: 1),
+                  18.gapHeight,
+                  ListTile(
+                    title: 'Total'.text(),
                     trailing: CurrenceConverter.getCurrenceFloatInStrings(
-                      (e.$2.price + e.$2.addenum) * e.$2.count,
+                      widget.receitModel.total,
                       _userController.user.value?.baseCurrence ?? '',
                     ).text(),
                   ),
-                ),
-                18.gapHeight,
-                Divider(color: Colors.grey, thickness: 1),
-                18.gapHeight,
-                ListTile(
-                  title: 'Total'.text(),
-                  trailing: CurrenceConverter.getCurrenceFloatInStrings(
-                    widget.receitModel.total,
-                    _userController.user.value?.baseCurrence ?? '',
-                  ).text(),
-                ),
-                ListTile(
-                  title: widget.receitModel.payment.text(),
-                  trailing: CurrenceConverter.getCurrenceFloatInStrings(
-                    widget.receitModel.amount,
-                    _userController.user.value?.baseCurrence ?? '',
-                  ).text(),
-                ),
-              ].column(),
-            ),
+                  ListTile(
+                    title: widget.receitModel.payment.text(),
+                    trailing: CurrenceConverter.getCurrenceFloatInStrings(
+                      widget.receitModel.amount,
+                      _userController.user.value?.baseCurrence ?? '',
+                    ).text(),
+                  ),
+                ].column(),
+              ),
+      ),
     );
   }
 
@@ -156,7 +166,11 @@ class _ScreenRefundCartState extends State<ScreenRefundCart> {
     if (state == null) {
       return;
     }
-    Get.off(() => ScreenRefundCart(receitModel: state));
+    setState(() {
+      widget.receitModel.items = state.items;
+      widget.receitModel.total = state.total;
+      widget.receitModel.amount = state.amount;
+    });
     Toaster.showSuccess("refunded");
   }
 }

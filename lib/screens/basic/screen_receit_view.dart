@@ -34,9 +34,19 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
         title: Text(widget.receitModel.label),
         actions: [
           "refund".text().textIconButton(
-            onPressed: () => Get.off(
-              () => ScreenRefundCart(receitModel: widget.receitModel),
-            ),
+            onPressed: () async {
+              final result = await Get.to(
+                () => ScreenRefundCart(receitModel: widget.receitModel),
+                arguments: widget.receitModel,
+              );
+              if (result != null) {
+                setState(() {
+                  widget.receitModel.items = result.items;
+                  widget.receitModel.total = result.total;
+                  widget.receitModel.amount = result.amount;
+                });
+              }
+            },
             icon: Iconify(Bx.recycle, color: Colors.red),
           ),
           IconButton(

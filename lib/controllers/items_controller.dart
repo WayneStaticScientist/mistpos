@@ -554,7 +554,7 @@ class ItemsController extends GetxController {
         return null;
       }
       final modelUpdate = ItemReceitModel.fromJson(response.body['update']);
-      model.items[index] = modelUpdate.items[index];
+      model.items = modelUpdate.items;
       model.total = modelUpdate.total;
       model.amount = modelUpdate.amount;
       if (e.count < 0) {
