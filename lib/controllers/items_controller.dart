@@ -580,6 +580,7 @@ class ItemsController extends GetxController {
           await isar.itemModels.put(itemModel);
         });
       }
+      loadReceits();
       return model;
     } catch (e) {
       Toaster.showError("There was error : $e");
