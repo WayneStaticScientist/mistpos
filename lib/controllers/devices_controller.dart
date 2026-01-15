@@ -224,8 +224,10 @@ class DevicesController extends GetxController {
             " - ${(item.percentageDiscount ? '${item.discount}%' : CurrenceConverter.getCurrenceFloatInStrings(item.discount, user.baseCurrence))}";
       }
       b.text(priceModel);
-      String refundModel = "refund  ${item.originalCount} ->  ${item.count}";
-      b.text(refundModel);
+      if (item.refunded) {
+        String refundModel = "refund  ${item.originalCount} ->  ${item.count}";
+        b.text(refundModel);
+      }
     }
     // --- SEPARATOR ---
     b.text('.' * receitWidth);
