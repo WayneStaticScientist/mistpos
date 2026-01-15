@@ -5,6 +5,9 @@ part 'item_unsaved_model.g.dart';
 @collection
 class ItemUnsavedModel {
   Id id = Isar.autoIncrement;
+  double miniItems = 0;
+  double wholesalePrice = 0;
+  bool wholesaleActivated = false;
   String sku;
   int? color;
   double cost;
@@ -48,9 +51,15 @@ class ItemUnsavedModel {
     this.compositeItems = const [],
     this.modifiers,
     this.isForSale = true,
+    this.miniItems = 0,
+    this.wholesaleActivated = false,
+    this.wholesalePrice = 0,
   });
   Map<String, dynamic> toJson() {
     return {
+      "miniItems": miniItems,
+      "wholesalePrice": wholesalePrice,
+      "wholesaleActivated": wholesaleActivated,
       "name": name,
       "category": category,
       "price": price,
@@ -77,6 +86,9 @@ class ItemUnsavedModel {
     return ItemUnsavedModel(
       hexId: json["_id"],
       isForSale: json["isForSale"] as bool? ?? true,
+      miniItems: (json['miniItems'] as num?)?.toDouble() ?? 0.0,
+      wholesaleActivated: json["wholesaleActivated"] as bool? ?? false,
+      wholesalePrice: (json['wholesalePrice'] as num?)?.toDouble() ?? 0.0,
       color: json["color"] as int?,
       sku: json["sku"] as String? ?? "",
       name: json["name"] as String? ?? "",

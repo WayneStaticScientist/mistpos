@@ -41,6 +41,15 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
   final _itemsUsavedController = Get.find<ItemsUnsavedController>();
   final _userController = Get.find<UserController>();
   final _formKey = GlobalKey<FormState>();
+  late final _wholesalePriceController = TextEditingController(
+    text: (CurrenceConverter.selectedCurrency(
+      widget.model.wholesalePrice,
+    )).toStringAsFixed(4),
+  );
+  late final _miniItemsController = TextEditingController(
+    text: widget.model.miniItems.toString(),
+  );
+
   late final _itemNameController = TextEditingController(
     text: widget.model.name,
   );
@@ -113,6 +122,8 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
             _buildItemInformationSection(),
             32.gapHeight,
             _buildInventoryManagementSection(),
+            32.gapHeight,
+            _wholesaleManagement(),
             32.gapHeight,
             _buildModifiersSection(),
             32.gapHeight,
@@ -492,6 +503,44 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
     );
   }
 
+  _wholesaleManagement() {
+    return MistMordernLayout(
+      label: "WholeSale Management",
+      children: [
+        14.gapHeight,
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: "Wholesale Activated".text(),
+          trailing: Switch(
+            value: widget.model.wholesaleActivated,
+            onChanged: (e) {
+              setState(() {
+                widget.model.wholesaleActivated = e;
+              });
+            },
+          ),
+        ),
+        14.gapHeight,
+        if (widget.model.wholesaleActivated) ...[
+          14.gapHeight,
+          MistFormInput(
+            label: "WholeSale price",
+            icon: Iconify(Bx.tag, color: Colors.grey.withAlpha(200)),
+            underLineColor: Colors.grey.withAlpha(200),
+            controller: _wholesalePriceController,
+          ),
+          14.gapHeight,
+          MistFormInput(
+            label: "Min items",
+            icon: Iconify(Bx.hash, color: Colors.grey.withAlpha(200)),
+            underLineColor: Colors.grey.withAlpha(200),
+            controller: _miniItemsController,
+          ),
+        ],
+      ],
+    );
+  }
+
   _compositeListItem() {
     return Obx(
       () =>
@@ -601,6 +650,25 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+    double miniItems = 0.0;
+    double wholeSalePrice = 0.0;
+    if (widget.model.wholesaleActivated) {
+      final mValue = double.tryParse(_miniItemsController.text);
+      if (mValue == null || mValue < 0) {
+        Toaster.showError('Invalid number of mini items in wholesale sections');
+        return;
+      }
+
+      final wValue = double.tryParse(_wholesalePriceController.text);
+      if (wValue == null || wValue < 0) {
+        Toaster.showError(
+          'Invalid number of wholesaleprice in wholesale sections',
+        );
+        return;
+      }
+      miniItems = mValue;
+      wholeSalePrice = wValue;
+    }
     if (widget.model.isCompositeItem &&
         _inventorController.selectedInvItems.isEmpty) {
       Toaster.showError('Please select at least one composite item');
@@ -624,6 +692,8 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
     } else {
       price = cost;
     }
+    widget.model.miniItems = miniItems;
+    widget.model.wholesalePrice = wholeSalePrice;
     widget.model.soldBy = _soldByGroup.value as String;
     widget.model.compositeItems = _inventorController.selectedInvItems;
     widget.model.modifiers = _modifiers;

@@ -6,6 +6,9 @@ part 'item_model.g.dart';
 class ItemModel {
   Id id = Isar.autoIncrement;
   String sku;
+  double miniItems = 0;
+  double wholesalePrice = 0;
+  bool wholesaleActivated = false;
   int? color;
   double cost;
   String name;
@@ -48,9 +51,15 @@ class ItemModel {
     this.compositeItems = const [],
     this.modifiers,
     this.isForSale = true,
+    this.miniItems = 0,
+    this.wholesaleActivated = false,
+    this.wholesalePrice = 0,
   });
   Map<String, dynamic> toJson() {
     return {
+      "miniItems": miniItems,
+      "wholesalePrice": wholesalePrice,
+      "wholesaleActivated": wholesaleActivated,
       "name": name,
       "category": category,
       "price": price,
@@ -76,6 +85,9 @@ class ItemModel {
   factory ItemModel.fromJson(Map<String, dynamic> json) {
     return ItemModel(
       hexId: json["_id"] ?? "",
+      miniItems: (json['miniItems'] as num?)?.toDouble() ?? 0.0,
+      wholesaleActivated: json["wholesaleActivated"] as bool? ?? false,
+      wholesalePrice: (json['wholesalePrice'] as num?)?.toDouble() ?? 0.0,
       isForSale: json["isForSale"] as bool? ?? true,
       color: json["color"] as int?,
       sku: json["sku"] as String? ?? "",

@@ -16,10 +16,10 @@ import 'package:mistpos/screens/basic/modern_layout.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/models/item_categories_model.dart';
-import 'package:mistpos/widgets/layouts/list_of_all_icons.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:radio_group_v2/radio_group_v2.dart' as rg;
 import 'package:mistpos/controllers/inventory_controller.dart';
+import 'package:mistpos/widgets/layouts/list_of_all_icons.dart';
 import 'package:radio_group_v2/utils/radio_group_decoration.dart';
 import 'package:mistpos/controllers/items_unsaved_controller.dart';
 import 'package:mistpos/widgets/buttons/mist_loaded_icon_button.dart';
@@ -41,15 +41,18 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
   final _itemsUnsavedController = Get.find<ItemsUnsavedController>();
   bool _isCompositeItem = false;
   bool _useProduction = false;
+  bool _isWholesaleItem = false;
   final _formKey = GlobalKey<FormState>();
   final _userController = Get.find<UserController>();
   final _itemSKUController = TextEditingController();
   final _itemNameController = TextEditingController();
   final _itemCostController = TextEditingController();
   final _itemPriceController = TextEditingController();
+  final _miniItemsController = TextEditingController();
   final _itemBarcodeController = TextEditingController();
-  final _initialStockController = TextEditingController();
   final _reorderLevelController = TextEditingController();
+  final _initialStockController = TextEditingController();
+  final _wholesalePriceController = TextEditingController();
   final _inventorController = Get.find<InventoryController>();
   final List<String> _modifiers = [];
   bool _isLoading = false;
@@ -96,6 +99,8 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
             _makeItemInformationSection(),
             32.gapHeight,
             _inventoryManagementSection(),
+            32.gapHeight,
+            _wholesaleManagement(),
             32.gapHeight,
             [
                   "Modifiers".text(
@@ -548,6 +553,44 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
     );
   }
 
+  _wholesaleManagement() {
+    return MistMordernLayout(
+      label: "WholeSale Management",
+      children: [
+        14.gapHeight,
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: "Wholesale Activated".text(),
+          trailing: Switch(
+            value: _isWholesaleItem,
+            onChanged: (e) {
+              setState(() {
+                _isWholesaleItem = e;
+              });
+            },
+          ),
+        ),
+        14.gapHeight,
+        if (_isWholesaleItem) ...[
+          14.gapHeight,
+          MistFormInput(
+            label: "WholeSale price",
+            icon: Iconify(Bx.tag, color: Colors.grey.withAlpha(200)),
+            underLineColor: Colors.grey.withAlpha(200),
+            controller: _wholesalePriceController,
+          ),
+          14.gapHeight,
+          MistFormInput(
+            label: "Min items",
+            icon: Iconify(Bx.hash, color: Colors.grey.withAlpha(200)),
+            underLineColor: Colors.grey.withAlpha(200),
+            controller: _miniItemsController,
+          ),
+        ],
+      ],
+    );
+  }
+
   _editItem(InvItem e) {
     final itemCountController = TextEditingController(
       text: e.quantity.toString(),
@@ -581,6 +624,8 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
   }
 
   void _saveItem() async {
+    double miniItems = 0.0;
+    double wholeSalePrice = 0.0;
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -600,6 +645,23 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
       Toaster.showError('Please select at least one compisite item');
       return;
     }
+    if (_isWholesaleItem) {
+      final mValue = double.tryParse(_miniItemsController.text);
+      if (mValue == null || mValue < 0) {
+        Toaster.showError('Invalid number of mini items in wholesale sections');
+        return;
+      }
+
+      final wValue = double.tryParse(_wholesalePriceController.text);
+      if (wValue == null || wValue < 0) {
+        Toaster.showError(
+          'Invalid number of wholesaleprice in wholesale sections',
+        );
+        return;
+      }
+      miniItems = mValue;
+      wholeSalePrice = wValue;
+    }
     double price = double.tryParse(_itemPriceController.text.trim()) ?? 0.0;
     final soldBy = _soldByGroup.value as String;
     final itemModel = ItemUnsavedModel(
@@ -610,12 +672,15 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
       shape: _selectedIcon,
       isForSale: _isForSale,
       modifiers: _modifiers,
+      miniItems: miniItems,
       useProduction: _useProduction,
+      wholesalePrice: wholeSalePrice,
       trackStock: _isTrackingInventory,
       color: _selectedColor.toARGB32(),
       category: _selectedCategory ?? "",
       isCompositeItem: _isCompositeItem,
       sku: _itemSKUController.text.trim(),
+      wholesaleActivated: _isWholesaleItem,
       name: _itemNameController.text.trim(),
       barcode: _itemBarcodeController.text.trim(),
       compositeItems: _inventorController.selectedInvItems,
