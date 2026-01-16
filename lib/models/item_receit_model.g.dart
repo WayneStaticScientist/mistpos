@@ -64,23 +64,29 @@ const ItemReceitModelSchema = CollectionSchema(
       name: r'label',
       type: IsarType.string,
     ),
-    r'payment': PropertySchema(
+    r'miniTax': PropertySchema(
       id: 9,
+      name: r'miniTax',
+      type: IsarType.objectList,
+      target: r'MiniTax',
+    ),
+    r'payment': PropertySchema(
+      id: 10,
       name: r'payment',
       type: IsarType.string,
     ),
     r'synced': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'synced',
       type: IsarType.bool,
     ),
     r'tax': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'tax',
       type: IsarType.double,
     ),
     r'total': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'total',
       type: IsarType.double,
     )
@@ -93,6 +99,7 @@ const ItemReceitModelSchema = CollectionSchema(
   indexes: {},
   links: {},
   embeddedSchemas: {
+    r'MiniTax': MiniTaxSchema,
     r'ItemReceitItem': ItemReceitItemSchema,
     r'EmbeddedDiscountModel': EmbeddedDiscountModelSchema
   },
@@ -135,6 +142,14 @@ int _itemReceitModelEstimateSize(
     }
   }
   bytesCount += 3 + object.label.length * 3;
+  bytesCount += 3 + object.miniTax.length * 3;
+  {
+    final offsets = allOffsets[MiniTax]!;
+    for (var i = 0; i < object.miniTax.length; i++) {
+      final value = object.miniTax[i];
+      bytesCount += MiniTaxSchema.estimateSize(value, offsets, allOffsets);
+    }
+  }
   bytesCount += 3 + object.payment.length * 3;
   return bytesCount;
 }
@@ -164,10 +179,16 @@ void _itemReceitModelSerialize(
     object.items,
   );
   writer.writeString(offsets[8], object.label);
-  writer.writeString(offsets[9], object.payment);
-  writer.writeBool(offsets[10], object.synced);
-  writer.writeDouble(offsets[11], object.tax);
-  writer.writeDouble(offsets[12], object.total);
+  writer.writeObjectList<MiniTax>(
+    offsets[9],
+    allOffsets,
+    MiniTaxSchema.serialize,
+    object.miniTax,
+  );
+  writer.writeString(offsets[10], object.payment);
+  writer.writeBool(offsets[11], object.synced);
+  writer.writeDouble(offsets[12], object.tax);
+  writer.writeDouble(offsets[13], object.total);
 }
 
 ItemReceitModel _itemReceitModelDeserialize(
@@ -198,10 +219,17 @@ ItemReceitModel _itemReceitModelDeserialize(
         ) ??
         [],
     label: reader.readStringOrNull(offsets[8]) ?? "",
-    payment: reader.readString(offsets[9]),
-    synced: reader.readBoolOrNull(offsets[10]) ?? false,
-    tax: reader.readDoubleOrNull(offsets[11]) ?? 0,
-    total: reader.readDouble(offsets[12]),
+    miniTax: reader.readObjectList<MiniTax>(
+          offsets[9],
+          MiniTaxSchema.deserialize,
+          allOffsets,
+          MiniTax(),
+        ) ??
+        const [],
+    payment: reader.readString(offsets[10]),
+    synced: reader.readBoolOrNull(offsets[11]) ?? false,
+    tax: reader.readDoubleOrNull(offsets[12]) ?? 0,
+    total: reader.readDouble(offsets[13]),
   );
   object.id = id;
   return object;
@@ -245,12 +273,20 @@ P _itemReceitModelDeserializeProp<P>(
     case 8:
       return (reader.readStringOrNull(offset) ?? "") as P;
     case 9:
-      return (reader.readString(offset)) as P;
+      return (reader.readObjectList<MiniTax>(
+            offset,
+            MiniTaxSchema.deserialize,
+            allOffsets,
+            MiniTax(),
+          ) ??
+          const []) as P;
     case 10:
-      return (reader.readBoolOrNull(offset) ?? false) as P;
+      return (reader.readString(offset)) as P;
     case 11:
-      return (reader.readDoubleOrNull(offset) ?? 0) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 12:
+      return (reader.readDoubleOrNull(offset) ?? 0) as P;
+    case 13:
       return (reader.readDouble(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1337,6 +1373,95 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      miniTaxLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'miniTax',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      miniTaxIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'miniTax',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      miniTaxIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'miniTax',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      miniTaxLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'miniTax',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      miniTaxLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'miniTax',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      miniTaxLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'miniTax',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
       paymentEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1628,6 +1753,13 @@ extension ItemReceitModelQueryObject
       itemsElement(FilterQuery<ItemReceitItem> q) {
     return QueryBuilder.apply(this, (query) {
       return query.object(q, r'items');
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      miniTaxElement(FilterQuery<MiniTax> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'miniTax');
     });
   }
 }
@@ -2079,6 +2211,13 @@ extension ItemReceitModelQueryProperty
   QueryBuilder<ItemReceitModel, String, QQueryOperations> labelProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'label');
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, List<MiniTax>, QQueryOperations>
+      miniTaxProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'miniTax');
     });
   }
 

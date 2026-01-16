@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
@@ -80,6 +82,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
   @override
   void initState() {
     super.initState();
+    log("the item is ${widget.model.toJson()}");
     if (widget.model.isCompositeItem) {
       _inventorController.selectedInvItems.clear();
       _inventorController.selectedInvItems.addAll(widget.model.compositeItems);
@@ -91,10 +94,12 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
     _itemSKUController.dispose();
     _itemNameController.dispose();
     _itemCostController.dispose();
+    _miniItemsController.dispose();
     _itemPriceController.dispose();
     _itemBarcodeController.dispose();
     _initialStockController.dispose();
     _reorderLevelController.dispose();
+    _wholesalePriceController.dispose();
     _inventorController.selectedInvItems.clear();
     super.dispose();
   }
@@ -218,7 +223,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
   }
 
   _buildItemInformationSection() {
-    int selectedIndex = SellingMethods.methods.indexOf(widget.model.category);
+    int selectedIndex = SellingMethods.methods.indexOf(widget.model.soldBy);
 
     return MistMordernLayout(
       label: "Item Information",

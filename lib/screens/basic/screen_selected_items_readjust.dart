@@ -168,7 +168,12 @@ class _ScreenSelectedItemsReadjustState
     final addenum = item['addenum'] as double? ?? 0.0;
     final qouted = item['qouted'] as double? ?? 0.0;
     bool percentageDiscount = item['percentageDiscount'] as bool? ?? true;
-    double price = count * (model.price + addenum + qouted);
+    double price =
+        count *
+            (model.wholesaleActivated && count >= model.miniItems
+                ? model.wholesalePrice
+                : (model.price + qouted)) +
+        addenum;
     double discount = (item['discount'] as num?)?.toDouble() ?? 0.0;
     if (item['discountId'] != null) {
       price = percentageDiscount
@@ -196,6 +201,10 @@ class _ScreenSelectedItemsReadjustState
                       .visibleIf(item['discountId'] != null),
                   "Full Price ${CurrenceConverter.getCurrenceFloatInStrings((model.price + addenum + qouted) * count, _userController.user.value?.baseCurrence ?? '')}"
                       .text(),
+                  if (model.wholesaleActivated) ...[
+                    "Wholesale Price ${CurrenceConverter.getCurrenceFloatInStrings(model.wholesalePrice, _userController.user.value?.baseCurrence ?? '')}"
+                        .text(),
+                  ],
                   "Sub Total ${CurrenceConverter.getCurrenceFloatInStrings(price, _userController.user.value?.baseCurrence ?? '')}"
                       .text(),
 

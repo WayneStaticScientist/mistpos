@@ -464,7 +464,12 @@ class ItemsController extends GetxController {
       final addenum = item['addenum'] as double? ?? 0.0;
       final qouted = item['qouted'] as double? ?? 0.0;
       final model = item['item'] as ItemModel;
-      double price = count * (model.price + addenum + qouted);
+      double price =
+          count *
+          (((model.wholesaleActivated && count >= model.miniItems)
+                  ? model.wholesalePrice
+                  : (model.price + qouted)) +
+              addenum);
       if (item['discountId'] != null) {
         double discount = (item['discount'] as num?)?.toDouble() ?? 0.0;
         bool percentageDiscount = item['percentageDiscount'] as bool? ?? true;
@@ -1238,7 +1243,11 @@ class ItemsController extends GetxController {
             ..cost = e['cost'] as double? ?? 0.0
             ..discountId = e['discountId'] as String?
             ..addenum = e['addenum'] as double? ?? 0.0
-            ..price = model.price + e['qouted'] as double? ?? 0.0
+            ..price =
+                (model.wholesaleActivated &&
+                    (e['count'] ?? 0) >= model.miniItems)
+                ? model.wholesalePrice
+                : (model.price + e['qouted'] as double? ?? 0.0)
             ..discount = (e['discount'] as num?)?.toDouble() ?? 0.0
             ..percentageDiscount = e['percentageDiscount'] as bool? ?? true
             ..count = e['count'] ?? 0;

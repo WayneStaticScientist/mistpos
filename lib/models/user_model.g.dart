@@ -194,7 +194,7 @@ User _userDeserialize(
 ) {
   final object = User(
     allowOfflinePurchase: reader.readBoolOrNull(offsets[0]) ?? true,
-    baseCurrence: reader.readStringOrNull(offsets[1]) ?? '',
+    baseCurrence: reader.readStringOrNull(offsets[1]) ?? 'USD',
     companies: reader.readStringList(offsets[2]) ?? [],
     company: reader.readString(offsets[3]),
     companyName: reader.readStringOrNull(offsets[4]) ?? '',
@@ -225,7 +225,7 @@ P _userDeserializeProp<P>(
     case 0:
       return (reader.readBoolOrNull(offset) ?? true) as P;
     case 1:
-      return (reader.readStringOrNull(offset) ?? '') as P;
+      return (reader.readStringOrNull(offset) ?? 'USD') as P;
     case 2:
       return (reader.readStringList(offset) ?? []) as P;
     case 3:

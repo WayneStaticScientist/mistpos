@@ -68,55 +68,70 @@ const ItemUnsavedModelSchema = CollectionSchema(
       name: r'lowStockThreshold',
       type: IsarType.long,
     ),
-    r'modifiers': PropertySchema(
+    r'miniItems': PropertySchema(
       id: 10,
+      name: r'miniItems',
+      type: IsarType.double,
+    ),
+    r'modifiers': PropertySchema(
+      id: 11,
       name: r'modifiers',
       type: IsarType.stringList,
     ),
     r'name': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'name',
       type: IsarType.string,
     ),
     r'price': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'price',
       type: IsarType.double,
     ),
     r'shape': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'shape',
       type: IsarType.string,
     ),
     r'sku': PropertySchema(
-      id: 14,
+      id: 15,
       name: r'sku',
       type: IsarType.string,
     ),
     r'soldBy': PropertySchema(
-      id: 15,
+      id: 16,
       name: r'soldBy',
       type: IsarType.string,
     ),
     r'stockQuantity': PropertySchema(
-      id: 16,
+      id: 17,
       name: r'stockQuantity',
       type: IsarType.long,
     ),
     r'syncOnline': PropertySchema(
-      id: 17,
+      id: 18,
       name: r'syncOnline',
       type: IsarType.bool,
     ),
     r'trackStock': PropertySchema(
-      id: 18,
+      id: 19,
       name: r'trackStock',
       type: IsarType.bool,
     ),
     r'useProduction': PropertySchema(
-      id: 19,
+      id: 20,
       name: r'useProduction',
       type: IsarType.bool,
+    ),
+    r'wholesaleActivated': PropertySchema(
+      id: 21,
+      name: r'wholesaleActivated',
+      type: IsarType.bool,
+    ),
+    r'wholesalePrice': PropertySchema(
+      id: 22,
+      name: r'wholesalePrice',
+      type: IsarType.double,
     )
   },
   estimateSize: _itemUnsavedModelEstimateSize,
@@ -201,16 +216,19 @@ void _itemUnsavedModelSerialize(
   writer.writeBool(offsets[7], object.isCompositeItem);
   writer.writeBool(offsets[8], object.isForSale);
   writer.writeLong(offsets[9], object.lowStockThreshold);
-  writer.writeStringList(offsets[10], object.modifiers);
-  writer.writeString(offsets[11], object.name);
-  writer.writeDouble(offsets[12], object.price);
-  writer.writeString(offsets[13], object.shape);
-  writer.writeString(offsets[14], object.sku);
-  writer.writeString(offsets[15], object.soldBy);
-  writer.writeLong(offsets[16], object.stockQuantity);
-  writer.writeBool(offsets[17], object.syncOnline);
-  writer.writeBool(offsets[18], object.trackStock);
-  writer.writeBool(offsets[19], object.useProduction);
+  writer.writeDouble(offsets[10], object.miniItems);
+  writer.writeStringList(offsets[11], object.modifiers);
+  writer.writeString(offsets[12], object.name);
+  writer.writeDouble(offsets[13], object.price);
+  writer.writeString(offsets[14], object.shape);
+  writer.writeString(offsets[15], object.sku);
+  writer.writeString(offsets[16], object.soldBy);
+  writer.writeLong(offsets[17], object.stockQuantity);
+  writer.writeBool(offsets[18], object.syncOnline);
+  writer.writeBool(offsets[19], object.trackStock);
+  writer.writeBool(offsets[20], object.useProduction);
+  writer.writeBool(offsets[21], object.wholesaleActivated);
+  writer.writeDouble(offsets[22], object.wholesalePrice);
 }
 
 ItemUnsavedModel _itemUnsavedModelDeserialize(
@@ -236,16 +254,19 @@ ItemUnsavedModel _itemUnsavedModelDeserialize(
     isCompositeItem: reader.readBoolOrNull(offsets[7]) ?? false,
     isForSale: reader.readBoolOrNull(offsets[8]) ?? true,
     lowStockThreshold: reader.readLong(offsets[9]),
-    modifiers: reader.readStringList(offsets[10]),
-    name: reader.readString(offsets[11]),
-    price: reader.readDouble(offsets[12]),
-    shape: reader.readStringOrNull(offsets[13]),
-    sku: reader.readString(offsets[14]),
-    soldBy: reader.readString(offsets[15]),
-    stockQuantity: reader.readLong(offsets[16]),
-    syncOnline: reader.readBoolOrNull(offsets[17]) ?? false,
-    trackStock: reader.readBool(offsets[18]),
-    useProduction: reader.readBoolOrNull(offsets[19]) ?? false,
+    miniItems: reader.readDoubleOrNull(offsets[10]) ?? 0,
+    modifiers: reader.readStringList(offsets[11]),
+    name: reader.readString(offsets[12]),
+    price: reader.readDouble(offsets[13]),
+    shape: reader.readStringOrNull(offsets[14]),
+    sku: reader.readString(offsets[15]),
+    soldBy: reader.readString(offsets[16]),
+    stockQuantity: reader.readLong(offsets[17]),
+    syncOnline: reader.readBoolOrNull(offsets[18]) ?? false,
+    trackStock: reader.readBool(offsets[19]),
+    useProduction: reader.readBoolOrNull(offsets[20]) ?? false,
+    wholesaleActivated: reader.readBoolOrNull(offsets[21]) ?? false,
+    wholesalePrice: reader.readDoubleOrNull(offsets[22]) ?? 0,
   );
   object.id = id;
   return object;
@@ -285,25 +306,31 @@ P _itemUnsavedModelDeserializeProp<P>(
     case 9:
       return (reader.readLong(offset)) as P;
     case 10:
-      return (reader.readStringList(offset)) as P;
+      return (reader.readDoubleOrNull(offset) ?? 0) as P;
     case 11:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringList(offset)) as P;
     case 12:
-      return (reader.readDouble(offset)) as P;
-    case 13:
-      return (reader.readStringOrNull(offset)) as P;
-    case 14:
       return (reader.readString(offset)) as P;
+    case 13:
+      return (reader.readDouble(offset)) as P;
+    case 14:
+      return (reader.readStringOrNull(offset)) as P;
     case 15:
       return (reader.readString(offset)) as P;
     case 16:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 17:
-      return (reader.readBoolOrNull(offset) ?? false) as P;
+      return (reader.readLong(offset)) as P;
     case 18:
-      return (reader.readBool(offset)) as P;
-    case 19:
       return (reader.readBoolOrNull(offset) ?? false) as P;
+    case 19:
+      return (reader.readBool(offset)) as P;
+    case 20:
+      return (reader.readBoolOrNull(offset) ?? false) as P;
+    case 21:
+      return (reader.readBoolOrNull(offset) ?? false) as P;
+    case 22:
+      return (reader.readDoubleOrNull(offset) ?? 0) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -1327,6 +1354,72 @@ extension ItemUnsavedModelQueryFilter
   }
 
   QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterFilterCondition>
+      miniItemsEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'miniItems',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterFilterCondition>
+      miniItemsGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'miniItems',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterFilterCondition>
+      miniItemsLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'miniItems',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterFilterCondition>
+      miniItemsBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'miniItems',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterFilterCondition>
       modifiersIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -2282,6 +2375,82 @@ extension ItemUnsavedModelQueryFilter
       ));
     });
   }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterFilterCondition>
+      wholesaleActivatedEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'wholesaleActivated',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterFilterCondition>
+      wholesalePriceEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'wholesalePrice',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterFilterCondition>
+      wholesalePriceGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'wholesalePrice',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterFilterCondition>
+      wholesalePriceLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'wholesalePrice',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterFilterCondition>
+      wholesalePriceBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'wholesalePrice',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
 }
 
 extension ItemUnsavedModelQueryObject
@@ -2422,6 +2591,20 @@ extension ItemUnsavedModelQuerySortBy
     });
   }
 
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterSortBy>
+      sortByMiniItems() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'miniItems', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterSortBy>
+      sortByMiniItemsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'miniItems', Sort.desc);
+    });
+  }
+
   QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -2541,6 +2724,34 @@ extension ItemUnsavedModelQuerySortBy
       sortByUseProductionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'useProduction', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterSortBy>
+      sortByWholesaleActivated() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wholesaleActivated', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterSortBy>
+      sortByWholesaleActivatedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wholesaleActivated', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterSortBy>
+      sortByWholesalePrice() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wholesalePrice', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterSortBy>
+      sortByWholesalePriceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wholesalePrice', Sort.desc);
     });
   }
 }
@@ -2683,6 +2894,20 @@ extension ItemUnsavedModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterSortBy>
+      thenByMiniItems() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'miniItems', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterSortBy>
+      thenByMiniItemsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'miniItems', Sort.desc);
+    });
+  }
+
   QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterSortBy> thenByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -2804,6 +3029,34 @@ extension ItemUnsavedModelQuerySortThenBy
       return query.addSortBy(r'useProduction', Sort.desc);
     });
   }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterSortBy>
+      thenByWholesaleActivated() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wholesaleActivated', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterSortBy>
+      thenByWholesaleActivatedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wholesaleActivated', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterSortBy>
+      thenByWholesalePrice() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wholesalePrice', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QAfterSortBy>
+      thenByWholesalePriceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wholesalePrice', Sort.desc);
+    });
+  }
 }
 
 extension ItemUnsavedModelQueryWhereDistinct
@@ -2867,6 +3120,13 @@ extension ItemUnsavedModelQueryWhereDistinct
       distinctByLowStockThreshold() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lowStockThreshold');
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QDistinct>
+      distinctByMiniItems() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'miniItems');
     });
   }
 
@@ -2937,6 +3197,20 @@ extension ItemUnsavedModelQueryWhereDistinct
       distinctByUseProduction() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'useProduction');
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QDistinct>
+      distinctByWholesaleActivated() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'wholesaleActivated');
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, ItemUnsavedModel, QDistinct>
+      distinctByWholesalePrice() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'wholesalePrice');
     });
   }
 }
@@ -3012,6 +3286,12 @@ extension ItemUnsavedModelQueryProperty
     });
   }
 
+  QueryBuilder<ItemUnsavedModel, double, QQueryOperations> miniItemsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'miniItems');
+    });
+  }
+
   QueryBuilder<ItemUnsavedModel, List<String>?, QQueryOperations>
       modifiersProperty() {
     return QueryBuilder.apply(this, (query) {
@@ -3072,6 +3352,20 @@ extension ItemUnsavedModelQueryProperty
       useProductionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'useProduction');
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, bool, QQueryOperations>
+      wholesaleActivatedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'wholesaleActivated');
+    });
+  }
+
+  QueryBuilder<ItemUnsavedModel, double, QQueryOperations>
+      wholesalePriceProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'wholesalePrice');
     });
   }
 }

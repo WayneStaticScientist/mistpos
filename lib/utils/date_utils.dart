@@ -104,6 +104,6 @@ class MistDateUtils {
   }
 
   static formatSortableDate(DateTime createdAt) {
-    return "${createdAt.year}/${createdAt.month}/${createdAt.day} ${getWeekDayName(createdAt)} ${createdAt.day} ${_getShortMonthName(createdAt.month)}";
+    return "${createdAt.year}/${createdAt.month.toString().padLeft(2, '0')}/${createdAt.day.toString().padLeft(2, '0')} ${getWeekDayName(createdAt)} ${createdAt.day} ${_getShortMonthName(createdAt.month)}";
   }
 }
