@@ -476,6 +476,11 @@ class InventoryController extends GetxController {
   RxString companyError = RxString("");
   Rx<CompanyModel?> company = Rx<CompanyModel?>(null);
   void loadCompany() async {
+    GetStorage storage = GetStorage();
+    final companyFromJson = storage.read("company");
+    if (companyFromJson != null) {
+      company.value = CompanyModel.fromJson(companyFromJson);
+    }
     if (loadingCompany.value) return;
     loadingCompany.value = true;
     companyError.value = "";
@@ -486,7 +491,6 @@ class InventoryController extends GetxController {
       return;
     }
     company.value = CompanyModel.fromJson(response.body['update']);
-    GetStorage storage = GetStorage();
     storage.write("company", company.value!.toJson());
   }
 

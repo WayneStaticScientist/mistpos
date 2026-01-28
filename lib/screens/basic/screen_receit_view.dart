@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/screens/basic/screen_credit_payment.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:pdf_maker/pdf_maker.dart';
 import 'package:iconify_flutter/icons/bx.dart';
@@ -33,22 +34,47 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
       appBar: AppBar(
         title: Text(widget.receitModel.label),
         actions: [
-          "refund".text().textIconButton(
-            onPressed: () async {
-              final result = await Get.to(
-                () => ScreenRefundCart(receitModel: widget.receitModel),
-                arguments: widget.receitModel,
-              );
-              if (result != null) {
-                setState(() {
-                  widget.receitModel.items = result.items;
-                  widget.receitModel.total = result.total;
-                  widget.receitModel.amount = result.amount;
-                });
-              }
-            },
-            icon: Iconify(Bx.recycle, color: Colors.red),
-          ),
+          "refund"
+              .text()
+              .textIconButton(
+                onPressed: () async {
+                  final result = await Get.to(
+                    () => ScreenRefundCart(receitModel: widget.receitModel),
+                    arguments: widget.receitModel,
+                  );
+                  if (result != null) {
+                    setState(() {
+                      widget.receitModel.items = result.items;
+                      widget.receitModel.total = result.total;
+                      widget.receitModel.amount = result.amount;
+                    });
+                  }
+                },
+                icon: Iconify(Bx.recycle, color: Colors.red),
+              )
+              .visibleIfNot(widget.receitModel.creditSale),
+          "Pay"
+              .text(style: TextStyle(color: Colors.white))
+              .textIconButton(
+                onPressed: () async {
+                  final result = await Get.to(
+                    () => ScreenCreditPayment(receitModel: widget.receitModel),
+                    arguments: widget.receitModel,
+                  );
+                  if (result != null) {
+                    setState(() {
+                      widget.receitModel.creditSale = result.creditSale;
+                      widget.receitModel.total = result.total;
+                      widget.receitModel.amount = result.amount;
+                    });
+                  }
+                },
+                icon: Iconify(Bx.coin, color: Colors.white),
+                style: TextButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                ),
+              )
+              .visibleIf(widget.receitModel.creditSale),
           IconButton(
             onPressed: _printReceit,
             icon: Iconify(Bx.printer, color: AppTheme.color(context)),
@@ -186,7 +212,7 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                       widget.receitModel.amount - widget.receitModel.total,
                       _userController.user.value?.baseCurrence ?? '',
                     ).text(style: TextStyle(fontWeight: FontWeight.bold)),
-                  ),
+                  ).visibleIfNot(widget.receitModel.creditSale),
                   18.gapHeight,
                 ]
                 .column(

@@ -1201,6 +1201,7 @@ class ItemsController extends GetxController {
     required bool allowOfflinePurchase,
     bool printReceits = false,
     required User user,
+    bool creditPayment = false,
   }) async {
     try {
       final isar = Isar.getInstance();
@@ -1228,6 +1229,7 @@ class ItemsController extends GetxController {
             .toList(),
         payment: payment,
         amount: payedAmount,
+        creditSale: creditPayment,
         synced: false,
         discounts: discounts
             .map((e) => EmbeddedDiscountModel.fromModel(e))

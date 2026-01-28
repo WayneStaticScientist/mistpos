@@ -10,6 +10,7 @@ class ItemReceitModel {
   final String cashier;
   final String payment;
   final double change;
+  bool creditSale = false;
   double tax;
   double amount;
   double total;
@@ -35,10 +36,12 @@ class ItemReceitModel {
     this.customerId,
     this.label = "",
     this.synced = false,
+    this.creditSale = false,
     this.discounts = const [],
   });
   Map<String, dynamic> toJson() {
     return {
+      "creditSale": creditSale,
       "customerId": customerId,
       "cashier": cashier,
       "payment": payment,
@@ -59,6 +62,7 @@ class ItemReceitModel {
 
   factory ItemReceitModel.fromJson(Map<String, dynamic> data) {
     return ItemReceitModel(
+      creditSale: data['creditSale'] ?? false,
       customerId: data['customerId'],
       items: data['items'] != null
           ? (data['items'] as List<dynamic>)

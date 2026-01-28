@@ -143,13 +143,28 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
   Widget _buildItem(ItemReceitModel receit) {
     return ListTile(
           contentPadding: EdgeInsets.zero,
-          leading: Iconify(Carbon.receipt, color: AppTheme.color(context)),
-          title: CurrenceConverter.getCurrenceFloatInStrings(
-            receit.total,
-            _userController.user.value?.baseCurrence ?? '',
-          ).text(),
-          trailing: Text(receit.label, style: TextStyle(fontSize: 10)),
-          subtitle: Text("${receit.createdAt.hour}:${receit.createdAt.minute}"),
+          leading: Iconify(
+            Carbon.receipt,
+            color: receit.creditSale ? Colors.red : AppTheme.color(context),
+          ),
+          title:
+              CurrenceConverter.getCurrenceFloatInStrings(
+                receit.total,
+                _userController.user.value?.baseCurrence ?? '',
+              ).text(
+                style: TextStyle(color: receit.creditSale ? Colors.red : null),
+              ),
+          trailing: Text(
+            receit.label,
+            style: TextStyle(
+              fontSize: 10,
+              color: receit.creditSale ? Colors.red : null,
+            ),
+          ),
+          subtitle: Text(
+            "${receit.createdAt.hour.toString().padLeft(2, '0')}:${receit.createdAt.minute.toString().padLeft(2, '0')} ${receit.creditSale ? '(credit)' : ''}",
+            style: TextStyle(color: receit.creditSale ? Colors.red : null),
+          ),
           onTap: () => Get.to(() => ScreenReceitView(receitModel: receit)),
         )
         .decoratedBox(

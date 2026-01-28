@@ -37,56 +37,61 @@ const ItemReceitModelSchema = CollectionSchema(
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
-    r'customerId': PropertySchema(
+    r'creditSale': PropertySchema(
       id: 4,
+      name: r'creditSale',
+      type: IsarType.bool,
+    ),
+    r'customerId': PropertySchema(
+      id: 5,
       name: r'customerId',
       type: IsarType.string,
     ),
     r'discounts': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'discounts',
       type: IsarType.objectList,
       target: r'EmbeddedDiscountModel',
     ),
     r'hexId': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'hexId',
       type: IsarType.string,
     ),
     r'items': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'items',
       type: IsarType.objectList,
       target: r'ItemReceitItem',
     ),
     r'label': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'label',
       type: IsarType.string,
     ),
     r'miniTax': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'miniTax',
       type: IsarType.objectList,
       target: r'MiniTax',
     ),
     r'payment': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'payment',
       type: IsarType.string,
     ),
     r'synced': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'synced',
       type: IsarType.bool,
     ),
     r'tax': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'tax',
       type: IsarType.double,
     ),
     r'total': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'total',
       type: IsarType.double,
     )
@@ -164,31 +169,32 @@ void _itemReceitModelSerialize(
   writer.writeString(offsets[1], object.cashier);
   writer.writeDouble(offsets[2], object.change);
   writer.writeDateTime(offsets[3], object.createdAt);
-  writer.writeString(offsets[4], object.customerId);
+  writer.writeBool(offsets[4], object.creditSale);
+  writer.writeString(offsets[5], object.customerId);
   writer.writeObjectList<EmbeddedDiscountModel>(
-    offsets[5],
+    offsets[6],
     allOffsets,
     EmbeddedDiscountModelSchema.serialize,
     object.discounts,
   );
-  writer.writeString(offsets[6], object.hexId);
+  writer.writeString(offsets[7], object.hexId);
   writer.writeObjectList<ItemReceitItem>(
-    offsets[7],
+    offsets[8],
     allOffsets,
     ItemReceitItemSchema.serialize,
     object.items,
   );
-  writer.writeString(offsets[8], object.label);
+  writer.writeString(offsets[9], object.label);
   writer.writeObjectList<MiniTax>(
-    offsets[9],
+    offsets[10],
     allOffsets,
     MiniTaxSchema.serialize,
     object.miniTax,
   );
-  writer.writeString(offsets[10], object.payment);
-  writer.writeBool(offsets[11], object.synced);
-  writer.writeDouble(offsets[12], object.tax);
-  writer.writeDouble(offsets[13], object.total);
+  writer.writeString(offsets[11], object.payment);
+  writer.writeBool(offsets[12], object.synced);
+  writer.writeDouble(offsets[13], object.tax);
+  writer.writeDouble(offsets[14], object.total);
 }
 
 ItemReceitModel _itemReceitModelDeserialize(
@@ -202,34 +208,35 @@ ItemReceitModel _itemReceitModelDeserialize(
     cashier: reader.readString(offsets[1]),
     change: reader.readDouble(offsets[2]),
     createdAt: reader.readDateTime(offsets[3]),
-    customerId: reader.readStringOrNull(offsets[4]),
+    creditSale: reader.readBoolOrNull(offsets[4]) ?? false,
+    customerId: reader.readStringOrNull(offsets[5]),
     discounts: reader.readObjectList<EmbeddedDiscountModel>(
-          offsets[5],
+          offsets[6],
           EmbeddedDiscountModelSchema.deserialize,
           allOffsets,
           EmbeddedDiscountModel(),
         ) ??
         const [],
-    hexId: reader.readString(offsets[6]),
+    hexId: reader.readString(offsets[7]),
     items: reader.readObjectList<ItemReceitItem>(
-          offsets[7],
+          offsets[8],
           ItemReceitItemSchema.deserialize,
           allOffsets,
           ItemReceitItem(),
         ) ??
         [],
-    label: reader.readStringOrNull(offsets[8]) ?? "",
+    label: reader.readStringOrNull(offsets[9]) ?? "",
     miniTax: reader.readObjectList<MiniTax>(
-          offsets[9],
+          offsets[10],
           MiniTaxSchema.deserialize,
           allOffsets,
           MiniTax(),
         ) ??
         const [],
-    payment: reader.readString(offsets[10]),
-    synced: reader.readBoolOrNull(offsets[11]) ?? false,
-    tax: reader.readDoubleOrNull(offsets[12]) ?? 0,
-    total: reader.readDouble(offsets[13]),
+    payment: reader.readString(offsets[11]),
+    synced: reader.readBoolOrNull(offsets[12]) ?? false,
+    tax: reader.readDoubleOrNull(offsets[13]) ?? 0,
+    total: reader.readDouble(offsets[14]),
   );
   object.id = id;
   return object;
@@ -251,8 +258,10 @@ P _itemReceitModelDeserializeProp<P>(
     case 3:
       return (reader.readDateTime(offset)) as P;
     case 4:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 5:
+      return (reader.readStringOrNull(offset)) as P;
+    case 6:
       return (reader.readObjectList<EmbeddedDiscountModel>(
             offset,
             EmbeddedDiscountModelSchema.deserialize,
@@ -260,9 +269,9 @@ P _itemReceitModelDeserializeProp<P>(
             EmbeddedDiscountModel(),
           ) ??
           const []) as P;
-    case 6:
-      return (reader.readString(offset)) as P;
     case 7:
+      return (reader.readString(offset)) as P;
+    case 8:
       return (reader.readObjectList<ItemReceitItem>(
             offset,
             ItemReceitItemSchema.deserialize,
@@ -270,9 +279,9 @@ P _itemReceitModelDeserializeProp<P>(
             ItemReceitItem(),
           ) ??
           []) as P;
-    case 8:
-      return (reader.readStringOrNull(offset) ?? "") as P;
     case 9:
+      return (reader.readStringOrNull(offset) ?? "") as P;
+    case 10:
       return (reader.readObjectList<MiniTax>(
             offset,
             MiniTaxSchema.deserialize,
@@ -280,13 +289,13 @@ P _itemReceitModelDeserializeProp<P>(
             MiniTax(),
           ) ??
           const []) as P;
-    case 10:
-      return (reader.readString(offset)) as P;
     case 11:
-      return (reader.readBoolOrNull(offset) ?? false) as P;
+      return (reader.readString(offset)) as P;
     case 12:
-      return (reader.readDoubleOrNull(offset) ?? 0) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 13:
+      return (reader.readDoubleOrNull(offset) ?? 0) as P;
+    case 14:
       return (reader.readDouble(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -708,6 +717,16 @@ extension ItemReceitModelQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+      creditSaleEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'creditSale',
+        value: value,
       ));
     });
   }
@@ -1823,6 +1842,20 @@ extension ItemReceitModelQuerySortBy
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+      sortByCreditSale() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'creditSale', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+      sortByCreditSaleDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'creditSale', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
       sortByCustomerId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'customerId', Sort.asc);
@@ -1970,6 +2003,20 @@ extension ItemReceitModelQuerySortThenBy
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+      thenByCreditSale() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'creditSale', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+      thenByCreditSaleDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'creditSale', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
       thenByCustomerId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'customerId', Sort.asc);
@@ -2102,6 +2149,13 @@ extension ItemReceitModelQueryWhereDistinct
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QDistinct>
+      distinctByCreditSale() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'creditSale');
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QDistinct>
       distinctByCustomerId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'customerId', caseSensitive: caseSensitive);
@@ -2178,6 +2232,12 @@ extension ItemReceitModelQueryProperty
       createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'createdAt');
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, bool, QQueryOperations> creditSaleProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'creditSale');
     });
   }
 

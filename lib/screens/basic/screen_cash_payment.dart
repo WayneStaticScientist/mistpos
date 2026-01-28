@@ -33,10 +33,12 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
       _userController.user.value?.baseCurrence ?? '',
     ).toString(),
   );
+
   double change = 0.0;
   Timer? _debounce;
   String _debounceCache = "";
   bool _savingReceit = false;
+
   @override
   void initState() {
     super.initState();
@@ -54,7 +56,7 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: "Cash Payment".text(),
+        title: "Payment Summary".text(),
         actions: [
           IconButton(
             onPressed: _cancelPayment,
@@ -62,9 +64,12 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
           ),
           IconButton(
             onPressed: _savePayment,
-
             icon: _loading
-                ? CircularProgressIndicator()
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
                 : Iconify(Carbon.save, color: AppTheme.color(context)),
           ),
         ],
@@ -72,82 +77,161 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
       body: SingleChildScrollView(
         child:
             [
-              "Cash Payment".text(),
+              "Amount to Pay".text(
+                style: Get.textTheme.titleMedium?.copyWith(color: Colors.grey),
+              ),
               CurrenceConverter.getCurrenceFloatInStrings(
                 _itemsListController.totalPrice.value,
                 _userController.user.value?.baseCurrence ?? '',
               ).text(
                 style: TextStyle(
-                  fontSize: 42,
+                  fontSize: 48,
                   fontWeight: FontWeight.bold,
                   color: Get.theme.colorScheme.primary,
                 ),
               ),
-              18.gapHeight,
+              24.gapHeight,
               MistFormInput(
-                label: "Amount Payed",
+                label: "Amount Tendered",
                 controller: _amountController,
                 keyboardType: TextInputType.number,
               ),
-              18.gapHeight,
-              (change < 0.0)
-                  ? "Not Enough Funds".text(
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  : "Change ${CurrenceConverter.getCurrenceFloatInStrings(change, _userController.user.value?.baseCurrence ?? '')}"
-                        .text(),
+              24.gapHeight,
+              _buildBalanceDisplay(),
             ].column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
             ),
-      ).center().padding(EdgeInsets.all(30)),
-      bottomNavigationBar: SafeArea(
-        child: "Pay"
-            .text()
-            .elevatedIconButton(
-              icon: _savingReceit
-                  ? CircularProgressIndicator(color: Colors.white)
-                  : Iconify(Carbon.money, color: Colors.white),
-              onPressed: _pay,
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.all(20),
-                backgroundColor: change >= 0.0
-                    ? Get.theme.colorScheme.primary
-                    : Colors.red,
-                foregroundColor: Colors.white,
+      ).center().padding(const EdgeInsets.all(30)),
+      bottomNavigationBar: _buildBottomActions(),
+    );
+  }
+
+  /// Displays either the change due or an error if funds are insufficient
+  Widget _buildBalanceDisplay() {
+    if (change < 0.0) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.red.withAlpha(30),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.red.withAlpha(80)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, color: Colors.red, size: 20),
+            8.gapWidth,
+            "Insufficient Funds".text(
+              style: const TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
               ),
-            )
-            .padding(EdgeInsets.all(12)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        "Change Due".text(
+          style: Get.textTheme.bodySmall?.copyWith(letterSpacing: 1.2),
+        ),
+        CurrenceConverter.getCurrenceFloatInStrings(
+          change,
+          _userController.user.value?.baseCurrence ?? '',
+        ).text(
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+            color: Colors.green,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Modern dual-button action bar
+  Widget _buildBottomActions() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Row(
+          children: [
+            // Pay on Credit Button
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _payOnCredit,
+                icon: const Iconify(Carbon.user_avatar, color: Colors.orange),
+                label: "Credit".text(),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  side: const BorderSide(color: Colors.orange, width: 1.5),
+                  foregroundColor: Colors.orange,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            // Pay Now Button (Primary)
+            Expanded(
+              flex: 2,
+              child: ElevatedButton.icon(
+                onPressed: _pay,
+                icon: _savingReceit
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Iconify(
+                        Carbon.checkmark_filled,
+                        color: Colors.white,
+                      ),
+                label: "Pay Now".text(),
+                style: ElevatedButton.styleFrom(
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  backgroundColor: change >= 0.0
+                      ? Get.theme.colorScheme.primary
+                      : Colors.grey.shade400,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   void _startDebouncer() {
-    _debounce = Timer.periodic(Duration(milliseconds: 500), (timer) {
-      if (_debounceCache == _amountController.text) {
-        return;
-      }
+    _debounce = Timer.periodic(const Duration(milliseconds: 300), (timer) {
+      if (_debounceCache == _amountController.text) return;
       _debounceCache = _amountController.text;
+
       final amount = double.tryParse(_amountController.text);
-      if (amount == null) {
-        setState(() {
-          change = -CurrenceConverter.prevailingAmount(
-            _itemsListController.totalPrice.value,
-            _userController.user.value?.baseCurrence ?? '',
-          );
-        });
-        return;
-      }
+      final total = CurrenceConverter.prevailingAmount(
+        _itemsListController.totalPrice.value,
+        _userController.user.value?.baseCurrence ?? '',
+      );
+
       setState(() {
-        change =
-            amount -
-            CurrenceConverter.prevailingAmount(
-              _itemsListController.totalPrice.value,
-              _userController.user.value?.baseCurrence ?? '',
-            );
+        if (amount == null) {
+          change = -total;
+        } else {
+          change = amount - total;
+        }
       });
     });
   }
@@ -155,19 +239,20 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
   void _cancelPayment() {
     Get.dialog(
       AlertDialog(
-        title: "Remove Payment".text(),
-        content: "are you sure you want to remove payment".text(),
+        title: "Cancel Transaction?".text(),
+        content: "This will remove all items and close the payment screen."
+            .text(),
         actions: [
-          "No".text().textButton(onPressed: () => Get.back()),
-          "Remove".text().textButton(
+          "Go Back".text().textButton(onPressed: () => Get.back()),
+          "Cancel All".text().textButton(
             onPressed: () async {
               Get.back();
               try {
                 await _itemsListController.removeAllSelected();
                 Get.back();
-                Toaster.showSuccess("payment removed");
+                Toaster.showSuccess("Transaction cancelled");
               } catch (e) {
-                Toaster.showError("failed to remove payment : $e");
+                Toaster.showError("Failed to cancel: $e");
               }
             },
           ),
@@ -180,11 +265,16 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
     final savedName = TextEditingController();
     Get.dialog(
       AlertDialog(
-        title: "Save Payment".text(),
-        content: MistFormInput(label: "Enter Save Name", controller: savedName),
+        title: "Save for Later".text(),
+        content: MistFormInput(
+          label: "Reference Name (e.g. Table 5)",
+          controller: savedName,
+        ),
         actions: [
           "Cancel".text().textButton(onPressed: () => Get.back()),
-          "Save".text().textButton(onPressed: () => _saveItem(savedName.text)),
+          "Save Draft".text().textButton(
+            onPressed: () => _saveItem(savedName.text),
+          ),
         ],
       ),
     );
@@ -192,65 +282,76 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
 
   void _saveItem(String text) async {
     if (text.trim().isEmpty) {
-      Toaster.showError("name is required");
+      Toaster.showError("A reference name is required");
       return;
     }
     Get.back();
-    setState(() {
-      _loading = true;
-    });
+    setState(() => _loading = true);
     try {
       await _itemsListController.saveItem(text);
       if (!mounted) return;
-      setState(() {
-        _loading = false;
-      });
+      setState(() => _loading = false);
       Get.back();
-      Toaster.showSuccess("payment saved");
+      Toaster.showSuccess("Payment saved as draft");
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-        });
-      }
-      Toaster.showError("failed to save payment : $e");
+      if (mounted) setState(() => _loading = false);
+      Toaster.showError("Failed to save: $e");
     }
   }
 
-  void _pay() async {
+  void _payOnCredit() {
+    Get.defaultDialog(
+      title: "Purchase On Credit",
+      content: "This will mark this payment as credit sale , continue".text(),
+      textCancel: "close",
+      textConfirm: "continue",
+      onConfirm: () {
+        Get.back();
+        _pay(creditPayment: true);
+      },
+    );
+  }
+
+  void _pay({bool creditPayment = false}) async {
     final amount = double.tryParse(_amountController.text);
     if (amount == null) {
-      Toaster.showError("invalid amount");
+      Toaster.showError("Please enter a valid amount");
       return;
     }
-    if (amount < _itemsListController.totalPrice.value) {
-      Toaster.showError("not enough funds");
+
+    final total = CurrenceConverter.prevailingAmount(
+      _itemsListController.totalPrice.value,
+      _userController.user.value?.baseCurrence ?? '',
+    );
+
+    if (amount < total) {
+      Toaster.showError("Insufficient funds for cash payment");
       return;
     }
-    setState(() {
-      _savingReceit = true;
-    });
+
+    setState(() => _savingReceit = true);
+
     if (_userController.user.value == null) {
       Toaster.showError("User registration needed");
+      setState(() => _savingReceit = false);
       return;
     }
+
     final state = await _itemsListController.addReceitFromItemModel(
       CurrenceConverter.baseCurrency(amount),
       "cash",
+      creditPayment: creditPayment,
       allowOfflinePurchase:
-          _userController.user.value != null &&
-          _userController.user.value!.allowOfflinePurchase,
+          _userController.user.value?.allowOfflinePurchase ?? false,
       user: _userController.user.value!,
       printReceits: _printerController.isPrinterConnected(),
     );
-    if (mounted) {
-      setState(() {
-        _savingReceit = false;
-      });
-    }
+
+    if (mounted) setState(() => _savingReceit = false);
+
     if (state) {
       Get.back();
-      Toaster.showSuccess("payment done");
+      Toaster.showSuccess("Payment successful");
     }
   }
 }

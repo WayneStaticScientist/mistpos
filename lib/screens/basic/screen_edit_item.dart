@@ -684,8 +684,8 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
               .map((e) => e.cost * e.quantity)
               .fold(0.0, (value, element) => value + element)
         : double.tryParse(_itemCostController.text.trim()) ?? 0.0;
-    if (cost <= 0) {
-      Toaster.showError('Item Cost must be greater than zero');
+    if (cost < 0) {
+      Toaster.showError('Item Cost must be greater or equal to zero');
       return;
     }
     setState(() {
