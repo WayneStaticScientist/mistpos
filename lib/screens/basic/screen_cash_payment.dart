@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
@@ -24,6 +25,7 @@ class ScreenCashPayment extends StatefulWidget {
 class _ScreenCashPaymentState extends State<ScreenCashPayment> {
   final _userController = Get.find<UserController>();
   final _printerController = Get.find<DevicesController>();
+  final _invController = Get.find<InventoryController>();
   final _itemsListController = Get.find<ItemsController>();
   bool _loading = false;
 
@@ -175,7 +177,7 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
                   ),
                 ),
               ),
-            ),
+            ).visibleIf(_invController.company.value?.enableCreditSale ?? true),
             const SizedBox(width: 16),
             // Pay Now Button (Primary)
             Expanded(

@@ -52,7 +52,7 @@ class _ScreenCreditPaymentState extends State<ScreenCreditPayment> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: "Payment Summary".text()),
+      appBar: AppBar(title: "Payment Credit".text()),
       body: SingleChildScrollView(
         child:
             [
@@ -137,31 +137,28 @@ class _ScreenCreditPaymentState extends State<ScreenCreditPayment> {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Expanded(
-          flex: 2,
-          child: ElevatedButton.icon(
-            onPressed: _pay,
-            icon: _savingReceit
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                : const Iconify(Carbon.checkmark_filled, color: Colors.white),
-            label: "Pay Now".text(),
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              backgroundColor: change >= 0.0
-                  ? Get.theme.colorScheme.primary
-                  : Colors.grey.shade400,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+        child: ElevatedButton.icon(
+          onPressed: _pay,
+          icon: _savingReceit
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              : const Iconify(Carbon.checkmark_filled, color: Colors.white),
+          label: "Pay Now".text(),
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            backgroundColor: change >= 0.0
+                ? Get.theme.colorScheme.primary
+                : Colors.grey.shade400,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
         ),
@@ -198,7 +195,7 @@ class _ScreenCreditPaymentState extends State<ScreenCreditPayment> {
     }
 
     final total = CurrenceConverter.prevailingAmount(
-      _itemsListController.totalPrice.value,
+      widget.receitModel.total,
       _userController.user.value?.baseCurrence ?? '',
     );
 
@@ -213,6 +210,16 @@ class _ScreenCreditPaymentState extends State<ScreenCreditPayment> {
       Toaster.showError("User registration needed");
       setState(() => _savingReceit = false);
       return;
+    }
+    final response = await _itemsListController.payReceitCredit(
+      amount: amount,
+      id: widget.receitModel.hexId,
+    );
+    if (response) {
+      widget.receitModel.amount = amount;
+      widget.receitModel.creditSale = false;
+      Get.back(result: widget.receitModel);
+      Toaster.showSuccess("payment success");
     }
 
     if (mounted) setState(() => _savingReceit = false);

@@ -6,6 +6,7 @@ class CompanyModel {
   String owner;
   String email;
   String name;
+  bool enableCreditSale;
   bool verified;
   bool showSalesCount;
   ExchangeRateModel exchangeRates;
@@ -21,9 +22,11 @@ class CompanyModel {
     required this.exchangeRates,
     required this.showSalesCount,
     required this.subscriptionType,
+    required this.enableCreditSale,
   });
   factory CompanyModel.fromJson(Map<String, dynamic> json) {
     return CompanyModel(
+      enableCreditSale: json['enableCreditSale'] ?? true,
       owner: json['owner'],
       email: json['email'],
       hexId: json['_id'] ?? "",
@@ -44,6 +47,7 @@ class CompanyModel {
       "email": email,
       "verified": verified,
       "showSalesCount": showSalesCount,
+      'enableCreditSale': enableCreditSale,
       "exchangeRates": exchangeRates.toJson(),
       "subscriptionType": subscriptionType.toJson(),
     };

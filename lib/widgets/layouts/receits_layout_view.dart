@@ -5,7 +5,6 @@ import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/utils/date_utils.dart';
-import 'package:grouped_list/grouped_list.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
@@ -30,15 +29,18 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
   final _searchController = TextEditingController();
   final _userController = Get.find<UserController>();
   final _itemsListController = Get.find<ItemsController>();
+
   String _searchKey = "";
+  String _filterStatus = "All"; // "All" or "Credit"
   late Timer? _debounce;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _syncReceits(1, _searchKey);
     });
-    // 💡 FIX APPLIED HERE
+
     _scrollController.addListener(() {
       final maxScroll = _scrollController.position.maxScrollExtent;
       final currentScroll = _scrollController.position.pixels;
@@ -52,7 +54,9 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
   void _initDebounce() {
     _debounce = Timer.periodic(const Duration(milliseconds: 500), (timer) {
       if (_searchController.text.trim() != _searchKey.trim()) {
-        _searchKey = _searchController.text;
+        setState(() {
+          _searchKey = _searchController.text;
+        });
         _syncReceits(1, _searchKey);
       }
     });
@@ -75,68 +79,160 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
         await _syncReceits(1, _searchKey);
         _refreshController.refreshCompleted();
       },
-
-      child: ListView(
+      child: CustomScrollView(
         controller: _scrollController,
-        padding: EdgeInsets.all(8),
-        children: [
-          MistSearchField(
-            controller: _searchController,
-            label: "Search Receits",
-          ).padding(const EdgeInsets.symmetric(horizontal: 10, vertical: 5)),
-          18.gapHeight,
-          Obx(
-            () => _itemsListController.receits.isNotEmpty
-                ? GroupedListView<ItemReceitModel, String>(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    elements: _itemsListController.receits,
-                    groupBy: (element) =>
-                        MistDateUtils.formatSortableDate(element.createdAt),
-                    groupSeparatorBuilder: (String groupByValue) =>
-                        // ... (Your separator logic)
-                        groupByValue
-                            .split(" ")
-                            .skip(1)
-                            .join(" ")
-                            .text(
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Get.theme.colorScheme.primary,
-                              ),
-                            )
-                            .row()
-                            .padding(const EdgeInsets.all(10)),
-                    itemBuilder: (context, ItemReceitModel element) {
-                      return [
-                        _buildItem(element),
-                        14.gapHeight,
-                      ].column(mainAxisSize: MainAxisSize.min);
-                    },
-                    itemComparator: (item1, item2) =>
-                        -item1.createdAt.compareTo(item2.createdAt),
-                    useStickyGroupSeparators: true,
-                    floatingHeader: true,
-                    order: GroupedListOrder.DESC,
-                  )
-                : [
-                    // Empty state is now correctly inside the ListView
+        slivers: [
+          // Floating and Snapping Header
+          // This will scroll away when going down and reappear on scroll up
+          SliverAppBar(
+            floating: true,
+            snap: true,
+            pinned: false,
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            toolbarHeight: 120.0, // Height to fit search and filters
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                padding: const EdgeInsets.only(
+                  top: 8,
+                  left: 8,
+                  right: 8,
+                  bottom: 5,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    MistSearchField(
+                      controller: _searchController,
+                      label: "Search Receits",
+                    ).padding(const EdgeInsets.symmetric(horizontal: 2)),
+
+                    // Filter Chips Row
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildFilterChip("All"),
+                          10.gapWidth,
+                          _buildFilterChip("Payed"),
+                          10.gapWidth,
+                          _buildFilterChip("Credit"),
+                        ],
+                      ).padding(const EdgeInsets.symmetric(horizontal: 2)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // The List Content
+          Obx(() {
+            // 2. Check if empty after filter
+            if (_itemsListController.receits.isNotEmpty) {
+              // Group logic
+              final Map<String, List<ItemReceitModel>> grouped = {};
+              for (var item in _itemsListController.receits) {
+                final date = MistDateUtils.formatSortableDate(item.createdAt);
+                if (!grouped.containsKey(date)) {
+                  grouped[date] = [];
+                }
+                grouped[date]!.add(item);
+              }
+
+              // Flatten logic: [Header, Item, Item, Header, Item...]
+              final List<dynamic> flatList = [];
+              final sortedKeys = grouped.keys.toList()
+                ..sort((a, b) => b.compareTo(a));
+
+              for (var key in sortedKeys) {
+                flatList.add(key); // Add Date String as Header
+                flatList.addAll(grouped[key]!); // Add Items
+              }
+
+              return SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final item = flatList[index];
+                  if (item is String) {
+                    return _buildGroupHeader(item);
+                  } else if (item is ItemReceitModel) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [_buildItem(item), 14.gapHeight],
+                    );
+                  }
+                  return const SizedBox.shrink();
+                }, childCount: flatList.length),
+              );
+            } else {
+              // Empty State
+              return SliverFillRemaining(
+                hasScrollBody: false,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
                     Iconify(
                       Bx.receipt,
                       color: AppTheme.color(context),
                       size: 43,
                     ),
                     14.gapHeight,
-                    "No Receits ".text(
+                    "No Receits found".text(
                       style: TextStyle(color: AppTheme.color(context)),
                     ),
-                  ].column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                  ),
-          ).padding(const EdgeInsets.only(bottom: 8.0)), // Removed .expanded1
+                  ],
+                ).padding(const EdgeInsets.all(20)),
+              );
+            }
+          }),
         ],
-      ), // Outer padding
+      ),
+    );
+  }
+
+  Widget _buildGroupHeader(String date) {
+    return date
+        .split(" ")
+        .skip(1)
+        .join(" ")
+        .text(
+          style: TextStyle(fontSize: 12, color: Get.theme.colorScheme.primary),
+        )
+        .row()
+        .padding(const EdgeInsets.all(10));
+  }
+
+  Widget _buildFilterChip(String label) {
+    bool isSelected = _filterStatus == label;
+    return ChoiceChip(
+      checkmarkColor: Theme.of(context).colorScheme.primary,
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (bool selected) {
+        if (selected) {
+          setState(() {
+            _filterStatus = label;
+          });
+          _syncReceits(1, _searchKey);
+        }
+      },
+      selectedColor: Get.theme.colorScheme.primary.withAlpha(60),
+      labelStyle: TextStyle(
+        color: isSelected ? Get.theme.colorScheme.primary : Colors.grey,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      ),
+      backgroundColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isSelected
+              ? Get.theme.colorScheme.primary
+              : Colors.grey.withAlpha(128),
+        ),
+      ),
     );
   }
 
@@ -179,6 +275,10 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
   }
 
   Future _syncReceits(int i, String searchKey) async {
-    await _itemsListController.loadReceits(page: i, search: searchKey);
+    await _itemsListController.loadReceits(
+      page: i,
+      search: searchKey,
+      filter: _filterStatus,
+    );
   }
 }

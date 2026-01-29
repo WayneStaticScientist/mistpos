@@ -163,11 +163,20 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
                         "0",
                   ),
                   18.gapWidth,
+
                   CardOverview(
                     color: Colors.green.withAlpha(150),
                     label: "Discounts",
                     value: CurrenceConverter.getCurrenceFloatInStrings(
                       _adminController.statsSales.value?.totalDiscounts ?? 0,
+                      _userController.user.value?.baseCurrence ?? '',
+                    ),
+                  ),
+                  18.gapWidth,
+                  CardOverview(
+                    label: "Credits",
+                    value: CurrenceConverter.getCurrenceFloatInStrings(
+                      _adminController.statsSales.value?.totalCredits ?? 0,
                       _userController.user.value?.baseCurrence ?? '',
                     ),
                   ),

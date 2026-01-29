@@ -204,13 +204,24 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                                         ?.showSalesCount ??
                                     false,
                                 onChanged: (c) {
-                                  _updateCompanyModel(c);
+                                  _updateCompanyModel(
+                                    c,
+                                    enableCreditSale:
+                                        _invController
+                                            .company
+                                            .value
+                                            ?.enableCreditSale ??
+                                        true,
+                                  );
                                 },
                               ),
                       ),
                       onTap: () => _updateCompanyModel(
                         !(_invController.company.value?.showSalesCount ??
                             false),
+                        enableCreditSale:
+                            _invController.company.value?.enableCreditSale ??
+                            true,
                       ),
                       contentPadding: EdgeInsets.all(0),
                       title: Text("Show Sales Item Quantitiess"),
@@ -220,6 +231,57 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                           ),
                       leading: Iconify(
                         Bx.font_size,
+                        color: AppTheme.color(context),
+                      ),
+                    ),
+                  ],
+                ).visibleIf(
+                  _user.user.value?.role == 'admin' ||
+                      _user.user.value?.role == 'manager',
+                ),
+          ),
+          24.gapColumn,
+          Obx(
+            () =>
+                MistMordernLayout(
+                  label: "Company",
+                  children: [
+                    ListTile(
+                      trailing: Obx(
+                        () => _adminController.companyLoading.value
+                            ? CircularProgressIndicator()
+                            : Switch(
+                                value:
+                                    _invController
+                                        .company
+                                        .value
+                                        ?.enableCreditSale ??
+                                    true,
+                                onChanged: (c) {
+                                  _updateCompanyModel(
+                                    _invController
+                                            .company
+                                            .value
+                                            ?.showSalesCount ??
+                                        false,
+                                    enableCreditSale: c,
+                                  );
+                                },
+                              ),
+                      ),
+                      onTap: () => _updateCompanyModel(
+                        _invController.company.value?.showSalesCount ?? false,
+                        enableCreditSale:
+                            !(_invController.company.value?.enableCreditSale ??
+                                true),
+                      ),
+                      contentPadding: EdgeInsets.all(0),
+                      title: "Enable Credit Sale".text(),
+                      subtitle: "enable cashiers to sell on credit".text(
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
+                      leading: Iconify(
+                        Bx.credit_card,
                         color: AppTheme.color(context),
                       ),
                     ),
@@ -377,13 +439,14 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
     );
   }
 
-  void _updateCompanyModel(bool bool) async {
+  void _updateCompanyModel(bool bool, {required bool enableCreditSale}) async {
     final company = _invController.company.value;
     if (company == null) {
       Toaster.showError("Failed to initialize , company not found");
       return;
     }
     company.showSalesCount = bool;
+    company.enableCreditSale = enableCreditSale;
     final response = await _adminController.updateCompany(
       company.toJson(),
       company.hexId,

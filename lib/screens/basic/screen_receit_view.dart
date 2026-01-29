@@ -91,8 +91,14 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
             CurrenceConverter.getCurrenceFloatInStrings(
               widget.receitModel.total,
               _userController.user.value?.baseCurrence ?? '',
-            ).text(style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
-            "Total".text(),
+            ).text(
+              style: TextStyle(
+                fontSize: 40,
+                fontWeight: FontWeight.bold,
+                color: widget.receitModel.creditSale ? Colors.red : null,
+              ),
+            ),
+            "Total${widget.receitModel.creditSale ? '(Credit)' : ''}".text(),
             18.gapHeight,
             Divider(color: Colors.grey.withAlpha(80), thickness: 1),
             [

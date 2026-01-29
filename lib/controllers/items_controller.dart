@@ -243,7 +243,11 @@ class ItemsController extends GetxController {
   RxInt receitsTotalPages = RxInt(2);
   RxBool receitsLoading = RxBool(false);
   RxString receitsHasError = RxString("");
-  Future<void> loadReceits({int page = 1, String search = ''}) async {
+  Future<void> loadReceits({
+    int page = 1,
+    String search = '',
+    String filter = '',
+  }) async {
     if (receitsLoading.value || updatingUsyncedReceits.value) return;
     final isar = Isar.getInstance();
     if (isar == null) {
@@ -252,7 +256,7 @@ class ItemsController extends GetxController {
     receitsHasError.value = "";
     receitsLoading.value = true;
     final response = await Net.get(
-      "/cashier/receits?page=$page&search=$search",
+      "/cashier/receits?page=$page&search=$search&filter=$filter",
     );
     receitsLoading.value = false;
     final unsyncedReceits = await isar.itemReceitModels
@@ -1309,6 +1313,22 @@ class ItemsController extends GetxController {
     }
   }
 
+  Future<bool> payReceitCredit({
+    required double amount,
+    required String id,
+  }) async {
+    final response = await Net.post(
+      "/cashier/credit/purchase",
+      data: {"id": id, "amount": amount},
+    );
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return false;
+    }
+    loadReceits();
+    return true;
+  }
+
   Future<void> updateReceitsInBackground(
     int id,
     ItemReceitModel itemReceitModel,
@@ -1322,8 +1342,8 @@ class ItemsController extends GetxController {
       "/cashier/purchase",
       data: itemReceitModel.toJson(),
     );
+    receitsLoading.value = false;
     if (response.hasError) {
-      receitsLoading.value = true;
       return;
     }
     final receivedModel = ItemReceitModel.fromJson(response.body['update']);
