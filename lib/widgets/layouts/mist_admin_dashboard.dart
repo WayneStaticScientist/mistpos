@@ -364,24 +364,15 @@ class _MistAdminDashboardState extends State<MistAdminDashboard> {
                 ? Colors.grey.withAlpha(50)
                 : null,
           ),
-          Obx(() {
-            bool isSubscribed = MistSubscriptionUtils.basicList.contains(
-              _inventoryController.company.value?.subscriptionType.type,
-            );
-            return ListTile(
-              leading: Iconify(Carbon.shopping_bag, color: Colors.amber),
-              title: "Stores".text(
-                style: TextStyle(color: isSubscribed ? null : Colors.red),
-              ),
-              onTap: () => widget.onTap("Stores"),
-              trailing: isSubscribed
-                  ? null
-                  : Iconify(Bx.lock, color: Colors.red, size: 16),
-              tileColor: widget.selectedTile == "Stores"
-                  ? Colors.grey.withAlpha(50)
-                  : null,
-            );
-          }),
+
+          ListTile(
+            leading: Iconify(Carbon.shopping_bag, color: Colors.amber),
+            title: "Stores".text(),
+            onTap: () => widget.onTap("Stores"),
+            tileColor: widget.selectedTile == "Stores"
+                ? Colors.grey.withAlpha(50)
+                : null,
+          ),
         ],
       ),
     );
