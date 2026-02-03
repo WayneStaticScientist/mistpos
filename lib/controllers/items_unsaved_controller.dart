@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
-import 'package:mistpos/models/item_unsaved_model.dart';
-import 'package:mistpos/services/network_wrapper.dart';
 import 'package:mistpos/utils/toast.dart';
+import 'package:mistpos/services/network_wrapper.dart';
+import 'package:mistpos/models/item_unsaved_model.dart';
 
 class ItemsUnsavedController extends GetxController {
   RxList<ItemUnsavedModel> cartItems = RxList();
@@ -79,12 +79,14 @@ class ItemsUnsavedController extends GetxController {
     if (isar == null) {
       return;
     }
+    syncingItems.value = true;
     cartItems.value = isar.itemUnsavedModels
         .filter()
-        .nameContains(search)
+        .nameContains(search, caseSensitive: false)
         .and()
         .categoryContains(category)
         .findAllSync();
+    syncingItems.value = false;
   }
 
   Future<void> syncCartItemsOnBackground({
