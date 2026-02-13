@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:get/get.dart'; // Ensure you have get package installed
+import 'package:get/get.dart';
+import 'package:mistpos/screens/basic/screen_add_expense.dart'; // Ensure you have get package installed
 
 /// Simple Model for Expense
 class Expense {
@@ -493,7 +494,7 @@ class _NavExpensesState extends State<NavExpenses> {
           color: isDarkMode ? Colors.grey[900] : Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withAlpha(27),
               blurRadius: 10,
               offset: const Offset(0, -5),
             ),
@@ -501,7 +502,7 @@ class _NavExpensesState extends State<NavExpenses> {
         ),
         child: SafeArea(
           child: ElevatedButton.icon(
-            onPressed: _addNewExpense,
+            onPressed: () => Get.to(() => AddExpenseScreen()),
             icon: const Icon(Icons.add),
             label: const Text("ADD NEW EXPENSE"),
             style: ElevatedButton.styleFrom(
