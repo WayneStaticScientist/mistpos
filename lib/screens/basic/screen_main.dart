@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/navs/nav_admin.dart';
+import 'package:mistpos/navs/nav_expenses.dart';
 import 'package:mistpos/navs/nav_items.dart';
 import 'package:mistpos/navs/nav_sales.dart';
 import 'package:mistpos/utils/date_utils.dart';
@@ -35,6 +36,7 @@ class _ScreenMainState extends State<ScreenMain> {
   bool _itemsInialized = false;
   late final _listNavs = {
     'sales': NavSale(),
+    "Expenses": NavExpenses(scaffoldKey: _scaffoldKey),
     "receipts": NavReceits(scaffoldKey: _scaffoldKey),
     "admin": NavAdmin(scaffoldKey: _scaffoldKey),
     "items": NavItems(scaffoldKey: _scaffoldKey),

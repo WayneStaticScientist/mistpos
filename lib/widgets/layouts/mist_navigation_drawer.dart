@@ -75,6 +75,17 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
                   _userController.user.value?.role.toLowerCase() == 'manager',
             ),
             ListTile(
+              leading: Iconify(Bx.wallet_alt, color: AppTheme.color(context)),
+              title: Text('Expenses'),
+              onTap: () => widget.onTap('Expenses'),
+              tileColor: widget.selectedNav == 'Expenses'
+                  ? Colors.grey.withAlpha(30)
+                  : null,
+            ).visibleIf(
+              _userController.user.value?.role.toLowerCase() == 'admin' ||
+                  _userController.user.value?.role.toLowerCase() == 'manager',
+            ),
+            ListTile(
               leading: Iconify(Bx.time, color: AppTheme.color(context)),
               title: Text('Shift'),
               onTap: () => Get.to(() => ScreenShiftsScreen()),
