@@ -245,6 +245,9 @@ class _NavExpensesState extends State<NavExpenses> {
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.black87 : Colors.grey[50],
       appBar: AppBar(
+        leading: DrawerButton(
+          onPressed: () => widget.scaffoldKey?.currentState?.openDrawer(),
+        ),
         title: const Text("Expenses"),
         centerTitle: true,
         backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
@@ -287,7 +290,7 @@ class _NavExpensesState extends State<NavExpenses> {
                   decoration: BoxDecoration(
                     color: isDarkMode ? Colors.grey[800] : Colors.white,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                    border: Border.all(color: Colors.grey.withAlpha(90)),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
@@ -328,7 +331,7 @@ class _NavExpensesState extends State<NavExpenses> {
                     decoration: BoxDecoration(
                       color: isDarkMode ? Colors.grey[800] : Colors.white,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                      border: Border.all(color: Colors.grey.withAlpha(90)),
                     ),
                     child: Row(
                       children: [
@@ -392,17 +395,17 @@ class _NavExpensesState extends State<NavExpenses> {
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: DataTable(
-                        headingRowColor: MaterialStateProperty.all(
-                          primaryColor.withOpacity(0.1),
+                        headingRowColor: WidgetStateProperty.all(
+                          primaryColor.withAlpha(30),
                         ),
-                        dataRowColor: MaterialStateProperty.all(
+                        dataRowColor: WidgetStateProperty.all(
                           isDarkMode ? Colors.grey[900] : Colors.white,
                         ),
                         columnSpacing: 20,
                         border: TableBorder(
                           horizontalInside: BorderSide(
                             width: 1,
-                            color: Colors.grey.withOpacity(0.2),
+                            color: Colors.white.withAlpha(30),
                           ),
                         ),
                         columns: const [
