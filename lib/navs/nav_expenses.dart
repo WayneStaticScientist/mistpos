@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:mistpos/utils/date_utils.dart'; // Ensure you have get package installed
 import 'package:mistpos/utils/subscriptions.dart';
 import 'package:mistpos/utils/currence_converter.dart';
+import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/controllers/expenses_controller.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
@@ -73,6 +74,13 @@ class _NavExpensesState extends State<NavExpenses> {
   }
 
   Future<void> _selectDateRange(BuildContext context) async {
+    bool isSubscribed = MistSubscriptionUtils.proList.contains(
+      _inventory.company.value?.subscriptionType.type,
+    );
+    if (!isSubscribed) {
+      Toaster.showError("Upgrade to pro-plan to use this feature");
+      return;
+    }
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2020),
@@ -170,23 +178,35 @@ class _NavExpensesState extends State<NavExpenses> {
             // 1. Search Bar
             Padding(
               padding: const EdgeInsets.all(12.0),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: "Search reason or reference or notes...",
-                  prefixIcon: Icon(Icons.search, color: primaryColor),
-                  filled: true,
-                  fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+              child: Obx(() {
+                bool isSubscribed = MistSubscriptionUtils.proList.contains(
+                  _inventory.company.value?.subscriptionType.type,
+                );
+                return TextField(
+                  controller: _searchController,
+                  readOnly: !isSubscribed,
+                  decoration: InputDecoration(
+                    hintText: isSubscribed
+                        ? "Search reason or reference or notes..."
+                        : "Upgrade to pro-plan for searching capabilities",
+                    prefixIcon: isSubscribed
+                        ? Icon(Icons.search, color: primaryColor)
+                        : Icon(Icons.lock, color: Colors.red),
+                    filled: true,
+                    fillColor: isSubscribed
+                        ? (isDarkMode ? Colors.grey[800] : Colors.white)
+                        : Colors.red.withAlpha(50),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 0,
+                    ),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 0,
-                  ),
-                ),
-              ),
+                );
+              }),
             ),
 
             // 2. Filters Row
@@ -226,6 +246,20 @@ class _NavExpensesState extends State<NavExpenses> {
                             );
                           }).toList(),
                           onChanged: (newValue) {
+                            bool isSubscribed = MistSubscriptionUtils.proList
+                                .contains(
+                                  _inventory
+                                      .company
+                                      .value
+                                      ?.subscriptionType
+                                      .type,
+                                );
+                            if (!isSubscribed) {
+                              Toaster.showError(
+                                "Upgrade to pro-plan to use this feature",
+                              );
+                              return;
+                            }
                             setState(() {
                               _selectedCategory = newValue;
                             });

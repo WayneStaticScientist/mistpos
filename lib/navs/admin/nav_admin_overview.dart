@@ -123,10 +123,30 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
                 scrollDirection: Axis.horizontal,
                 child: [
                   CardOverview(
-                    label: "Profit ",
+                    label: "Gross Profit ",
                     value: CurrenceConverter.getCurrenceFloatInStrings(
                       (_adminController.statsSales.value?.totalSales ?? 0) -
                           (_adminController.statsSales.value?.totalCost ?? 0),
+                      _userController.user.value?.baseCurrence ?? '',
+                    ),
+                  ),
+                  18.gapWidth,
+                  CardOverview(
+                    label: "Expenses ",
+                    value: CurrenceConverter.getCurrenceFloatInStrings(
+                      (_adminController.statsSales.value?.totalExpenses ?? 0),
+                      _userController.user.value?.baseCurrence ?? '',
+                    ),
+                  ),
+                  18.gapWidth,
+                  CardOverview(
+                    label: "Net Profit ",
+                    value: CurrenceConverter.getCurrenceFloatInStrings(
+                      ((_adminController.statsSales.value?.totalSales ?? 0) -
+                              (_adminController.statsSales.value?.totalCost ??
+                                  0)) -
+                          (_adminController.statsSales.value?.totalExpenses ??
+                              0),
                       _userController.user.value?.baseCurrence ?? '',
                     ),
                   ),
