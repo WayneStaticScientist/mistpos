@@ -698,7 +698,9 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
       price = cost;
     }
     widget.model.miniItems = miniItems;
-    widget.model.wholesalePrice = wholeSalePrice;
+    widget.model.wholesalePrice = CurrenceConverter.baseCurrency(
+      wholeSalePrice,
+    );
     widget.model.soldBy = _soldByGroup.value as String;
     widget.model.compositeItems = _inventorController.selectedInvItems;
     widget.model.modifiers = _modifiers;

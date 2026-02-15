@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/utils/date_utils.dart';
+import 'package:mistpos/utils/currence_converter.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart'; // Ensure you have get package installed
 import 'package:mistpos/controllers/expenses_controller.dart';
 
@@ -14,6 +16,7 @@ class AddExpenseScreen extends StatefulWidget {
 
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _userController = Get.find<UserController>();
 
   final _expenseController = Get.find<ExpensesController>();
   // Text Controllers
@@ -110,11 +113,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    final amountNumber = double.tryParse(_amountController.text);
+    double? amountNumber = double.tryParse(_amountController.text);
     if (amountNumber == null || amountNumber < 0) {
       Toaster.showError("Please enter a valid amount");
       return;
     }
+    amountNumber = CurrenceConverter.baseCurrency(amountNumber);
+
     final response = await _expenseController.addExpense({
       "amount": amountNumber,
       "category": _selectedCategory!,
@@ -125,8 +130,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       "notes": _notesController.text,
     });
     if (response && mounted) {
-      Toaster.showSuccess("Expense added successfully");
       Get.back();
+      Toaster.showSuccess("Expense added successfully");
     }
   }
 
@@ -202,7 +207,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   ),
                   decoration: InputDecoration(
                     labelText: "Amount",
-                    prefixText: "\$ ",
+                    prefixText:
+                        "${_userController.user.value?.baseCurrence ?? 'USD'} ",
                     filled: true,
                     fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
                     border: OutlineInputBorder(
@@ -376,12 +382,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       ),
                       elevation: 2,
                     ),
-                    child: const Text(
-                      "SAVE TRANSACTION",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Obx(
+                      () => _expenseController.addingExpenses.value
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                              "SAVE TRANSACTION",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
                   ),
                 ),
