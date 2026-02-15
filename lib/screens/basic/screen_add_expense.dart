@@ -106,14 +106,27 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     );
   }
 
-  void _saveExpense() {
-    if (_formKey.currentState!.validate()) {
-      // Logic to save expense would go here
-      // For now, we just go back to the previous screen
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Expense Added Successfully!')),
-      );
-      Navigator.pop(context);
+  void _saveExpense() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    final amountNumber = double.tryParse(_amountController.text);
+    if (amountNumber == null || amountNumber < 0) {
+      Toaster.showError("Please enter a valid amount");
+      return;
+    }
+    final response = await _expenseController.addExpense({
+      "amount": amountNumber,
+      "category": _selectedCategory!,
+      "expenseFor": _expenseForController.text,
+      "date": _selectedDate.toIso8601String(),
+      "paymentType": _paymentType,
+      "referenceNumber": _referenceController.text.trim(),
+      "notes": _notesController.text,
+    });
+    if (response && mounted) {
+      Toaster.showSuccess("Expense added successfully");
+      Get.back();
     }
   }
 

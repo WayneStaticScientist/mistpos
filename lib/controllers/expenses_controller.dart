@@ -28,6 +28,7 @@ class ExpensesController extends GetxController {
   }
 
   Future<bool> addExpenseCategory(String name) async {
+    if (syncingExpenseCategories.value) return false;
     syncingExpenseCategories.value = true;
     final response = await Net.post(
       "/admin/expense-category",
@@ -42,13 +43,15 @@ class ExpensesController extends GetxController {
     return true;
   }
 
-  void addExpense(Map<String, dynamic> expenseData) async {
+  Future<bool> addExpense(Map<String, dynamic> expenseData) async {
+    if (addingExpenses.value) return false;
     addingExpenses.value = true;
     final response = await Net.post("/admin/expense");
     addingExpenses.value = false;
     if (response.hasError) {
       Toaster.showError(response.response);
-      return;
+      return false;
     }
+    return true;
   }
 }
