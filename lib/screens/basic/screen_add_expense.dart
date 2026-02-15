@@ -1,6 +1,9 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:get/get.dart'; // Ensure you have get package installed
+import 'package:mistpos/utils/toast.dart';
+import 'package:mistpos/utils/date_utils.dart';
+import 'package:mistpos/widgets/loaders/small_loader.dart'; // Ensure you have get package installed
+import 'package:mistpos/controllers/expenses_controller.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   const AddExpenseScreen({super.key});
@@ -12,6 +15,7 @@ class AddExpenseScreen extends StatefulWidget {
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  final _expenseController = Get.find<ExpensesController>();
   // Text Controllers
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _expenseForController =
@@ -29,14 +33,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   // Lists
   final List<String> _paymentTypes = ['Cash', 'Bank', 'Others'];
   // Mutable list to simulate "categories that can be added later"
-  final List<String> _categories = [
-    'Food',
-    'Transport',
-    'Shopping',
-    'Bills',
-    'Entertainment',
-    'Health',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _expenseController.syncExpenseCategories();
+  }
 
   @override
   void dispose() {
@@ -89,13 +90,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           ElevatedButton(
             onPressed: () {
               if (_newCategoryController.text.isNotEmpty) {
-                setState(() {
-                  _categories.add(_newCategoryController.text);
-                  _selectedCategory = _newCategoryController.text;
-                });
+                Get.back();
+                _expenseController.addExpenseCategory(
+                  _newCategoryController.text.trim(),
+                );
                 _newCategoryController.clear();
-                Navigator.pop(ctx);
+                return;
               }
+              Toaster.showError("Please enter a category name");
             },
             child: const Text("Add"),
           ),
@@ -154,16 +156,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     decoration: BoxDecoration(
                       color: isDarkMode ? Colors.grey[800] : Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                      border: Border.all(color: Colors.grey.withAlpha(100)),
                     ),
                     child: Row(
                       children: [
                         Icon(Icons.calendar_today, color: primaryColor),
                         const SizedBox(width: 12),
                         Text(
-                          DateFormat(
-                            'EEEE, MMM dd, yyyy',
-                          ).format(_selectedDate),
+                          MistDateUtils.formatNormalDate(_selectedDate),
                           style: TextStyle(
                             fontSize: 16,
                             color: isDarkMode ? Colors.white : Colors.black87,
@@ -198,8 +198,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     ),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty)
+                    if (value == null || value.isEmpty) {
                       return 'Please enter an amount';
+                    }
                     if (double.tryParse(value) == null) return 'Invalid number';
                     return null;
                   },
@@ -210,44 +211,53 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: DropdownButtonFormField<String>(
-                        value: _selectedCategory,
-                        decoration: InputDecoration(
-                          labelText: "Category",
-                          filled: true,
-                          fillColor: isDarkMode
-                              ? Colors.grey[800]
-                              : Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
+                      child: Obx(
+                        () => DropdownButtonFormField<String>(
+                          initialValue: _selectedCategory,
+                          decoration: InputDecoration(
+                            labelText: "Category",
+                            filled: true,
+                            fillColor: isDarkMode
+                                ? Colors.grey[800]
+                                : Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.category,
+                              color: primaryColor,
+                            ),
                           ),
-                          prefixIcon: Icon(Icons.category, color: primaryColor),
+                          items: _expenseController.categories.map((category) {
+                            return DropdownMenuItem<String>(
+                              value: category.id,
+                              child: Text(category.label),
+                            );
+                          }).toList(),
+                          onChanged: (newValue) =>
+                              setState(() => _selectedCategory = newValue),
+                          validator: (value) =>
+                              value == null ? 'Please select a category' : null,
                         ),
-                        items: _categories.map((String category) {
-                          return DropdownMenuItem<String>(
-                            value: category,
-                            child: Text(category),
-                          );
-                        }).toList(),
-                        onChanged: (newValue) =>
-                            setState(() => _selectedCategory = newValue),
-                        validator: (value) =>
-                            value == null ? 'Please select a category' : null,
                       ),
                     ),
                     const SizedBox(width: 10),
                     InkWell(
                       onTap: _addNewCategoryDialog,
-                      child: Container(
-                        height: 56,
-                        width: 56,
-                        decoration: BoxDecoration(
-                          color: primaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: primaryColor),
-                        ),
-                        child: Icon(Icons.add, color: primaryColor),
+                      child: Obx(
+                        () => _expenseController.syncingExpenseCategories.value
+                            ? MistLoader1()
+                            : Container(
+                                height: 56,
+                                width: 56,
+                                decoration: BoxDecoration(
+                                  color: primaryColor.withAlpha(30),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: primaryColor),
+                                ),
+                                child: Icon(Icons.add, color: primaryColor),
+                              ),
                       ),
                     ),
                   ],
@@ -275,7 +285,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
                 // 5. Payment Type
                 DropdownButtonFormField<String>(
-                  value: _paymentType,
+                  initialValue: _paymentType,
                   decoration: InputDecoration(
                     labelText: "Payment Type",
                     filled: true,

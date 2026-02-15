@@ -1,6 +1,7 @@
 import 'package:isar/isar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/instance_manager.dart';
+import 'package:mistpos/controllers/expenses_controller.dart';
 import 'package:mistpos/models/gateway.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:mistpos/models/tax_model.dart';
@@ -72,6 +73,7 @@ class MyApp extends StatelessWidget {
         Get.put(DevicesController());
         Get.put(ItemsUnsavedController());
         Get.put(FirebaseController());
+        Get.put(ExpensesController());
       }),
 
       theme: AppTheme.lightTheme,
