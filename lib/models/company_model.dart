@@ -11,7 +11,7 @@ class CompanyModel {
   bool showSalesCount;
   ExchangeRateModel exchangeRates;
   SubscriptionModel subscriptionType;
-
+  bool autoApproveAllExpenses;
   String hexId;
   CompanyModel({
     required this.owner,
@@ -23,9 +23,11 @@ class CompanyModel {
     required this.showSalesCount,
     required this.subscriptionType,
     required this.enableCreditSale,
+    this.autoApproveAllExpenses = false,
   });
   factory CompanyModel.fromJson(Map<String, dynamic> json) {
     return CompanyModel(
+      autoApproveAllExpenses: json['autoApproveAllExpenses'] ?? false,
       enableCreditSale: json['enableCreditSale'] ?? true,
       owner: json['owner'],
       email: json['email'],
@@ -50,6 +52,7 @@ class CompanyModel {
       'enableCreditSale': enableCreditSale,
       "exchangeRates": exchangeRates.toJson(),
       "subscriptionType": subscriptionType.toJson(),
+      'autoApproveAllExpenses': autoApproveAllExpenses,
     };
   }
 

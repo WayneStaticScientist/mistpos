@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/inventory/constants.dart';
 import 'package:mistpos/utils/subscriptions.dart';
@@ -16,6 +17,7 @@ import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/controllers/expenses_controller.dart';
 import 'package:mistpos/widgets/layouts/subscription_alert.dart';
+import 'package:mistpos/screens/inventory/screen_view_expense.dart';
 
 class NavInventoryExpenses extends StatefulWidget {
   const NavInventoryExpenses({super.key});
@@ -100,7 +102,7 @@ class _NavInventoryExpensesState extends State<NavInventoryExpenses> {
             MistSearchField(label: "Expenses ", controller: _searchController),
             ListView(
               scrollDirection: Axis.horizontal,
-              children: Inventory.inventoryCountStatus
+              children: Inventory.inventoryExpense
                   .map(
                     (e) =>
                         MistChip(
@@ -142,10 +144,10 @@ class _NavInventoryExpensesState extends State<NavInventoryExpenses> {
   Widget _buildTile(ExpenseModel model) {
     return ListTile(
       contentPadding: EdgeInsets.all(0),
-      // onTap: () => Get.to(() => ScreenViewPurchaseOrder(model: model)),
-      leading: CircleAvatar(child: Iconify(Bx.tag, color: Colors.white)),
+      onTap: () => Get.to(() => ScreenViewExpense(model: model)),
+      leading: Iconify(Bx.money, color: AppTheme.color(context)),
       subtitle: MistDateUtils.getInformalDate(model.date).text(),
-      title: (model.category['label'] ?? '-=').text(),
+      title: Text((model.category['label'] ?? '-=')),
       trailing: _getIcon(model.status),
     );
   }
@@ -156,7 +158,7 @@ class _NavInventoryExpensesState extends State<NavInventoryExpenses> {
       if (_searchTerm != searchTerm) {
         _searchTerm = searchTerm;
         // Start a new search from page 1
-        _inventory.loadPurchaseOrders(
+        _expenses.fetchPaginatedExpenses(
           search: _searchTerm,
           page: 1,
           status: _statusFilter,
@@ -184,9 +186,7 @@ class _NavInventoryExpensesState extends State<NavInventoryExpenses> {
     if (status.toLowerCase() == "accepted") {
       return Iconify(Bx.check_circle, color: Colors.green, size: 35);
     }
-    if (status.toLowerCase() == "partial-received") {
-      return Iconify(Bx.time, color: Colors.yellow, size: 35);
-    }
+
     return Iconify(Bx.archive, color: Colors.grey, size: 35);
   }
 }

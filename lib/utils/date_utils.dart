@@ -20,6 +20,27 @@ class MistDateUtils {
     return to.difference(from).inDays;
   }
 
+  static String getDifferenxeInApproximate(DateTime to) {
+    final from = DateTime.now();
+    int days = to.difference(from).inDays;
+    if (days > 0) {
+      return "$days left";
+    }
+    int hours = to.difference(from).inHours;
+    if (hours > 0) {
+      return "$hours hours left";
+    }
+    int minutes = to.difference(from).inMinutes;
+    if (minutes > 0) {
+      return "$minutes minutes left";
+    }
+    int seconds = to.difference(from).inSeconds;
+    if (seconds > 0) {
+      return "$seconds seconds left";
+    }
+    return "Expired";
+  }
+
   static String getWeekDayName(DateTime dateTime) {
     switch (dateTime.weekday) {
       case DateTime.monday:

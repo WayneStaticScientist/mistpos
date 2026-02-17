@@ -18,4 +18,9 @@ class Inventory {
     {"label": "Pending", "value": "pending"},
     {"label": "Accepted", "value": "completed"},
   ];
+  static const inventoryExpense = [
+    {"label": "All", "value": ""},
+    {"label": "Pending", "value": "pending"},
+    {"label": "Accepted", "value": "accepted"},
+  ];
 }

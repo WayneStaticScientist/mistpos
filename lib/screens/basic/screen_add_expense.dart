@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/utils/currence_converter.dart';
@@ -147,10 +148,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     final primaryColor = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? Colors.black87 : Colors.grey[50],
       appBar: AppBar(
         title: const Text("Add New Expense"),
-        backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
+        backgroundColor: AppTheme.surface(context),
         foregroundColor: isDarkMode ? Colors.white : Colors.black,
         elevation: 0,
         leading: IconButton(
@@ -172,7 +172,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: isDarkMode ? Colors.grey[800] : Colors.white,
+                      color: AppTheme.surface(context),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.grey.withAlpha(100)),
                     ),
@@ -210,7 +210,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     prefixText:
                         "${_userController.user.value?.baseCurrence ?? 'USD'} ",
                     filled: true,
-                    fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
+                    fillColor: AppTheme.surface(context),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -236,9 +236,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           decoration: InputDecoration(
                             labelText: "Category",
                             filled: true,
-                            fillColor: isDarkMode
-                                ? Colors.grey[800]
-                                : Colors.white,
+                            fillColor: AppTheme.surface(context),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide.none,
@@ -289,7 +287,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   decoration: InputDecoration(
                     labelText: "Expense For (Payee/Reason)",
                     filled: true,
-                    fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
+                    fillColor: AppTheme.surface(context),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -308,7 +306,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   decoration: InputDecoration(
                     labelText: "Payment Type",
                     filled: true,
-                    fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
+                    fillColor: AppTheme.surface(context),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -335,7 +333,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   decoration: InputDecoration(
                     labelText: "Reference Number (Optional)",
                     filled: true,
-                    fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
+                    fillColor: AppTheme.surface(context),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -353,7 +351,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     labelText: "Notes",
                     alignLabelWithHint: true,
                     filled: true,
-                    fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
+                    fillColor: AppTheme.surface(context),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,

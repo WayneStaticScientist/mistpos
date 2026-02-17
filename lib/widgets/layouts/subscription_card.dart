@@ -1,6 +1,7 @@
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mistpos/utils/date_utils.dart';
 
 class SubscriptionCard extends StatelessWidget {
   // Mock data for the card
@@ -176,9 +177,11 @@ class SubscriptionCard extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 20.0),
               child: Center(
                 child: Text(
-                  remainingTime!.difference(DateTime.now()).inDays > 0
-                      ? '${remainingTime!.difference(DateTime.now()).inDays} days remaining.'
-                      : 'Your current plan has expired.',
+                  remainingTime!.difference(DateTime.now()).inDays < 0
+                      ? 'Your current plan has expired.'
+                      : MistDateUtils.getDifferenxeInApproximate(
+                          remainingTime!,
+                        ),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

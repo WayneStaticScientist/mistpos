@@ -75,7 +75,9 @@ class _ProfileTileState extends State<ProfileTile> {
                   4.gapWidth,
                   (daysLeft < 0
                           ? "Expired"
-                          : "${MistDateUtils.getDaysDifference(company.subscriptionType.validUntil!)} days left")
+                          : MistDateUtils.getDifferenxeInApproximate(
+                              company.subscriptionType.validUntil!,
+                            ))
                       .text(
                         style: TextStyle(
                           color:

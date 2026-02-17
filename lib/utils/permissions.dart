@@ -31,6 +31,11 @@ class UserPermissions {
       name: "Add/Update/Delete discounts",
       value: "discounts",
     ),
+    PermissionStructure(name: "Add Expenses", value: "expense-add"),
+    PermissionStructure(
+      name: "Approve Expenses/Reject",
+      value: "expense-approve",
+    ),
     PermissionStructure(name: "Delete Customers", value: "customer-*"),
     PermissionStructure(name: "Have Cashier Capabilites", value: "cashier"),
     PermissionStructure(name: "Payment Integrations", value: "payment"),

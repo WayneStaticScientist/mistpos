@@ -1,12 +1,13 @@
 class ExpenseModel {
   final String id;
-  final String status;
+  String status;
   final String notes;
   final DateTime date;
   final double amount;
   final Map category;
   final String expenseFor;
   final String paymentType;
+  final dynamic senderId;
   final String referenceNumber;
 
   ExpenseModel({
@@ -15,6 +16,7 @@ class ExpenseModel {
     required this.date,
     required this.status,
     required this.amount,
+    required this.senderId,
     required this.category,
     required this.expenseFor,
     required this.paymentType,
@@ -27,6 +29,7 @@ class ExpenseModel {
       category: json['category'],
       expenseFor: json['expenseFor'],
       paymentType: json['paymentType'],
+      senderId: json['senderId'] ?? '',
       date: DateTime.parse(json['date']),
       status: json['status'] ?? 'pending',
       referenceNumber: json['referenceNumber'],

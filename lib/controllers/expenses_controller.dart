@@ -126,4 +126,24 @@ class ExpensesController extends GetxController {
     totalPaginatedExpenses.value = response.body['total'];
     paginatedExpensesPage.value = response.body['page'];
   }
+
+  Future<bool> acceptExpense(String id) async {
+    final response = await Net.put("/admin/expense/accept/$id");
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return false;
+    }
+    fetchPaginatedExpenses();
+    return true;
+  }
+
+  Future<bool> rejectExpense(String id) async {
+    final response = await Net.delete("/admin/expense/accept/$id");
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return false;
+    }
+    fetchPaginatedExpenses();
+    return true;
+  }
 }
