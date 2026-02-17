@@ -1,9 +1,10 @@
-import 'package:isar/isar.dart';
+import 'package:isar_plus/isar_plus.dart';
+import '../main.dart';
 part 'item_categories_model.g.dart';
 
 @collection
 class ItemCategoryModel {
-  late Id id = Isar.autoIncrement;
+  late int id = IdGen.id;
   @Index(unique: true)
   String name;
   int? color;

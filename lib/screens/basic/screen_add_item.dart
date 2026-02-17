@@ -303,7 +303,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
     });
   }
 
-  _inventoryManagementSection() {
+  MistMordernLayout _inventoryManagementSection() {
     return MistMordernLayout(
       label: "Inventory Management",
       children: [
@@ -376,7 +376,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
     );
   }
 
-  _makeItemInformationSection() {
+  MistMordernLayout _makeItemInformationSection() {
     return MistMordernLayout(
       label: "Item Information",
       children: [
@@ -500,7 +500,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
     );
   }
 
-  _compositeListItem() {
+  Obx _compositeListItem() {
     return Obx(
       () =>
           [
@@ -553,7 +553,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
     );
   }
 
-  _wholesaleManagement() {
+  MistMordernLayout _wholesaleManagement() {
     return MistMordernLayout(
       label: "WholeSale Management",
       children: [
@@ -591,7 +591,7 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
     );
   }
 
-  _editItem(InvItem e) {
+  void _editItem(InvItem e) {
     final itemCountController = TextEditingController(
       text: e.quantity.toString(),
     );

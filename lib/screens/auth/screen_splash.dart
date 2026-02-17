@@ -57,7 +57,7 @@ class _ScreenSplashState extends State<ScreenSplash> {
     );
   }
 
-  _openBottomNav() {
+  void _openBottomNav() {
     Get.bottomSheet(
       [
         CardButtons(

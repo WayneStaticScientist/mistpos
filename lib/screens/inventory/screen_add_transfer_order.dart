@@ -204,7 +204,7 @@ class _ScreenAddTransferOrderState extends State<ScreenAddTransferOrder> {
     );
   }
 
-  _edit(InvItem itemInv) {
+  void _edit(InvItem itemInv) {
     final proposedCostsPrice = TextEditingController(
       text: itemInv.cost.toString(),
     );

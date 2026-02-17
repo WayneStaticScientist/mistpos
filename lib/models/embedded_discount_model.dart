@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_plus/isar_plus.dart';
 import 'package:mistpos/models/discount_model.dart';
 part 'embedded_discount_model.g.dart';
 

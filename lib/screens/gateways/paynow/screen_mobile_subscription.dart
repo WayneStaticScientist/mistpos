@@ -67,7 +67,7 @@ class _ScreenMobileSubscriptionState extends State<ScreenMobileSubscription> {
     );
   }
 
-  _pay() async {
+  Future<void> _pay() async {
     if (_userController.user.value == null) {
       Toaster.showError("User registration needed");
       return;

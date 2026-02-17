@@ -1,9 +1,11 @@
-import 'package:isar/isar.dart';
+import 'package:isar_plus/isar_plus.dart';
+
+import '../main.dart';
 part 'shifts_model.g.dart';
 
 @collection
 class ShiftsModel {
-  Id id = Isar.autoIncrement;
+  late int id = IdGen.id;
   bool synced = false;
   bool shiftIsClosed = false;
   String hexId;

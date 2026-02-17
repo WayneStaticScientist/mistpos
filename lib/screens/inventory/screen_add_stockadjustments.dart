@@ -219,7 +219,7 @@ class _ScreenAddStockadjustmentsState extends State<ScreenAddStockadjustments> {
     );
   }
 
-  _makeTable(List<InvItem> selectedInvItems) {
+  SingleChildScrollView _makeTable(List<InvItem> selectedInvItems) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Table(

@@ -100,7 +100,7 @@ class _ScreenAccountSelectionState extends State<ScreenAccountSelection> {
     );
   }
 
-  _buildTile(User model) {
+  ListTile _buildTile(User model) {
     return ListTile(
       onTap: () => Get.to(() => ScreenChangeEmployee(user: model)),
       title: model.fullName.text(),

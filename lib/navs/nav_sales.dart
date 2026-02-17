@@ -97,7 +97,7 @@ class _NavSaleState extends State<NavSale> {
     );
   }
 
-  _buildNormalFlowLayout() {
+  Stack _buildNormalFlowLayout() {
     final model = AppSettingsModel.fromStorage();
     return Stack(
       children: [
@@ -247,7 +247,7 @@ class _NavSaleState extends State<NavSale> {
     );
   }
 
-  _buidCategoriesLayout() {
+  SalesCategoriesList _buidCategoriesLayout() {
     return SalesCategoriesList(
       value: _selectedListGroup,
       changeCategory: (e) => _changeCategory(e),
@@ -259,13 +259,13 @@ class _NavSaleState extends State<NavSale> {
     );
   }
 
-  _buidItemList() {
+  StatefulWidget _buidItemList() {
     if (_selectedListGroup == "discounts") return SalesDiscountsList();
     if (_selectedListGroup == "tax") return SalesTaxList();
     return SalesItemList(onTap: (a, b) => _handleWidgetClick(a, b));
   }
 
-  _selectedItemsList() {
+  SafeArea _selectedItemsList() {
     return SafeArea(
       child: Obx(
         () => [
@@ -311,7 +311,7 @@ class _NavSaleState extends State<NavSale> {
     );
   }
 
-  _changeCategory(String id) {
+  void _changeCategory(String id) {
     _itemsListController.selectedCategory.value = id;
     _itemsListController.loadCartItems(
       search: _searchTerm,

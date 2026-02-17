@@ -22,6 +22,7 @@ https://developer.android.com/about/versions/12/features/bluetooth-permissions -
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
+    android:extractNativeLibs="false"
         android:label="MistPos"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">

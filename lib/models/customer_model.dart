@@ -1,9 +1,10 @@
-import 'package:isar/isar.dart';
+import 'package:isar_plus/isar_plus.dart';
+import 'package:mistpos/main.dart';
 part 'customer_model.g.dart';
 
 @collection
 class CustomerModel {
-  Id id = Isar.autoIncrement;
+  late int id = IdGen.id;
   final String email;
   final String city;
   final String notes;

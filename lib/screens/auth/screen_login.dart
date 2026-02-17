@@ -73,7 +73,7 @@ class _ScreenLoginState extends State<ScreenLogin> {
     );
   }
 
-  _login() {
+  void _login() {
     if (!_formKey.currentState!.validate()) return;
     _userController.loginUser(_emailController.text, _passwordController.text);
   }

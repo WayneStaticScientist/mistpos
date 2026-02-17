@@ -93,7 +93,7 @@ class _NavModifiersListState extends State<NavModifiersList> {
     }
   }
 
-  _createEmpytLayout() {
+  Center _createEmpytLayout() {
     return [
           Iconify(Bx.no_entry, color: AppTheme.color(context), size: 30),
           18.gapHeight,

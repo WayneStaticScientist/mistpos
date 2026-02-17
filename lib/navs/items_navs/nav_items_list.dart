@@ -68,7 +68,7 @@ class _NavItemsListState extends State<NavItemsList> {
     ].column().padding(EdgeInsets.all(9));
   }
 
-  _openEditor(ItemUnsavedModel model) {
+  void _openEditor(ItemUnsavedModel model) {
     final company = CompanyModel.fromStorage();
     if (company?.subscriptionType.type == MistSubscriptionUtils.freePlan ||
         company?.subscriptionType.type == null) {
@@ -99,7 +99,7 @@ class _NavItemsListState extends State<NavItemsList> {
     );
   }
 
-  _openEditDialog(ItemUnsavedModel model) {
+  void _openEditDialog(ItemUnsavedModel model) {
     Get.back();
     final textController = TextEditingController();
     Get.dialog(

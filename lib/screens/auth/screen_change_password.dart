@@ -65,7 +65,7 @@ class _ScreenChangePasswordState extends State<ScreenChangePassword> {
     );
   }
 
-  _changePassword() async {
+  Future<void> _changePassword() async {
     if (!_formKey.currentState!.validate()) return;
     final success = await _userController.changePassword(
       _oldPasswordController.text,

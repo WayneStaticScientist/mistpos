@@ -166,7 +166,7 @@ class _ScreenAddEmployeeState extends State<ScreenAddEmployee> {
     );
   }
 
-  _addEmployCall() async {
+  Future<void> _addEmployCall() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }

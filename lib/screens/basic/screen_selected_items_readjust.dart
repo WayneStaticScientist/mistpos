@@ -97,7 +97,7 @@ class _ScreenSelectedItemsReadjustState
     );
   }
 
-  _clearCart() {
+  void _clearCart() {
     Get.dialog(
       AlertDialog(
         title: "Remove Payment".text(),

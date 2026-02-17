@@ -83,7 +83,7 @@ class _TaxListScreensState extends State<TaxListScreens> {
     );
   }
 
-  _buildItem(TaxModel tax) {
+  ListTile _buildItem(TaxModel tax) {
     return ListTile(
       onLongPress: () => _confirmDelete(tax),
       trailing: (tax.activated

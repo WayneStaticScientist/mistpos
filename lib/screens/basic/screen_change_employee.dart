@@ -75,7 +75,7 @@ class _ScreenChangeEmployeeState extends State<ScreenChangeEmployee> {
     );
   }
 
-  _switch() {
+  void _switch() {
     if (_controller.text.trim().isEmpty) {
       Toaster.showError("password is required");
       return;

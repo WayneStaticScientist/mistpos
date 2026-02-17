@@ -78,7 +78,7 @@ class _ScreenViewInventoryCountState extends State<ScreenViewInventoryCount> {
     );
   }
 
-  _buildInventorySummary() {
+  MistMordernLayout _buildInventorySummary() {
     return MistMordernLayout(
       label: "Summary",
       children: [
@@ -104,7 +104,7 @@ class _ScreenViewInventoryCountState extends State<ScreenViewInventoryCount> {
     );
   }
 
-  _buildSupplierInformation() {
+  MistMordernLayout _buildSupplierInformation() {
     return MistMordernLayout(
       label: "Sender",
       children: [
@@ -153,7 +153,7 @@ class _ScreenViewInventoryCountState extends State<ScreenViewInventoryCount> {
     );
   }
 
-  _buildProductInformation() {
+  MistMordernLayout _buildProductInformation() {
     return MistMordernLayout(
       label: "Items Information ",
       children: [
@@ -240,7 +240,7 @@ class _ScreenViewInventoryCountState extends State<ScreenViewInventoryCount> {
     return Iconify(Bx.check_circle, color: Colors.green, size: 35);
   }
 
-  _countPage() async {
+  Future<void> _countPage() async {
     final result = await Get.to(
       () => ScreenInventoryCount(model: widget.model),
     );

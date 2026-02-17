@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_plus/isar_plus.dart';
+import 'package:mistpos/main.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:mistpos/models/user_model.dart';
@@ -30,12 +31,12 @@ class FirebaseController extends GetxController {
   void readModel(NotificationModel model) async {
     if (model.read) return;
     model.read = true;
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
-    await isar.writeTxn(() async {
-      await isar.notificationModels.put(model);
+    await isar.write((isar) async {
+      isar.notificationModels.put(model);
     });
     int index = notifications.indexWhere((e) => e.id == model.id);
     if (index >= 0) {
@@ -45,12 +46,12 @@ class FirebaseController extends GetxController {
   }
 
   void listAllNotifications({String search = ""}) async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
-    final notifyAsync = await isar.notificationModels
-        .filter()
+    final notifyAsync = isar.notificationModels
+        .where()
         .titleContains(search, caseSensitive: false)
         .or()
         .messageContains(search, caseSensitive: false)
@@ -60,14 +61,14 @@ class FirebaseController extends GetxController {
   }
 
   void deleteAllNotifications() async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
 
     int count = 0;
-    await isar.writeTxn(() async {
-      count = await isar.notificationModels.where().deleteAll();
+    await isar.write((isar) async {
+      count = isar.notificationModels.where().deleteAll();
     });
     notifications.clear();
     Toaster.showSuccess("deleted $count notifications");
@@ -108,7 +109,7 @@ class FirebaseController extends GetxController {
 
   Future<void> addFirebaseMessage(RemoteMessage message) async {
     try {
-      final isar = Isar.getInstance();
+      final isar = IsarStatic.getInstance();
       if (isar == null) {
         return;
       }
@@ -117,7 +118,7 @@ class FirebaseController extends GetxController {
         message: message.notification?.body ?? 'no message body',
         updatedAt: DateTime.now(),
       );
-      await isar.writeTxn(() async {
+      await isar.write((isar) async {
         isar.notificationModels.put(model);
       });
       notificationSize.value = notificationSize.value + 1;
@@ -132,10 +133,8 @@ class FirebaseController extends GetxController {
     if (notification != null && android != null) {
       final String smallIcon = android.smallIcon ?? '@mipmap/ic_launcher';
       flutterLocalNotificationsPlugin.show(
-        notification.hashCode, // Unique ID for the notification
-        notification.title,
-        notification.body,
-        NotificationDetails(
+        // Unique ID for the notification
+        notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             'high_importance_channel',
             'High Importance Notifications',
@@ -144,7 +143,10 @@ class FirebaseController extends GetxController {
             icon: smallIcon,
           ),
         ),
+        title: notification.title,
+        body: notification.body,
         payload: message.data.toString(),
+        id: notification.hashCode,
       );
     }
   }

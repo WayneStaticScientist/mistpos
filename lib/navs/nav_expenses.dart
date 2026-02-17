@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/utils/toast.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/date_utils.dart'; // Ensure you have get package installed
 import 'package:mistpos/utils/subscriptions.dart';
 import 'package:mistpos/utils/currence_converter.dart';
-import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/controllers/expenses_controller.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
@@ -89,14 +90,7 @@ class _NavExpensesState extends State<NavExpenses> {
           ? DateTimeRange(start: _startDate!, end: _endDate!)
           : null,
       builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-          child: child!,
-        );
+        return child!;
       },
     );
 
@@ -144,14 +138,13 @@ class _NavExpensesState extends State<NavExpenses> {
         return SubscriptionAlert();
       }
       return Scaffold(
-        backgroundColor: isDarkMode ? Colors.black87 : Colors.grey[50],
         appBar: AppBar(
           leading: DrawerButton(
             onPressed: () => widget.scaffoldKey?.currentState?.openDrawer(),
           ),
           title: const Text("Expenses"),
           centerTitle: true,
-          backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
+          backgroundColor: AppTheme.surface(context),
           foregroundColor: isDarkMode ? Colors.white : Colors.black,
           elevation: 0,
           actions: [
@@ -194,7 +187,7 @@ class _NavExpensesState extends State<NavExpenses> {
                         : Icon(Icons.lock, color: Colors.red),
                     filled: true,
                     fillColor: isSubscribed
-                        ? (isDarkMode ? Colors.grey[800] : Colors.white)
+                        ? (AppTheme.surface(context))
                         : Colors.red.withAlpha(50),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -219,9 +212,9 @@ class _NavExpensesState extends State<NavExpenses> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
-                      color: isDarkMode ? Colors.grey[800] : Colors.white,
+                      color: AppTheme.surface(context),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.withAlpha(90)),
+                      border: Border.all(color: Colors.grey.withAlpha(30)),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: Obx(
@@ -281,9 +274,9 @@ class _NavExpensesState extends State<NavExpenses> {
                         vertical: 12,
                       ),
                       decoration: BoxDecoration(
-                        color: isDarkMode ? Colors.grey[800] : Colors.white,
+                        color: AppTheme.surface(context),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey.withAlpha(90)),
+                        border: Border.all(color: Colors.grey.withAlpha(30)),
                       ),
                       child: Row(
                         children: [
@@ -354,17 +347,10 @@ class _NavExpensesState extends State<NavExpenses> {
                                     primaryColor.withAlpha(30),
                                   ),
                                   dataRowColor: WidgetStateProperty.all(
-                                    isDarkMode
-                                        ? Colors.grey[900]
-                                        : Colors.white,
+                                    AppTheme.surface(context),
                                   ),
                                   columnSpacing: 20,
-                                  border: TableBorder(
-                                    horizontalInside: BorderSide(
-                                      width: 1,
-                                      color: Colors.white.withAlpha(30),
-                                    ),
-                                  ),
+
                                   columns: const [
                                     DataColumn(
                                       label: Text(
@@ -469,14 +455,8 @@ class _NavExpensesState extends State<NavExpenses> {
         bottomNavigationBar: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isDarkMode ? Colors.grey[900] : Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha(27),
-                blurRadius: 10,
-                offset: const Offset(0, -5),
-              ),
-            ],
+            color: AppTheme.surface(context),
+            boxShadow: [],
           ),
           child: SafeArea(
             child: ElevatedButton.icon(

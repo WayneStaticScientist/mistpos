@@ -3,1201 +3,1100 @@
 part of 'item_receit_item.dart';
 
 // **************************************************************************
-// IsarEmbeddedGenerator
+// _IsarEmbeddedGenerator
 // **************************************************************************
 
 // coverage:ignore-file
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+// ignore_for_file: duplicate_ignore, invalid_use_of_protected_member, lines_longer_than_80_chars, constant_identifier_names, avoid_js_rounded_ints, no_leading_underscores_for_local_identifiers, require_trailing_commas, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_in_if_null_operators, library_private_types_in_public_api, prefer_const_constructors
+// ignore_for_file: type=lint
 
-const ItemReceitItemSchema = Schema(
-  name: r'ItemReceitItem',
-  id: -6421942727519692737,
-  properties: {
-    r'addenum': PropertySchema(
-      id: 0,
-      name: r'addenum',
-      type: IsarType.double,
-    ),
-    r'baseId': PropertySchema(
-      id: 1,
-      name: r'baseId',
-      type: IsarType.long,
-    ),
-    r'cost': PropertySchema(
-      id: 2,
-      name: r'cost',
-      type: IsarType.double,
-    ),
-    r'count': PropertySchema(
-      id: 3,
-      name: r'count',
-      type: IsarType.long,
-    ),
-    r'discount': PropertySchema(
-      id: 4,
-      name: r'discount',
-      type: IsarType.double,
-    ),
-    r'discountId': PropertySchema(
-      id: 5,
-      name: r'discountId',
-      type: IsarType.string,
-    ),
-    r'itemId': PropertySchema(
-      id: 6,
-      name: r'itemId',
-      type: IsarType.string,
-    ),
-    r'name': PropertySchema(
-      id: 7,
-      name: r'name',
-      type: IsarType.string,
-    ),
-    r'originalCount': PropertySchema(
-      id: 8,
-      name: r'originalCount',
-      type: IsarType.long,
-    ),
-    r'percentageDiscount': PropertySchema(
-      id: 9,
-      name: r'percentageDiscount',
-      type: IsarType.bool,
-    ),
-    r'price': PropertySchema(
-      id: 10,
-      name: r'price',
-      type: IsarType.double,
-    ),
-    r'refunded': PropertySchema(
-      id: 11,
-      name: r'refunded',
-      type: IsarType.bool,
-    ),
-    r'rejectedReason': PropertySchema(
-      id: 12,
-      name: r'rejectedReason',
-      type: IsarType.string,
-    )
-  },
-  estimateSize: _itemReceitItemEstimateSize,
-  serialize: _itemReceitItemSerialize,
-  deserialize: _itemReceitItemDeserialize,
-  deserializeProp: _itemReceitItemDeserializeProp,
+final ItemReceitItemSchema = IsarGeneratedSchema(
+  schema: IsarSchema(
+    name: 'ItemReceitItem',
+
+    embedded: true,
+    properties: [
+      IsarPropertySchema(name: 'name', type: IsarType.string),
+      IsarPropertySchema(name: 'count', type: IsarType.long),
+      IsarPropertySchema(name: 'price', type: IsarType.double),
+      IsarPropertySchema(name: 'cost', type: IsarType.double),
+      IsarPropertySchema(name: 'addenum', type: IsarType.double),
+      IsarPropertySchema(name: 'itemId', type: IsarType.string),
+      IsarPropertySchema(name: 'rejectedReason', type: IsarType.string),
+      IsarPropertySchema(name: 'refunded', type: IsarType.bool),
+      IsarPropertySchema(name: 'originalCount', type: IsarType.long),
+      IsarPropertySchema(name: 'discount', type: IsarType.double),
+      IsarPropertySchema(name: 'discountId', type: IsarType.string),
+      IsarPropertySchema(name: 'percentageDiscount', type: IsarType.bool),
+      IsarPropertySchema(name: 'baseId', type: IsarType.long),
+    ],
+    indexes: [],
+  ),
+  converter: IsarObjectConverter<void, ItemReceitItem>(
+    serialize: serializeItemReceitItem,
+    deserialize: deserializeItemReceitItem,
+  ),
 );
 
-int _itemReceitItemEstimateSize(
-  ItemReceitItem object,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  var bytesCount = offsets.last;
+@isarProtected
+int serializeItemReceitItem(IsarWriter writer, ItemReceitItem object) {
+  IsarCore.writeString(writer, 1, object.name);
+  IsarCore.writeLong(writer, 2, object.count);
+  IsarCore.writeDouble(writer, 3, object.price);
+  IsarCore.writeDouble(writer, 4, object.cost);
+  IsarCore.writeDouble(writer, 5, object.addenum);
+  IsarCore.writeString(writer, 6, object.itemId);
+  IsarCore.writeString(writer, 7, object.rejectedReason);
+  IsarCore.writeBool(writer, 8, value: object.refunded);
+  IsarCore.writeLong(writer, 9, object.originalCount);
+  IsarCore.writeDouble(writer, 10, object.discount);
   {
     final value = object.discountId;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
+    if (value == null) {
+      IsarCore.writeNull(writer, 11);
+    } else {
+      IsarCore.writeString(writer, 11, value);
     }
   }
-  bytesCount += 3 + object.itemId.length * 3;
-  bytesCount += 3 + object.name.length * 3;
-  bytesCount += 3 + object.rejectedReason.length * 3;
-  return bytesCount;
+  IsarCore.writeBool(writer, 12, value: object.percentageDiscount);
+  IsarCore.writeLong(writer, 13, object.baseId);
+  return 0;
 }
 
-void _itemReceitItemSerialize(
-  ItemReceitItem object,
-  IsarWriter writer,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  writer.writeDouble(offsets[0], object.addenum);
-  writer.writeLong(offsets[1], object.baseId);
-  writer.writeDouble(offsets[2], object.cost);
-  writer.writeLong(offsets[3], object.count);
-  writer.writeDouble(offsets[4], object.discount);
-  writer.writeString(offsets[5], object.discountId);
-  writer.writeString(offsets[6], object.itemId);
-  writer.writeString(offsets[7], object.name);
-  writer.writeLong(offsets[8], object.originalCount);
-  writer.writeBool(offsets[9], object.percentageDiscount);
-  writer.writeDouble(offsets[10], object.price);
-  writer.writeBool(offsets[11], object.refunded);
-  writer.writeString(offsets[12], object.rejectedReason);
-}
-
-ItemReceitItem _itemReceitItemDeserialize(
-  Id id,
-  IsarReader reader,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
+@isarProtected
+ItemReceitItem deserializeItemReceitItem(IsarReader reader) {
   final object = ItemReceitItem();
-  object.addenum = reader.readDouble(offsets[0]);
-  object.baseId = reader.readLong(offsets[1]);
-  object.cost = reader.readDouble(offsets[2]);
-  object.count = reader.readLong(offsets[3]);
-  object.discount = reader.readDouble(offsets[4]);
-  object.discountId = reader.readStringOrNull(offsets[5]);
-  object.itemId = reader.readString(offsets[6]);
-  object.name = reader.readString(offsets[7]);
-  object.originalCount = reader.readLong(offsets[8]);
-  object.percentageDiscount = reader.readBool(offsets[9]);
-  object.price = reader.readDouble(offsets[10]);
-  object.refunded = reader.readBool(offsets[11]);
-  object.rejectedReason = reader.readString(offsets[12]);
+  object.name = IsarCore.readString(reader, 1) ?? '';
+  object.count = IsarCore.readLong(reader, 2);
+  object.price = IsarCore.readDouble(reader, 3);
+  object.cost = IsarCore.readDouble(reader, 4);
+  object.addenum = IsarCore.readDouble(reader, 5);
+  object.itemId = IsarCore.readString(reader, 6) ?? '';
+  object.rejectedReason = IsarCore.readString(reader, 7) ?? '';
+  object.refunded = IsarCore.readBool(reader, 8);
+  object.originalCount = IsarCore.readLong(reader, 9);
+  object.discount = IsarCore.readDouble(reader, 10);
+  object.discountId = IsarCore.readString(reader, 11);
+  object.percentageDiscount = IsarCore.readBool(reader, 12);
+  object.baseId = IsarCore.readLong(reader, 13);
   return object;
-}
-
-P _itemReceitItemDeserializeProp<P>(
-  IsarReader reader,
-  int propertyId,
-  int offset,
-  Map<Type, List<int>> allOffsets,
-) {
-  switch (propertyId) {
-    case 0:
-      return (reader.readDouble(offset)) as P;
-    case 1:
-      return (reader.readLong(offset)) as P;
-    case 2:
-      return (reader.readDouble(offset)) as P;
-    case 3:
-      return (reader.readLong(offset)) as P;
-    case 4:
-      return (reader.readDouble(offset)) as P;
-    case 5:
-      return (reader.readStringOrNull(offset)) as P;
-    case 6:
-      return (reader.readString(offset)) as P;
-    case 7:
-      return (reader.readString(offset)) as P;
-    case 8:
-      return (reader.readLong(offset)) as P;
-    case 9:
-      return (reader.readBool(offset)) as P;
-    case 10:
-      return (reader.readDouble(offset)) as P;
-    case 11:
-      return (reader.readBool(offset)) as P;
-    case 12:
-      return (reader.readString(offset)) as P;
-    default:
-      throw IsarError('Unknown property with id $propertyId');
-  }
 }
 
 extension ItemReceitItemQueryFilter
     on QueryBuilder<ItemReceitItem, ItemReceitItem, QFilterCondition> {
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      addenumEqualTo(
-    double value, {
-    double epsilon = Query.epsilon,
-  }) {
+  nameEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'addenum',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        EqualCondition(property: 1, value: value, caseSensitive: caseSensitive),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      addenumGreaterThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
+  nameGreaterThan(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'addenum',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      addenumLessThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
+  nameGreaterThanOrEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'addenum',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      addenumBetween(
+  nameLessThan(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 1, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  nameLessThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  nameBetween(String lower, String upper, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 1,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  nameStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  nameEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  nameContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  nameMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 1,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  nameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const EqualCondition(property: 1, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  nameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const GreaterCondition(property: 1, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  countEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 2, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  countGreaterThan(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 2, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  countGreaterThanOrEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 2, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  countLessThan(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(LessCondition(property: 2, value: value));
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  countLessThanOrEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 2, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  countBetween(int lower, int upper) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(property: 2, lower: lower, upper: upper),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  priceEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 3, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  priceGreaterThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 3, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  priceGreaterThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 3, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  priceLessThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 3, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  priceLessThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 3, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  priceBetween(double lower, double upper, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 3,
+          lower: lower,
+          upper: upper,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  costEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 4, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  costGreaterThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 4, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  costGreaterThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 4, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  costLessThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 4, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  costLessThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 4, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  costBetween(double lower, double upper, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 4,
+          lower: lower,
+          upper: upper,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  addenumEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 5, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  addenumGreaterThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 5, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  addenumGreaterThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 5, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  addenumLessThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 5, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  addenumLessThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 5, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  addenumBetween(
     double lower,
     double upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
+    double epsilon = Filter.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'addenum',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 5,
+          lower: lower,
+          upper: upper,
+
+          epsilon: epsilon,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      baseIdEqualTo(int value) {
+  itemIdEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'baseId',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        EqualCondition(property: 6, value: value, caseSensitive: caseSensitive),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      baseIdGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
+  itemIdGreaterThan(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'baseId',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 6,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      baseIdLessThan(
-    int value, {
-    bool include = false,
-  }) {
+  itemIdGreaterThanOrEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'baseId',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 6,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      baseIdBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
+  itemIdLessThan(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'baseId',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        LessCondition(property: 6, value: value, caseSensitive: caseSensitive),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      costEqualTo(
-    double value, {
-    double epsilon = Query.epsilon,
-  }) {
+  itemIdLessThanOrEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'cost',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 6,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      costGreaterThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
+  itemIdBetween(String lower, String upper, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'cost',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 6,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      costLessThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
+  itemIdStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'cost',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 6,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      costBetween(
-    double lower,
-    double upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
+  itemIdEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'cost',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 6,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      countEqualTo(int value) {
+  itemIdContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'count',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 6,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      countGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
+  itemIdMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'count',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 6,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      countLessThan(
-    int value, {
-    bool include = false,
-  }) {
+  itemIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'count',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        const EqualCondition(property: 6, value: ''),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      countBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
+  itemIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'count',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        const GreaterCondition(property: 6, value: ''),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      discountEqualTo(
-    double value, {
-    double epsilon = Query.epsilon,
-  }) {
+  rejectedReasonEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'discount',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        EqualCondition(property: 7, value: value, caseSensitive: caseSensitive),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      discountGreaterThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
+  rejectedReasonGreaterThan(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'discount',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 7,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      discountLessThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'discount',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      discountBetween(
-    double lower,
-    double upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'discount',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      discountIdIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'discountId',
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      discountIdIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'discountId',
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      discountIdEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'discountId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      discountIdGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'discountId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      discountIdLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'discountId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      discountIdBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'discountId',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      discountIdStartsWith(
+  rejectedReasonGreaterThanOrEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'discountId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 7,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      discountIdEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  rejectedReasonLessThan(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'discountId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        LessCondition(property: 7, value: value, caseSensitive: caseSensitive),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      discountIdContains(String value, {bool caseSensitive = true}) {
+  rejectedReasonLessThanOrEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'discountId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 7,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      discountIdMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'discountId',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      discountIdIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'discountId',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      discountIdIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'discountId',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      itemIdEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'itemId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      itemIdGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'itemId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      itemIdLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'itemId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      itemIdBetween(
+  rejectedReasonBetween(
     String lower,
     String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'itemId',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 7,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      itemIdStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  rejectedReasonStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'itemId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 7,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      itemIdEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  rejectedReasonEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'itemId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 7,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      itemIdContains(String value, {bool caseSensitive = true}) {
+  rejectedReasonContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'itemId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 7,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      itemIdMatches(String pattern, {bool caseSensitive = true}) {
+  rejectedReasonMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'itemId',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 7,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      itemIdIsEmpty() {
+  rejectedReasonIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'itemId',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        const EqualCondition(property: 7, value: ''),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      itemIdIsNotEmpty() {
+  rejectedReasonIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'itemId',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        const GreaterCondition(property: 7, value: ''),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      nameEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  refundedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        EqualCondition(property: 8, value: value),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      nameGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
+  originalCountEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        EqualCondition(property: 9, value: value),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      nameLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
+  originalCountGreaterThan(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        GreaterCondition(property: 9, value: value),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      nameBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
+  originalCountGreaterThanOrEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'name',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 9, value: value),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      nameStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  originalCountLessThan(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(LessCondition(property: 9, value: value));
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      nameEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  originalCountLessThanOrEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 9, value: value),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      nameContains(String value, {bool caseSensitive = true}) {
+  originalCountBetween(int lower, int upper) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        BetweenCondition(property: 9, lower: lower, upper: upper),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      nameMatches(String pattern, {bool caseSensitive = true}) {
+  discountEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'name',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        EqualCondition(property: 10, value: value, epsilon: epsilon),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      nameIsEmpty() {
+  discountGreaterThan(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'name',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        GreaterCondition(property: 10, value: value, epsilon: epsilon),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      nameIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'name',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      originalCountEqualTo(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'originalCount',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      originalCountGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'originalCount',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      originalCountLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'originalCount',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      originalCountBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'originalCount',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      percentageDiscountEqualTo(bool value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'percentageDiscount',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      priceEqualTo(
+  discountGreaterThanOrEqualTo(
     double value, {
-    double epsilon = Query.epsilon,
+    double epsilon = Filter.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'price',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 10, value: value, epsilon: epsilon),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      priceGreaterThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
+  discountLessThan(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'price',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        LessCondition(property: 10, value: value, epsilon: epsilon),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      priceLessThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
+  discountLessThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'price',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 10, value: value, epsilon: epsilon),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      priceBetween(
+  discountBetween(
     double lower,
     double upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
+    double epsilon = Filter.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'price',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 10,
+          lower: lower,
+          upper: upper,
+
+          epsilon: epsilon,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      refundedEqualTo(bool value) {
+  discountIdIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'refunded',
-        value: value,
-      ));
+      return query.addFilterCondition(const IsNullCondition(property: 11));
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      rejectedReasonEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'rejectedReason',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+  discountIdIsNotNull() {
+    return QueryBuilder.apply(not(), (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 11));
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      rejectedReasonGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
+  discountIdEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'rejectedReason',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        EqualCondition(
+          property: 11,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      rejectedReasonLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
+  discountIdGreaterThan(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'rejectedReason',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 11,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      rejectedReasonBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
+  discountIdGreaterThanOrEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'rejectedReason',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 11,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      rejectedReasonStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  discountIdLessThan(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'rejectedReason',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        LessCondition(property: 11, value: value, caseSensitive: caseSensitive),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      rejectedReasonEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  discountIdLessThanOrEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'rejectedReason',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 11,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      rejectedReasonContains(String value, {bool caseSensitive = true}) {
+  discountIdBetween(String? lower, String? upper, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'rejectedReason',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 11,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      rejectedReasonMatches(String pattern, {bool caseSensitive = true}) {
+  discountIdStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'rejectedReason',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 11,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      rejectedReasonIsEmpty() {
+  discountIdEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'rejectedReason',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 11,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-      rejectedReasonIsNotEmpty() {
+  discountIdContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'rejectedReason',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 11,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  discountIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 11,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  discountIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const EqualCondition(property: 11, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  discountIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const GreaterCondition(property: 11, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  percentageDiscountEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 12, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  baseIdEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 13, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  baseIdGreaterThan(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 13, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  baseIdGreaterThanOrEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 13, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  baseIdLessThan(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 13, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  baseIdLessThanOrEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 13, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  baseIdBetween(int lower, int upper) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(property: 13, lower: lower, upper: upper),
+      );
     });
   }
 }

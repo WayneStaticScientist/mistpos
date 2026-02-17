@@ -3,606 +3,613 @@
 part of 'item_saved_items_model.dart';
 
 // **************************************************************************
-// IsarCollectionGenerator
+// _IsarCollectionGenerator
 // **************************************************************************
 
 // coverage:ignore-file
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+// ignore_for_file: duplicate_ignore, invalid_use_of_protected_member, lines_longer_than_80_chars, constant_identifier_names, avoid_js_rounded_ints, no_leading_underscores_for_local_identifiers, require_trailing_commas, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_in_if_null_operators, library_private_types_in_public_api, prefer_const_constructors
+// ignore_for_file: type=lint
 
 extension GetItemSavedItemsModelCollection on Isar {
-  IsarCollection<ItemSavedItemsModel> get itemSavedItemsModels =>
+  IsarCollection<int, ItemSavedItemsModel> get itemSavedItemsModels =>
       this.collection();
 }
 
-const ItemSavedItemsModelSchema = CollectionSchema(
-  name: r'ItemSavedItemsModel',
-  id: -7775464578989841789,
-  properties: {
-    r'createdAt': PropertySchema(
-      id: 0,
-      name: r'createdAt',
-      type: IsarType.dateTime,
-    ),
-    r'dataMap': PropertySchema(
-      id: 1,
-      name: r'dataMap',
-      type: IsarType.objectList,
-      target: r'ItemSavedModel',
-    ),
-    r'name': PropertySchema(
-      id: 2,
-      name: r'name',
-      type: IsarType.string,
-    )
-  },
-  estimateSize: _itemSavedItemsModelEstimateSize,
-  serialize: _itemSavedItemsModelSerialize,
-  deserialize: _itemSavedItemsModelDeserialize,
-  deserializeProp: _itemSavedItemsModelDeserializeProp,
-  idName: r'id',
-  indexes: {},
-  links: {},
-  embeddedSchemas: {r'ItemSavedModel': ItemSavedModelSchema},
-  getId: _itemSavedItemsModelGetId,
-  getLinks: _itemSavedItemsModelGetLinks,
-  attach: _itemSavedItemsModelAttach,
-  version: '3.1.0+1',
+final ItemSavedItemsModelSchema = IsarGeneratedSchema(
+  schema: IsarSchema(
+    name: 'ItemSavedItemsModel',
+    idName: 'id',
+    embedded: false,
+    properties: [
+      IsarPropertySchema(name: 'name', type: IsarType.string),
+      IsarPropertySchema(
+        name: 'dataMap',
+        type: IsarType.objectList,
+        target: 'ItemSavedModel',
+      ),
+      IsarPropertySchema(name: 'createdAt', type: IsarType.dateTime),
+    ],
+    indexes: [],
+  ),
+  converter: IsarObjectConverter<int, ItemSavedItemsModel>(
+    serialize: serializeItemSavedItemsModel,
+    deserialize: deserializeItemSavedItemsModel,
+    deserializeProperty: deserializeItemSavedItemsModelProp,
+  ),
+  getEmbeddedSchemas: () => [ItemSavedModelSchema],
 );
 
-int _itemSavedItemsModelEstimateSize(
-  ItemSavedItemsModel object,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  var bytesCount = offsets.last;
-  bytesCount += 3 + object.dataMap.length * 3;
-  {
-    final offsets = allOffsets[ItemSavedModel]!;
-    for (var i = 0; i < object.dataMap.length; i++) {
-      final value = object.dataMap[i];
-      bytesCount +=
-          ItemSavedModelSchema.estimateSize(value, offsets, allOffsets);
-    }
-  }
-  bytesCount += 3 + object.name.length * 3;
-  return bytesCount;
-}
-
-void _itemSavedItemsModelSerialize(
-  ItemSavedItemsModel object,
+@isarProtected
+int serializeItemSavedItemsModel(
   IsarWriter writer,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
+  ItemSavedItemsModel object,
 ) {
-  writer.writeDateTime(offsets[0], object.createdAt);
-  writer.writeObjectList<ItemSavedModel>(
-    offsets[1],
-    allOffsets,
-    ItemSavedModelSchema.serialize,
-    object.dataMap,
-  );
-  writer.writeString(offsets[2], object.name);
-}
-
-ItemSavedItemsModel _itemSavedItemsModelDeserialize(
-  Id id,
-  IsarReader reader,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  final object = ItemSavedItemsModel(
-    createdAt: reader.readDateTime(offsets[0]),
-    dataMap: reader.readObjectList<ItemSavedModel>(
-          offsets[1],
-          ItemSavedModelSchema.deserialize,
-          allOffsets,
-          ItemSavedModel(),
-        ) ??
-        [],
-    name: reader.readString(offsets[2]),
-  );
-  object.id = id;
-  return object;
-}
-
-P _itemSavedItemsModelDeserializeProp<P>(
-  IsarReader reader,
-  int propertyId,
-  int offset,
-  Map<Type, List<int>> allOffsets,
-) {
-  switch (propertyId) {
-    case 0:
-      return (reader.readDateTime(offset)) as P;
-    case 1:
-      return (reader.readObjectList<ItemSavedModel>(
-            offset,
-            ItemSavedModelSchema.deserialize,
-            allOffsets,
-            ItemSavedModel(),
-          ) ??
-          []) as P;
-    case 2:
-      return (reader.readString(offset)) as P;
-    default:
-      throw IsarError('Unknown property with id $propertyId');
+  IsarCore.writeString(writer, 1, object.name);
+  {
+    final list = object.dataMap;
+    final listWriter = IsarCore.beginList(writer, 2, list.length);
+    for (var i = 0; i < list.length; i++) {
+      {
+        final value = list[i];
+        final objectWriter = IsarCore.beginObject(listWriter, i);
+        serializeItemSavedModel(objectWriter, value);
+        IsarCore.endObject(listWriter, objectWriter);
+      }
+    }
+    IsarCore.endList(writer, listWriter);
   }
-}
-
-Id _itemSavedItemsModelGetId(ItemSavedItemsModel object) {
+  IsarCore.writeLong(
+    writer,
+    3,
+    object.createdAt.toUtc().microsecondsSinceEpoch,
+  );
   return object.id;
 }
 
-List<IsarLinkBase<dynamic>> _itemSavedItemsModelGetLinks(
-    ItemSavedItemsModel object) {
-  return [];
-}
-
-void _itemSavedItemsModelAttach(
-    IsarCollection<dynamic> col, Id id, ItemSavedItemsModel object) {
-  object.id = id;
-}
-
-extension ItemSavedItemsModelQueryWhereSort
-    on QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QWhere> {
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterWhere> anyId() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(const IdWhereClause.any());
-    });
-  }
-}
-
-extension ItemSavedItemsModelQueryWhere
-    on QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QWhereClause> {
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterWhereClause>
-      idEqualTo(Id id) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterWhereClause>
-      idNotEqualTo(Id id) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(
-              IdWhereClause.lessThan(upper: id, includeUpper: false),
-            )
-            .addWhereClause(
-              IdWhereClause.greaterThan(lower: id, includeLower: false),
-            );
+@isarProtected
+ItemSavedItemsModel deserializeItemSavedItemsModel(IsarReader reader) {
+  final String _name;
+  _name = IsarCore.readString(reader, 1) ?? '';
+  final List<ItemSavedModel> _dataMap;
+  {
+    final length = IsarCore.readList(reader, 2, IsarCore.readerPtrPtr);
+    {
+      final reader = IsarCore.readerPtr;
+      if (reader.isNull) {
+        _dataMap = const <ItemSavedModel>[];
       } else {
-        return query
-            .addWhereClause(
-              IdWhereClause.greaterThan(lower: id, includeLower: false),
-            )
-            .addWhereClause(
-              IdWhereClause.lessThan(upper: id, includeUpper: false),
-            );
+        final list = List<ItemSavedModel>.filled(
+          length,
+          ItemSavedModel(),
+          growable: true,
+        );
+        for (var i = 0; i < length; i++) {
+          {
+            final objectReader = IsarCore.readObject(reader, i);
+            if (objectReader.isNull) {
+              list[i] = ItemSavedModel();
+            } else {
+              final embedded = deserializeItemSavedModel(objectReader);
+              IsarCore.freeReader(objectReader);
+              list[i] = embedded;
+            }
+          }
+        }
+        IsarCore.freeReader(reader);
+        _dataMap = list;
       }
-    });
+    }
   }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterWhereClause>
-      idGreaterThan(Id id, {bool include = false}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IdWhereClause.greaterThan(lower: id, includeLower: include),
-      );
-    });
+  final DateTime _createdAt;
+  {
+    final value = IsarCore.readLong(reader, 3);
+    if (value == -9223372036854775808) {
+      _createdAt = DateTime.fromMillisecondsSinceEpoch(
+        0,
+        isUtc: true,
+      ).toLocal();
+    } else {
+      _createdAt = DateTime.fromMicrosecondsSinceEpoch(
+        value,
+        isUtc: true,
+      ).toLocal();
+    }
   }
+  final object = ItemSavedItemsModel(
+    name: _name,
+    dataMap: _dataMap,
+    createdAt: _createdAt,
+  );
+  object.id = IsarCore.readId(reader);
+  return object;
+}
 
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterWhereClause>
-      idLessThan(Id id, {bool include = false}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IdWhereClause.lessThan(upper: id, includeUpper: include),
-      );
-    });
+@isarProtected
+dynamic deserializeItemSavedItemsModelProp(IsarReader reader, int property) {
+  switch (property) {
+    case 1:
+      return IsarCore.readString(reader, 1) ?? '';
+    case 0:
+      return IsarCore.readId(reader);
+    case 2:
+      {
+        final length = IsarCore.readList(reader, 2, IsarCore.readerPtrPtr);
+        {
+          final reader = IsarCore.readerPtr;
+          if (reader.isNull) {
+            return const <ItemSavedModel>[];
+          } else {
+            final list = List<ItemSavedModel>.filled(
+              length,
+              ItemSavedModel(),
+              growable: true,
+            );
+            for (var i = 0; i < length; i++) {
+              {
+                final objectReader = IsarCore.readObject(reader, i);
+                if (objectReader.isNull) {
+                  list[i] = ItemSavedModel();
+                } else {
+                  final embedded = deserializeItemSavedModel(objectReader);
+                  IsarCore.freeReader(objectReader);
+                  list[i] = embedded;
+                }
+              }
+            }
+            IsarCore.freeReader(reader);
+            return list;
+          }
+        }
+      }
+    case 3:
+      {
+        final value = IsarCore.readLong(reader, 3);
+        if (value == -9223372036854775808) {
+          return DateTime.fromMillisecondsSinceEpoch(0, isUtc: true).toLocal();
+        } else {
+          return DateTime.fromMicrosecondsSinceEpoch(
+            value,
+            isUtc: true,
+          ).toLocal();
+        }
+      }
+    default:
+      throw ArgumentError('Unknown property: $property');
   }
+}
 
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterWhereClause>
-      idBetween(
-    Id lowerId,
-    Id upperId, {
-    bool includeLower = true,
-    bool includeUpper = true,
+sealed class _ItemSavedItemsModelUpdate {
+  bool call({required int id, String? name, DateTime? createdAt});
+}
+
+class _ItemSavedItemsModelUpdateImpl implements _ItemSavedItemsModelUpdate {
+  const _ItemSavedItemsModelUpdateImpl(this.collection);
+
+  final IsarCollection<int, ItemSavedItemsModel> collection;
+
+  @override
+  bool call({
+    required int id,
+    Object? name = ignore,
+    Object? createdAt = ignore,
   }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
-        includeLower: includeLower,
-        upper: upperId,
-        includeUpper: includeUpper,
-      ));
+    return collection.updateProperties(
+          [id],
+          {
+            if (name != ignore) 1: name as String?,
+            if (createdAt != ignore) 3: createdAt as DateTime?,
+          },
+        ) >
+        0;
+  }
+}
+
+sealed class _ItemSavedItemsModelUpdateAll {
+  int call({required List<int> id, String? name, DateTime? createdAt});
+}
+
+class _ItemSavedItemsModelUpdateAllImpl
+    implements _ItemSavedItemsModelUpdateAll {
+  const _ItemSavedItemsModelUpdateAllImpl(this.collection);
+
+  final IsarCollection<int, ItemSavedItemsModel> collection;
+
+  @override
+  int call({
+    required List<int> id,
+    Object? name = ignore,
+    Object? createdAt = ignore,
+  }) {
+    return collection.updateProperties(id, {
+      if (name != ignore) 1: name as String?,
+      if (createdAt != ignore) 3: createdAt as DateTime?,
     });
   }
 }
 
-extension ItemSavedItemsModelQueryFilter on QueryBuilder<ItemSavedItemsModel,
-    ItemSavedItemsModel, QFilterCondition> {
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      createdAtEqualTo(DateTime value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'createdAt',
-        value: value,
-      ));
-    });
-  }
+extension ItemSavedItemsModelUpdate
+    on IsarCollection<int, ItemSavedItemsModel> {
+  _ItemSavedItemsModelUpdate get update => _ItemSavedItemsModelUpdateImpl(this);
 
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      createdAtGreaterThan(
-    DateTime value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'createdAt',
-        value: value,
-      ));
-    });
-  }
+  _ItemSavedItemsModelUpdateAll get updateAll =>
+      _ItemSavedItemsModelUpdateAllImpl(this);
+}
 
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      createdAtLessThan(
-    DateTime value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'createdAt',
-        value: value,
-      ));
-    });
-  }
+sealed class _ItemSavedItemsModelQueryUpdate {
+  int call({String? name, DateTime? createdAt});
+}
 
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      createdAtBetween(
-    DateTime lower,
-    DateTime upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'createdAt',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
+class _ItemSavedItemsModelQueryUpdateImpl
+    implements _ItemSavedItemsModelQueryUpdate {
+  const _ItemSavedItemsModelQueryUpdateImpl(this.query, {this.limit});
 
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      dataMapLengthEqualTo(int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'dataMap',
-        length,
-        true,
-        length,
-        true,
-      );
-    });
-  }
+  final IsarQuery<ItemSavedItemsModel> query;
+  final int? limit;
 
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      dataMapIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'dataMap',
-        0,
-        true,
-        0,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      dataMapIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'dataMap',
-        0,
-        false,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      dataMapLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'dataMap',
-        0,
-        true,
-        length,
-        include,
-      );
-    });
-  }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      dataMapLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'dataMap',
-        length,
-        include,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      dataMapLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'dataMap',
-        lower,
-        includeLower,
-        upper,
-        includeUpper,
-      );
-    });
-  }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      idEqualTo(Id value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'id',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      idGreaterThan(
-    Id value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      idLessThan(
-    Id value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      idBetween(
-    Id lower,
-    Id upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      nameEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      nameGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      nameLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      nameBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'name',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      nameStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      nameEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      nameContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      nameMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'name',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      nameIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'name',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      nameIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'name',
-        value: '',
-      ));
+  @override
+  int call({Object? name = ignore, Object? createdAt = ignore}) {
+    return query.updateProperties(limit: limit, {
+      if (name != ignore) 1: name as String?,
+      if (createdAt != ignore) 3: createdAt as DateTime?,
     });
   }
 }
 
-extension ItemSavedItemsModelQueryObject on QueryBuilder<ItemSavedItemsModel,
-    ItemSavedItemsModel, QFilterCondition> {
+extension ItemSavedItemsModelQueryUpdate on IsarQuery<ItemSavedItemsModel> {
+  _ItemSavedItemsModelQueryUpdate get updateFirst =>
+      _ItemSavedItemsModelQueryUpdateImpl(this, limit: 1);
+
+  _ItemSavedItemsModelQueryUpdate get updateAll =>
+      _ItemSavedItemsModelQueryUpdateImpl(this);
+}
+
+class _ItemSavedItemsModelQueryBuilderUpdateImpl
+    implements _ItemSavedItemsModelQueryUpdate {
+  const _ItemSavedItemsModelQueryBuilderUpdateImpl(this.query, {this.limit});
+
+  final QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QOperations>
+  query;
+  final int? limit;
+
+  @override
+  int call({Object? name = ignore, Object? createdAt = ignore}) {
+    final q = query.build();
+    try {
+      return q.updateProperties(limit: limit, {
+        if (name != ignore) 1: name as String?,
+        if (createdAt != ignore) 3: createdAt as DateTime?,
+      });
+    } finally {
+      q.close();
+    }
+  }
+}
+
+extension ItemSavedItemsModelQueryBuilderUpdate
+    on QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QOperations> {
+  _ItemSavedItemsModelQueryUpdate get updateFirst =>
+      _ItemSavedItemsModelQueryBuilderUpdateImpl(this, limit: 1);
+
+  _ItemSavedItemsModelQueryUpdate get updateAll =>
+      _ItemSavedItemsModelQueryBuilderUpdateImpl(this);
+}
+
+extension ItemSavedItemsModelQueryFilter
+    on
+        QueryBuilder<
+          ItemSavedItemsModel,
+          ItemSavedItemsModel,
+          QFilterCondition
+        > {
   QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
-      dataMapElement(FilterQuery<ItemSavedModel> q) {
+  nameEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.object(q, r'dataMap');
+      return query.addFilterCondition(
+        EqualCondition(property: 1, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  nameGreaterThan(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  nameGreaterThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  nameLessThan(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 1, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  nameLessThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  nameBetween(String lower, String upper, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 1,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  nameStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  nameEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  nameContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  nameMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 1,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  nameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const EqualCondition(property: 1, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  nameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const GreaterCondition(property: 1, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  idEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 0, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  idGreaterThan(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 0, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  idGreaterThanOrEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 0, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  idLessThan(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(LessCondition(property: 0, value: value));
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  idLessThanOrEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 0, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  idBetween(int lower, int upper) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(property: 0, lower: lower, upper: upper),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  dataMapIsEmpty() {
+    return not().dataMapIsNotEmpty();
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  dataMapIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const GreaterOrEqualCondition(property: 2, value: null),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  createdAtEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 3, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  createdAtGreaterThan(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 3, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  createdAtGreaterThanOrEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 3, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  createdAtLessThan(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(LessCondition(property: 3, value: value));
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  createdAtLessThanOrEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 3, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterFilterCondition>
+  createdAtBetween(DateTime lower, DateTime upper) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(property: 3, lower: lower, upper: upper),
+      );
     });
   }
 }
 
-extension ItemSavedItemsModelQueryLinks on QueryBuilder<ItemSavedItemsModel,
-    ItemSavedItemsModel, QFilterCondition> {}
+extension ItemSavedItemsModelQueryObject
+    on
+        QueryBuilder<
+          ItemSavedItemsModel,
+          ItemSavedItemsModel,
+          QFilterCondition
+        > {}
 
 extension ItemSavedItemsModelQuerySortBy
     on QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QSortBy> {
   QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterSortBy>
-      sortByCreatedAt() {
+  sortByName({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'createdAt', Sort.asc);
+      return query.addSortBy(1, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterSortBy>
-      sortByCreatedAtDesc() {
+  sortByNameDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'createdAt', Sort.desc);
+      return query.addSortBy(1, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterSortBy>
-      sortByName() {
+  sortById() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'name', Sort.asc);
+      return query.addSortBy(0);
     });
   }
 
   QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterSortBy>
-      sortByNameDesc() {
+  sortByIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'name', Sort.desc);
+      return query.addSortBy(0, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterSortBy>
+  sortByCreatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(3);
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterSortBy>
+  sortByCreatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(3, sort: Sort.desc);
     });
   }
 }
@@ -610,90 +617,150 @@ extension ItemSavedItemsModelQuerySortBy
 extension ItemSavedItemsModelQuerySortThenBy
     on QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QSortThenBy> {
   QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterSortBy>
-      thenByCreatedAt() {
+  thenByName({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'createdAt', Sort.asc);
+      return query.addSortBy(1, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterSortBy>
-      thenByCreatedAtDesc() {
+  thenByNameDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'createdAt', Sort.desc);
+      return query.addSortBy(1, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterSortBy>
-      thenById() {
+  thenById() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'id', Sort.asc);
+      return query.addSortBy(0);
     });
   }
 
   QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterSortBy>
-      thenByIdDesc() {
+  thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'id', Sort.desc);
+      return query.addSortBy(0, sort: Sort.desc);
     });
   }
 
   QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterSortBy>
-      thenByName() {
+  thenByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'name', Sort.asc);
+      return query.addSortBy(3);
     });
   }
 
   QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterSortBy>
-      thenByNameDesc() {
+  thenByCreatedAtDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'name', Sort.desc);
+      return query.addSortBy(3, sort: Sort.desc);
     });
   }
 }
 
 extension ItemSavedItemsModelQueryWhereDistinct
     on QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QDistinct> {
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QDistinct>
-      distinctByCreatedAt() {
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterDistinct>
+  distinctByName({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'createdAt');
+      return query.addDistinctBy(1, caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QDistinct>
-      distinctByName({bool caseSensitive = true}) {
+  QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QAfterDistinct>
+  distinctByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'name', caseSensitive: caseSensitive);
+      return query.addDistinctBy(3);
     });
   }
 }
 
-extension ItemSavedItemsModelQueryProperty
-    on QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QQueryProperty> {
-  QueryBuilder<ItemSavedItemsModel, int, QQueryOperations> idProperty() {
+extension ItemSavedItemsModelQueryProperty1
+    on QueryBuilder<ItemSavedItemsModel, ItemSavedItemsModel, QProperty> {
+  QueryBuilder<ItemSavedItemsModel, String, QAfterProperty> nameProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'id');
+      return query.addProperty(1);
     });
   }
 
-  QueryBuilder<ItemSavedItemsModel, DateTime, QQueryOperations>
-      createdAtProperty() {
+  QueryBuilder<ItemSavedItemsModel, int, QAfterProperty> idProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'createdAt');
+      return query.addProperty(0);
     });
   }
 
-  QueryBuilder<ItemSavedItemsModel, List<ItemSavedModel>, QQueryOperations>
-      dataMapProperty() {
+  QueryBuilder<ItemSavedItemsModel, List<ItemSavedModel>, QAfterProperty>
+  dataMapProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'dataMap');
+      return query.addProperty(2);
     });
   }
 
-  QueryBuilder<ItemSavedItemsModel, String, QQueryOperations> nameProperty() {
+  QueryBuilder<ItemSavedItemsModel, DateTime, QAfterProperty>
+  createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'name');
+      return query.addProperty(3);
+    });
+  }
+}
+
+extension ItemSavedItemsModelQueryProperty2<R>
+    on QueryBuilder<ItemSavedItemsModel, R, QAfterProperty> {
+  QueryBuilder<ItemSavedItemsModel, (R, String), QAfterProperty>
+  nameProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(1);
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, (R, int), QAfterProperty> idProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(0);
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, (R, List<ItemSavedModel>), QAfterProperty>
+  dataMapProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(2);
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, (R, DateTime), QAfterProperty>
+  createdAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(3);
+    });
+  }
+}
+
+extension ItemSavedItemsModelQueryProperty3<R1, R2>
+    on QueryBuilder<ItemSavedItemsModel, (R1, R2), QAfterProperty> {
+  QueryBuilder<ItemSavedItemsModel, (R1, R2, String), QOperations>
+  nameProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(1);
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, (R1, R2, int), QOperations> idProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(0);
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, (R1, R2, List<ItemSavedModel>), QOperations>
+  dataMapProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(2);
+    });
+  }
+
+  QueryBuilder<ItemSavedItemsModel, (R1, R2, DateTime), QOperations>
+  createdAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(3);
     });
   }
 }

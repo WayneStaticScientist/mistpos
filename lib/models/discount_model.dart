@@ -1,4 +1,5 @@
-import 'package:isar/isar.dart';
+import 'package:isar_plus/isar_plus.dart';
+import 'package:mistpos/main.dart';
 part 'discount_model.g.dart';
 
 @collection
@@ -8,7 +9,7 @@ class DiscountModel {
   String company;
   bool percentage;
   String hexId = "";
-  Id id = Isar.autoIncrement;
+  late int id = IdGen.id;
   DiscountModel({
     required this.name,
     required this.value,

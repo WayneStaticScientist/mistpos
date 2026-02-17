@@ -3,89 +3,63 @@
 part of 'mini_tax.dart';
 
 // **************************************************************************
-// IsarEmbeddedGenerator
+// _IsarEmbeddedGenerator
 // **************************************************************************
 
 // coverage:ignore-file
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+// ignore_for_file: duplicate_ignore, invalid_use_of_protected_member, lines_longer_than_80_chars, constant_identifier_names, avoid_js_rounded_ints, no_leading_underscores_for_local_identifiers, require_trailing_commas, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_in_if_null_operators, library_private_types_in_public_api, prefer_const_constructors
+// ignore_for_file: type=lint
 
-const MiniTaxSchema = Schema(
-  name: r'MiniTax',
-  id: -6105814537113233876,
-  properties: {
-    r'label': PropertySchema(
-      id: 0,
-      name: r'label',
-      type: IsarType.string,
-    ),
-    r'sumOfItems': PropertySchema(
-      id: 1,
-      name: r'sumOfItems',
-      type: IsarType.long,
-    ),
-    r'value': PropertySchema(
-      id: 2,
-      name: r'value',
-      type: IsarType.double,
-    )
-  },
-  estimateSize: _miniTaxEstimateSize,
-  serialize: _miniTaxSerialize,
-  deserialize: _miniTaxDeserialize,
-  deserializeProp: _miniTaxDeserializeProp,
+final MiniTaxSchema = IsarGeneratedSchema(
+  schema: IsarSchema(
+    name: 'MiniTax',
+
+    embedded: true,
+    properties: [
+      IsarPropertySchema(name: 'label', type: IsarType.string),
+      IsarPropertySchema(name: 'value', type: IsarType.double),
+      IsarPropertySchema(name: 'sumOfItems', type: IsarType.long),
+    ],
+    indexes: [],
+  ),
+  converter: IsarObjectConverter<void, MiniTax>(
+    serialize: serializeMiniTax,
+    deserialize: deserializeMiniTax,
+  ),
 );
 
-int _miniTaxEstimateSize(
-  MiniTax object,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  var bytesCount = offsets.last;
-  bytesCount += 3 + object.label.length * 3;
-  return bytesCount;
+@isarProtected
+int serializeMiniTax(IsarWriter writer, MiniTax object) {
+  IsarCore.writeString(writer, 1, object.label);
+  IsarCore.writeDouble(writer, 2, object.value);
+  IsarCore.writeLong(writer, 3, object.sumOfItems);
+  return 0;
 }
 
-void _miniTaxSerialize(
-  MiniTax object,
-  IsarWriter writer,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  writer.writeString(offsets[0], object.label);
-  writer.writeLong(offsets[1], object.sumOfItems);
-  writer.writeDouble(offsets[2], object.value);
-}
-
-MiniTax _miniTaxDeserialize(
-  Id id,
-  IsarReader reader,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  final object = MiniTax(
-    label: reader.readStringOrNull(offsets[0]) ?? "",
-    sumOfItems: reader.readLongOrNull(offsets[1]) ?? 0,
-    value: reader.readDoubleOrNull(offsets[2]) ?? 0,
-  );
-  return object;
-}
-
-P _miniTaxDeserializeProp<P>(
-  IsarReader reader,
-  int propertyId,
-  int offset,
-  Map<Type, List<int>> allOffsets,
-) {
-  switch (propertyId) {
-    case 0:
-      return (reader.readStringOrNull(offset) ?? "") as P;
-    case 1:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
-    case 2:
-      return (reader.readDoubleOrNull(offset) ?? 0) as P;
-    default:
-      throw IsarError('Unknown property with id $propertyId');
+@isarProtected
+MiniTax deserializeMiniTax(IsarReader reader) {
+  final String _label;
+  _label = IsarCore.readString(reader, 1) ?? "";
+  final double _value;
+  {
+    final value = IsarCore.readDouble(reader, 2);
+    if (value.isNaN) {
+      _value = 0;
+    } else {
+      _value = value;
+    }
   }
+  final int _sumOfItems;
+  {
+    final value = IsarCore.readLong(reader, 3);
+    if (value == -9223372036854775808) {
+      _sumOfItems = 0;
+    } else {
+      _sumOfItems = value;
+    }
+  }
+  final object = MiniTax(label: _label, value: _value, sumOfItems: _sumOfItems);
+  return object;
 }
 
 extension MiniTaxQueryFilter
@@ -95,60 +69,80 @@ extension MiniTaxQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'label',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        EqualCondition(property: 1, value: value, caseSensitive: caseSensitive),
+      );
     });
   }
 
   QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> labelGreaterThan(
     String value, {
-    bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'label',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition>
+  labelGreaterThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> labelLessThan(
     String value, {
-    bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'label',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        LessCondition(property: 1, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> labelLessThanOrEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> labelBetween(
     String lower,
     String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'label',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 1,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
@@ -157,11 +151,13 @@ extension MiniTaxQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'label',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
@@ -170,168 +166,187 @@ extension MiniTaxQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'label',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> labelContains(
-      String value,
-      {bool caseSensitive = true}) {
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'label',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> labelMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'label',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 1,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> labelIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'label',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        const EqualCondition(property: 1, value: ''),
+      );
     });
   }
 
   QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> labelIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'label',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> sumOfItemsEqualTo(
-      int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'sumOfItems',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> sumOfItemsGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'sumOfItems',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> sumOfItemsLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'sumOfItems',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> sumOfItemsBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'sumOfItems',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        const GreaterCondition(property: 1, value: ''),
+      );
     });
   }
 
   QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> valueEqualTo(
     double value, {
-    double epsilon = Query.epsilon,
+    double epsilon = Filter.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'value',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        EqualCondition(property: 2, value: value, epsilon: epsilon),
+      );
     });
   }
 
   QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> valueGreaterThan(
     double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
+    double epsilon = Filter.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'value',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        GreaterCondition(property: 2, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition>
+  valueGreaterThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 2, value: value, epsilon: epsilon),
+      );
     });
   }
 
   QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> valueLessThan(
     double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
+    double epsilon = Filter.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'value',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        LessCondition(property: 2, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> valueLessThanOrEqualTo(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 2, value: value, epsilon: epsilon),
+      );
     });
   }
 
   QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> valueBetween(
     double lower,
     double upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
+    double epsilon = Filter.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'value',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 2,
+          lower: lower,
+          upper: upper,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> sumOfItemsEqualTo(
+    int value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 3, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> sumOfItemsGreaterThan(
+    int value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 3, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition>
+  sumOfItemsGreaterThanOrEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 3, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> sumOfItemsLessThan(
+    int value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(LessCondition(property: 3, value: value));
+    });
+  }
+
+  QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition>
+  sumOfItemsLessThanOrEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 3, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<MiniTax, MiniTax, QAfterFilterCondition> sumOfItemsBetween(
+    int lower,
+    int upper,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(property: 3, lower: lower, upper: upper),
+      );
     });
   }
 }

@@ -288,7 +288,7 @@ class _ScreenInventoryCountState extends State<ScreenInventoryCount> {
     setState(() {});
   }
 
-  _confirmComplete() {
+  void _confirmComplete() {
     Get.defaultDialog(
       title: "Are You sure?",
       content: Text(

@@ -1,7 +1,6 @@
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/instance_manager.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/controllers/user_controller.dart';
@@ -11,7 +10,6 @@ import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/services/network_wrapper.dart';
-import 'package:get/get_navigation/get_navigation.dart';
 import 'package:mistpos/utils/subscriptions.dart';
 import 'package:mistpos/widgets/layouts/profile_tile.dart';
 import 'package:mistpos/screens/basic/screen_dashboard.dart';

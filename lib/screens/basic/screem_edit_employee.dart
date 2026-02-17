@@ -179,7 +179,7 @@ class _ScreenEditEmployeeState extends State<ScreenEditEmployee> {
     );
   }
 
-  _updateEmployee() async {
+  Future<void> _updateEmployee() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }

@@ -201,7 +201,7 @@ class _ScreenEditPurchaseOrderState extends State<ScreenEditPurchaseOrder> {
     });
   }
 
-  _showBottomBar(InvItem itemInv) {
+  void _showBottomBar(InvItem itemInv) {
     Get.bottomSheet(
       [
         CardButtons(
@@ -221,7 +221,7 @@ class _ScreenEditPurchaseOrderState extends State<ScreenEditPurchaseOrder> {
     );
   }
 
-  _edit(InvItem itemInv) {
+  void _edit(InvItem itemInv) {
     final proposedCostsPrice = TextEditingController(
       text: itemInv.cost.toString(),
     );

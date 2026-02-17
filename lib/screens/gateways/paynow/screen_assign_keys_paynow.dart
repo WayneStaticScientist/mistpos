@@ -66,7 +66,7 @@ class _ScreenAssignKeysPaynowState extends State<ScreenAssignKeysPaynow> {
     );
   }
 
-  _setupKeys() async {
+  Future<void> _setupKeys() async {
     if (!_formKey.currentState!.validate()) return;
     User? response = await _adminController.setupPaynowKeys(
       integrationId: _integrationIdController.text,

@@ -96,7 +96,7 @@ class _EditCurrenciesState extends State<EditCurrencies> {
     );
   }
 
-  _addNewCurrency() {
+  void _addNewCurrency() {
     final codeNameController = TextEditingController();
     final rateController = TextEditingController();
     Get.defaultDialog(
@@ -145,7 +145,7 @@ class _EditCurrenciesState extends State<EditCurrencies> {
     );
   }
 
-  _delete(MapEntry<String, double> e) {
+  void _delete(MapEntry<String, double> e) {
     Get.defaultDialog(
       title: "Delete Currency",
       content: "Are you sure you want to delete ${e.key}".text(),
@@ -198,7 +198,7 @@ class _EditCurrenciesState extends State<EditCurrencies> {
     );
   }
 
-  _save() async {
+  Future<void> _save() async {
     if (_inventoryController.company.value == null) {
       Toaster.showError("No company found");
       return;

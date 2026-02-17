@@ -38,7 +38,7 @@ class _ScreensSeleectedDiscountsViewState
     );
   }
 
-  _buildTile(DiscountModel discount) {
+  ListTile _buildTile(DiscountModel discount) {
     return ListTile(
       title: discount.name.text(),
       leading: Iconify(Carbon.money, color: Get.theme.colorScheme.primary),

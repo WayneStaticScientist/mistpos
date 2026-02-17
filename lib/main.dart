@@ -1,6 +1,8 @@
-import 'package:isar/isar.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/instance_manager.dart';
+import 'package:isar_plus/isar_plus.dart';
 import 'package:mistpos/controllers/expenses_controller.dart';
 import 'package:mistpos/models/gateway.dart';
 import 'package:get_storage/get_storage.dart';
@@ -33,28 +35,65 @@ import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/controllers/items_unsaved_controller.dart';
 import 'package:mistpos/firebase-messanging/firebase_bg_notification_handler.dart';
 
+class IsarStatic {
+  static Isar? isar;
+  static Isar? getInstance() {
+    return isar;
+  }
+}
+
+class IdGen {
+  static int get id {
+    GetStorage storage = GetStorage();
+    int id = storage.read("mist-id") ?? 0;
+    storage.write("mist-id", id + 1);
+    return id;
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final dir = await getApplicationDocumentsDirectory();
+  final path = "${dir.path}/default.isar";
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  final dir = await getApplicationDocumentsDirectory();
-  await Isar.open([
-    GatewaySchema,
-    TaxModelSchema,
-    ItemModelSchema,
-    ShiftsModelSchema,
-    ItemModifierSchema,
-    DiscountModelSchema,
-    ItemReceitModelSchema,
-    ItemUnsavedModelSchema,
-    NotificationModelSchema,
-    ItemCategoryModelSchema,
-    PrinterDeviceModelSchema,
-    ItemSavedItemsModelSchema,
-  ], directory: dir.path);
+  try {
+    await initIsarDatabase(dir);
+  } catch (e) {
+    if (e.toString().contains('deserialize') ||
+        e.toString().contains('Schema')) {
+      final dbFile = File(path);
+      if (await dbFile.exists()) {
+        await dbFile.delete();
+        final lockFile = File("$path.lock");
+        if (await lockFile.exists()) await lockFile.delete();
+      }
+      await initIsarDatabase(dir);
+    }
+  }
   await GetStorage.init();
   runApp(const MyApp());
   Get.put(ItemsController());
+}
+
+Future<void> initIsarDatabase(Directory dir) async {
+  IsarStatic.isar = Isar.open(
+    schemas: [
+      GatewaySchema,
+      TaxModelSchema,
+      ItemModelSchema,
+      ShiftsModelSchema,
+      ItemModifierSchema,
+      DiscountModelSchema,
+      ItemReceitModelSchema,
+      ItemUnsavedModelSchema,
+      NotificationModelSchema,
+      ItemCategoryModelSchema,
+      PrinterDeviceModelSchema,
+      ItemSavedItemsModelSchema,
+    ],
+    directory: dir.path,
+  );
 }
 
 class MyApp extends StatelessWidget {

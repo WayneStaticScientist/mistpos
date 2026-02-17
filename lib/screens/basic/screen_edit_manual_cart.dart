@@ -246,7 +246,7 @@ class _ScreenEditManualCartState extends State<ScreenEditManualCart> {
     Get.back();
   }
 
-  _addDiscount() async {
+  Future<void> _addDiscount() async {
     final result = await Get.to(() => ScreenSelectDiscount());
     if (result == null) return;
     setState(() {
@@ -256,7 +256,7 @@ class _ScreenEditManualCartState extends State<ScreenEditManualCart> {
     });
   }
 
-  _removeDiscount() {
+  void _removeDiscount() {
     setState(() {
       discount = 0.0;
       discountId = null;

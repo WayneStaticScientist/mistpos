@@ -1,10 +1,11 @@
 import 'package:get_storage/get_storage.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_plus/isar_plus.dart';
+import 'package:mistpos/main.dart';
 part 'user_model.g.dart';
 
 @collection
 class User {
-  Id id = Isar.autoIncrement;
+  late int id = IdGen.id;
   String hexId;
   final int till;
   String? password;

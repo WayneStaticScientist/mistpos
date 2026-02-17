@@ -102,7 +102,7 @@ class _ScreenViewPurchaseOrderState extends State<ScreenViewPurchaseOrder> {
     );
   }
 
-  _buildProductSummary() {
+  DecoratedBox _buildProductSummary() {
     final totalItems = widget.model.inventoryItems.fold(
       0.0,
       (prev, current) => prev + current.quantity,
@@ -169,7 +169,7 @@ class _ScreenViewPurchaseOrderState extends State<ScreenViewPurchaseOrder> {
         );
   }
 
-  _buildSupplierInformation() {
+  MistMordernLayout _buildSupplierInformation() {
     return MistMordernLayout(
       label: "Supplier Information",
       children: [
@@ -242,7 +242,7 @@ class _ScreenViewPurchaseOrderState extends State<ScreenViewPurchaseOrder> {
     );
   }
 
-  _buildProductInformation() {
+  MistMordernLayout _buildProductInformation() {
     final totalProductPrice = widget.model.inventoryItems.fold(
       0.0,
       (prev, current) => prev + current.amount,
@@ -299,7 +299,7 @@ class _ScreenViewPurchaseOrderState extends State<ScreenViewPurchaseOrder> {
     return Colors.grey;
   }
 
-  _updateState(String s, String t) {
+  void _updateState(String s, String t) {
     Get.defaultDialog(
       title: "Confirm Changes",
       content: s.text(),
@@ -396,7 +396,7 @@ class _ScreenViewPurchaseOrderState extends State<ScreenViewPurchaseOrder> {
     );
   }
 
-  _navigateToReceive() async {
+  Future<void> _navigateToReceive() async {
     final result = await Get.to(
       () => ScreenCompletePurchaseOrder(model: widget.model),
     );

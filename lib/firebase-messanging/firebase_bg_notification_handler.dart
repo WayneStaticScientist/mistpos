@@ -1,5 +1,6 @@
-import 'package:isar/isar.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:isar_plus/isar_plus.dart';
+import 'package:mistpos/main.dart';
 import 'package:mistpos/models/notification_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -10,17 +11,18 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 void addMessage(RemoteMessage message) async {
   try {
     final dir = await getApplicationDocumentsDirectory();
-    Isar? isarInstance = Isar.getInstance();
-    isarInstance ??= await Isar.open([
-      NotificationModelSchema,
-    ], directory: dir.path);
+    Isar? isarInstance = IsarStatic.getInstance();
+    isarInstance ??= Isar.open(
+      schemas: [NotificationModelSchema],
+      directory: dir.path,
+    );
     final model = NotificationModel(
       title: message.notification?.title ?? "-",
       message: message.notification?.body ?? 'no message body',
       updatedAt: DateTime.now(),
     );
-    await isarInstance.writeTxn(() async {
-      isarInstance?.notificationModels.put(model);
+    await isarInstance.writeAsync((isarInstance) async {
+      isarInstance.notificationModels.put(model);
     });
     GetStorage storage = GetStorage();
     int notificationSize = storage.read("notifications") ?? 0;
@@ -65,10 +67,10 @@ Future<void> initializeLocalNotifications() async {
 
   // 3. INITIALIZE PLUGIN
   await flutterLocalNotificationsPlugin.initialize(
-    initializationSettings,
     onDidReceiveNotificationResponse: (NotificationResponse response) async {
       // Handle navigation/deep-linking here when user taps a notification
     },
+    settings: initializationSettings,
   );
 
   // 4. FOREGROUND MESSAGE HANDLING (Required to display notifications when app is open)
@@ -80,10 +82,7 @@ Future<void> initializeLocalNotifications() async {
     if (notification != null && android != null) {
       final String smallIcon = android.smallIcon ?? '@mipmap/ic_launcher';
       flutterLocalNotificationsPlugin.show(
-        notification.hashCode, // Unique ID for the notification
-        notification.title,
-        notification.body,
-        NotificationDetails(
+        notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             channel.id, // Use the same channel ID defined above
             channel.name,
@@ -91,8 +90,11 @@ Future<void> initializeLocalNotifications() async {
             icon: smallIcon,
           ),
         ),
+        title: notification.title,
+        body: notification.body,
         // Include payload data for tap handling if needed
         payload: message.data.toString(),
+        id: notification.hashCode,
       );
     }
     // For Data Messages in foreground, you'd still process 'message.data' here.

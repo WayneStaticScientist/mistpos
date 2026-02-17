@@ -93,7 +93,7 @@ class _ScreenEditDiscountState extends State<ScreenEditDiscount> {
     );
   }
 
-  _update() async {
+  Future<void> _update() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() {
       _loading = true;

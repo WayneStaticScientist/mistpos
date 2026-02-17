@@ -5,7 +5,8 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   file_selector_windows
   firebase_core
-  isar_flutter_libs
+  flutter_blue_plus_winrt
+  isar_plus_flutter_libs
   permission_handler_windows
 )
 

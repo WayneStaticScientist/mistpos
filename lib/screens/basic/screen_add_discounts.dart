@@ -92,7 +92,7 @@ class _ScreenAddDiscountsState extends State<ScreenAddDiscounts> {
     );
   }
 
-  _saveItem() async {
+  Future<void> _saveItem() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }

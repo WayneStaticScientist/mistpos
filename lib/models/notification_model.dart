@@ -1,9 +1,10 @@
-import 'package:isar/isar.dart';
+import 'package:isar_plus/isar_plus.dart';
+import 'package:mistpos/main.dart';
 part 'notification_model.g.dart';
 
 @collection
 class NotificationModel {
-  Id id = Isar.autoIncrement;
+  late int id = IdGen.id;
   String title;
   String message;
   DateTime updatedAt;

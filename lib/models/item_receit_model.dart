@@ -1,4 +1,5 @@
-import 'package:isar/isar.dart';
+import 'package:isar_plus/isar_plus.dart';
+import 'package:mistpos/main.dart';
 import 'package:mistpos/models/mini_tax.dart';
 import 'package:mistpos/models/item_receit_item.dart';
 import 'package:mistpos/models/embedded_discount_model.dart';
@@ -6,7 +7,7 @@ part 'item_receit_model.g.dart';
 
 @collection
 class ItemReceitModel {
-  Id id = Isar.autoIncrement;
+  late int id = IdGen.id;
   final String cashier;
   final String payment;
   final double change;

@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_plus/isar_plus.dart';
+import 'package:mistpos/main.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/mini_tax.dart';
 import 'package:mistpos/models/tax_model.dart';
@@ -63,11 +64,11 @@ class ItemsController extends GetxController {
   //get categories
   void loadCategories() {
     if (categoriesSyncing.value) return;
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
-    final loadedCategories = isar.itemCategoryModels.where().findAllSync();
+    final loadedCategories = isar.itemCategoryModels.where().findAll();
     categories.assignAll(loadedCategories);
     loadCategoriesAsync();
   }
@@ -76,7 +77,7 @@ class ItemsController extends GetxController {
   RxBool categoriesSyncing = RxBool(false);
   RxString categoriesSyncingFailed = RxString("");
   void loadCategoriesAsync() async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
@@ -92,11 +93,11 @@ class ItemsController extends GetxController {
     List<ItemCategoryModel> models = list
         .map((e) => ItemCategoryModel.fromJson(e))
         .toList();
-    await isar.writeTxn(() async {
-      await isar.itemCategoryModels.where().deleteAll();
-      await isar.itemCategoryModels.putAll(models);
+    await isar.write((isar) async {
+      isar.itemCategoryModels.where().deleteAll();
+      isar.itemCategoryModels.putAll(models);
     });
-    final loadedCategories = isar.itemCategoryModels.where().findAllSync();
+    final loadedCategories = isar.itemCategoryModels.where().findAll();
     categories.assignAll(loadedCategories);
     categoriesSyncing.value = false;
   }
@@ -130,22 +131,22 @@ class ItemsController extends GetxController {
     String search = "",
     String category = "",
   }) async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
     if (selectedCategory.value.isNotEmpty) {
       final loadedItems = isar.itemModels
-          .filter()
+          .where()
           .categoryEqualTo(selectedCategory.value)
           .nameContains(search, caseSensitive: false)
-          .findAllSync();
+          .findAll();
       cartItems.assignAll(loadedItems);
     } else {
       final loadedItems = isar.itemModels
-          .filter()
+          .where()
           .nameContains(search, caseSensitive: false)
-          .findAllSync();
+          .findAll();
       cartItems.assignAll(loadedItems);
     }
   }
@@ -162,7 +163,7 @@ class ItemsController extends GetxController {
     bool isCompositeItems = false,
   }) async {
     if (syncingItems.value) return;
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
@@ -184,28 +185,28 @@ class ItemsController extends GetxController {
       return ItemModel.fromJson((e));
     }).toList();
 
-    await isar.writeTxn(() async {
-      await isar.itemModels.where().deleteAll();
+    await isar.write((isar) async {
+      isar.itemModels.where().deleteAll();
       if (itemsPage.value > 1) {
-        await isar.itemModels.putAll(cartItems);
+        isar.itemModels.putAll(cartItems);
       }
-      await isar.itemModels.putAll(models);
+      isar.itemModels.putAll(models);
     });
-    final loadedItems = isar.itemModels.where().findAllSync();
+    final loadedItems = isar.itemModels.where().findAll();
     cartItems.assignAll(loadedItems);
     syncingItems.value = false;
   }
 
   //search
   void searchItems(String searchTerm) {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
     final loadedItems = isar.itemModels
-        .filter()
+        .where()
         .nameEndsWith(searchTerm)
-        .findAllSync();
+        .findAll();
     cartItems.assignAll(loadedItems);
   }
 
@@ -229,11 +230,11 @@ class ItemsController extends GetxController {
  =================================== RECEITS LOADING ==============================================
  */
   Future<void> loadReceitsStatic() async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
-    final r = isar.itemReceitModels.where().sortByCreatedAtDesc().findAllSync();
+    final r = isar.itemReceitModels.where().sortByCreatedAtDesc().findAll();
     receits.assignAll(r);
     loadReceits();
   }
@@ -249,7 +250,7 @@ class ItemsController extends GetxController {
     String filter = '',
   }) async {
     if (receitsLoading.value || updatingUsyncedReceits.value) return;
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
@@ -259,8 +260,8 @@ class ItemsController extends GetxController {
       "/cashier/receits?page=$page&search=$search&filter=$filter",
     );
     receitsLoading.value = false;
-    final unsyncedReceits = await isar.itemReceitModels
-        .filter()
+    final unsyncedReceits = isar.itemReceitModels
+        .where()
         .syncedEqualTo(false)
         .findAll();
     if (!response.hasError) {
@@ -275,15 +276,15 @@ class ItemsController extends GetxController {
         } else {
           receits.addAll(lv);
         }
-        await isar.writeTxn(() async {
-          await isar.itemReceitModels.where().deleteAll();
-          await isar.itemReceitModels.putAll(receits);
+        await isar.write((isar) async {
+          isar.itemReceitModels.where().deleteAll();
+          isar.itemReceitModels.putAll(receits);
         });
       }
       _updateUnsyncedReceits();
       return;
     }
-    final r = isar.itemReceitModels.where().sortByCreatedAtDesc().findAllSync();
+    final r = isar.itemReceitModels.where().sortByCreatedAtDesc().findAll();
     receits.assignAll(r);
   }
 
@@ -298,7 +299,7 @@ class ItemsController extends GetxController {
   void loadMofiers({int page = 1, String search = ''}) async {
     if (modifiersLoading.value) return;
     modifiersLoading.value = true;
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
@@ -311,13 +312,13 @@ class ItemsController extends GetxController {
       if (list != null) {
         modifiers.value = list.map((e) => ItemModifier.fromJson(e)).toList();
       }
-      await isar.writeTxn(() async {
-        await isar.itemModifiers.where().deleteAll();
-        await isar.itemModifiers.putAll(modifiers);
+      await isar.write((isar) async {
+        isar.itemModifiers.where().deleteAll();
+        isar.itemModifiers.putAll(modifiers);
       });
       return;
     }
-    final loadedModifiers = isar.itemModifiers.where().findAllSync();
+    final loadedModifiers = isar.itemModifiers.where().findAll();
     modifiers.assignAll(loadedModifiers);
   }
 
@@ -339,19 +340,17 @@ class ItemsController extends GetxController {
       Toaster.showError(net.response);
       return false;
     }
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       Toaster.showError('Database not initialized');
       return false;
     }
     try {
-      await isar.writeTxn(() async {
+      isar.write((isar) async {
         if (updated) {
-          await isar.itemModifiers.put(modefier);
+          isar.itemModifiers.put(modefier);
         } else {
-          await isar.itemModifiers.put(
-            ItemModifier.fromJson(net!.body['update']),
-          );
+          isar.itemModifiers.put(ItemModifier.fromJson(net!.body['update']));
         }
       });
       loadMofiers();
@@ -363,14 +362,14 @@ class ItemsController extends GetxController {
   }
 
   Future<bool> deleteModifiers(List<int> id) async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       Toaster.showError('Database not initialized');
       return false;
     }
     try {
-      await isar.writeTxn(() async {
-        await isar.itemModifiers.deleteAll(id);
+      isar.write((isar) async {
+        isar.itemModifiers.deleteAll(id);
       });
       loadMofiers();
       return true;
@@ -385,7 +384,7 @@ class ItemsController extends GetxController {
  */
   //Inventory Items
   Future<void> saveItem(String name) async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       Toaster.showError('Database not initialized');
       return;
@@ -395,8 +394,8 @@ class ItemsController extends GetxController {
       dataMap: checkOutItems.map((e) => _getModel(e)).toList(),
       createdAt: DateTime.now(),
     );
-    await isar.writeTxn(() async {
-      await isar.itemSavedItemsModels.put(allTheModels);
+    await isar.write((isar) async {
+      isar.itemSavedItemsModels.put(allTheModels);
     });
     checkOutItems.clear();
     selectedCustomer.value = null;
@@ -405,16 +404,16 @@ class ItemsController extends GetxController {
   }
 
   void loadSavedItems() {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
-    final loadedModels = isar.itemSavedItemsModels.where().findAllSync();
+    final loadedModels = isar.itemSavedItemsModels.where().findAll();
     savedItems.assignAll(loadedModels);
   }
 
   void unwrapToCart(ItemSavedItemsModel model) async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       Toaster.showError('Database not initialized');
       return;
@@ -425,9 +424,7 @@ class ItemsController extends GetxController {
       final List<Map<String, dynamic>> newCheckOutItems = [];
       for (var savedItem in model.dataMap) {
         // 1. Retrieve the original ItemModel using the baseId
-        final ItemModel? originalItem = await isar.itemModels.get(
-          savedItem.baseId,
-        );
+        final ItemModel? originalItem = isar.itemModels.get(savedItem.baseId);
 
         if (originalItem != null) {
           newCheckOutItems.add({
@@ -448,8 +445,8 @@ class ItemsController extends GetxController {
       checkOutItems.addAll(newCheckOutItems);
 
       // Delete the saved item after successfully loading it
-      await isar.writeTxn(() async {
-        await isar.itemSavedItemsModels.delete(model.id);
+      await isar.write((isar) async {
+        isar.itemSavedItemsModels.delete(model.id);
       });
 
       _calculatedTotalPrice();
@@ -551,7 +548,7 @@ class ItemsController extends GetxController {
         Toaster.showError(response.response);
         return null;
       }
-      final isar = Isar.getInstance();
+      final isar = IsarStatic.getInstance();
       if (isar == null) {
         Toaster.showError("database not initialized");
         return null;
@@ -564,12 +561,11 @@ class ItemsController extends GetxController {
         Toaster.showError("$count should be less than ${e.count}");
         return null;
       }
-      await isar.writeTxn(() async {
-        await isar.itemReceitModels.put(model);
+      await isar.write((isar) async {
+        isar.itemReceitModels.put(model);
       });
-      final itemModel = await isar.itemModels
+      final itemModel = isar.itemModels
           .where()
-          .filter()
           .hexIdEqualTo(e.itemId)
           .findFirst();
       if (itemModel == null) {
@@ -578,8 +574,8 @@ class ItemsController extends GetxController {
       }
       if (itemModel.trackStock) {
         itemModel.stockQuantity = itemModel.stockQuantity + count;
-        await isar.writeTxn(() async {
-          await isar.itemModels.put(itemModel);
+        await isar.write((isar) async {
+          isar.itemModels.put(itemModel);
         });
       }
       loadReceits();
@@ -646,16 +642,16 @@ class ItemsController extends GetxController {
   }
 
   void _loadFixedItems() {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
-    cartItems.value = isar.itemModels.where().findAllSync();
-    modifiers.value = isar.itemModifiers.where().findAllSync();
-    discounts.value = isar.discountModels.where().findAllSync();
-    categories.value = isar.itemCategoryModels.where().findAllSync();
-    taxes.value = isar.taxModels.where().findAllSync();
-    final r = isar.itemReceitModels.where().sortByCreatedAtDesc().findAllSync();
+    cartItems.value = isar.itemModels.where().findAll();
+    modifiers.value = isar.itemModifiers.where().findAll();
+    discounts.value = isar.discountModels.where().findAll();
+    categories.value = isar.itemCategoryModels.where().findAll();
+    taxes.value = isar.taxModels.where().findAll();
+    final r = isar.itemReceitModels.where().sortByCreatedAtDesc().findAll();
     receits.assignAll(r);
   }
 
@@ -673,10 +669,10 @@ class ItemsController extends GetxController {
       return false;
     }
     TaxModel tax = TaxModel.fromJson(response.body['update']);
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar != null) {
-      await isar.writeTxn(() async {
-        await isar.taxModels.put(tax);
+      isar.write((isar) async {
+        isar.taxModels.put(tax);
       });
     }
     loadTaxes();
@@ -716,11 +712,11 @@ class ItemsController extends GetxController {
     }
     final list = response.body['list'] as List<dynamic>? ?? [];
     taxes.value = list.map((e) => TaxModel.fromJson(e)).toList();
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar != null) {
-      await isar.writeTxn(() async {
-        await isar.taxModels.where().deleteAll();
-        await isar.taxModels.putAll(taxes);
+      isar.write((isar) async {
+        isar.taxModels.where().deleteAll();
+        isar.taxModels.putAll(taxes);
       });
     }
   }
@@ -737,10 +733,10 @@ class ItemsController extends GetxController {
       return false;
     }
     DiscountModel discount = DiscountModel.fromJson(response.body['update']);
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar != null) {
-      await isar.writeTxn(() async {
-        await isar.discountModels.put(discount);
+      isar.write((isar) async {
+        isar.discountModels.put(discount);
       });
     }
     loadDiscounts();
@@ -762,11 +758,11 @@ class ItemsController extends GetxController {
     }
     final list = response.body['list'] as List<dynamic>? ?? [];
     discounts.value = list.map((e) => DiscountModel.fromJson(e)).toList();
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar != null) {
-      await isar.writeTxn(() async {
-        await isar.discountModels.where().deleteAll();
-        await isar.discountModels.putAll(discounts);
+      isar.write((isar) async {
+        isar.discountModels.where().deleteAll();
+        isar.discountModels.putAll(discounts);
       });
     }
   }
@@ -796,15 +792,15 @@ class ItemsController extends GetxController {
   Ysssssssssss
   */
   Future<ItemModel?> findModelByBarCode(String barCode) async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       Toaster.showError('Database not initialized');
       return null;
     }
     ItemModel? model = isar.itemModels
-        .filter()
+        .where()
         .barcodeEqualTo(barCode)
-        .findFirstSync();
+        .findFirst();
     if (model != null) {
       return model;
     }
@@ -834,7 +830,7 @@ class ItemsController extends GetxController {
     bool isCompositeItems = false,
   }) async {
     if (syncingFixedItems.value) return;
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
@@ -855,14 +851,14 @@ class ItemsController extends GetxController {
     List<ItemModel> models = itemList.map((e) {
       return ItemModel.fromJson((e));
     }).toList();
-    await isar.writeTxn(() async {
-      await isar.itemModels.where().deleteAll();
+    await isar.write((isar) async {
+      isar.itemModels.where().deleteAll();
       if (itemsPage.value > 1) {
-        await isar.itemModels.putAll(fixedItems);
+        isar.itemModels.putAll(fixedItems);
       }
-      await isar.itemModels.putAll(models);
+      isar.itemModels.putAll(models);
     });
-    final loadedItems = isar.itemModels.where().findAllSync();
+    final loadedItems = isar.itemModels.where().findAll();
     fixedItems.assignAll(loadedItems);
     syncingFixedItems.value = false;
   }
@@ -1057,16 +1053,16 @@ class ItemsController extends GetxController {
     Map<String, bool>? dataMap,
     bool percentageDiscount = true,
   }) async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       Toaster.showError("Database initilization error");
       return;
     }
     if (checkOutItems.isEmpty) {
       salesTaxes.value = isar.taxModels
-          .filter()
+          .where()
           .activatedEqualTo(true)
-          .findAllSync();
+          .findAll();
     }
     final dataFound = checkOutItems.indexWhere((e) {
       final id = e['id'];
@@ -1127,16 +1123,16 @@ class ItemsController extends GetxController {
         return false;
       }
       final obj = ItemModel.fromJson(response.body['update']);
-      final isar = Isar.getInstance();
+      final isar = IsarStatic.getInstance();
       if (isar == null) {
         Toaster.showError('Database not initialized');
         return false;
       }
-      await isar.writeTxn(() async {
+      await isar.write((isar) async {
         if (update) {
-          await isar.itemModels.put(item);
+          isar.itemModels.put(item);
         } else {
-          await isar.itemModels.put(obj);
+          isar.itemModels.put(obj);
         }
       });
       syncCartItemsOnBackground();
@@ -1170,18 +1166,18 @@ class ItemsController extends GetxController {
         return false;
       }
       final obj = ItemCategoryModel.fromJson(response.body['update']);
-      final isar = Isar.getInstance();
+      final isar = IsarStatic.getInstance();
       if (isar == null) {
         Toaster.showError('Database not initialized');
         return false;
       }
-      await isar.writeTxn(() async {
+      await isar.write((isar) async {
         if (update) {
           category.name = obj.name;
           category.color = obj.color;
-          await isar.itemCategoryModels.put(category);
+          isar.itemCategoryModels.put(category);
         } else {
-          await isar.itemCategoryModels.put(obj);
+          isar.itemCategoryModels.put(obj);
         }
       });
       loadCategories();
@@ -1208,7 +1204,7 @@ class ItemsController extends GetxController {
     bool creditPayment = false,
   }) async {
     try {
-      final isar = Isar.getInstance();
+      final isar = IsarStatic.getInstance();
       if (isar == null) {
         Toaster.showError('Database not initialized');
         return false;
@@ -1278,14 +1274,15 @@ class ItemsController extends GetxController {
       });
       itemReceitModel.tax = totalTax;
       int newReceitId = -1;
-      await isar.writeTxn(() async {
-        newReceitId = await isar.itemReceitModels.put(itemReceitModel);
+      await isar.write((isar) async {
+        isar.itemReceitModels.put(itemReceitModel);
+        newReceitId = itemReceitModel.id;
       });
       if (selectedShift.value != null) {
         selectedShift.value!.totalSales += totalPrice.value;
         selectedShift.value!.totalCustomers++;
         selectedShift.value!.salesQuantity += checkOutItems.length;
-        await isar.writeTxn(() async {
+        await isar.write((isar) async {
           isar.shiftsModels.put(selectedShift.value!);
         });
       }
@@ -1333,7 +1330,7 @@ class ItemsController extends GetxController {
     int id,
     ItemReceitModel itemReceitModel,
   ) async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
@@ -1347,9 +1344,9 @@ class ItemsController extends GetxController {
       return;
     }
     final receivedModel = ItemReceitModel.fromJson(response.body['update']);
-    await isar.writeTxn(() async {
+    await isar.write((isar) async {
       receivedModel.id = id;
-      await isar.itemReceitModels.put(receivedModel);
+      isar.itemReceitModels.put(receivedModel);
     });
     loadReceitsStatic();
     loadReceits();
@@ -1359,13 +1356,13 @@ class ItemsController extends GetxController {
   RxBool updatingUsyncedReceits = RxBool(false);
   Future<void> _updateUnsyncedReceits() async {
     if (updatingUsyncedReceits.value) return;
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
     updatingUsyncedReceits.value = true;
-    final allUnsynced = await isar.itemReceitModels
-        .filter()
+    final allUnsynced = isar.itemReceitModels
+        .where()
         .syncedEqualTo(false)
         .findAll();
     for (final receit in allUnsynced) {
@@ -1386,12 +1383,12 @@ class ItemsController extends GetxController {
   =========================================================================
 */
   void openShift(double amountInDrawer, User user) async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       Toaster.showError("something went wrong on opening a shift");
       return;
     }
-    final count = await isar.shiftsModels.where().count();
+    final count = isar.shiftsModels.where().count();
     final model = ShiftsModel(
       cashDrawerEnd: amountInDrawer,
       cashDrawerStart: amountInDrawer,
@@ -1404,8 +1401,8 @@ class ItemsController extends GetxController {
         count: count,
       ),
     );
-    await isar.writeTxn(() async {
-      await isar.shiftsModels.put(model);
+    await isar.write((isar) async {
+      isar.shiftsModels.put(model);
     });
     selectedShift.value = model;
     loadShifts();
@@ -1419,7 +1416,7 @@ class ItemsController extends GetxController {
     if (printReceitOfShift.value) {
       DevicesController.printShift(selectedShift.value!, user);
     }
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null || selectedShift.value == null) {
       Toaster.showError("something went wrong on closing a shift");
       return;
@@ -1427,56 +1424,56 @@ class ItemsController extends GetxController {
     selectedShift.value!.shiftIsClosed = true;
     selectedShift.value!.cashDrawerEnd = amountInDrawer;
     selectedShift.value!.closeShiftTime = DateTime.now();
-    await isar.writeTxn(() async {
-      await isar.shiftsModels.put(selectedShift.value!);
+    await isar.write((isar) async {
+      isar.shiftsModels.put(selectedShift.value!);
     });
     loadShifts();
     selectedShift.value = null;
   }
 
   void reopenLastUnclosedShift() async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
-    selectedShift.value = await isar.shiftsModels
-        .filter()
+    selectedShift.value = isar.shiftsModels
+        .where()
         .shiftIsClosedEqualTo(false)
         .findFirst();
   }
 
   void loadShifts() async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
-    shifts.value = await isar.shiftsModels
+    shifts.value = isar.shiftsModels
         .where()
         .sortByOpenShiftTimeDesc()
         .findAll();
   }
 
   void syncAllShifts() async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
     final allShifts = isar.shiftsModels
-        .filter()
+        .where()
         .shiftIsClosedEqualTo(true)
         .and()
         .syncedEqualTo(false)
-        .findAllSync();
+        .findAll();
     for (final shift in allShifts) {
       final response = await Net.post("/cashier/shifts", data: shift.toJson());
       if (response.hasError) {
         break;
       }
       final updatedShift = ShiftsModel.fromJson(response.body['update']);
-      await isar.writeTxn(() async {
+      await isar.write((isar) async {
         shift.synced = true;
         shift.userId = updatedShift.userId;
-        await isar.shiftsModels.put(shift);
+        isar.shiftsModels.put(shift);
       });
     }
   }
@@ -1492,11 +1489,11 @@ class ItemsController extends GetxController {
   }
 
   void restoreTaxs() async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
-    salesTaxes.value = isar.taxModels.where().findAllSync();
+    salesTaxes.value = isar.taxModels.where().findAll();
     _calculatedTotalPrice();
   }
 }

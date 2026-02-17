@@ -1,9 +1,10 @@
-import 'package:isar/isar.dart';
+import 'package:isar_plus/isar_plus.dart';
+import 'package:mistpos/main.dart';
 part 'tax_model.g.dart';
 
 @collection
 class TaxModel {
-  Id id = Isar.autoIncrement;
+  late int id = IdGen.id;
   String label;
   bool activated;
   double value;

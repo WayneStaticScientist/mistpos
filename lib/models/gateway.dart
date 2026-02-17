@@ -1,4 +1,5 @@
-import 'package:isar/isar.dart';
+import 'package:isar_plus/isar_plus.dart';
+import 'package:mistpos/main.dart';
 part 'gateway.g.dart';
 
 @collection
@@ -7,7 +8,7 @@ class Gateway {
   String key;
   String hexId;
   String integrationId;
-  Id id = Isar.autoIncrement;
+  late int id = IdGen.id;
   Gateway({
     required this.name,
     required this.key,

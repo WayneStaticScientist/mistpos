@@ -284,7 +284,7 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
     });
   }
 
-  _getWeeklyProfitsBarChart() {
+  Obx _getWeeklyProfitsBarChart() {
     return Obx(() {
       final list = _adminController.weeklyProfits;
       if (_adminController.loadingWeeklyProfits.value) {
@@ -441,7 +441,7 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
     });
   }
 
-  _getWeeklySalesChart() {
+  Obx _getWeeklySalesChart() {
     return Obx(() {
       final list = _adminController.weeklyProfits;
       if (_adminController.loadingWeeklyProfits.value) {
@@ -610,7 +610,7 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
     });
   }
 
-  _getWeeklyVisitorsChart() {
+  Obx _getWeeklyVisitorsChart() {
     return Obx(() {
       final list = _adminController.weeklyProfits;
       if (_adminController.loadingWeeklyProfits.value) {

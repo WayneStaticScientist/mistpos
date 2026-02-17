@@ -151,7 +151,7 @@ class _ScreenAddModifierState extends State<ScreenAddModifier> {
     );
   }
 
-  _addOption() {
+  void _addOption() {
     if (!_formKey.currentState!.validate()) {
       return;
     }

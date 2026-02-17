@@ -33,7 +33,7 @@ dependencies {
 android {
     namespace = "aca.bicosatstudios.mistpos.mistpos"
     compileSdk = 36
-    ndkVersion = "27.0.12077973"
+    ndkVersion = "28.0.12674087"
     
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -55,8 +55,24 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled = true
+        manifestPlaceholders["extractNativeLibs"] = "false"
+        externalNativeBuild {
+            cmake {
+                cppFlags("-Wl,-z,max-page-size=16384")
+                arguments += listOf("-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON")
+            }
+            ndkBuild {
+                cppFlags("-Wl,-z,max-page-size=16384")
+            }
+        }
     }
     
+     packagingOptions {
+      jniLibs {
+        useLegacyPackaging = false
+      }
+  }
+
    signingConfigs {
         create("release") {
             // Accessing the properties using getProperty() is the safe Kotlin DSL way

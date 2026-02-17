@@ -70,7 +70,7 @@ class _ScreenExportImportState extends State<ScreenExportImport> {
     );
   }
 
-  _importItems() async {
+  Future<void> _importItems() async {
     final value = await _invController.importItems();
     if (!value || !mounted) {
       return;

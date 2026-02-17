@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_plus/isar_plus.dart';
 part 'saved_modifier.g.dart';
 
 @embedded

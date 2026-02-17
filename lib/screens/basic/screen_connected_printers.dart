@@ -95,7 +95,7 @@ class _ScreenConnectedPrintersState extends State<ScreenConnectedPrinters> {
     );
   }
 
-  _connectWithNetwork() {
+  void _connectWithNetwork() {
     Get.back();
     final ipAddress = TextEditingController();
     final port = TextEditingController(text: "9100");

@@ -52,7 +52,7 @@ class _ScreenAddStoreState extends State<ScreenAddStore> {
     );
   }
 
-  _createStore() async {
+  Future<void> _createStore() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }

@@ -180,7 +180,7 @@ class _ScreenShiftsScreenState extends State<ScreenShiftsScreen> {
     );
   }
 
-  _closeShift() {
+  void _closeShift() {
     if (_itemsListController.selectedShift.value == null) {
       Toaster.showError("no shift selected");
       return;

@@ -103,7 +103,7 @@ class _ScreenCreateAccountState extends State<ScreenCreateAccount> {
     );
   }
 
-  _createAccount() {
+  void _createAccount() {
     if (!_formKey.currentState!.validate()) return;
     if (_fullNameController.text.trim().split(" ").length < 2) {
       Toaster.showError("Please enter your full name e.g John Doe");

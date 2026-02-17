@@ -1,10 +1,11 @@
-import 'package:isar/isar.dart';
+import 'package:isar_plus/isar_plus.dart';
+import 'package:mistpos/main.dart';
 import 'package:mistpos/models/modifier_embedder.dart';
 part 'item_modifier_model.g.dart';
 
 @collection
 class ItemModifier {
-  Id id = Isar.autoIncrement;
+  late int id = IdGen.id;
   @Index()
   String name;
   String hexId;

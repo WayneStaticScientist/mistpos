@@ -78,7 +78,7 @@ class _ScreenViewCompanyState extends State<ScreenViewCompany> {
     );
   }
 
-  _changeName() {
+  void _changeName() {
     final name = TextEditingController(text: widget.company.name);
     Get.defaultDialog(
       title: "Change Name",

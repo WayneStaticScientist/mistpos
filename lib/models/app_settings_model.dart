@@ -49,7 +49,7 @@ class AppSettingsModel {
     return AppSettingsModel.fromJson(box.read('appSettings') ?? {});
   }
 
-  saveToStorage() {
+  void saveToStorage() {
     GetStorage box = GetStorage();
     box.write('appSettings', toJson());
   }

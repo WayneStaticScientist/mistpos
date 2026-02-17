@@ -165,7 +165,7 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     }
   }
 
-  _makeDrawer(bool r) {
+  Obx _makeDrawer(bool r) {
     return Obx(
       () => MistAdminDashboard(
         userName: _userController.user.value?.fullName ?? "User",

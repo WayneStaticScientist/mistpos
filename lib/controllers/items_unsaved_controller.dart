@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_plus/isar_plus.dart';
+import 'package:mistpos/main.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/services/network_wrapper.dart';
 import 'package:mistpos/models/item_unsaved_model.dart';
@@ -36,16 +37,16 @@ class ItemsUnsavedController extends GetxController {
         return false;
       }
       final obj = ItemUnsavedModel.fromJson(response.body['update']);
-      final isar = Isar.getInstance();
+      final isar = IsarStatic.getInstance();
       if (isar == null) {
         Toaster.showError('Database not initialized');
         return false;
       }
-      await isar.writeTxn(() async {
+      await isar.write((isar) async {
         if (update) {
-          await isar.itemUnsavedModels.put(item);
+          isar.itemUnsavedModels.put(item);
         } else {
-          await isar.itemUnsavedModels.put(obj);
+          isar.itemUnsavedModels.put(obj);
         }
       });
       syncCartItemsOnBackground();
@@ -75,17 +76,17 @@ class ItemsUnsavedController extends GetxController {
   }
 
   Future<void> search({String search = "", String category = ""}) async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
     syncingItems.value = true;
-    cartItems.value = isar.itemUnsavedModels
-        .filter()
+    cartItems.value = await isar.itemUnsavedModels
+        .where()
         .nameContains(search, caseSensitive: false)
         .and()
         .categoryContains(category)
-        .findAllSync();
+        .findAllAsync();
     syncingItems.value = false;
   }
 
@@ -96,7 +97,7 @@ class ItemsUnsavedController extends GetxController {
     bool isCompositeItems = false,
   }) async {
     if (syncingItems.value) return;
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
@@ -118,21 +119,21 @@ class ItemsUnsavedController extends GetxController {
       return ItemUnsavedModel.fromJson((e));
     }).toList();
 
-    await isar.writeTxn(() async {
-      await isar.itemUnsavedModels.where().deleteAll();
-      await isar.itemUnsavedModels.putAll(models);
+    await isar.write((isar) async {
+      isar.itemUnsavedModels.where().deleteAll();
+      isar.itemUnsavedModels.putAll(models);
     });
-    final loadedItems = isar.itemUnsavedModels.where().findAllSync();
+    final loadedItems = await isar.itemUnsavedModels.where().findAllAsync();
     cartItems.assignAll(loadedItems);
     syncingItems.value = false;
   }
 
   void _loadFixedItems() {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
-    final loadedItems = isar.itemUnsavedModels.where().findAllSync();
+    final loadedItems = isar.itemUnsavedModels.where().findAll();
     cartItems.assignAll(loadedItems);
   }
 }

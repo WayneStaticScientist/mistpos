@@ -64,7 +64,7 @@ class _ScreenCompletePurchaseOrderState
     );
   }
 
-  _buildProductInformation() {
+  MistMordernLayout _buildProductInformation() {
     return MistMordernLayout(
       label: "",
       children: [
@@ -166,7 +166,7 @@ class _ScreenCompletePurchaseOrderState
     );
   }
 
-  _complete() async {
+  Future<void> _complete() async {
     setState(() {
       _loading = true;
     });

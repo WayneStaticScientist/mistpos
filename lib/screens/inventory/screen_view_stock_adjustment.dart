@@ -41,7 +41,7 @@ class _ScreenViewStockAdjustmentState extends State<ScreenViewStockAdjustment> {
     );
   }
 
-  _buildProductSummary() {
+  MistMordernLayout _buildProductSummary() {
     return MistMordernLayout(
       label: "Summary ",
       children: [
@@ -68,7 +68,7 @@ class _ScreenViewStockAdjustmentState extends State<ScreenViewStockAdjustment> {
     );
   }
 
-  _buildProductInformation() {
+  MistMordernLayout _buildProductInformation() {
     return MistMordernLayout(
       label: "Product Information ",
       children: [_makeTable(widget.model.inventoryItems)],

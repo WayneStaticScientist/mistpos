@@ -63,7 +63,7 @@ class _NavCategoryListState extends State<NavCategoryList> {
     );
   }
 
-  _openEditor(ItemCategoryModel model) {
+  void _openEditor(ItemCategoryModel model) {
     final company = CompanyModel.fromStorage();
     if (company?.subscriptionType.type == MistSubscriptionUtils.freePlan ||
         company?.subscriptionType.type == null) {
@@ -93,7 +93,7 @@ class _NavCategoryListState extends State<NavCategoryList> {
     );
   }
 
-  _openDeleteDialog(ItemCategoryModel model) {
+  void _openDeleteDialog(ItemCategoryModel model) {
     Get.back();
     Get.dialog(
       AlertDialog(

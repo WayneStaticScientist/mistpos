@@ -3,465 +3,548 @@
 part of 'shifts_model.dart';
 
 // **************************************************************************
-// IsarCollectionGenerator
+// _IsarCollectionGenerator
 // **************************************************************************
 
 // coverage:ignore-file
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+// ignore_for_file: duplicate_ignore, invalid_use_of_protected_member, lines_longer_than_80_chars, constant_identifier_names, avoid_js_rounded_ints, no_leading_underscores_for_local_identifiers, require_trailing_commas, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_in_if_null_operators, library_private_types_in_public_api, prefer_const_constructors
+// ignore_for_file: type=lint
 
 extension GetShiftsModelCollection on Isar {
-  IsarCollection<ShiftsModel> get shiftsModels => this.collection();
+  IsarCollection<int, ShiftsModel> get shiftsModels => this.collection();
 }
 
-const ShiftsModelSchema = CollectionSchema(
-  name: r'ShiftsModel',
-  id: 7685666414399568096,
-  properties: {
-    r'cashDrawerEnd': PropertySchema(
-      id: 0,
-      name: r'cashDrawerEnd',
-      type: IsarType.double,
-    ),
-    r'cashDrawerStart': PropertySchema(
-      id: 1,
-      name: r'cashDrawerStart',
-      type: IsarType.double,
-    ),
-    r'closeShiftTime': PropertySchema(
-      id: 2,
-      name: r'closeShiftTime',
-      type: IsarType.dateTime,
-    ),
-    r'hexId': PropertySchema(
-      id: 3,
-      name: r'hexId',
-      type: IsarType.string,
-    ),
-    r'openShiftTime': PropertySchema(
-      id: 4,
-      name: r'openShiftTime',
-      type: IsarType.dateTime,
-    ),
-    r'salesQuantity': PropertySchema(
-      id: 5,
-      name: r'salesQuantity',
-      type: IsarType.long,
-    ),
-    r'shiftIsClosed': PropertySchema(
-      id: 6,
-      name: r'shiftIsClosed',
-      type: IsarType.bool,
-    ),
-    r'shiftLabel': PropertySchema(
-      id: 7,
-      name: r'shiftLabel',
-      type: IsarType.string,
-    ),
-    r'synced': PropertySchema(
-      id: 8,
-      name: r'synced',
-      type: IsarType.bool,
-    ),
-    r'totalCustomers': PropertySchema(
-      id: 9,
-      name: r'totalCustomers',
-      type: IsarType.long,
-    ),
-    r'totalSales': PropertySchema(
-      id: 10,
-      name: r'totalSales',
-      type: IsarType.double,
-    ),
-    r'userId': PropertySchema(
-      id: 11,
-      name: r'userId',
-      type: IsarType.string,
-    )
-  },
-  estimateSize: _shiftsModelEstimateSize,
-  serialize: _shiftsModelSerialize,
-  deserialize: _shiftsModelDeserialize,
-  deserializeProp: _shiftsModelDeserializeProp,
-  idName: r'id',
-  indexes: {},
-  links: {},
-  embeddedSchemas: {},
-  getId: _shiftsModelGetId,
-  getLinks: _shiftsModelGetLinks,
-  attach: _shiftsModelAttach,
-  version: '3.1.0+1',
+final ShiftsModelSchema = IsarGeneratedSchema(
+  schema: IsarSchema(
+    name: 'ShiftsModel',
+    idName: 'id',
+    embedded: false,
+    properties: [
+      IsarPropertySchema(name: 'synced', type: IsarType.bool),
+      IsarPropertySchema(name: 'shiftIsClosed', type: IsarType.bool),
+      IsarPropertySchema(name: 'hexId', type: IsarType.string),
+      IsarPropertySchema(name: 'userId', type: IsarType.string),
+      IsarPropertySchema(name: 'shiftLabel', type: IsarType.string),
+      IsarPropertySchema(name: 'totalSales', type: IsarType.double),
+      IsarPropertySchema(name: 'salesQuantity', type: IsarType.long),
+      IsarPropertySchema(name: 'totalCustomers', type: IsarType.long),
+      IsarPropertySchema(name: 'cashDrawerEnd', type: IsarType.double),
+      IsarPropertySchema(name: 'cashDrawerStart', type: IsarType.double),
+      IsarPropertySchema(name: 'openShiftTime', type: IsarType.dateTime),
+      IsarPropertySchema(name: 'closeShiftTime', type: IsarType.dateTime),
+    ],
+    indexes: [],
+  ),
+  converter: IsarObjectConverter<int, ShiftsModel>(
+    serialize: serializeShiftsModel,
+    deserialize: deserializeShiftsModel,
+    deserializeProperty: deserializeShiftsModelProp,
+  ),
+  getEmbeddedSchemas: () => [],
 );
 
-int _shiftsModelEstimateSize(
-  ShiftsModel object,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  var bytesCount = offsets.last;
-  bytesCount += 3 + object.hexId.length * 3;
-  bytesCount += 3 + object.shiftLabel.length * 3;
-  bytesCount += 3 + object.userId.length * 3;
-  return bytesCount;
-}
-
-void _shiftsModelSerialize(
-  ShiftsModel object,
-  IsarWriter writer,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  writer.writeDouble(offsets[0], object.cashDrawerEnd);
-  writer.writeDouble(offsets[1], object.cashDrawerStart);
-  writer.writeDateTime(offsets[2], object.closeShiftTime);
-  writer.writeString(offsets[3], object.hexId);
-  writer.writeDateTime(offsets[4], object.openShiftTime);
-  writer.writeLong(offsets[5], object.salesQuantity);
-  writer.writeBool(offsets[6], object.shiftIsClosed);
-  writer.writeString(offsets[7], object.shiftLabel);
-  writer.writeBool(offsets[8], object.synced);
-  writer.writeLong(offsets[9], object.totalCustomers);
-  writer.writeDouble(offsets[10], object.totalSales);
-  writer.writeString(offsets[11], object.userId);
-}
-
-ShiftsModel _shiftsModelDeserialize(
-  Id id,
-  IsarReader reader,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  final object = ShiftsModel(
-    cashDrawerEnd: reader.readDouble(offsets[0]),
-    cashDrawerStart: reader.readDouble(offsets[1]),
-    closeShiftTime: reader.readDateTime(offsets[2]),
-    hexId: reader.readStringOrNull(offsets[3]) ?? '',
-    openShiftTime: reader.readDateTime(offsets[4]),
-    salesQuantity: reader.readLongOrNull(offsets[5]) ?? 0,
-    shiftIsClosed: reader.readBoolOrNull(offsets[6]) ?? false,
-    shiftLabel: reader.readString(offsets[7]),
-    synced: reader.readBoolOrNull(offsets[8]) ?? false,
-    totalCustomers: reader.readLongOrNull(offsets[9]) ?? 0,
-    totalSales: reader.readDoubleOrNull(offsets[10]) ?? 0,
-    userId: reader.readString(offsets[11]),
+@isarProtected
+int serializeShiftsModel(IsarWriter writer, ShiftsModel object) {
+  IsarCore.writeBool(writer, 1, value: object.synced);
+  IsarCore.writeBool(writer, 2, value: object.shiftIsClosed);
+  IsarCore.writeString(writer, 3, object.hexId);
+  IsarCore.writeString(writer, 4, object.userId);
+  IsarCore.writeString(writer, 5, object.shiftLabel);
+  IsarCore.writeDouble(writer, 6, object.totalSales);
+  IsarCore.writeLong(writer, 7, object.salesQuantity);
+  IsarCore.writeLong(writer, 8, object.totalCustomers);
+  IsarCore.writeDouble(writer, 9, object.cashDrawerEnd);
+  IsarCore.writeDouble(writer, 10, object.cashDrawerStart);
+  IsarCore.writeLong(
+    writer,
+    11,
+    object.openShiftTime.toUtc().microsecondsSinceEpoch,
   );
-  object.id = id;
-  return object;
-}
-
-P _shiftsModelDeserializeProp<P>(
-  IsarReader reader,
-  int propertyId,
-  int offset,
-  Map<Type, List<int>> allOffsets,
-) {
-  switch (propertyId) {
-    case 0:
-      return (reader.readDouble(offset)) as P;
-    case 1:
-      return (reader.readDouble(offset)) as P;
-    case 2:
-      return (reader.readDateTime(offset)) as P;
-    case 3:
-      return (reader.readStringOrNull(offset) ?? '') as P;
-    case 4:
-      return (reader.readDateTime(offset)) as P;
-    case 5:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
-    case 6:
-      return (reader.readBoolOrNull(offset) ?? false) as P;
-    case 7:
-      return (reader.readString(offset)) as P;
-    case 8:
-      return (reader.readBoolOrNull(offset) ?? false) as P;
-    case 9:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
-    case 10:
-      return (reader.readDoubleOrNull(offset) ?? 0) as P;
-    case 11:
-      return (reader.readString(offset)) as P;
-    default:
-      throw IsarError('Unknown property with id $propertyId');
-  }
-}
-
-Id _shiftsModelGetId(ShiftsModel object) {
+  IsarCore.writeLong(
+    writer,
+    12,
+    object.closeShiftTime.toUtc().microsecondsSinceEpoch,
+  );
   return object.id;
 }
 
-List<IsarLinkBase<dynamic>> _shiftsModelGetLinks(ShiftsModel object) {
-  return [];
-}
-
-void _shiftsModelAttach(
-    IsarCollection<dynamic> col, Id id, ShiftsModel object) {
-  object.id = id;
-}
-
-extension ShiftsModelQueryWhereSort
-    on QueryBuilder<ShiftsModel, ShiftsModel, QWhere> {
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterWhere> anyId() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(const IdWhereClause.any());
-    });
+@isarProtected
+ShiftsModel deserializeShiftsModel(IsarReader reader) {
+  final bool _synced;
+  _synced = IsarCore.readBool(reader, 1);
+  final bool _shiftIsClosed;
+  _shiftIsClosed = IsarCore.readBool(reader, 2);
+  final String _hexId;
+  _hexId = IsarCore.readString(reader, 3) ?? '';
+  final String _userId;
+  _userId = IsarCore.readString(reader, 4) ?? '';
+  final String _shiftLabel;
+  _shiftLabel = IsarCore.readString(reader, 5) ?? '';
+  final double _totalSales;
+  {
+    final value = IsarCore.readDouble(reader, 6);
+    if (value.isNaN) {
+      _totalSales = 0;
+    } else {
+      _totalSales = value;
+    }
   }
+  final int _salesQuantity;
+  {
+    final value = IsarCore.readLong(reader, 7);
+    if (value == -9223372036854775808) {
+      _salesQuantity = 0;
+    } else {
+      _salesQuantity = value;
+    }
+  }
+  final int _totalCustomers;
+  {
+    final value = IsarCore.readLong(reader, 8);
+    if (value == -9223372036854775808) {
+      _totalCustomers = 0;
+    } else {
+      _totalCustomers = value;
+    }
+  }
+  final double _cashDrawerEnd;
+  _cashDrawerEnd = IsarCore.readDouble(reader, 9);
+  final double _cashDrawerStart;
+  _cashDrawerStart = IsarCore.readDouble(reader, 10);
+  final DateTime _openShiftTime;
+  {
+    final value = IsarCore.readLong(reader, 11);
+    if (value == -9223372036854775808) {
+      _openShiftTime = DateTime.fromMillisecondsSinceEpoch(
+        0,
+        isUtc: true,
+      ).toLocal();
+    } else {
+      _openShiftTime = DateTime.fromMicrosecondsSinceEpoch(
+        value,
+        isUtc: true,
+      ).toLocal();
+    }
+  }
+  final DateTime _closeShiftTime;
+  {
+    final value = IsarCore.readLong(reader, 12);
+    if (value == -9223372036854775808) {
+      _closeShiftTime = DateTime.fromMillisecondsSinceEpoch(
+        0,
+        isUtc: true,
+      ).toLocal();
+    } else {
+      _closeShiftTime = DateTime.fromMicrosecondsSinceEpoch(
+        value,
+        isUtc: true,
+      ).toLocal();
+    }
+  }
+  final object = ShiftsModel(
+    synced: _synced,
+    shiftIsClosed: _shiftIsClosed,
+    hexId: _hexId,
+    userId: _userId,
+    shiftLabel: _shiftLabel,
+    totalSales: _totalSales,
+    salesQuantity: _salesQuantity,
+    totalCustomers: _totalCustomers,
+    cashDrawerEnd: _cashDrawerEnd,
+    cashDrawerStart: _cashDrawerStart,
+    openShiftTime: _openShiftTime,
+    closeShiftTime: _closeShiftTime,
+  );
+  object.id = IsarCore.readId(reader);
+  return object;
 }
 
-extension ShiftsModelQueryWhere
-    on QueryBuilder<ShiftsModel, ShiftsModel, QWhereClause> {
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterWhereClause> idEqualTo(Id id) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterWhereClause> idNotEqualTo(
-      Id id) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(
-              IdWhereClause.lessThan(upper: id, includeUpper: false),
-            )
-            .addWhereClause(
-              IdWhereClause.greaterThan(lower: id, includeLower: false),
-            );
-      } else {
-        return query
-            .addWhereClause(
-              IdWhereClause.greaterThan(lower: id, includeLower: false),
-            )
-            .addWhereClause(
-              IdWhereClause.lessThan(upper: id, includeUpper: false),
-            );
+@isarProtected
+dynamic deserializeShiftsModelProp(IsarReader reader, int property) {
+  switch (property) {
+    case 0:
+      return IsarCore.readId(reader);
+    case 1:
+      return IsarCore.readBool(reader, 1);
+    case 2:
+      return IsarCore.readBool(reader, 2);
+    case 3:
+      return IsarCore.readString(reader, 3) ?? '';
+    case 4:
+      return IsarCore.readString(reader, 4) ?? '';
+    case 5:
+      return IsarCore.readString(reader, 5) ?? '';
+    case 6:
+      {
+        final value = IsarCore.readDouble(reader, 6);
+        if (value.isNaN) {
+          return 0;
+        } else {
+          return value;
+        }
       }
-    });
+    case 7:
+      {
+        final value = IsarCore.readLong(reader, 7);
+        if (value == -9223372036854775808) {
+          return 0;
+        } else {
+          return value;
+        }
+      }
+    case 8:
+      {
+        final value = IsarCore.readLong(reader, 8);
+        if (value == -9223372036854775808) {
+          return 0;
+        } else {
+          return value;
+        }
+      }
+    case 9:
+      return IsarCore.readDouble(reader, 9);
+    case 10:
+      return IsarCore.readDouble(reader, 10);
+    case 11:
+      {
+        final value = IsarCore.readLong(reader, 11);
+        if (value == -9223372036854775808) {
+          return DateTime.fromMillisecondsSinceEpoch(0, isUtc: true).toLocal();
+        } else {
+          return DateTime.fromMicrosecondsSinceEpoch(
+            value,
+            isUtc: true,
+          ).toLocal();
+        }
+      }
+    case 12:
+      {
+        final value = IsarCore.readLong(reader, 12);
+        if (value == -9223372036854775808) {
+          return DateTime.fromMillisecondsSinceEpoch(0, isUtc: true).toLocal();
+        } else {
+          return DateTime.fromMicrosecondsSinceEpoch(
+            value,
+            isUtc: true,
+          ).toLocal();
+        }
+      }
+    default:
+      throw ArgumentError('Unknown property: $property');
   }
+}
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterWhereClause> idGreaterThan(Id id,
-      {bool include = false}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IdWhereClause.greaterThan(lower: id, includeLower: include),
-      );
-    });
-  }
+sealed class _ShiftsModelUpdate {
+  bool call({
+    required int id,
+    bool? synced,
+    bool? shiftIsClosed,
+    String? hexId,
+    String? userId,
+    String? shiftLabel,
+    double? totalSales,
+    int? salesQuantity,
+    int? totalCustomers,
+    double? cashDrawerEnd,
+    double? cashDrawerStart,
+    DateTime? openShiftTime,
+    DateTime? closeShiftTime,
+  });
+}
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterWhereClause> idLessThan(Id id,
-      {bool include = false}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IdWhereClause.lessThan(upper: id, includeUpper: include),
-      );
-    });
-  }
+class _ShiftsModelUpdateImpl implements _ShiftsModelUpdate {
+  const _ShiftsModelUpdateImpl(this.collection);
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterWhereClause> idBetween(
-    Id lowerId,
-    Id upperId, {
-    bool includeLower = true,
-    bool includeUpper = true,
+  final IsarCollection<int, ShiftsModel> collection;
+
+  @override
+  bool call({
+    required int id,
+    Object? synced = ignore,
+    Object? shiftIsClosed = ignore,
+    Object? hexId = ignore,
+    Object? userId = ignore,
+    Object? shiftLabel = ignore,
+    Object? totalSales = ignore,
+    Object? salesQuantity = ignore,
+    Object? totalCustomers = ignore,
+    Object? cashDrawerEnd = ignore,
+    Object? cashDrawerStart = ignore,
+    Object? openShiftTime = ignore,
+    Object? closeShiftTime = ignore,
   }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
-        includeLower: includeLower,
-        upper: upperId,
-        includeUpper: includeUpper,
-      ));
+    return collection.updateProperties(
+          [id],
+          {
+            if (synced != ignore) 1: synced as bool?,
+            if (shiftIsClosed != ignore) 2: shiftIsClosed as bool?,
+            if (hexId != ignore) 3: hexId as String?,
+            if (userId != ignore) 4: userId as String?,
+            if (shiftLabel != ignore) 5: shiftLabel as String?,
+            if (totalSales != ignore) 6: totalSales as double?,
+            if (salesQuantity != ignore) 7: salesQuantity as int?,
+            if (totalCustomers != ignore) 8: totalCustomers as int?,
+            if (cashDrawerEnd != ignore) 9: cashDrawerEnd as double?,
+            if (cashDrawerStart != ignore) 10: cashDrawerStart as double?,
+            if (openShiftTime != ignore) 11: openShiftTime as DateTime?,
+            if (closeShiftTime != ignore) 12: closeShiftTime as DateTime?,
+          },
+        ) >
+        0;
+  }
+}
+
+sealed class _ShiftsModelUpdateAll {
+  int call({
+    required List<int> id,
+    bool? synced,
+    bool? shiftIsClosed,
+    String? hexId,
+    String? userId,
+    String? shiftLabel,
+    double? totalSales,
+    int? salesQuantity,
+    int? totalCustomers,
+    double? cashDrawerEnd,
+    double? cashDrawerStart,
+    DateTime? openShiftTime,
+    DateTime? closeShiftTime,
+  });
+}
+
+class _ShiftsModelUpdateAllImpl implements _ShiftsModelUpdateAll {
+  const _ShiftsModelUpdateAllImpl(this.collection);
+
+  final IsarCollection<int, ShiftsModel> collection;
+
+  @override
+  int call({
+    required List<int> id,
+    Object? synced = ignore,
+    Object? shiftIsClosed = ignore,
+    Object? hexId = ignore,
+    Object? userId = ignore,
+    Object? shiftLabel = ignore,
+    Object? totalSales = ignore,
+    Object? salesQuantity = ignore,
+    Object? totalCustomers = ignore,
+    Object? cashDrawerEnd = ignore,
+    Object? cashDrawerStart = ignore,
+    Object? openShiftTime = ignore,
+    Object? closeShiftTime = ignore,
+  }) {
+    return collection.updateProperties(id, {
+      if (synced != ignore) 1: synced as bool?,
+      if (shiftIsClosed != ignore) 2: shiftIsClosed as bool?,
+      if (hexId != ignore) 3: hexId as String?,
+      if (userId != ignore) 4: userId as String?,
+      if (shiftLabel != ignore) 5: shiftLabel as String?,
+      if (totalSales != ignore) 6: totalSales as double?,
+      if (salesQuantity != ignore) 7: salesQuantity as int?,
+      if (totalCustomers != ignore) 8: totalCustomers as int?,
+      if (cashDrawerEnd != ignore) 9: cashDrawerEnd as double?,
+      if (cashDrawerStart != ignore) 10: cashDrawerStart as double?,
+      if (openShiftTime != ignore) 11: openShiftTime as DateTime?,
+      if (closeShiftTime != ignore) 12: closeShiftTime as DateTime?,
     });
   }
+}
+
+extension ShiftsModelUpdate on IsarCollection<int, ShiftsModel> {
+  _ShiftsModelUpdate get update => _ShiftsModelUpdateImpl(this);
+
+  _ShiftsModelUpdateAll get updateAll => _ShiftsModelUpdateAllImpl(this);
+}
+
+sealed class _ShiftsModelQueryUpdate {
+  int call({
+    bool? synced,
+    bool? shiftIsClosed,
+    String? hexId,
+    String? userId,
+    String? shiftLabel,
+    double? totalSales,
+    int? salesQuantity,
+    int? totalCustomers,
+    double? cashDrawerEnd,
+    double? cashDrawerStart,
+    DateTime? openShiftTime,
+    DateTime? closeShiftTime,
+  });
+}
+
+class _ShiftsModelQueryUpdateImpl implements _ShiftsModelQueryUpdate {
+  const _ShiftsModelQueryUpdateImpl(this.query, {this.limit});
+
+  final IsarQuery<ShiftsModel> query;
+  final int? limit;
+
+  @override
+  int call({
+    Object? synced = ignore,
+    Object? shiftIsClosed = ignore,
+    Object? hexId = ignore,
+    Object? userId = ignore,
+    Object? shiftLabel = ignore,
+    Object? totalSales = ignore,
+    Object? salesQuantity = ignore,
+    Object? totalCustomers = ignore,
+    Object? cashDrawerEnd = ignore,
+    Object? cashDrawerStart = ignore,
+    Object? openShiftTime = ignore,
+    Object? closeShiftTime = ignore,
+  }) {
+    return query.updateProperties(limit: limit, {
+      if (synced != ignore) 1: synced as bool?,
+      if (shiftIsClosed != ignore) 2: shiftIsClosed as bool?,
+      if (hexId != ignore) 3: hexId as String?,
+      if (userId != ignore) 4: userId as String?,
+      if (shiftLabel != ignore) 5: shiftLabel as String?,
+      if (totalSales != ignore) 6: totalSales as double?,
+      if (salesQuantity != ignore) 7: salesQuantity as int?,
+      if (totalCustomers != ignore) 8: totalCustomers as int?,
+      if (cashDrawerEnd != ignore) 9: cashDrawerEnd as double?,
+      if (cashDrawerStart != ignore) 10: cashDrawerStart as double?,
+      if (openShiftTime != ignore) 11: openShiftTime as DateTime?,
+      if (closeShiftTime != ignore) 12: closeShiftTime as DateTime?,
+    });
+  }
+}
+
+extension ShiftsModelQueryUpdate on IsarQuery<ShiftsModel> {
+  _ShiftsModelQueryUpdate get updateFirst =>
+      _ShiftsModelQueryUpdateImpl(this, limit: 1);
+
+  _ShiftsModelQueryUpdate get updateAll => _ShiftsModelQueryUpdateImpl(this);
+}
+
+class _ShiftsModelQueryBuilderUpdateImpl implements _ShiftsModelQueryUpdate {
+  const _ShiftsModelQueryBuilderUpdateImpl(this.query, {this.limit});
+
+  final QueryBuilder<ShiftsModel, ShiftsModel, QOperations> query;
+  final int? limit;
+
+  @override
+  int call({
+    Object? synced = ignore,
+    Object? shiftIsClosed = ignore,
+    Object? hexId = ignore,
+    Object? userId = ignore,
+    Object? shiftLabel = ignore,
+    Object? totalSales = ignore,
+    Object? salesQuantity = ignore,
+    Object? totalCustomers = ignore,
+    Object? cashDrawerEnd = ignore,
+    Object? cashDrawerStart = ignore,
+    Object? openShiftTime = ignore,
+    Object? closeShiftTime = ignore,
+  }) {
+    final q = query.build();
+    try {
+      return q.updateProperties(limit: limit, {
+        if (synced != ignore) 1: synced as bool?,
+        if (shiftIsClosed != ignore) 2: shiftIsClosed as bool?,
+        if (hexId != ignore) 3: hexId as String?,
+        if (userId != ignore) 4: userId as String?,
+        if (shiftLabel != ignore) 5: shiftLabel as String?,
+        if (totalSales != ignore) 6: totalSales as double?,
+        if (salesQuantity != ignore) 7: salesQuantity as int?,
+        if (totalCustomers != ignore) 8: totalCustomers as int?,
+        if (cashDrawerEnd != ignore) 9: cashDrawerEnd as double?,
+        if (cashDrawerStart != ignore) 10: cashDrawerStart as double?,
+        if (openShiftTime != ignore) 11: openShiftTime as DateTime?,
+        if (closeShiftTime != ignore) 12: closeShiftTime as DateTime?,
+      });
+    } finally {
+      q.close();
+    }
+  }
+}
+
+extension ShiftsModelQueryBuilderUpdate
+    on QueryBuilder<ShiftsModel, ShiftsModel, QOperations> {
+  _ShiftsModelQueryUpdate get updateFirst =>
+      _ShiftsModelQueryBuilderUpdateImpl(this, limit: 1);
+
+  _ShiftsModelQueryUpdate get updateAll =>
+      _ShiftsModelQueryBuilderUpdateImpl(this);
 }
 
 extension ShiftsModelQueryFilter
     on QueryBuilder<ShiftsModel, ShiftsModel, QFilterCondition> {
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      cashDrawerEndEqualTo(
-    double value, {
-    double epsilon = Query.epsilon,
-  }) {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition> idEqualTo(
+    int value,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'cashDrawerEnd',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        EqualCondition(property: 0, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition> idGreaterThan(
+    int value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 0, value: value),
+      );
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      cashDrawerEndGreaterThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
+  idGreaterThanOrEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'cashDrawerEnd',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 0, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition> idLessThan(
+    int value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(LessCondition(property: 0, value: value));
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      cashDrawerEndLessThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
+  idLessThanOrEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'cashDrawerEnd',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 0, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition> idBetween(
+    int lower,
+    int upper,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(property: 0, lower: lower, upper: upper),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition> syncedEqualTo(
+    bool value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 1, value: value),
+      );
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      cashDrawerEndBetween(
-    double lower,
-    double upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
+  shiftIsClosedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'cashDrawerEnd',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      cashDrawerStartEqualTo(
-    double value, {
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'cashDrawerStart',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      cashDrawerStartGreaterThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'cashDrawerStart',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      cashDrawerStartLessThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'cashDrawerStart',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      cashDrawerStartBetween(
-    double lower,
-    double upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'cashDrawerStart',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      closeShiftTimeEqualTo(DateTime value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'closeShiftTime',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      closeShiftTimeGreaterThan(
-    DateTime value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'closeShiftTime',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      closeShiftTimeLessThan(
-    DateTime value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'closeShiftTime',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      closeShiftTimeBetween(
-    DateTime lower,
-    DateTime upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'closeShiftTime',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        EqualCondition(property: 2, value: value),
+      );
     });
   }
 
@@ -470,61 +553,76 @@ extension ShiftsModelQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'hexId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        EqualCondition(property: 3, value: value, caseSensitive: caseSensitive),
+      );
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      hexIdGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
+  hexIdGreaterThan(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'hexId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 3,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  hexIdGreaterThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 3,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition> hexIdLessThan(
     String value, {
-    bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'hexId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        LessCondition(property: 3, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  hexIdLessThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 3,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition> hexIdBetween(
     String lower,
     String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'hexId',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 3,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
@@ -533,11 +631,13 @@ extension ShiftsModelQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'hexId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 3,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
@@ -546,497 +646,60 @@ extension ShiftsModelQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'hexId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 3,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition> hexIdContains(
-      String value,
-      {bool caseSensitive = true}) {
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'hexId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 3,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition> hexIdMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'hexId',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 3,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition> hexIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'hexId',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        const EqualCondition(property: 3, value: ''),
+      );
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      hexIdIsNotEmpty() {
+  hexIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'hexId',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition> idEqualTo(
-      Id value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'id',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition> idGreaterThan(
-    Id value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition> idLessThan(
-    Id value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition> idBetween(
-    Id lower,
-    Id upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      openShiftTimeEqualTo(DateTime value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'openShiftTime',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      openShiftTimeGreaterThan(
-    DateTime value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'openShiftTime',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      openShiftTimeLessThan(
-    DateTime value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'openShiftTime',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      openShiftTimeBetween(
-    DateTime lower,
-    DateTime upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'openShiftTime',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      salesQuantityEqualTo(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'salesQuantity',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      salesQuantityGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'salesQuantity',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      salesQuantityLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'salesQuantity',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      salesQuantityBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'salesQuantity',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      shiftIsClosedEqualTo(bool value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'shiftIsClosed',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      shiftLabelEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'shiftLabel',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      shiftLabelGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'shiftLabel',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      shiftLabelLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'shiftLabel',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      shiftLabelBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'shiftLabel',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      shiftLabelStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'shiftLabel',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      shiftLabelEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'shiftLabel',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      shiftLabelContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'shiftLabel',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      shiftLabelMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'shiftLabel',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      shiftLabelIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'shiftLabel',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      shiftLabelIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'shiftLabel',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition> syncedEqualTo(
-      bool value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'synced',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      totalCustomersEqualTo(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'totalCustomers',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      totalCustomersGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'totalCustomers',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      totalCustomersLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'totalCustomers',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      totalCustomersBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'totalCustomers',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      totalSalesEqualTo(
-    double value, {
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'totalSales',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      totalSalesGreaterThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'totalSales',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      totalSalesLessThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'totalSales',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      totalSalesBetween(
-    double lower,
-    double upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'totalSales',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        const GreaterCondition(property: 3, value: ''),
+      );
     });
   }
 
@@ -1045,75 +708,89 @@ extension ShiftsModelQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'userId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        EqualCondition(property: 4, value: value, caseSensitive: caseSensitive),
+      );
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      userIdGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
+  userIdGreaterThan(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'userId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 4,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  userIdGreaterThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 4,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition> userIdLessThan(
     String value, {
-    bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'userId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        LessCondition(property: 4, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  userIdLessThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 4,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition> userIdBetween(
     String lower,
     String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'userId',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 4,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      userIdStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  userIdStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'userId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 4,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
@@ -1122,55 +799,621 @@ extension ShiftsModelQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'userId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 4,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition> userIdContains(
-      String value,
-      {bool caseSensitive = true}) {
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'userId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 4,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition> userIdMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'userId',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 4,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      userIdIsEmpty() {
+  userIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'userId',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        const EqualCondition(property: 4, value: ''),
+      );
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
-      userIdIsNotEmpty() {
+  userIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'userId',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        const GreaterCondition(property: 4, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  shiftLabelEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 5, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  shiftLabelGreaterThan(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 5,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  shiftLabelGreaterThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 5,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  shiftLabelLessThan(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 5, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  shiftLabelLessThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 5,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  shiftLabelBetween(String lower, String upper, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 5,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  shiftLabelStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 5,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  shiftLabelEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 5,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  shiftLabelContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 5,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  shiftLabelMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 5,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  shiftLabelIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const EqualCondition(property: 5, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  shiftLabelIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const GreaterCondition(property: 5, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  totalSalesEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 6, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  totalSalesGreaterThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 6, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  totalSalesGreaterThanOrEqualTo(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 6, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  totalSalesLessThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 6, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  totalSalesLessThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 6, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  totalSalesBetween(
+    double lower,
+    double upper, {
+    double epsilon = Filter.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 6,
+          lower: lower,
+          upper: upper,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  salesQuantityEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 7, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  salesQuantityGreaterThan(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 7, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  salesQuantityGreaterThanOrEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 7, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  salesQuantityLessThan(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(LessCondition(property: 7, value: value));
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  salesQuantityLessThanOrEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 7, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  salesQuantityBetween(int lower, int upper) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(property: 7, lower: lower, upper: upper),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  totalCustomersEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 8, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  totalCustomersGreaterThan(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 8, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  totalCustomersGreaterThanOrEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 8, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  totalCustomersLessThan(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(LessCondition(property: 8, value: value));
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  totalCustomersLessThanOrEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 8, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  totalCustomersBetween(int lower, int upper) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(property: 8, lower: lower, upper: upper),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  cashDrawerEndEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 9, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  cashDrawerEndGreaterThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 9, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  cashDrawerEndGreaterThanOrEqualTo(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 9, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  cashDrawerEndLessThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 9, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  cashDrawerEndLessThanOrEqualTo(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 9, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  cashDrawerEndBetween(
+    double lower,
+    double upper, {
+    double epsilon = Filter.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 9,
+          lower: lower,
+          upper: upper,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  cashDrawerStartEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 10, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  cashDrawerStartGreaterThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 10, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  cashDrawerStartGreaterThanOrEqualTo(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 10, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  cashDrawerStartLessThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 10, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  cashDrawerStartLessThanOrEqualTo(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 10, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  cashDrawerStartBetween(
+    double lower,
+    double upper, {
+    double epsilon = Filter.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 10,
+          lower: lower,
+          upper: upper,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  openShiftTimeEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 11, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  openShiftTimeGreaterThan(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 11, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  openShiftTimeGreaterThanOrEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 11, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  openShiftTimeLessThan(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 11, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  openShiftTimeLessThanOrEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 11, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  openShiftTimeBetween(DateTime lower, DateTime upper) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(property: 11, lower: lower, upper: upper),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  closeShiftTimeEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 12, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  closeShiftTimeGreaterThan(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 12, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  closeShiftTimeGreaterThanOrEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 12, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  closeShiftTimeLessThan(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 12, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  closeShiftTimeLessThanOrEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 12, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterFilterCondition>
+  closeShiftTimeBetween(DateTime lower, DateTime upper) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(property: 12, lower: lower, upper: upper),
+      );
     });
   }
 }
@@ -1178,488 +1421,703 @@ extension ShiftsModelQueryFilter
 extension ShiftsModelQueryObject
     on QueryBuilder<ShiftsModel, ShiftsModel, QFilterCondition> {}
 
-extension ShiftsModelQueryLinks
-    on QueryBuilder<ShiftsModel, ShiftsModel, QFilterCondition> {}
-
 extension ShiftsModelQuerySortBy
     on QueryBuilder<ShiftsModel, ShiftsModel, QSortBy> {
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByCashDrawerEnd() {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortById() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cashDrawerEnd', Sort.asc);
+      return query.addSortBy(0);
     });
   }
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
-      sortByCashDrawerEndDesc() {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cashDrawerEnd', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByCashDrawerStart() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cashDrawerStart', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
-      sortByCashDrawerStartDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cashDrawerStart', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByCloseShiftTime() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'closeShiftTime', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
-      sortByCloseShiftTimeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'closeShiftTime', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByHexId() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hexId', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByHexIdDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hexId', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByOpenShiftTime() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'openShiftTime', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
-      sortByOpenShiftTimeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'openShiftTime', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortBySalesQuantity() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'salesQuantity', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
-      sortBySalesQuantityDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'salesQuantity', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByShiftIsClosed() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'shiftIsClosed', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
-      sortByShiftIsClosedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'shiftIsClosed', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByShiftLabel() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'shiftLabel', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByShiftLabelDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'shiftLabel', Sort.desc);
+      return query.addSortBy(0, sort: Sort.desc);
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortBySynced() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'synced', Sort.asc);
+      return query.addSortBy(1);
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortBySyncedDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'synced', Sort.desc);
+      return query.addSortBy(1, sort: Sort.desc);
     });
   }
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByTotalCustomers() {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByShiftIsClosed() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalCustomers', Sort.asc);
+      return query.addSortBy(2);
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
-      sortByTotalCustomersDesc() {
+  sortByShiftIsClosedDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalCustomers', Sort.desc);
+      return query.addSortBy(2, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByHexId({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(3, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByHexIdDesc({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(3, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByUserId({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(4, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByUserIdDesc({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(4, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByShiftLabel({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(5, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByShiftLabelDesc({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(5, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByTotalSales() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalSales', Sort.asc);
+      return query.addSortBy(6);
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByTotalSalesDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalSales', Sort.desc);
+      return query.addSortBy(6, sort: Sort.desc);
     });
   }
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByUserId() {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortBySalesQuantity() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'userId', Sort.asc);
+      return query.addSortBy(7);
     });
   }
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByUserIdDesc() {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
+  sortBySalesQuantityDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'userId', Sort.desc);
+      return query.addSortBy(7, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByTotalCustomers() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(8);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
+  sortByTotalCustomersDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(8, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByCashDrawerEnd() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(9);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
+  sortByCashDrawerEndDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(9, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByCashDrawerStart() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(10);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
+  sortByCashDrawerStartDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(10, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByOpenShiftTime() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(11);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
+  sortByOpenShiftTimeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(11, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> sortByCloseShiftTime() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(12);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
+  sortByCloseShiftTimeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(12, sort: Sort.desc);
     });
   }
 }
 
 extension ShiftsModelQuerySortThenBy
     on QueryBuilder<ShiftsModel, ShiftsModel, QSortThenBy> {
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByCashDrawerEnd() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cashDrawerEnd', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
-      thenByCashDrawerEndDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cashDrawerEnd', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByCashDrawerStart() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cashDrawerStart', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
-      thenByCashDrawerStartDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'cashDrawerStart', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByCloseShiftTime() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'closeShiftTime', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
-      thenByCloseShiftTimeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'closeShiftTime', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByHexId() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hexId', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByHexIdDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hexId', Sort.desc);
-    });
-  }
-
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'id', Sort.asc);
+      return query.addSortBy(0);
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'id', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByOpenShiftTime() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'openShiftTime', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
-      thenByOpenShiftTimeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'openShiftTime', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenBySalesQuantity() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'salesQuantity', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
-      thenBySalesQuantityDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'salesQuantity', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByShiftIsClosed() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'shiftIsClosed', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
-      thenByShiftIsClosedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'shiftIsClosed', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByShiftLabel() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'shiftLabel', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByShiftLabelDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'shiftLabel', Sort.desc);
+      return query.addSortBy(0, sort: Sort.desc);
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenBySynced() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'synced', Sort.asc);
+      return query.addSortBy(1);
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenBySyncedDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'synced', Sort.desc);
+      return query.addSortBy(1, sort: Sort.desc);
     });
   }
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByTotalCustomers() {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByShiftIsClosed() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalCustomers', Sort.asc);
+      return query.addSortBy(2);
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
-      thenByTotalCustomersDesc() {
+  thenByShiftIsClosedDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalCustomers', Sort.desc);
+      return query.addSortBy(2, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByHexId({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(3, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByHexIdDesc({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(3, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByUserId({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(4, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByUserIdDesc({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(4, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByShiftLabel({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(5, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByShiftLabelDesc({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(5, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByTotalSales() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalSales', Sort.asc);
+      return query.addSortBy(6);
     });
   }
 
   QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByTotalSalesDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'totalSales', Sort.desc);
+      return query.addSortBy(6, sort: Sort.desc);
     });
   }
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByUserId() {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenBySalesQuantity() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'userId', Sort.asc);
+      return query.addSortBy(7);
     });
   }
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByUserIdDesc() {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
+  thenBySalesQuantityDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'userId', Sort.desc);
+      return query.addSortBy(7, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByTotalCustomers() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(8);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
+  thenByTotalCustomersDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(8, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByCashDrawerEnd() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(9);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
+  thenByCashDrawerEndDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(9, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByCashDrawerStart() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(10);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
+  thenByCashDrawerStartDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(10, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByOpenShiftTime() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(11);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
+  thenByOpenShiftTimeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(11, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy> thenByCloseShiftTime() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(12);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterSortBy>
+  thenByCloseShiftTimeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(12, sort: Sort.desc);
     });
   }
 }
 
 extension ShiftsModelQueryWhereDistinct
     on QueryBuilder<ShiftsModel, ShiftsModel, QDistinct> {
-  QueryBuilder<ShiftsModel, ShiftsModel, QDistinct> distinctByCashDrawerEnd() {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterDistinct> distinctBySynced() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'cashDrawerEnd');
+      return query.addDistinctBy(1);
     });
   }
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QDistinct>
-      distinctByCashDrawerStart() {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterDistinct>
+  distinctByShiftIsClosed() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'cashDrawerStart');
+      return query.addDistinctBy(2);
     });
   }
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QDistinct> distinctByCloseShiftTime() {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterDistinct> distinctByHexId({
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'closeShiftTime');
+      return query.addDistinctBy(3, caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QDistinct> distinctByHexId(
-      {bool caseSensitive = true}) {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterDistinct> distinctByUserId({
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'hexId', caseSensitive: caseSensitive);
+      return query.addDistinctBy(4, caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QDistinct> distinctByOpenShiftTime() {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterDistinct> distinctByShiftLabel({
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'openShiftTime');
+      return query.addDistinctBy(5, caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QDistinct> distinctBySalesQuantity() {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterDistinct>
+  distinctByTotalSales() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'salesQuantity');
+      return query.addDistinctBy(6);
     });
   }
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QDistinct> distinctByShiftIsClosed() {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterDistinct>
+  distinctBySalesQuantity() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'shiftIsClosed');
+      return query.addDistinctBy(7);
     });
   }
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QDistinct> distinctByShiftLabel(
-      {bool caseSensitive = true}) {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterDistinct>
+  distinctByTotalCustomers() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'shiftLabel', caseSensitive: caseSensitive);
+      return query.addDistinctBy(8);
     });
   }
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QDistinct> distinctBySynced() {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterDistinct>
+  distinctByCashDrawerEnd() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'synced');
+      return query.addDistinctBy(9);
     });
   }
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QDistinct> distinctByTotalCustomers() {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterDistinct>
+  distinctByCashDrawerStart() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'totalCustomers');
+      return query.addDistinctBy(10);
     });
   }
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QDistinct> distinctByTotalSales() {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterDistinct>
+  distinctByOpenShiftTime() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'totalSales');
+      return query.addDistinctBy(11);
     });
   }
 
-  QueryBuilder<ShiftsModel, ShiftsModel, QDistinct> distinctByUserId(
-      {bool caseSensitive = true}) {
+  QueryBuilder<ShiftsModel, ShiftsModel, QAfterDistinct>
+  distinctByCloseShiftTime() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'userId', caseSensitive: caseSensitive);
+      return query.addDistinctBy(12);
     });
   }
 }
 
-extension ShiftsModelQueryProperty
-    on QueryBuilder<ShiftsModel, ShiftsModel, QQueryProperty> {
-  QueryBuilder<ShiftsModel, int, QQueryOperations> idProperty() {
+extension ShiftsModelQueryProperty1
+    on QueryBuilder<ShiftsModel, ShiftsModel, QProperty> {
+  QueryBuilder<ShiftsModel, int, QAfterProperty> idProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'id');
+      return query.addProperty(0);
     });
   }
 
-  QueryBuilder<ShiftsModel, double, QQueryOperations> cashDrawerEndProperty() {
+  QueryBuilder<ShiftsModel, bool, QAfterProperty> syncedProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'cashDrawerEnd');
+      return query.addProperty(1);
     });
   }
 
-  QueryBuilder<ShiftsModel, double, QQueryOperations>
-      cashDrawerStartProperty() {
+  QueryBuilder<ShiftsModel, bool, QAfterProperty> shiftIsClosedProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'cashDrawerStart');
+      return query.addProperty(2);
     });
   }
 
-  QueryBuilder<ShiftsModel, DateTime, QQueryOperations>
-      closeShiftTimeProperty() {
+  QueryBuilder<ShiftsModel, String, QAfterProperty> hexIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'closeShiftTime');
+      return query.addProperty(3);
     });
   }
 
-  QueryBuilder<ShiftsModel, String, QQueryOperations> hexIdProperty() {
+  QueryBuilder<ShiftsModel, String, QAfterProperty> userIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'hexId');
+      return query.addProperty(4);
     });
   }
 
-  QueryBuilder<ShiftsModel, DateTime, QQueryOperations>
-      openShiftTimeProperty() {
+  QueryBuilder<ShiftsModel, String, QAfterProperty> shiftLabelProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'openShiftTime');
+      return query.addProperty(5);
     });
   }
 
-  QueryBuilder<ShiftsModel, int, QQueryOperations> salesQuantityProperty() {
+  QueryBuilder<ShiftsModel, double, QAfterProperty> totalSalesProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'salesQuantity');
+      return query.addProperty(6);
     });
   }
 
-  QueryBuilder<ShiftsModel, bool, QQueryOperations> shiftIsClosedProperty() {
+  QueryBuilder<ShiftsModel, int, QAfterProperty> salesQuantityProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'shiftIsClosed');
+      return query.addProperty(7);
     });
   }
 
-  QueryBuilder<ShiftsModel, String, QQueryOperations> shiftLabelProperty() {
+  QueryBuilder<ShiftsModel, int, QAfterProperty> totalCustomersProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'shiftLabel');
+      return query.addProperty(8);
     });
   }
 
-  QueryBuilder<ShiftsModel, bool, QQueryOperations> syncedProperty() {
+  QueryBuilder<ShiftsModel, double, QAfterProperty> cashDrawerEndProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'synced');
+      return query.addProperty(9);
     });
   }
 
-  QueryBuilder<ShiftsModel, int, QQueryOperations> totalCustomersProperty() {
+  QueryBuilder<ShiftsModel, double, QAfterProperty> cashDrawerStartProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'totalCustomers');
+      return query.addProperty(10);
     });
   }
 
-  QueryBuilder<ShiftsModel, double, QQueryOperations> totalSalesProperty() {
+  QueryBuilder<ShiftsModel, DateTime, QAfterProperty> openShiftTimeProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'totalSales');
+      return query.addProperty(11);
     });
   }
 
-  QueryBuilder<ShiftsModel, String, QQueryOperations> userIdProperty() {
+  QueryBuilder<ShiftsModel, DateTime, QAfterProperty> closeShiftTimeProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'userId');
+      return query.addProperty(12);
+    });
+  }
+}
+
+extension ShiftsModelQueryProperty2<R>
+    on QueryBuilder<ShiftsModel, R, QAfterProperty> {
+  QueryBuilder<ShiftsModel, (R, int), QAfterProperty> idProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(0);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R, bool), QAfterProperty> syncedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(1);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R, bool), QAfterProperty> shiftIsClosedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(2);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R, String), QAfterProperty> hexIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(3);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R, String), QAfterProperty> userIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(4);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R, String), QAfterProperty> shiftLabelProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(5);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R, double), QAfterProperty> totalSalesProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(6);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R, int), QAfterProperty> salesQuantityProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(7);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R, int), QAfterProperty> totalCustomersProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(8);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R, double), QAfterProperty>
+  cashDrawerEndProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(9);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R, double), QAfterProperty>
+  cashDrawerStartProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(10);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R, DateTime), QAfterProperty>
+  openShiftTimeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(11);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R, DateTime), QAfterProperty>
+  closeShiftTimeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(12);
+    });
+  }
+}
+
+extension ShiftsModelQueryProperty3<R1, R2>
+    on QueryBuilder<ShiftsModel, (R1, R2), QAfterProperty> {
+  QueryBuilder<ShiftsModel, (R1, R2, int), QOperations> idProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(0);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R1, R2, bool), QOperations> syncedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(1);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R1, R2, bool), QOperations>
+  shiftIsClosedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(2);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R1, R2, String), QOperations> hexIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(3);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R1, R2, String), QOperations> userIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(4);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R1, R2, String), QOperations>
+  shiftLabelProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(5);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R1, R2, double), QOperations>
+  totalSalesProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(6);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R1, R2, int), QOperations>
+  salesQuantityProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(7);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R1, R2, int), QOperations>
+  totalCustomersProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(8);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R1, R2, double), QOperations>
+  cashDrawerEndProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(9);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R1, R2, double), QOperations>
+  cashDrawerStartProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(10);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R1, R2, DateTime), QOperations>
+  openShiftTimeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(11);
+    });
+  }
+
+  QueryBuilder<ShiftsModel, (R1, R2, DateTime), QOperations>
+  closeShiftTimeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(12);
     });
   }
 }

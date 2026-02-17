@@ -329,7 +329,7 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
     Get.changeThemeMode(model.darkMode ? ThemeMode.dark : ThemeMode.light);
   }
 
-  _changeSize(int size) {
+  void _changeSize(int size) {
     final model = AppSettingsModel.fromStorage();
     final sizeController = TextEditingController(text: size.toString());
     Get.defaultDialog(

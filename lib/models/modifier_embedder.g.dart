@@ -3,282 +3,245 @@
 part of 'modifier_embedder.dart';
 
 // **************************************************************************
-// IsarEmbeddedGenerator
+// _IsarEmbeddedGenerator
 // **************************************************************************
 
 // coverage:ignore-file
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+// ignore_for_file: duplicate_ignore, invalid_use_of_protected_member, lines_longer_than_80_chars, constant_identifier_names, avoid_js_rounded_ints, no_leading_underscores_for_local_identifiers, require_trailing_commas, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_in_if_null_operators, library_private_types_in_public_api, prefer_const_constructors
+// ignore_for_file: type=lint
 
-const ModifierEmbedderSchema = Schema(
-  name: r'ModifierEmbedder',
-  id: -1459721454899555226,
-  properties: {
-    r'key': PropertySchema(
-      id: 0,
-      name: r'key',
-      type: IsarType.string,
-    ),
-    r'value': PropertySchema(
-      id: 1,
-      name: r'value',
-      type: IsarType.double,
-    )
-  },
-  estimateSize: _modifierEmbedderEstimateSize,
-  serialize: _modifierEmbedderSerialize,
-  deserialize: _modifierEmbedderDeserialize,
-  deserializeProp: _modifierEmbedderDeserializeProp,
+final ModifierEmbedderSchema = IsarGeneratedSchema(
+  schema: IsarSchema(
+    name: 'ModifierEmbedder',
+
+    embedded: true,
+    properties: [
+      IsarPropertySchema(name: 'key', type: IsarType.string),
+      IsarPropertySchema(name: 'value', type: IsarType.double),
+    ],
+    indexes: [],
+  ),
+  converter: IsarObjectConverter<void, ModifierEmbedder>(
+    serialize: serializeModifierEmbedder,
+    deserialize: deserializeModifierEmbedder,
+  ),
 );
 
-int _modifierEmbedderEstimateSize(
-  ModifierEmbedder object,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  var bytesCount = offsets.last;
-  bytesCount += 3 + object.key.length * 3;
-  return bytesCount;
+@isarProtected
+int serializeModifierEmbedder(IsarWriter writer, ModifierEmbedder object) {
+  IsarCore.writeString(writer, 1, object.key);
+  IsarCore.writeDouble(writer, 2, object.value);
+  return 0;
 }
 
-void _modifierEmbedderSerialize(
-  ModifierEmbedder object,
-  IsarWriter writer,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  writer.writeString(offsets[0], object.key);
-  writer.writeDouble(offsets[1], object.value);
-}
-
-ModifierEmbedder _modifierEmbedderDeserialize(
-  Id id,
-  IsarReader reader,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
+@isarProtected
+ModifierEmbedder deserializeModifierEmbedder(IsarReader reader) {
   final object = ModifierEmbedder();
-  object.key = reader.readString(offsets[0]);
-  object.value = reader.readDouble(offsets[1]);
+  object.key = IsarCore.readString(reader, 1) ?? '';
+  object.value = IsarCore.readDouble(reader, 2);
   return object;
-}
-
-P _modifierEmbedderDeserializeProp<P>(
-  IsarReader reader,
-  int propertyId,
-  int offset,
-  Map<Type, List<int>> allOffsets,
-) {
-  switch (propertyId) {
-    case 0:
-      return (reader.readString(offset)) as P;
-    case 1:
-      return (reader.readDouble(offset)) as P;
-    default:
-      throw IsarError('Unknown property with id $propertyId');
-  }
 }
 
 extension ModifierEmbedderQueryFilter
     on QueryBuilder<ModifierEmbedder, ModifierEmbedder, QFilterCondition> {
   QueryBuilder<ModifierEmbedder, ModifierEmbedder, QAfterFilterCondition>
-      keyEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  keyEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'key',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        EqualCondition(property: 1, value: value, caseSensitive: caseSensitive),
+      );
     });
   }
 
   QueryBuilder<ModifierEmbedder, ModifierEmbedder, QAfterFilterCondition>
-      keyGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
+  keyGreaterThan(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'key',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ModifierEmbedder, ModifierEmbedder, QAfterFilterCondition>
-      keyLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
+  keyGreaterThanOrEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'key',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ModifierEmbedder, ModifierEmbedder, QAfterFilterCondition>
-      keyBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
+  keyLessThan(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'key',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        LessCondition(property: 1, value: value, caseSensitive: caseSensitive),
+      );
     });
   }
 
   QueryBuilder<ModifierEmbedder, ModifierEmbedder, QAfterFilterCondition>
-      keyStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  keyLessThanOrEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'key',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ModifierEmbedder, ModifierEmbedder, QAfterFilterCondition>
-      keyEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  keyBetween(String lower, String upper, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'key',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 1,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ModifierEmbedder, ModifierEmbedder, QAfterFilterCondition>
-      keyContains(String value, {bool caseSensitive = true}) {
+  keyStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'key',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ModifierEmbedder, ModifierEmbedder, QAfterFilterCondition>
-      keyMatches(String pattern, {bool caseSensitive = true}) {
+  keyEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'key',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ModifierEmbedder, ModifierEmbedder, QAfterFilterCondition>
-      keyIsEmpty() {
+  keyContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'key',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ModifierEmbedder, ModifierEmbedder, QAfterFilterCondition>
-      keyIsNotEmpty() {
+  keyMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'key',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 1,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<ModifierEmbedder, ModifierEmbedder, QAfterFilterCondition>
-      valueEqualTo(
-    double value, {
-    double epsilon = Query.epsilon,
-  }) {
+  keyIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'value',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        const EqualCondition(property: 1, value: ''),
+      );
     });
   }
 
   QueryBuilder<ModifierEmbedder, ModifierEmbedder, QAfterFilterCondition>
-      valueGreaterThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
+  keyIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'value',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        const GreaterCondition(property: 1, value: ''),
+      );
     });
   }
 
   QueryBuilder<ModifierEmbedder, ModifierEmbedder, QAfterFilterCondition>
-      valueLessThan(
-    double value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
+  valueEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'value',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        EqualCondition(property: 2, value: value, epsilon: epsilon),
+      );
     });
   }
 
   QueryBuilder<ModifierEmbedder, ModifierEmbedder, QAfterFilterCondition>
-      valueBetween(
-    double lower,
-    double upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
+  valueGreaterThan(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'value',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        GreaterCondition(property: 2, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ModifierEmbedder, ModifierEmbedder, QAfterFilterCondition>
+  valueGreaterThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 2, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ModifierEmbedder, ModifierEmbedder, QAfterFilterCondition>
+  valueLessThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 2, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ModifierEmbedder, ModifierEmbedder, QAfterFilterCondition>
+  valueLessThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 2, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ModifierEmbedder, ModifierEmbedder, QAfterFilterCondition>
+  valueBetween(double lower, double upper, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 2,
+          lower: lower,
+          upper: upper,
+
+          epsilon: epsilon,
+        ),
+      );
     });
   }
 }

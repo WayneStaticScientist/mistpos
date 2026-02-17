@@ -222,7 +222,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
     );
   }
 
-  _buildItemInformationSection() {
+  MistMordernLayout _buildItemInformationSection() {
     int selectedIndex = SellingMethods.methods.indexOf(widget.model.soldBy);
 
     return MistMordernLayout(
@@ -352,7 +352,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
     );
   }
 
-  _buildInventoryManagementSection() {
+  MistMordernLayout _buildInventoryManagementSection() {
     return MistMordernLayout(
       label: "Inventory Management",
       children: [
@@ -425,7 +425,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
     );
   }
 
-  _buildModifiersSection() {
+  MistMordernLayout _buildModifiersSection() {
     return MistMordernLayout(
       label: 'Modifiers',
       children: [
@@ -461,7 +461,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
     );
   }
 
-  _buildDecoratorSection() {
+  MistMordernLayout _buildDecoratorSection() {
     return MistMordernLayout(
       label: "Item Appearance on POS Screen",
       children: [
@@ -508,7 +508,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
     );
   }
 
-  _wholesaleManagement() {
+  MistMordernLayout _wholesaleManagement() {
     return MistMordernLayout(
       label: "WholeSale Management",
       children: [
@@ -546,7 +546,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
     );
   }
 
-  _compositeListItem() {
+  Obx _compositeListItem() {
     return Obx(
       () =>
           [
@@ -619,7 +619,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
     });
   }
 
-  _editItem(InvItem e) {
+  void _editItem(InvItem e) {
     final itemCountController = TextEditingController(
       text: e.quantity.toString(),
     );

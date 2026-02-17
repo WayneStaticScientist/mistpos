@@ -3,537 +3,679 @@
 part of 'embedded_discount_model.dart';
 
 // **************************************************************************
-// IsarEmbeddedGenerator
+// _IsarEmbeddedGenerator
 // **************************************************************************
 
 // coverage:ignore-file
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+// ignore_for_file: duplicate_ignore, invalid_use_of_protected_member, lines_longer_than_80_chars, constant_identifier_names, avoid_js_rounded_ints, no_leading_underscores_for_local_identifiers, require_trailing_commas, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_in_if_null_operators, library_private_types_in_public_api, prefer_const_constructors
+// ignore_for_file: type=lint
 
-const EmbeddedDiscountModelSchema = Schema(
-  name: r'EmbeddedDiscountModel',
-  id: 2520789001739607538,
-  properties: {
-    r'discount': PropertySchema(
-      id: 0,
-      name: r'discount',
-      type: IsarType.double,
-    ),
-    r'discountId': PropertySchema(
-      id: 1,
-      name: r'discountId',
-      type: IsarType.string,
-    ),
-    r'name': PropertySchema(
-      id: 2,
-      name: r'name',
-      type: IsarType.string,
-    ),
-    r'percentageDiscount': PropertySchema(
-      id: 3,
-      name: r'percentageDiscount',
-      type: IsarType.bool,
-    )
-  },
-  estimateSize: _embeddedDiscountModelEstimateSize,
-  serialize: _embeddedDiscountModelSerialize,
-  deserialize: _embeddedDiscountModelDeserialize,
-  deserializeProp: _embeddedDiscountModelDeserializeProp,
+final EmbeddedDiscountModelSchema = IsarGeneratedSchema(
+  schema: IsarSchema(
+    name: 'EmbeddedDiscountModel',
+
+    embedded: true,
+    properties: [
+      IsarPropertySchema(name: 'discountId', type: IsarType.string),
+      IsarPropertySchema(name: 'discount', type: IsarType.double),
+      IsarPropertySchema(name: 'percentageDiscount', type: IsarType.bool),
+      IsarPropertySchema(name: 'name', type: IsarType.string),
+    ],
+    indexes: [],
+  ),
+  converter: IsarObjectConverter<void, EmbeddedDiscountModel>(
+    serialize: serializeEmbeddedDiscountModel,
+    deserialize: deserializeEmbeddedDiscountModel,
+  ),
 );
 
-int _embeddedDiscountModelEstimateSize(
+@isarProtected
+int serializeEmbeddedDiscountModel(
+  IsarWriter writer,
   EmbeddedDiscountModel object,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
 ) {
-  var bytesCount = offsets.last;
   {
     final value = object.discountId;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
+    if (value == null) {
+      IsarCore.writeNull(writer, 1);
+    } else {
+      IsarCore.writeString(writer, 1, value);
+    }
+  }
+  IsarCore.writeDouble(writer, 2, object.discount ?? double.nan);
+  {
+    final value = object.percentageDiscount;
+    if (value == null) {
+      IsarCore.writeNull(writer, 3);
+    } else {
+      IsarCore.writeBool(writer, 3, value: value);
     }
   }
   {
     final value = object.name;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
+    if (value == null) {
+      IsarCore.writeNull(writer, 4);
+    } else {
+      IsarCore.writeString(writer, 4, value);
     }
   }
-  return bytesCount;
+  return 0;
 }
 
-void _embeddedDiscountModelSerialize(
-  EmbeddedDiscountModel object,
-  IsarWriter writer,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  writer.writeDouble(offsets[0], object.discount);
-  writer.writeString(offsets[1], object.discountId);
-  writer.writeString(offsets[2], object.name);
-  writer.writeBool(offsets[3], object.percentageDiscount);
-}
-
-EmbeddedDiscountModel _embeddedDiscountModelDeserialize(
-  Id id,
-  IsarReader reader,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
+@isarProtected
+EmbeddedDiscountModel deserializeEmbeddedDiscountModel(IsarReader reader) {
+  final String? _discountId;
+  _discountId = IsarCore.readString(reader, 1);
+  final double? _discount;
+  {
+    final value = IsarCore.readDouble(reader, 2);
+    if (value.isNaN) {
+      _discount = null;
+    } else {
+      _discount = value;
+    }
+  }
+  final bool? _percentageDiscount;
+  {
+    if (IsarCore.readNull(reader, 3)) {
+      _percentageDiscount = null;
+    } else {
+      _percentageDiscount = IsarCore.readBool(reader, 3);
+    }
+  }
+  final String? _name;
+  _name = IsarCore.readString(reader, 4);
   final object = EmbeddedDiscountModel(
-    discount: reader.readDoubleOrNull(offsets[0]),
-    discountId: reader.readStringOrNull(offsets[1]),
-    name: reader.readStringOrNull(offsets[2]),
-    percentageDiscount: reader.readBoolOrNull(offsets[3]),
+    discountId: _discountId,
+    discount: _discount,
+    percentageDiscount: _percentageDiscount,
+    name: _name,
   );
   return object;
 }
 
-P _embeddedDiscountModelDeserializeProp<P>(
-  IsarReader reader,
-  int propertyId,
-  int offset,
-  Map<Type, List<int>> allOffsets,
-) {
-  switch (propertyId) {
-    case 0:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 1:
-      return (reader.readStringOrNull(offset)) as P;
-    case 2:
-      return (reader.readStringOrNull(offset)) as P;
-    case 3:
-      return (reader.readBoolOrNull(offset)) as P;
-    default:
-      throw IsarError('Unknown property with id $propertyId');
-  }
-}
-
-extension EmbeddedDiscountModelQueryFilter on QueryBuilder<
-    EmbeddedDiscountModel, EmbeddedDiscountModel, QFilterCondition> {
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> discountIsNull() {
+extension EmbeddedDiscountModelQueryFilter
+    on
+        QueryBuilder<
+          EmbeddedDiscountModel,
+          EmbeddedDiscountModel,
+          QFilterCondition
+        > {
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountIdIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'discount',
-      ));
+      return query.addFilterCondition(const IsNullCondition(property: 1));
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> discountIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'discount',
-      ));
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountIdIsNotNull() {
+    return QueryBuilder.apply(not(), (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 1));
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> discountEqualTo(
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountIdEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 1, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountIdGreaterThan(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountIdGreaterThanOrEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountIdLessThan(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 1, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountIdLessThanOrEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountIdBetween(String? lower, String? upper, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 1,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountIdStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountIdEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 1,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 1,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const EqualCondition(property: 1, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const GreaterCondition(property: 1, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 2));
+    });
+  }
+
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountIsNotNull() {
+    return QueryBuilder.apply(not(), (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 2));
+    });
+  }
+
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountEqualTo(double? value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 2, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountGreaterThan(double? value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 2, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountGreaterThanOrEqualTo(
     double? value, {
-    double epsilon = Query.epsilon,
+    double epsilon = Filter.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'discount',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 2, value: value, epsilon: epsilon),
+      );
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> discountGreaterThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountLessThan(double? value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'discount',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        LessCondition(property: 2, value: value, epsilon: epsilon),
+      );
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> discountLessThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountLessThanOrEqualTo(double? value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'discount',
-        value: value,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 2, value: value, epsilon: epsilon),
+      );
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> discountBetween(
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  discountBetween(
     double? lower,
     double? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
+    double epsilon = Filter.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'discount',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 2,
+          lower: lower,
+          upper: upper,
+
+          epsilon: epsilon,
+        ),
+      );
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> discountIdIsNull() {
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  percentageDiscountIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'discountId',
-      ));
+      return query.addFilterCondition(const IsNullCondition(property: 3));
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> discountIdIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'discountId',
-      ));
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  percentageDiscountIsNotNull() {
+    return QueryBuilder.apply(not(), (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 3));
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> discountIdEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  percentageDiscountEqualTo(bool? value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'discountId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        EqualCondition(property: 3, value: value),
+      );
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> discountIdGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  nameIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'discountId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(const IsNullCondition(property: 4));
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> discountIdLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'discountId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  nameIsNotNull() {
+    return QueryBuilder.apply(not(), (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 4));
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> discountIdBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  nameEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'discountId',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        EqualCondition(property: 4, value: value, caseSensitive: caseSensitive),
+      );
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> discountIdStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  nameGreaterThan(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'discountId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 4,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> discountIdEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  nameGreaterThanOrEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'discountId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 4,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-          QAfterFilterCondition>
-      discountIdContains(String value, {bool caseSensitive = true}) {
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  nameLessThan(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'discountId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        LessCondition(property: 4, value: value, caseSensitive: caseSensitive),
+      );
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-          QAfterFilterCondition>
-      discountIdMatches(String pattern, {bool caseSensitive = true}) {
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  nameLessThanOrEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'discountId',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 4,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> discountIdIsEmpty() {
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  nameBetween(String? lower, String? upper, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'discountId',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 4,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> discountIdIsNotEmpty() {
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  nameStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'discountId',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 4,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> nameIsNull() {
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  nameEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'name',
-      ));
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 4,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> nameIsNotNull() {
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  nameContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'name',
-      ));
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 4,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> nameEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  nameMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 4,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> nameGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  nameIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        const EqualCondition(property: 4, value: ''),
+      );
     });
   }
 
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> nameLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<
+    EmbeddedDiscountModel,
+    EmbeddedDiscountModel,
+    QAfterFilterCondition
+  >
+  nameIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> nameBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'name',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> nameStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> nameEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-          QAfterFilterCondition>
-      nameContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-          QAfterFilterCondition>
-      nameMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'name',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> nameIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'name',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> nameIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'name',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> percentageDiscountIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'percentageDiscount',
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> percentageDiscountIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'percentageDiscount',
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedDiscountModel, EmbeddedDiscountModel,
-      QAfterFilterCondition> percentageDiscountEqualTo(bool? value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'percentageDiscount',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        const GreaterCondition(property: 4, value: ''),
+      );
     });
   }
 }
 
-extension EmbeddedDiscountModelQueryObject on QueryBuilder<
-    EmbeddedDiscountModel, EmbeddedDiscountModel, QFilterCondition> {}
+extension EmbeddedDiscountModelQueryObject
+    on
+        QueryBuilder<
+          EmbeddedDiscountModel,
+          EmbeddedDiscountModel,
+          QFilterCondition
+        > {}

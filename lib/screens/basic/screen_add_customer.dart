@@ -153,7 +153,7 @@ class _ScreenAddCustomerState extends State<ScreenAddCustomer> {
     );
   }
 
-  _addCustomerCall() async {
+  Future<void> _addCustomerCall() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }

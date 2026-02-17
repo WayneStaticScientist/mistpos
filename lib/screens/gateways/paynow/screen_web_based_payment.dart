@@ -57,7 +57,7 @@ class _ScreenWebBasedPaymentPaynowState
     );
   }
 
-  _pay() async {
+  Future<void> _pay() async {
     final amount = _itemController.totalPrice.value;
     if (_userController.user.value == null) {
       Toaster.showError("User registration needed");

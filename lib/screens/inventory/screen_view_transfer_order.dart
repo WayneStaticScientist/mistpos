@@ -63,7 +63,7 @@ class _ScreenViewTransferOrderState extends State<ScreenViewTransferOrder> {
     );
   }
 
-  _buildInventorySummary() {
+  MistMordernLayout _buildInventorySummary() {
     return MistMordernLayout(
       label: "Summary",
       children: [
@@ -80,7 +80,7 @@ class _ScreenViewTransferOrderState extends State<ScreenViewTransferOrder> {
     );
   }
 
-  _buildSupplierInformation() {
+  DecoratedBox _buildSupplierInformation() {
     return [
           "Sender Information".text(
             style: TextStyle(fontWeight: FontWeight.bold),
@@ -134,7 +134,7 @@ class _ScreenViewTransferOrderState extends State<ScreenViewTransferOrder> {
         );
   }
 
-  _buildProductInformation() {
+  DecoratedBox _buildProductInformation() {
     return [
           "Items Information ".text(
             style: TextStyle(fontWeight: FontWeight.bold),

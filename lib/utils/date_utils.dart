@@ -103,7 +103,7 @@ class MistDateUtils {
     }
   }
 
-  static formatSortableDate(DateTime createdAt) {
+  static String formatSortableDate(DateTime createdAt) {
     return "${createdAt.year}/${createdAt.month.toString().padLeft(2, '0')}/${createdAt.day.toString().padLeft(2, '0')} ${getWeekDayName(createdAt)} ${createdAt.day} ${_getShortMonthName(createdAt.month)}";
   }
 }

@@ -193,7 +193,7 @@ class _ScreenAddPurchaseOrderState extends State<ScreenAddPurchaseOrder> {
     }
   }
 
-  _makeTable(List<InvItem> selectedInvItems) {
+  SingleChildScrollView _makeTable(List<InvItem> selectedInvItems) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Table(

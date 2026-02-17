@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:isar/isar.dart';
+import 'package:isar_plus/isar_plus.dart';
+import 'package:mistpos/main.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/models/tax_model.dart';
@@ -37,7 +38,7 @@ class DevicesController extends GetxController {
   RxList<PrinterDeviceModel> printerDevices = RxList<PrinterDeviceModel>([]);
 
   Future<void> connectToNetwork(String ipAddress, int port, User? user) async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       Toaster.showError("Database was not initialized");
       return;
@@ -65,7 +66,7 @@ class DevicesController extends GetxController {
       );
       return;
     }
-    await isar.writeTxn(() async {
+    await isar.write((isar) async {
       isar.printerDeviceModels.put(
         PrinterDeviceModel(
           name: ipAddress,
@@ -83,7 +84,7 @@ class DevicesController extends GetxController {
     String macAddress,
     User? user,
   ) async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       Toaster.showError("Database was not initialized");
       return false;
@@ -119,7 +120,7 @@ class DevicesController extends GetxController {
         connectingToDevice.value = false;
         return false;
       }
-      await isar.writeTxn(() async {
+      await isar.write((isar) async {
         isar.printerDeviceModels.put(
           PrinterDeviceModel(
             name: name,
@@ -140,21 +141,21 @@ class DevicesController extends GetxController {
   }
 
   void getConnectedDevices() async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
-    printerDevices.value = await isar.printerDeviceModels.where().findAll();
+    printerDevices.value = isar.printerDeviceModels.where().findAll();
   }
 
   void forgetDevice(PrinterDeviceModel printerDevic) async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
     }
     printer.unregisterDevice(PosPrinterRole.cashier);
-    await isar.writeTxn(() async {
-      await isar.printerDeviceModels.delete(printerDevic.id);
+    await isar.write((isar) async {
+      isar.printerDeviceModels.delete(printerDevic.id);
     });
     Toaster.showError(
       "Printer device disconnected , you might wanna connect from devices",
@@ -302,12 +303,12 @@ class DevicesController extends GetxController {
   }
 
   void connectLastDevice() async {
-    final isar = Isar.getInstance();
+    final isar = IsarStatic.getInstance();
     final user = User.fromStorage();
     if (isar == null || user == null) {
       return;
     }
-    final device = await isar.printerDeviceModels
+    final device = isar.printerDeviceModels
         .where()
         .sortByIsConnected()
         .findFirst();

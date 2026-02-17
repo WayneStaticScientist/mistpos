@@ -1,10 +1,11 @@
-import 'package:isar/isar.dart';
+import 'package:isar_plus/isar_plus.dart';
+import 'package:mistpos/main.dart';
 import 'package:mistpos/models/inv_item.dart';
 part 'item_unsaved_model.g.dart';
 
 @collection
 class ItemUnsavedModel {
-  Id id = Isar.autoIncrement;
+  late int id = IdGen.id;
   double miniItems = 0;
   double wholesalePrice = 0;
   bool wholesaleActivated = false;
