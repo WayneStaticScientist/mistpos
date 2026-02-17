@@ -63,6 +63,8 @@ class _ScreenViewExpenseState extends State<ScreenViewExpense> {
           24.gapHeight,
           _buildSupplierInformation(),
           24.gapHeight,
+          _builtAccepterInformation(),
+          24.gapHeight,
           _buildProductInformation(),
         ],
       ).constrained(maxWidth: ScreenSizes.maxWidth).center(),
@@ -181,6 +183,44 @@ class _ScreenViewExpenseState extends State<ScreenViewExpense> {
           ).visibleIf(widget.model.senderId['role'] == 'cashier'),
         ],
       ],
+    );
+  }
+
+  Widget _builtAccepterInformation() {
+    return MistMordernLayout(
+      label: "Accepted By",
+      children: [
+        if (widget.model.acceptedBy != null &&
+            widget.model.acceptedBy is Map) ...[
+          ListTile(
+            title: Text(widget.model.acceptedBy['fullName'] ?? "No Name"),
+            leading: Iconify(Bx.user, color: AppTheme.color(context)),
+            subtitle: "Name".text(),
+          ),
+          12.gapHeight,
+          ListTile(
+            title: Text(widget.model.acceptedBy['email'] ?? "No Email"),
+            leading: Iconify(Bx.envelope, color: AppTheme.color(context)),
+            subtitle: "Email".text(),
+          ),
+          12.gapHeight,
+          ListTile(
+            title: Text(
+              (widget.model.acceptedBy['role'] ?? "").toString().toUpperCase(),
+            ),
+            leading: Iconify(Bx.flag, color: AppTheme.color(context)),
+            subtitle: "Role".text(),
+          ),
+          12.gapHeight,
+          ListTile(
+            title: Text((widget.model.acceptedBy['till'] ?? 0).toString()),
+            leading: Iconify(Bx.building, color: AppTheme.color(context)),
+            subtitle: "Till".text(),
+          ).visibleIf(widget.model.acceptedBy['role'] == 'cashier'),
+        ],
+      ],
+    ).visibleIf(
+      widget.model.acceptedBy != null && widget.model.acceptedBy is Map,
     );
   }
 

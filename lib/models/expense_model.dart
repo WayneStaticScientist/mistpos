@@ -8,6 +8,7 @@ class ExpenseModel {
   final String expenseFor;
   final String paymentType;
   final dynamic senderId;
+  final dynamic acceptedBy;
   final String referenceNumber;
 
   ExpenseModel({
@@ -19,6 +20,7 @@ class ExpenseModel {
     required this.senderId,
     required this.category,
     required this.expenseFor,
+    required this.acceptedBy,
     required this.paymentType,
     required this.referenceNumber,
   });
@@ -28,6 +30,7 @@ class ExpenseModel {
       notes: json['notes'],
       category: json['category'],
       expenseFor: json['expenseFor'],
+      acceptedBy: json['acceptedBy'],
       paymentType: json['paymentType'],
       senderId: json['senderId'] ?? '',
       date: DateTime.parse(json['date']),
