@@ -90,4 +90,40 @@ class ExpensesController extends GetxController {
       (previousValue, element) => previousValue + element.amount,
     );
   }
+
+  RxInt totalPaginatedExpenses = 0.obs;
+  RxInt paginatedExpensesPage = 1.obs;
+  RxBool fetchingPaginatedExpenses = false.obs;
+  RxString fetchingPaginatedExpensesResponse = ''.obs;
+  RxList<ExpenseModel> paginatedExpenses = RxList([]);
+  Future<void> fetchPaginatedExpenses({
+    int page = 1,
+    String status = '',
+    String search = '',
+    String category = '',
+  }) async {
+    if (fetchingPaginatedExpenses.value) return;
+    fetchingPaginatedExpenses.value = true;
+    fetchingPaginatedExpensesResponse.value = '';
+    final response = await Net.get(
+      "/expenses-pages?search=$search&page=$page&category=$category&status=$status",
+    );
+    fetchingPaginatedExpenses.value = false;
+    if (response.hasError) {
+      fetchingPaginatedExpensesResponse.value = response.response;
+      Toaster.showError(response.response);
+      return;
+    }
+    final list = response.body['list'] as List<dynamic>?;
+    expenses.clear();
+    if (list == null) {
+      return;
+    }
+    if (page == 1) {
+      paginatedExpenses.clear();
+    }
+    paginatedExpenses.addAll(list.map((e) => ExpenseModel.fromJson(e)));
+    totalPaginatedExpenses.value = response.body['total'];
+    paginatedExpensesPage.value = response.body['page'];
+  }
 }

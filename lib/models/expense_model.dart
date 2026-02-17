@@ -1,6 +1,6 @@
 class ExpenseModel {
   final String id;
-
+  final String status;
   final String notes;
   final DateTime date;
   final double amount;
@@ -13,6 +13,7 @@ class ExpenseModel {
     required this.id,
     required this.notes,
     required this.date,
+    required this.status,
     required this.amount,
     required this.category,
     required this.expenseFor,
@@ -27,6 +28,7 @@ class ExpenseModel {
       expenseFor: json['expenseFor'],
       paymentType: json['paymentType'],
       date: DateTime.parse(json['date']),
+      status: json['status'] ?? 'pending',
       referenceNumber: json['referenceNumber'],
       amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
     );

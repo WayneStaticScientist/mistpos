@@ -25,6 +25,7 @@ import 'package:mistpos/navs/admin/nav_sales_by_employee.dart';
 import 'package:mistpos/screens/basic/screen_add_employee.dart';
 import 'package:mistpos/screens/basic/screen_add_customer.dart';
 import 'package:mistpos/navs/items_navs/nav_category_list.dart';
+import 'package:mistpos/navs/admin/nav_inventory_expenses.dart';
 import 'package:mistpos/navs/items_navs/nav_discounts_list.dart';
 import 'package:mistpos/navs/admin/nav_inventory_valuation.dart';
 import 'package:mistpos/navs/items_navs/nav_modifiers_list.dart';
@@ -61,14 +62,15 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
   final _navInvEvaluation = GlobalKey<NavInventoryValuationState>();
   late final navs = {
     "Items": NavItemsList(),
-    "Overview": NavAdminOverView(key: _adminOverviewKey),
+    "Stores": NavAdminStores(),
     'Receits': ReceitsLayoutView(),
     "Categories": NavCategoryList(),
     "Modifiers": NavModifiersList(),
     "Discounts": NavDiscountsList(),
     "Employees": NavAdminEmployees(),
     "Customers": NavListCustomers(),
-    "Stores": NavAdminStores(),
+    "Expenses": NavInventoryExpenses(),
+    "Overview": NavAdminOverView(key: _adminOverviewKey),
     "Daily Sales": DailySales(key: _dailySalesKey),
     "Sales By Employee": NavSalesByEmployee(key: _salesByEmployeeKeys),
     "Sales By Payments": NavSalesByPayment(key: _salesByPayment),

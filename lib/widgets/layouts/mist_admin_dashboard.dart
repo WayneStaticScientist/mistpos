@@ -168,6 +168,7 @@ class _MistAdminDashboardState extends State<MistAdminDashboard> {
                     "Suppliers",
                     "Purchase Orders",
                     "Stock Adjustments",
+                    "Expenses",
                   ].contains(widget.selectedTile)
                   ? Colors.grey.withAlpha(50)
                   : null,
@@ -239,6 +240,22 @@ class _MistAdminDashboardState extends State<MistAdminDashboard> {
                       : Iconify(Bx.lock, color: Colors.red, size: 16),
                   onTap: () => widget.onTap("Transfer Orders"),
                   tileColor: widget.selectedTile == "Transfer Orders"
+                      ? Colors.grey.withAlpha(50)
+                      : null,
+                ),
+                ListTile(
+                  leading: Iconify(
+                    Carbon.money,
+                    color: isSubscribed ? Colors.green : Colors.red,
+                  ),
+                  title: "Expenses".text(
+                    style: TextStyle(color: isSubscribed ? null : Colors.red),
+                  ),
+                  trailing: isSubscribed
+                      ? null
+                      : Iconify(Bx.lock, color: Colors.red, size: 16),
+                  onTap: () => widget.onTap("Expenses"),
+                  tileColor: widget.selectedTile == "Expenses"
                       ? Colors.grey.withAlpha(50)
                       : null,
                 ),
