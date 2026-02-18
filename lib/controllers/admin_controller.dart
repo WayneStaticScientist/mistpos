@@ -188,6 +188,7 @@ class AdminController extends GetxController {
       Toaster.showError(result.response);
       return false;
     }
+
     loadCompanies();
     return true;
   }
