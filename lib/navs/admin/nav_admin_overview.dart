@@ -108,6 +108,16 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
                       _userController.user.value?.baseCurrence ?? '',
                     ),
                   ),
+                  18.gapWidth,
+                  CardOverview(
+                    color: Colors.orange.withAlpha(120),
+                    label: "Average Cost",
+                    value: CurrenceConverter.getCurrenceFloatInStrings(
+                      _adminController.statsPoducts.value?.totalAverageCosts ??
+                          0,
+                      _userController.user.value?.baseCurrence ?? '',
+                    ),
+                  ),
                 ].row(),
               ).sizedBox(height: 150, width: double.infinity),
             ),
@@ -155,6 +165,29 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
                     label: "Total Sales",
                     value: CurrenceConverter.getCurrenceFloatInStrings(
                       _adminController.statsSales.value?.totalSales ?? 0,
+                      _userController.user.value?.baseCurrence ?? '',
+                    ),
+                  ),
+                  18.gapWidth,
+                  CardOverview(
+                    label: "Average Cost of Sales",
+                    value: CurrenceConverter.getCurrenceFloatInStrings(
+                      _adminController.statsSales.value?.totalAverageCosts ?? 0,
+                      _userController.user.value?.baseCurrence ?? '',
+                    ),
+                  ),
+                  18.gapWidth,
+                  CardOverview(
+                    label: "Average Profit",
+                    value: CurrenceConverter.getCurrenceFloatInStrings(
+                      ((_adminController.statsSales.value?.totalSales ?? 0) -
+                              (_adminController
+                                      .statsSales
+                                      .value
+                                      ?.totalAverageCosts ??
+                                  0)) -
+                          (_adminController.statsSales.value?.totalExpenses ??
+                              0),
                       _userController.user.value?.baseCurrence ?? '',
                     ),
                   ),

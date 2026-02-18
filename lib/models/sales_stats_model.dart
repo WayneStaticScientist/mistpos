@@ -8,6 +8,7 @@ class Cashier {
 }
 
 class StatsSalesModel {
+  final double totalAverageCosts;
   final double totalExpenses;
   final double expensesCount;
   final double totalSales;
@@ -24,6 +25,7 @@ class StatsSalesModel {
   final List<Cashier> cashiers;
 
   StatsSalesModel({
+    required this.totalAverageCosts,
     required this.totalTaxs,
     required this.totalExpenses,
     required this.expensesCount,
@@ -42,6 +44,7 @@ class StatsSalesModel {
 
   factory StatsSalesModel.fromJson(Map<String, dynamic> json) {
     return StatsSalesModel(
+      totalAverageCosts: (json['totalAverageCosts'] as num?)?.toDouble() ?? 0.0,
       totalExpenses: (json['totalExpenses'] as num?)?.toDouble() ?? 0.0,
       expensesCount: (json['expensesCount'] as num?)?.toDouble() ?? 0.0,
       totalCredits: (json['totalCredits'] as num?)?.toDouble() ?? 0.0,
