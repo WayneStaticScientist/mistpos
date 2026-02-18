@@ -23,8 +23,9 @@ class MistDateUtils {
   static String getDifferenxeInApproximate(DateTime to) {
     final from = DateTime.now();
     int days = to.difference(from).inDays;
+
     if (days > 0) {
-      return "$days left";
+      return "$days days left";
     }
     int hours = to.difference(from).inHours;
     if (hours > 0) {

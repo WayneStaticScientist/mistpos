@@ -548,6 +548,11 @@ class ItemsController extends GetxController {
         Toaster.showError(response.response);
         return null;
       }
+      if (selectedShift.value != null) {
+        double price = model.items[index].price * count;
+        selectedShift.value!.totalSales =
+            selectedShift.value!.totalSales - price;
+      }
       final isar = IsarStatic.getInstance();
       if (isar == null) {
         Toaster.showError("database not initialized");
