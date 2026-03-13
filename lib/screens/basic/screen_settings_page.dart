@@ -170,6 +170,9 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                 title: "Receit Design".text(),
                 contentPadding: EdgeInsets.all(0),
                 leading: Iconify(Bx.receipt, color: AppTheme.color(context)),
+              ).visibleIf(
+                _user.user.value?.role == 'admin' ||
+                    _user.user.value?.role == 'manager',
               ),
             ],
           ),
