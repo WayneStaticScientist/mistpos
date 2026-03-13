@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:isar_plus/isar_plus.dart';
 import 'package:mistpos/main.dart';
+import 'package:mistpos/utils/offline_printer.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/models/tax_model.dart';
@@ -175,131 +175,123 @@ class DevicesController extends GetxController {
     int receitWidth = model.printerRecietLength;
     bool enableQrCode = model.enableQrCode;
     String padRight(String text, int length) => text.padRight(length, ' ');
-    if (model.receitLogoPath.isNotEmpty) {
-      final rasterImage = getRasterImage(model.receitLogoPath);
-      if (rasterImage != null) {
+    for (final row in model.extras) {
+      if (!row.enabled) {
+        continue;
+      }
+      if (row.key == "Company Logo" && row.type == "system") {
+        OfflinePrinter.printLogo(model, b);
+        continue;
+      }
+      if (row.value == "company" && row.type == "system") {
+        b.text(
+          user.companyName.toUpperCase().toString(),
+          align: PosAlign.center,
+          bold: true,
+        );
+        b.feed(2);
+        b.text(
+          'Company: ${user.companyName.toString()}',
+          align: PosAlign.center,
+        );
+        continue;
+      }
+      if (row.value == "seller" && row.type == "system") {
+        b.text('Role: ${user.role.toString()}');
+        b.text('Pos: ${user.till.toString()}');
+        continue;
+      }
+      if (row.value == "time" && row.type == "system") {
+        b.text(
+          'Time: ${DateTime.now().toString().substring(0, 19)}',
+          align: PosAlign.center,
+        );
+        continue;
+      }
+      if (row.value == "fiscal" && row.type == "system") {
         b.feed(1);
-        b.raster(rasterImage);
+        b.text('*** FISCAL RECEIPT ***', align: PosAlign.center, bold: true);
         b.feed(1);
+        b.text('.' * receitWidth);
+        continue;
+      }
+
+      if (row.value == "items" && row.type == "system") {
+        OfflinePrinter.printReceitItems(
+          model: model,
+          b: b,
+          itemReceitModel: itemReceitModel,
+          user: user,
+          salesTaxes: salesTaxes,
+        );
+      }
+      if (row.value == "customer" && row.type == "system") {
+        if (customer != null) {
+          b.feed(1);
+          b.text("--- CUSTOMER INFO ---", align: PosAlign.center, bold: true);
+          b.feed(1);
+          b.text('Customer: ${customer.fullName}');
+          b.text('Phone: ${customer.phoneNumber}');
+          b.text('Email: ${customer.email}');
+          b.text('Address: ${customer.address}');
+          b.feed(1);
+        }
+        continue;
+      }
+      if (row.value == "qrcode" && row.type == "system") {
+        if (enableQrCode) {
+          b.feed(1);
+          b.text("--- QR CODE ---", align: PosAlign.center, bold: true);
+          b.qrCode(itemReceitModel.label);
+          b.feed(1);
+        }
+        continue;
+      }
+      if (row.value == "label" && row.type == "system") {
+        b.text('--- END ---', align: PosAlign.center);
+        b.feed(1);
+        b.text(itemReceitModel.label, align: PosAlign.center);
+        b.feed(1);
+        continue;
+      }
+      if (row.type == "normal-spaced") {
+        String value = sanitizeInput(row.key, user, customer, itemReceitModel);
+        String label = padRight(row.key, receitWidth - value.length) + value;
+        b.text(label, bold: row.isBold);
+        continue;
+      }
+      if (row.type == "normal") {
+        b.text(
+          "${row.key} : ${sanitizeInput(row.key, user, customer, itemReceitModel)}",
+          bold: row.isBold,
+        );
+        continue;
+      }
+      if (row.type == "space") {
+        b.feed(1);
+        continue;
+      }
+      if (row.type == "repeat") {
+        String value = row.value * receitWidth;
+        b.text(value);
+        continue;
+      }
+      if (row.type == "comment") {
+        b.text(
+          sanitizeInput(row.value, user, customer, itemReceitModel),
+          align: row.align == "center"
+              ? PosAlign.center
+              : (row.align == "left" ? PosAlign.left : PosAlign.right),
+          bold: row.isBold,
+        );
+        continue;
       }
     }
-    b.text(
-      user.companyName.toUpperCase().toString(),
-      align: PosAlign.center,
-      bold: true,
-    );
-    b.feed(2);
-    b.text('Company: ${user.companyName.toString()}', align: PosAlign.center);
-    b.text('Role: ${user.role.toString()}');
-    b.text('Pos: ${user.till.toString()}');
-    b.text(
-      'Time: ${DateTime.now().toString().substring(0, 19)}',
-      align: PosAlign.center,
-    );
-    b.feed(1);
-    b.text('*** FISCAL RECEIPT ***', align: PosAlign.center, bold: true);
-    b.feed(1);
+
     // --- SEPARATOR and ITEM HEADER (Manually Aligned) ---
-    b.text('.' * receitWidth);
-    for (final item in itemReceitModel.items) {
-      final itemPrice = item.addenum + item.price;
-      final totalItemPrice = itemPrice * item.count;
-      final totalStr = CurrenceConverter.getCurrenceFloatInStrings(
-        totalItemPrice,
-        user.baseCurrence,
-      );
-      final itemName = item.name.substring(
-        0,
-        math.min(item.name.length, (receitWidth * 0.65).toInt()),
-      );
-      String label =
-          padRight(itemName, receitWidth - totalStr.length) + totalStr;
-      b.text(label);
-      final unitPriceStr = CurrenceConverter.getCurrenceFloatInStrings(
-        itemPrice,
-        user.baseCurrence,
-      );
-      String priceModel = "${item.count} x $unitPriceStr";
-      if (item.discount > 0 && item.discountId != null) {
-        priceModel +=
-            " - ${(item.percentageDiscount ? '${item.discount}%' : CurrenceConverter.getCurrenceFloatInStrings(item.discount, user.baseCurrence))}";
-      }
-      b.text(priceModel);
-      if (item.refunded) {
-        String refundModel = "refund  ${item.originalCount} ->  ${item.count}";
-        b.text(refundModel);
-      }
-    }
-    // --- SEPARATOR ---
-    b.text('.' * receitWidth);
-    b.feed(1);
-    final totalDueStr = CurrenceConverter.getCurrenceFloatInStrings(
-      itemReceitModel.total,
-      user.baseCurrence,
-    );
 
-    if (itemReceitModel.discounts.isNotEmpty) {
-      b.feed(1);
-      b.text('--- DISCOUNTS ---', align: PosAlign.center, bold: true);
-      b.feed(1);
-      for (final discount in itemReceitModel.discounts) {
-        final discountStr = discount.percentageDiscount == false
-            ? CurrenceConverter.getCurrenceFloatInStrings(
-                discount.discount ?? 0.0,
-                user.baseCurrence,
-              )
-            : '${discount.discount}%';
-        String label = '${discount.name ?? '-no=name-'} - $discountStr';
-        b.text(label);
-      }
-    }
-    if (salesTaxes.isNotEmpty) {
-      b.feed(1);
-      b.text('--- Taxes ---', align: PosAlign.center, bold: true);
-      b.feed(1);
-      for (final tax in salesTaxes) {
-        final taxString = '${tax.value}%';
-        String label = '${tax.label} - $taxString';
-        b.text(label);
-      }
-    }
-    final totalLine =
-        padRight('TOTAL DUE:', receitWidth - totalDueStr.length) + totalDueStr;
-    b.text(totalLine, bold: true);
-
-    b.feed(2);
-    b.text('.' * receitWidth);
-    if (customer != null) {
-      b.feed(1);
-      b.text("--- CUSTOMER INFO ---", align: PosAlign.center, bold: true);
-      b.feed(1);
-      b.text('Customer: ${customer.fullName}');
-      b.text('Phone: ${customer.phoneNumber}');
-      b.text('Email: ${customer.email}');
-      b.text('Address: ${customer.address}');
-      b.feed(1);
-    }
-    if (enableQrCode) {
-      b.feed(1);
-      b.text("--- QR CODE ---", align: PosAlign.center, bold: true);
-      b.qrCode(itemReceitModel.label);
-      b.feed(1);
-    }
-    b.text('--- END ---', align: PosAlign.center);
-    b.feed(1);
-    b.text(itemReceitModel.label, align: PosAlign.center);
-    b.feed(1);
     b.cut();
     printer.printEscPos(PosPrinterRole.cashier, b);
-  }
-
-  static List<int>? getRasterImage(String receitLogoPath) {
-    try {
-      final imageBytes = File(receitLogoPath).readAsBytesSync();
-      return imageBytes;
-    } catch (_) {
-      return null;
-    }
   }
 
   void connectLastDevice() async {
@@ -333,7 +325,7 @@ class DevicesController extends GetxController {
     bool enableQrCode = model.enableQrCode;
     String padRight(String text, int length) => text.padRight(length, ' ');
     if (model.receitLogoPath.isNotEmpty) {
-      final rasterImage = getRasterImage(model.receitLogoPath);
+      final rasterImage = OfflinePrinter.getRasterImage(model.receitLogoPath);
       if (rasterImage != null) {
         b.feed(1);
         b.raster(rasterImage);
@@ -510,5 +502,30 @@ class DevicesController extends GetxController {
     b.feed(1);
     b.cut();
     printer.printEscPos(PosPrinterRole.cashier, b);
+  }
+
+  static String sanitizeInput(
+    String label,
+    User user,
+    CustomerModel? customer,
+    ItemReceitModel itemReceitModel,
+  ) {
+    return label
+        .replaceAll("%%customer%%", customer?.fullName ?? "customer")
+        .replaceAll(
+          "%%amount%%",
+          CurrenceConverter.selectedCurrencyInString(itemReceitModel.total),
+        )
+        .replaceAll("%%cashier%%", itemReceitModel.cashier)
+        .replaceAll("%%number%%", itemReceitModel.items.length.toString())
+        .replaceAll("%%company%%", user.companyName)
+        .replaceAll(
+          "%%formatted_date%%",
+          MistDateUtils.formatNormalDate(DateTime.now()),
+        )
+        .replaceAll("%%date%%", DateTime.now().toString())
+        .replaceAll("%%day%%", DateTime.now().day.toString())
+        .replaceAll("%%month%%", DateTime.now().month.toString())
+        .replaceAll("%%year%%", DateTime.now().year.toString());
   }
 }

@@ -6,7 +6,14 @@ class ReceitExtrasModel {
   // ignore: constant_identifier_names
   static const EXTRA_SPACE = "space";
   // ignore: constant_identifier_names
-  static const RECEIT_EXTRAS = ["normal", "repeat", "space"];
+  static const RECEIT_EXTRAS = [
+    "normal",
+    'normal-spaced',
+    'comment',
+    "repeat",
+    "space",
+  ];
+  bool enabled;
   final String key;
   final String value;
   final String align;
@@ -14,6 +21,7 @@ class ReceitExtrasModel {
   final String type;
 
   ReceitExtrasModel({
+    this.enabled = true,
     required this.key,
     required this.value,
     required this.align,
@@ -24,19 +32,21 @@ class ReceitExtrasModel {
   factory ReceitExtrasModel.fromJSON(dynamic data) {
     return ReceitExtrasModel(
       key: data['key'],
+      enabled: data['enabled'] ?? true,
       value: data['value'],
       align: data['align'],
       isBold: data['isBold'],
-      type: data['type'],
+      type: data['rtype'],
     );
   }
   Map toJson() {
     return {
+      'enabled': enabled,
       "key": key,
       "value": value,
       "align": align,
       "isBold": isBold,
-      "type": type,
+      "rtype": type,
     };
   }
 }

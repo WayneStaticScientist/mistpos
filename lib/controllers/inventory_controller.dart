@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart';
+import 'package:mistpos/models/app_settings_model.dart';
+import 'package:mistpos/models/receit_extras_model.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/inv_item.dart';
 import 'package:get_storage/get_storage.dart';
@@ -492,6 +495,12 @@ class InventoryController extends GetxController {
     }
     company.value = CompanyModel.fromJson(response.body['update']);
     storage.write("company", company.value!.toJson());
+    final setingsStorage = AppSettingsModel.fromStorage();
+    if (company.value!.receitExtras.isNotEmpty) {
+      setingsStorage.extras = company.value!.receitExtras;
+      setingsStorage.saveToStorage();
+    }
+    company.value?.saveToStorage();
   }
 
   Future<bool> updateCurrency(ExchangeRateModel model) async {
@@ -833,5 +842,36 @@ class InventoryController extends GetxController {
     }
     Toaster.showSuccess("Items uploaded successfully");
     uploadingItems.value = false;
+  }
+
+  RxBool updatingCompanyExtrass = RxBool(false);
+  Future<bool> updateCompanyExtras(List<ReceitExtrasModel> extras) async {
+    GetStorage storage = GetStorage();
+    final companyFromJson = storage.read("company");
+    if (companyFromJson != null) {
+      company.value = CompanyModel.fromJson(companyFromJson);
+    }
+    if (updatingCompanyExtrass.value) return false;
+    updatingCompanyExtrass.value = true;
+
+    final response = await Net.post(
+      "/admin/company/extras-receits/${company.value!.hexId}",
+      data: {"receitExtras": extras.map((e) => e.toJson()).toList()},
+    );
+    updatingCompanyExtrass.value = false;
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return false;
+    }
+    company.value = CompanyModel.fromJson(response.body['update']);
+    storage.write("company", company.value!.toJson());
+    final setingsStorage = AppSettingsModel.fromStorage();
+    if (company.value!.receitExtras.isNotEmpty) {
+      setingsStorage.extras = company.value!.receitExtras;
+      setingsStorage.saveToStorage();
+    }
+    company.value?.saveToStorage();
+    Toaster.showSuccess("receits visuals updated");
+    return true;
   }
 }

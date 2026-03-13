@@ -1,5 +1,6 @@
 import 'package:get_storage/get_storage.dart';
 import 'package:mistpos/models/exchange_rate_model.dart';
+import 'package:mistpos/models/receit_extras_model.dart';
 import 'package:mistpos/models/subscripiton_model.dart';
 
 class CompanyModel {
@@ -13,10 +14,12 @@ class CompanyModel {
   SubscriptionModel subscriptionType;
   bool autoApproveAllExpenses;
   String hexId;
+  List<ReceitExtrasModel> receitExtras;
   CompanyModel({
     required this.owner,
     required this.email,
     required this.name,
+    this.receitExtras = const [],
     required this.hexId,
     this.verified = false,
     required this.exchangeRates,
@@ -32,6 +35,11 @@ class CompanyModel {
       owner: json['owner'],
       email: json['email'],
       hexId: json['_id'] ?? "",
+      receitExtras:
+          (json['receitExtras'] as List<dynamic>?)
+              ?.map((e) => ReceitExtrasModel.fromJSON(e))
+              .toList() ??
+          [],
       name: json['name'] ?? "-",
       verified: json['verified'] ?? false,
       showSalesCount: json['showSalesCount'] ?? false,
@@ -53,6 +61,7 @@ class CompanyModel {
       "exchangeRates": exchangeRates.toJson(),
       "subscriptionType": subscriptionType.toJson(),
       'autoApproveAllExpenses': autoApproveAllExpenses,
+      "receitExtras": receitExtras.map((e) => e.toJson()).toList(),
     };
   }
 

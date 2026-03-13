@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:get/get.dart';
 import 'package:isar_plus/isar_plus.dart';
 import 'package:mistpos/main.dart';

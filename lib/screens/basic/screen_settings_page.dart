@@ -169,7 +169,7 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                 onTap: () => Get.to(() => ScreenReceiptDesigner()),
                 title: "Receit Design".text(),
                 contentPadding: EdgeInsets.all(0),
-                leading: Iconify(Bx.camera, color: AppTheme.color(context)),
+                leading: Iconify(Bx.receipt, color: AppTheme.color(context)),
               ),
             ],
           ),
