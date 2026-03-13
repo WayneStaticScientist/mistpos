@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -855,7 +854,7 @@ class InventoryController extends GetxController {
     updatingCompanyExtrass.value = true;
 
     final response = await Net.post(
-      "/admin/company/extras-receits/${company.value!.hexId}",
+      "/admin/company/extras-receits/thisvaky=ejs",
       data: {"receitExtras": extras.map((e) => e.toJson()).toList()},
     );
     updatingCompanyExtrass.value = false;

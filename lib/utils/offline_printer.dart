@@ -65,6 +65,10 @@ class OfflinePrinter {
       itemReceitModel.total,
       user.baseCurrence,
     );
+    final changeStr = CurrenceConverter.getCurrenceFloatInStrings(
+      itemReceitModel.change,
+      user.baseCurrence,
+    );
 
     if (itemReceitModel.discounts.isNotEmpty) {
       b.feed(1);
@@ -94,7 +98,9 @@ class OfflinePrinter {
     final totalLine =
         padRight('TOTAL DUE:', receitWidth - totalDueStr.length) + totalDueStr;
     b.text(totalLine, bold: true);
-
+    final change =
+        padRight('CHANGE:', receitWidth - changeStr.length) + changeStr;
+    b.text(change, bold: true);
     b.feed(2);
     b.text('.' * receitWidth);
   }

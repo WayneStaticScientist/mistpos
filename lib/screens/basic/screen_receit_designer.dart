@@ -34,7 +34,7 @@ class _ScreenReceiptDesignerState extends State<ScreenReceiptDesigner> {
 
   @override
   Widget build(BuildContext context) {
-    final themeColor = AppTheme.color(context);
+    final themeColor = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
       appBar: AppBar(
@@ -310,7 +310,7 @@ class _ScreenReceiptDesignerState extends State<ScreenReceiptDesigner> {
                 height: 50,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.color(context),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
