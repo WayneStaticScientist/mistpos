@@ -24,7 +24,7 @@ final InvItemSchema = IsarGeneratedSchema(
       IsarPropertySchema(name: 'amount', type: IsarType.double),
       IsarPropertySchema(name: 'sku', type: IsarType.string),
       IsarPropertySchema(name: 'barcode', type: IsarType.string),
-      IsarPropertySchema(name: 'inStock', type: IsarType.long),
+      IsarPropertySchema(name: 'inStock', type: IsarType.double),
       IsarPropertySchema(name: 'difference', type: IsarType.long),
       IsarPropertySchema(name: 'updated', type: IsarType.bool),
       IsarPropertySchema(name: 'receive', type: IsarType.double),
@@ -47,7 +47,7 @@ int serializeInvItem(IsarWriter writer, InvItem object) {
   IsarCore.writeDouble(writer, 6, object.amount);
   IsarCore.writeString(writer, 7, object.sku);
   IsarCore.writeString(writer, 8, object.barcode);
-  IsarCore.writeLong(writer, 9, object.inStock);
+  IsarCore.writeDouble(writer, 9, object.inStock);
   IsarCore.writeLong(writer, 10, object.difference);
   IsarCore.writeBool(writer, 11, value: object.updated);
   IsarCore.writeDouble(writer, 12, object.receive);
@@ -100,10 +100,10 @@ InvItem deserializeInvItem(IsarReader reader) {
   _sku = IsarCore.readString(reader, 7) ?? '';
   final String _barcode;
   _barcode = IsarCore.readString(reader, 8) ?? '';
-  final int _inStock;
+  final double _inStock;
   {
-    final value = IsarCore.readLong(reader, 9);
-    if (value == -9223372036854775808) {
+    final value = IsarCore.readDouble(reader, 9);
+    if (value.isNaN) {
       _inStock = 1;
     } else {
       _inStock = value;
@@ -1066,58 +1066,70 @@ extension InvItemQueryFilter
   }
 
   QueryBuilder<InvItem, InvItem, QAfterFilterCondition> inStockEqualTo(
-    int value,
-  ) {
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        EqualCondition(property: 9, value: value),
+        EqualCondition(property: 9, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<InvItem, InvItem, QAfterFilterCondition> inStockGreaterThan(
-    int value,
-  ) {
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        GreaterCondition(property: 9, value: value),
+        GreaterCondition(property: 9, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<InvItem, InvItem, QAfterFilterCondition>
-  inStockGreaterThanOrEqualTo(int value) {
+  inStockGreaterThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        GreaterOrEqualCondition(property: 9, value: value),
+        GreaterOrEqualCondition(property: 9, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<InvItem, InvItem, QAfterFilterCondition> inStockLessThan(
-    int value,
-  ) {
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(LessCondition(property: 9, value: value));
+      return query.addFilterCondition(
+        LessCondition(property: 9, value: value, epsilon: epsilon),
+      );
     });
   }
 
   QueryBuilder<InvItem, InvItem, QAfterFilterCondition>
-  inStockLessThanOrEqualTo(int value) {
+  inStockLessThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessOrEqualCondition(property: 9, value: value),
+        LessOrEqualCondition(property: 9, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<InvItem, InvItem, QAfterFilterCondition> inStockBetween(
-    int lower,
-    int upper,
-  ) {
+    double lower,
+    double upper, {
+    double epsilon = Filter.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        BetweenCondition(property: 9, lower: lower, upper: upper),
+        BetweenCondition(
+          property: 9,
+          lower: lower,
+          upper: upper,
+
+          epsilon: epsilon,
+        ),
       );
     });
   }

@@ -11,7 +11,7 @@ class InvItem {
   double amount;
   String sku;
   String barcode;
-  int inStock = 1;
+  double inStock = 1;
   int difference = 0;
   bool updated = false;
   double receive = 0;
@@ -51,7 +51,7 @@ class InvItem {
       id: data['id'],
       name: data['name'],
       sku: data['sku'] ?? '',
-      inStock: data['inStock'] ?? 0,
+      inStock: (data['inStock'] as num?)?.toDouble() ?? 0,
       barcode: data['barcode'] ?? '',
       updated: data['updated'] ?? false,
       difference: data['difference'] ?? 0,

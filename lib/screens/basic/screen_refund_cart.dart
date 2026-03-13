@@ -137,7 +137,7 @@ class _ScreenRefundCartState extends State<ScreenRefundCart> {
     );
   }
 
-  void _proceedToRefund(int index, ItemReceitItem e, int count) {
+  void _proceedToRefund(int index, ItemReceitItem e, num count) {
     Get.dialog(
       AlertDialog(
         title: Text('Refund ${e.name}'),
@@ -152,7 +152,7 @@ class _ScreenRefundCartState extends State<ScreenRefundCart> {
     );
   }
 
-  void _confirmRefund(int index, ItemReceitItem e, int count) async {
+  void _confirmRefund(int index, ItemReceitItem e, num count) async {
     Get.back();
     setState(() {
       _loading = true;

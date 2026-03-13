@@ -6,6 +6,7 @@ import 'package:exui/material.dart';
 import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/screens/basic/screen_receit_designer.dart';
 import 'package:mistpos/utils/sdk_int.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:path/path.dart' as p;
@@ -163,6 +164,12 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                         .text(
                           style: TextStyle(color: Colors.grey, fontSize: 12),
                         ),
+              ),
+              ListTile(
+                onTap: () => Get.to(() => ScreenReceiptDesigner()),
+                title: "Receit Design".text(),
+                contentPadding: EdgeInsets.all(0),
+                leading: Iconify(Bx.camera, color: AppTheme.color(context)),
               ),
             ],
           ),

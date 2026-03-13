@@ -684,8 +684,9 @@ class _ScreenAddItemState extends State<ScreenAddItem> {
       name: _itemNameController.text.trim(),
       barcode: _itemBarcodeController.text.trim(),
       compositeItems: _inventorController.selectedInvItems,
-      stockQuantity: int.tryParse(_initialStockController.text.trim()) ?? 0,
-      lowStockThreshold: int.tryParse(_reorderLevelController.text.trim()) ?? 0,
+      stockQuantity: double.tryParse(_initialStockController.text.trim()) ?? 0,
+      lowStockThreshold:
+          double.tryParse(_reorderLevelController.text.trim()) ?? 0,
     );
     final response = await _itemsUnsavedController.createItem(
       itemModel,

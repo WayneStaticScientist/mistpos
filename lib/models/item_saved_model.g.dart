@@ -19,7 +19,7 @@ final ItemSavedModelSchema = IsarGeneratedSchema(
       IsarPropertySchema(name: 'dataMap', type: IsarType.stringList),
       IsarPropertySchema(name: 'qouted', type: IsarType.double),
       IsarPropertySchema(name: 'addenum', type: IsarType.double),
-      IsarPropertySchema(name: 'count', type: IsarType.long),
+      IsarPropertySchema(name: 'count', type: IsarType.double),
       IsarPropertySchema(name: 'baseId', type: IsarType.long),
       IsarPropertySchema(name: 'cost', type: IsarType.double),
     ],
@@ -43,7 +43,7 @@ int serializeItemSavedModel(IsarWriter writer, ItemSavedModel object) {
   }
   IsarCore.writeDouble(writer, 2, object.qouted);
   IsarCore.writeDouble(writer, 3, object.addenum);
-  IsarCore.writeLong(writer, 4, object.count);
+  IsarCore.writeDouble(writer, 4, object.count);
   IsarCore.writeLong(writer, 5, object.baseId);
   IsarCore.writeDouble(writer, 6, object.cost);
   return 0;
@@ -70,7 +70,7 @@ ItemSavedModel deserializeItemSavedModel(IsarReader reader) {
   }
   object.qouted = IsarCore.readDouble(reader, 2);
   object.addenum = IsarCore.readDouble(reader, 3);
-  object.count = IsarCore.readLong(reader, 4);
+  object.count = IsarCore.readDouble(reader, 4);
   object.baseId = IsarCore.readLong(reader, 5);
   object.cost = IsarCore.readDouble(reader, 6);
   return object;
@@ -365,53 +365,61 @@ extension ItemSavedModelQueryFilter
   }
 
   QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-  countEqualTo(int value) {
+  countEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        EqualCondition(property: 4, value: value),
+        EqualCondition(property: 4, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-  countGreaterThan(int value) {
+  countGreaterThan(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        GreaterCondition(property: 4, value: value),
+        GreaterCondition(property: 4, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-  countGreaterThanOrEqualTo(int value) {
+  countGreaterThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        GreaterOrEqualCondition(property: 4, value: value),
+        GreaterOrEqualCondition(property: 4, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-  countLessThan(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(LessCondition(property: 4, value: value));
-    });
-  }
-
-  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-  countLessThanOrEqualTo(int value) {
+  countLessThan(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessOrEqualCondition(property: 4, value: value),
+        LessCondition(property: 4, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
-  countBetween(int lower, int upper) {
+  countLessThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        BetweenCondition(property: 4, lower: lower, upper: upper),
+        LessOrEqualCondition(property: 4, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemSavedModel, ItemSavedModel, QAfterFilterCondition>
+  countBetween(double lower, double upper, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 4,
+          lower: lower,
+          upper: upper,
+
+          epsilon: epsilon,
+        ),
       );
     });
   }

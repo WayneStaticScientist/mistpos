@@ -710,9 +710,9 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
     widget.model.sku = _itemSKUController.text;
     widget.model.barcode = _itemBarcodeController.text;
     widget.model.lowStockThreshold =
-        int.tryParse(_reorderLevelController.text) ?? 0;
+        double.tryParse(_reorderLevelController.text) ?? 0;
     widget.model.stockQuantity =
-        int.tryParse(_initialStockController.text) ?? 0;
+        double.tryParse(_initialStockController.text) ?? 0;
     final soldBy = _soldByGroup.value as String;
     widget.model.soldBy = soldBy;
     final response = await _itemsUsavedController.createItem(widget.model);

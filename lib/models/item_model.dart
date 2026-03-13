@@ -21,7 +21,7 @@ class ItemModel {
   String category;
   String barcode;
   bool trackStock;
-  int stockQuantity;
+  double stockQuantity;
   int lowStockThreshold;
   List<String>? modifiers;
   bool syncOnline = false;
@@ -102,7 +102,7 @@ class ItemModel {
               ?.map((e) => InvItem.fromJson(e))
               .toList() ??
           [],
-      stockQuantity: json["stockQuantity"],
+      stockQuantity: (json["stockQuantity"] as num?)?.toDouble() ?? 0,
       avatar: json["avatar"] as String? ?? "",
       soldBy: json["soldBy"] as String? ?? "",
       barcode: json["barcode"] as String? ?? "",

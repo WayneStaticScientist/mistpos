@@ -3,9 +3,7 @@ import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
-import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/item_model.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
@@ -25,8 +23,10 @@ class ScreenEditManualCart extends StatefulWidget {
 class _ScreenEditManualCartState extends State<ScreenEditManualCart> {
   final _itemsListController = Get.find<ItemsController>();
   final _userController = Get.find<UserController>();
-  late int count = widget.map['count'] as int;
-  late int track = widget.map['count'] as int;
+  late final _countController = TextEditingController(
+    text: (widget.map['count'] as num).toDouble().toString(),
+  );
+  late double track = (widget.map['count'] as num).toDouble();
   late String? discountId = widget.map['discountId'] as String?;
   late bool percentageDiscount =
       widget.map['percentageDiscount'] as bool? ?? true;
@@ -46,7 +46,8 @@ class _ScreenEditManualCartState extends State<ScreenEditManualCart> {
 
   @override
   Widget build(BuildContext context) {
-    price = count * item.price + floatAmount;
+    price =
+        double.tryParse(_countController.text) ?? 0 * item.price + floatAmount;
     if (discountId != null) {
       price = !percentageDiscount
           ? (price - discount)
@@ -80,21 +81,16 @@ class _ScreenEditManualCartState extends State<ScreenEditManualCart> {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           18.gapHeight,
-          [
-            IconButton.filled(
-              onPressed: _dec,
-              icon: Iconify(Bx.chevron_left, color: Colors.white, size: 50),
+          TextField(
+            keyboardType: TextInputType.number,
+            controller: _countController,
+            onChanged: (e) => setState(() {}),
+            decoration: InputDecoration(
+              label: "Quantity".text(),
+              fillColor: Colors.grey.withAlpha(30),
+              filled: true,
             ),
-            [
-              "$count".text(
-                style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),
-              ),
-            ].row(mainAxisAlignment: MainAxisAlignment.center).expanded1,
-            IconButton.filled(
-              onPressed: _inc,
-              icon: Iconify(Bx.chevron_right, color: Colors.white, size: 50),
-            ),
-          ].row(mainAxisAlignment: MainAxisAlignment.spaceBetween),
+          ),
           18.gapHeight,
           if (item.modifiers != null && item.modifiers!.isNotEmpty)
             _generatedModifiers(),
@@ -146,19 +142,6 @@ class _ScreenEditManualCartState extends State<ScreenEditManualCart> {
         ),
       ),
     );
-  }
-
-  void _dec() {
-    if (count <= 1) return;
-    setState(() {
-      count--;
-    });
-  }
-
-  void _inc() {
-    setState(() {
-      count++;
-    });
   }
 
   Widget _generatedModifiers() {
@@ -231,14 +214,29 @@ class _ScreenEditManualCartState extends State<ScreenEditManualCart> {
       }
       item.price = CurrenceConverter.baseCurrency(val);
     }
+    if (item.soldBy == "Each") {
+      final int? projected = int.tryParse(_countController.text);
+      if (projected == null || projected <= 0) {
+        Toaster.showError(
+          "Invalid descrete number for non weighted items , valids numbers are only  1 , 2 , 3 and so on",
+        );
+        return;
+      }
+    } else {
+      double? projected = double.tryParse(_countController.text);
+      if (projected == null) {
+        Toaster.showError("Invalid quantity number");
+        return;
+      }
+    }
 
     _itemsListController.addSelectedItem(
       item,
-      count: count,
+      count: double.tryParse(_countController.text) ?? 1,
       dataMap: dataMap,
       addenum: addenum,
       qouted: floatAmount,
-      restoreAmount: track - count,
+      restoreAmount: track - (double.tryParse(_countController.text) ?? 1),
       discountId: discountId,
       discount: discount,
       percentageDiscount: percentageDiscount,

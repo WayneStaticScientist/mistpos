@@ -1,9 +1,11 @@
 import 'package:get_storage/get_storage.dart';
+import 'package:mistpos/models/receit_extras_model.dart';
 
 class AppSettingsModel {
   bool externalBarCodeEnabled;
   bool useSystemDarkMode;
   bool darkMode;
+  List<ReceitExtrasModel> extras;
   bool enableQrCode;
   int printerRecietLength = 32;
   int decimalPlaces = 2;
@@ -18,6 +20,7 @@ class AppSettingsModel {
     required this.printerRecietLength,
     required this.decimalPlaces,
     this.receitLogoPath = "",
+    this.extras = const [],
     this.prioritizeShift = true,
     this.hasAlertedAboutFreeVersion = false,
   });

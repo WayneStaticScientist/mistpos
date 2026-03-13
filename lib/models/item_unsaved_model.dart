@@ -21,8 +21,8 @@ class ItemUnsavedModel {
   String category;
   String barcode;
   bool trackStock;
-  int stockQuantity;
-  int lowStockThreshold;
+  double stockQuantity;
+  double lowStockThreshold;
   List<String>? modifiers;
   bool syncOnline = false;
   bool useProduction = false;
@@ -102,12 +102,12 @@ class ItemUnsavedModel {
               ?.map((e) => InvItem.fromJson(e))
               .toList() ??
           [],
-      stockQuantity: json["stockQuantity"],
+      stockQuantity: (json["stockQuantity"] as num?)?.toDouble() ?? 0,
       avatar: json["avatar"] as String? ?? "",
       soldBy: json["soldBy"] as String? ?? "",
       barcode: json["barcode"] as String? ?? "",
       category: json["category"] as String? ?? "",
-      lowStockThreshold: json["lowStockThreshold"],
+      lowStockThreshold: (json["lowStockThreshold"] as num?)?.toDouble() ?? 0,
       modifiers: (json["modifiers"] as List<dynamic>?)
           ?.map((e) => e.toString())
           .toList(),

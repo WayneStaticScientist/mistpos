@@ -17,14 +17,14 @@ final ItemReceitItemSchema = IsarGeneratedSchema(
     embedded: true,
     properties: [
       IsarPropertySchema(name: 'name', type: IsarType.string),
-      IsarPropertySchema(name: 'count', type: IsarType.long),
+      IsarPropertySchema(name: 'count', type: IsarType.double),
       IsarPropertySchema(name: 'price', type: IsarType.double),
       IsarPropertySchema(name: 'cost', type: IsarType.double),
       IsarPropertySchema(name: 'addenum', type: IsarType.double),
       IsarPropertySchema(name: 'itemId', type: IsarType.string),
       IsarPropertySchema(name: 'rejectedReason', type: IsarType.string),
       IsarPropertySchema(name: 'refunded', type: IsarType.bool),
-      IsarPropertySchema(name: 'originalCount', type: IsarType.long),
+      IsarPropertySchema(name: 'originalCount', type: IsarType.double),
       IsarPropertySchema(name: 'discount', type: IsarType.double),
       IsarPropertySchema(name: 'discountId', type: IsarType.string),
       IsarPropertySchema(name: 'percentageDiscount', type: IsarType.bool),
@@ -41,14 +41,14 @@ final ItemReceitItemSchema = IsarGeneratedSchema(
 @isarProtected
 int serializeItemReceitItem(IsarWriter writer, ItemReceitItem object) {
   IsarCore.writeString(writer, 1, object.name);
-  IsarCore.writeLong(writer, 2, object.count);
+  IsarCore.writeDouble(writer, 2, object.count);
   IsarCore.writeDouble(writer, 3, object.price);
   IsarCore.writeDouble(writer, 4, object.cost);
   IsarCore.writeDouble(writer, 5, object.addenum);
   IsarCore.writeString(writer, 6, object.itemId);
   IsarCore.writeString(writer, 7, object.rejectedReason);
   IsarCore.writeBool(writer, 8, value: object.refunded);
-  IsarCore.writeLong(writer, 9, object.originalCount);
+  IsarCore.writeDouble(writer, 9, object.originalCount);
   IsarCore.writeDouble(writer, 10, object.discount);
   {
     final value = object.discountId;
@@ -67,14 +67,14 @@ int serializeItemReceitItem(IsarWriter writer, ItemReceitItem object) {
 ItemReceitItem deserializeItemReceitItem(IsarReader reader) {
   final object = ItemReceitItem();
   object.name = IsarCore.readString(reader, 1) ?? '';
-  object.count = IsarCore.readLong(reader, 2);
+  object.count = IsarCore.readDouble(reader, 2);
   object.price = IsarCore.readDouble(reader, 3);
   object.cost = IsarCore.readDouble(reader, 4);
   object.addenum = IsarCore.readDouble(reader, 5);
   object.itemId = IsarCore.readString(reader, 6) ?? '';
   object.rejectedReason = IsarCore.readString(reader, 7) ?? '';
   object.refunded = IsarCore.readBool(reader, 8);
-  object.originalCount = IsarCore.readLong(reader, 9);
+  object.originalCount = IsarCore.readDouble(reader, 9);
   object.discount = IsarCore.readDouble(reader, 10);
   object.discountId = IsarCore.readString(reader, 11);
   object.percentageDiscount = IsarCore.readBool(reader, 12);
@@ -226,53 +226,61 @@ extension ItemReceitItemQueryFilter
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-  countEqualTo(int value) {
+  countEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        EqualCondition(property: 2, value: value),
+        EqualCondition(property: 2, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-  countGreaterThan(int value) {
+  countGreaterThan(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        GreaterCondition(property: 2, value: value),
+        GreaterCondition(property: 2, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-  countGreaterThanOrEqualTo(int value) {
+  countGreaterThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        GreaterOrEqualCondition(property: 2, value: value),
+        GreaterOrEqualCondition(property: 2, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-  countLessThan(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(LessCondition(property: 2, value: value));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-  countLessThanOrEqualTo(int value) {
+  countLessThan(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessOrEqualCondition(property: 2, value: value),
+        LessCondition(property: 2, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-  countBetween(int lower, int upper) {
+  countLessThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        BetweenCondition(property: 2, lower: lower, upper: upper),
+        LessOrEqualCondition(property: 2, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  countBetween(double lower, double upper, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 2,
+          lower: lower,
+          upper: upper,
+
+          epsilon: epsilon,
+        ),
       );
     });
   }
@@ -760,53 +768,71 @@ extension ItemReceitItemQueryFilter
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-  originalCountEqualTo(int value) {
+  originalCountEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        EqualCondition(property: 9, value: value),
+        EqualCondition(property: 9, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-  originalCountGreaterThan(int value) {
+  originalCountGreaterThan(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        GreaterCondition(property: 9, value: value),
+        GreaterCondition(property: 9, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-  originalCountGreaterThanOrEqualTo(int value) {
+  originalCountGreaterThanOrEqualTo(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        GreaterOrEqualCondition(property: 9, value: value),
+        GreaterOrEqualCondition(property: 9, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-  originalCountLessThan(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(LessCondition(property: 9, value: value));
-    });
-  }
-
-  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-  originalCountLessThanOrEqualTo(int value) {
+  originalCountLessThan(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessOrEqualCondition(property: 9, value: value),
+        LessCondition(property: 9, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
-  originalCountBetween(int lower, int upper) {
+  originalCountLessThanOrEqualTo(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        BetweenCondition(property: 9, lower: lower, upper: upper),
+        LessOrEqualCondition(property: 9, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  originalCountBetween(
+    double lower,
+    double upper, {
+    double epsilon = Filter.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 9,
+          lower: lower,
+          upper: upper,
+
+          epsilon: epsilon,
+        ),
       );
     });
   }

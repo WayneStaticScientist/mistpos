@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:get/get.dart';
 import 'package:isar_plus/isar_plus.dart';
 import 'package:mistpos/main.dart';
@@ -461,7 +463,7 @@ class ItemsController extends GetxController {
  */
   void _calculatedTotalPrice() {
     totalPrice.value = checkOutItems.fold(0.0, (prev, item) {
-      final count = item['count'] as int? ?? 0;
+      final count = item['count'] as num? ?? 0;
       final addenum = item['addenum'] as double? ?? 0.0;
       final qouted = item['qouted'] as double? ?? 0.0;
       final model = item['item'] as ItemModel;
@@ -533,7 +535,7 @@ class ItemsController extends GetxController {
   Future<ItemReceitModel?> refundItem(
     ItemReceitModel model,
     ItemReceitItem e,
-    int count,
+    num count,
     int index,
   ) async {
     try {
@@ -1049,12 +1051,12 @@ class ItemsController extends GetxController {
 
   void addSelectedItem(
     ItemModel model, {
-    int count = -1,
+    double count = -1,
     String? discountId,
     double qouted = 0.0,
     double addenum = 0.0,
     double discount = 0.0,
-    int restoreAmount = -1,
+    double restoreAmount = -1,
     Map<String, bool>? dataMap,
     bool percentageDiscount = true,
   }) async {
@@ -1215,6 +1217,7 @@ class ItemsController extends GetxController {
         return false;
       }
       final discounts = selectedDiscounts;
+
       final itemReceitModel = ItemReceitModel(
         hexId: "",
         cashier: "admin",
@@ -1246,18 +1249,18 @@ class ItemsController extends GetxController {
             ..name = model.name
             ..baseId = model.id
             ..itemId = e['hexId']
-            ..originalCount = e['count'] ?? 0
+            ..originalCount = ((e['count'] as num?)?.toDouble() ?? 1)
             ..cost = e['cost'] as double? ?? 0.0
             ..discountId = e['discountId'] as String?
             ..addenum = e['addenum'] as double? ?? 0.0
             ..price =
                 (model.wholesaleActivated &&
-                    (e['count'] ?? 0) >= model.miniItems)
+                    ((e['count'] as num?)?.toDouble() ?? 1) >= model.miniItems)
                 ? model.wholesalePrice
                 : (model.price + e['qouted'] as double? ?? 0.0)
             ..discount = (e['discount'] as num?)?.toDouble() ?? 0.0
             ..percentageDiscount = e['percentageDiscount'] as bool? ?? true
-            ..count = e['count'] ?? 0;
+            ..count = (e['count'] as num?)?.toDouble() ?? 0;
           return receit;
         }).toList(),
         change: payedAmount - totalPrice.value,

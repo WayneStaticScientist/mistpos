@@ -35,7 +35,7 @@ final ItemModelSchema = IsarGeneratedSchema(
       IsarPropertySchema(name: 'category', type: IsarType.string),
       IsarPropertySchema(name: 'barcode', type: IsarType.string),
       IsarPropertySchema(name: 'trackStock', type: IsarType.bool),
-      IsarPropertySchema(name: 'stockQuantity', type: IsarType.long),
+      IsarPropertySchema(name: 'stockQuantity', type: IsarType.double),
       IsarPropertySchema(name: 'lowStockThreshold', type: IsarType.long),
       IsarPropertySchema(name: 'modifiers', type: IsarType.stringList),
       IsarPropertySchema(name: 'syncOnline', type: IsarType.bool),
@@ -89,7 +89,7 @@ int serializeItemModel(IsarWriter writer, ItemModel object) {
   IsarCore.writeString(writer, 13, object.category);
   IsarCore.writeString(writer, 14, object.barcode);
   IsarCore.writeBool(writer, 15, value: object.trackStock);
-  IsarCore.writeLong(writer, 16, object.stockQuantity);
+  IsarCore.writeDouble(writer, 16, object.stockQuantity);
   IsarCore.writeLong(writer, 17, object.lowStockThreshold);
   {
     final list = object.modifiers;
@@ -176,8 +176,8 @@ ItemModel deserializeItemModel(IsarReader reader) {
   _barcode = IsarCore.readString(reader, 14) ?? '';
   final bool _trackStock;
   _trackStock = IsarCore.readBool(reader, 15);
-  final int _stockQuantity;
-  _stockQuantity = IsarCore.readLong(reader, 16);
+  final double _stockQuantity;
+  _stockQuantity = IsarCore.readDouble(reader, 16);
   final int _lowStockThreshold;
   _lowStockThreshold = IsarCore.readLong(reader, 17);
   final List<String>? _modifiers;
@@ -323,7 +323,7 @@ dynamic deserializeItemModelProp(IsarReader reader, int property) {
     case 15:
       return IsarCore.readBool(reader, 15);
     case 16:
-      return IsarCore.readLong(reader, 16);
+      return IsarCore.readDouble(reader, 16);
     case 17:
       return IsarCore.readLong(reader, 17);
     case 18:
@@ -410,7 +410,7 @@ sealed class _ItemModelUpdate {
     String? category,
     String? barcode,
     bool? trackStock,
-    int? stockQuantity,
+    double? stockQuantity,
     int? lowStockThreshold,
     bool? syncOnline,
     bool? useProduction,
@@ -467,7 +467,7 @@ class _ItemModelUpdateImpl implements _ItemModelUpdate {
             if (category != ignore) 13: category as String?,
             if (barcode != ignore) 14: barcode as String?,
             if (trackStock != ignore) 15: trackStock as bool?,
-            if (stockQuantity != ignore) 16: stockQuantity as int?,
+            if (stockQuantity != ignore) 16: stockQuantity as double?,
             if (lowStockThreshold != ignore) 17: lowStockThreshold as int?,
             if (syncOnline != ignore) 19: syncOnline as bool?,
             if (useProduction != ignore) 20: useProduction as bool?,
@@ -497,7 +497,7 @@ sealed class _ItemModelUpdateAll {
     String? category,
     String? barcode,
     bool? trackStock,
-    int? stockQuantity,
+    double? stockQuantity,
     int? lowStockThreshold,
     bool? syncOnline,
     bool? useProduction,
@@ -552,7 +552,7 @@ class _ItemModelUpdateAllImpl implements _ItemModelUpdateAll {
       if (category != ignore) 13: category as String?,
       if (barcode != ignore) 14: barcode as String?,
       if (trackStock != ignore) 15: trackStock as bool?,
-      if (stockQuantity != ignore) 16: stockQuantity as int?,
+      if (stockQuantity != ignore) 16: stockQuantity as double?,
       if (lowStockThreshold != ignore) 17: lowStockThreshold as int?,
       if (syncOnline != ignore) 19: syncOnline as bool?,
       if (useProduction != ignore) 20: useProduction as bool?,
@@ -585,7 +585,7 @@ sealed class _ItemModelQueryUpdate {
     String? category,
     String? barcode,
     bool? trackStock,
-    int? stockQuantity,
+    double? stockQuantity,
     int? lowStockThreshold,
     bool? syncOnline,
     bool? useProduction,
@@ -640,7 +640,7 @@ class _ItemModelQueryUpdateImpl implements _ItemModelQueryUpdate {
       if (category != ignore) 13: category as String?,
       if (barcode != ignore) 14: barcode as String?,
       if (trackStock != ignore) 15: trackStock as bool?,
-      if (stockQuantity != ignore) 16: stockQuantity as int?,
+      if (stockQuantity != ignore) 16: stockQuantity as double?,
       if (lowStockThreshold != ignore) 17: lowStockThreshold as int?,
       if (syncOnline != ignore) 19: syncOnline as bool?,
       if (useProduction != ignore) 20: useProduction as bool?,
@@ -705,7 +705,7 @@ class _ItemModelQueryBuilderUpdateImpl implements _ItemModelQueryUpdate {
         if (category != ignore) 13: category as String?,
         if (barcode != ignore) 14: barcode as String?,
         if (trackStock != ignore) 15: trackStock as bool?,
-        if (stockQuantity != ignore) 16: stockQuantity as int?,
+        if (stockQuantity != ignore) 16: stockQuantity as double?,
         if (lowStockThreshold != ignore) 17: lowStockThreshold as int?,
         if (syncOnline != ignore) 19: syncOnline as bool?,
         if (useProduction != ignore) 20: useProduction as bool?,
@@ -2447,55 +2447,71 @@ extension ItemModelQueryFilter
   }
 
   QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
-  stockQuantityEqualTo(int value) {
+  stockQuantityEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        EqualCondition(property: 16, value: value),
+        EqualCondition(property: 16, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
-  stockQuantityGreaterThan(int value) {
+  stockQuantityGreaterThan(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        GreaterCondition(property: 16, value: value),
+        GreaterCondition(property: 16, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
-  stockQuantityGreaterThanOrEqualTo(int value) {
+  stockQuantityGreaterThanOrEqualTo(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        GreaterOrEqualCondition(property: 16, value: value),
+        GreaterOrEqualCondition(property: 16, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
-  stockQuantityLessThan(int value) {
+  stockQuantityLessThan(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessCondition(property: 16, value: value),
+        LessCondition(property: 16, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
-  stockQuantityLessThanOrEqualTo(int value) {
+  stockQuantityLessThanOrEqualTo(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessOrEqualCondition(property: 16, value: value),
+        LessOrEqualCondition(property: 16, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
-  stockQuantityBetween(int lower, int upper) {
+  stockQuantityBetween(
+    double lower,
+    double upper, {
+    double epsilon = Filter.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        BetweenCondition(property: 16, lower: lower, upper: upper),
+        BetweenCondition(
+          property: 16,
+          lower: lower,
+          upper: upper,
+
+          epsilon: epsilon,
+        ),
       );
     });
   }
@@ -3642,7 +3658,7 @@ extension ItemModelQueryProperty1
     });
   }
 
-  QueryBuilder<ItemModel, int, QAfterProperty> stockQuantityProperty() {
+  QueryBuilder<ItemModel, double, QAfterProperty> stockQuantityProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(16);
     });
@@ -3792,7 +3808,7 @@ extension ItemModelQueryProperty2<R>
     });
   }
 
-  QueryBuilder<ItemModel, (R, int), QAfterProperty> stockQuantityProperty() {
+  QueryBuilder<ItemModel, (R, double), QAfterProperty> stockQuantityProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(16);
     });
@@ -3944,7 +3960,8 @@ extension ItemModelQueryProperty3<R1, R2>
     });
   }
 
-  QueryBuilder<ItemModel, (R1, R2, int), QOperations> stockQuantityProperty() {
+  QueryBuilder<ItemModel, (R1, R2, double), QOperations>
+  stockQuantityProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(16);
     });

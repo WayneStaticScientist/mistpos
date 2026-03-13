@@ -164,7 +164,7 @@ class _ScreenSelectedItemsReadjustState
 
   Widget _makeItem(Map<String, dynamic> item) {
     final model = item['item'] as ItemModel;
-    final count = item['count'] as int;
+    final count = item['count'] as num;
     final addenum = item['addenum'] as double? ?? 0.0;
     final qouted = item['qouted'] as double? ?? 0.0;
     bool percentageDiscount = item['percentageDiscount'] as bool? ?? true;

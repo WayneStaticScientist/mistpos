@@ -272,7 +272,7 @@ class _NavSaleState extends State<NavSale> {
           SingleChildScrollView(
             child: _itemsListController.checkOutItems
                 .map<Widget>((e) {
-                  final count = e['count'] as int;
+                  final count = e['count'] as num;
                   final model = e['item'] as ItemModel;
                   return ListTile(
                     title: Text(model.name, style: TextStyle(fontSize: 24)),

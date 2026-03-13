@@ -4,14 +4,14 @@ part 'item_receit_item.g.dart';
 @embedded
 class ItemReceitItem {
   late String name;
-  late int count;
+  late double count;
   late double price;
   double cost = 0;
   late double addenum;
   late String itemId;
   String rejectedReason = "";
   bool refunded = false;
-  int originalCount = 0;
+  double originalCount = 0;
   double discount = 0;
   String? discountId;
   bool percentageDiscount = true;
@@ -38,7 +38,7 @@ class ItemReceitItem {
   factory ItemReceitItem.fromJson(Map<String, dynamic> data) {
     return ItemReceitItem()
       ..name = data["name"]
-      ..count = data['count']
+      ..count = (data['count'] as num?)?.toDouble() ?? 0.0
       ..cost = (data['cost'] as num?)?.toDouble() ?? 0.0
       ..price = (data['price'] as num?)?.toDouble() ?? 0.0
       ..addenum = (data['addenum'] as num?)?.toDouble() ?? 0.0
@@ -49,6 +49,6 @@ class ItemReceitItem {
       ..discountId = data['discountId'] ?? ''
       ..percentageDiscount = data['percentageDiscount'] ?? true
       ..rejectedReason = data['rejectedReason'] ?? ""
-      ..originalCount = data['originalCount'] ?? 0;
+      ..originalCount = (data['originalCount'] as num?)?.toDouble() ?? 0;
   }
 }

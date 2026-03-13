@@ -3,9 +3,7 @@ import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
-import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/item_model.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/controllers/user_controller.dart';
@@ -23,14 +21,17 @@ class ScreenManualCart extends StatefulWidget {
 class _ScreenManualCartState extends State<ScreenManualCart> {
   final _itemsListController = Get.find<ItemsController>();
   final _userController = Get.find<UserController>();
-  int count = 1;
+  double count = 1;
   double price = 0;
   double floatAmount = 0;
   final Map<String, bool> dataMap = {};
   final priceTextController = TextEditingController();
+  final _countController = TextEditingController(text: "1");
   @override
   Widget build(BuildContext context) {
-    price = count * (widget.item.price + floatAmount);
+    price =
+        (double.tryParse(_countController.text) ?? 0) *
+        (widget.item.price + floatAmount);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.item.name),
@@ -48,21 +49,16 @@ class _ScreenManualCartState extends State<ScreenManualCart> {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           18.gapHeight,
-          [
-            IconButton.filled(
-              onPressed: _dec,
-              icon: Iconify(Bx.chevron_left, color: Colors.white, size: 50),
+          TextField(
+            keyboardType: TextInputType.number,
+            controller: _countController,
+            onChanged: (e) => setState(() {}),
+            decoration: InputDecoration(
+              label: "Quantity".text(),
+              fillColor: Colors.grey.withAlpha(30),
+              filled: true,
             ),
-            [
-              "$count".text(
-                style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),
-              ),
-            ].row(mainAxisAlignment: MainAxisAlignment.center).expanded1,
-            IconButton.filled(
-              onPressed: _inc,
-              icon: Iconify(Bx.chevron_right, color: Colors.white, size: 50),
-            ),
-          ].row(mainAxisAlignment: MainAxisAlignment.spaceBetween),
+          ),
           18.gapHeight,
           if (widget.item.modifiers != null &&
               widget.item.modifiers!.isNotEmpty)
@@ -98,19 +94,6 @@ class _ScreenManualCartState extends State<ScreenManualCart> {
         ),
       ),
     );
-  }
-
-  void _dec() {
-    if (count <= 1) return;
-    setState(() {
-      count--;
-    });
-  }
-
-  void _inc() {
-    setState(() {
-      count++;
-    });
   }
 
   Widget _generatedModifiers() {
@@ -189,10 +172,25 @@ class _ScreenManualCartState extends State<ScreenManualCart> {
       }
       widget.item.price = CurrenceConverter.baseCurrency(val);
     }
+    if (widget.item.soldBy == "Each") {
+      final int? projected = int.tryParse(_countController.text);
+      if (projected == null || projected <= 0) {
+        Toaster.showError(
+          "Invalid descrete number for non weighted items , valids numbers are only  1 , 2 , 3 and so on",
+        );
+        return;
+      }
+    } else {
+      double? projected = double.tryParse(_countController.text);
+      if (projected == null) {
+        Toaster.showError("Invalid quantity number");
+        return;
+      }
+    }
     _itemsListController.addSelectedItem(
       widget.item,
       addenum: addenum,
-      count: count,
+      count: double.tryParse(_countController.text) ?? 1,
       qouted: floatAmount,
       dataMap: dataMap,
     );
