@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/themes/app_theme.dart';
@@ -49,6 +50,7 @@ class _NavSaleState extends State<NavSale> {
   final _scrollController = ScrollController();
   final _refreshController = RefreshController();
   final _userController = Get.find<UserController>();
+  final _invController = Get.find<InventoryController>();
   final _itemsListController = Get.find<ItemsController>();
   final TextEditingController _searchController = TextEditingController();
   @override
@@ -107,6 +109,7 @@ class _NavSaleState extends State<NavSale> {
             onRefresh: () async {
               await _itemsListController.syncCartItemsOnBackground();
               await _itemsListController.updateUnsyncedReceits();
+              _invController.loadCompany();
               _refreshController.refreshCompleted();
               setState(() {
                 _searchTerm = '';

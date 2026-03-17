@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -31,7 +30,6 @@ class OfflinePrinter {
     int receitWidth = model.printerRecietLength;
     String padRight(String text, int length) => text.padRight(length, ' ');
     for (final item in itemReceitModel.items) {
-      log("printing ${item.name}");
       final itemPrice = item.addenum + item.price;
       final totalItemPrice = itemPrice * item.count;
       final totalStr = CurrenceConverter.getCurrenceFloatInStrings(
@@ -43,7 +41,13 @@ class OfflinePrinter {
         math.min(item.name.length, (receitWidth * 0.65).toInt()),
       );
       String label =
-          padRight(itemName, receitWidth - totalStr.length) + totalStr;
+          padRight(
+            itemName.length > (receitWidth - totalStr.length - 2)
+                ? '${itemName.substring(0, receitWidth - totalStr.length - 4)}..'
+                : itemName,
+            receitWidth - totalStr.length,
+          ) +
+          totalStr;
       b.text(label);
       final unitPriceStr = CurrenceConverter.getCurrenceFloatInStrings(
         itemPrice,

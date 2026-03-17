@@ -1,14 +1,13 @@
-import 'dart:developer';
 import 'dart:math' as math;
 
-import 'package:isar_plus/isar_plus.dart';
 import 'package:mistpos/main.dart';
-import 'package:mistpos/utils/offline_printer.dart';
+import 'package:isar_plus/isar_plus.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/utils/date_utils.dart';
 import 'package:mistpos/models/tax_model.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/models/shifts_model.dart';
+import 'package:mistpos/utils/offline_printer.dart';
 import 'package:mistpos/models/customer_model.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:mistpos/utils/currence_converter.dart';
@@ -176,13 +175,10 @@ class DevicesController extends GetxController {
     int receitWidth = model.printerRecietLength;
     bool enableQrCode = model.enableQrCode;
     String padRight(String text, int length) => text.padRight(length, ' ');
-    log("Printing receits");
     for (final row in model.extras) {
       if (!row.enabled) {
-        log("row-skipped ${row.key}");
         continue;
       }
-      log("row-watched ${row.key}");
       if (row.key == "Company Logo" && row.type == "system") {
         OfflinePrinter.printLogo(model, b);
         continue;
@@ -259,14 +255,19 @@ class DevicesController extends GetxController {
         continue;
       }
       if (row.type == "normal-spaced") {
-        String value = sanitizeInput(row.key, user, customer, itemReceitModel);
+        String value = sanitizeInput(
+          row.value,
+          user,
+          customer,
+          itemReceitModel,
+        );
         String label = padRight(row.key, receitWidth - value.length) + value;
         b.text(label, bold: row.isBold);
         continue;
       }
       if (row.type == "normal") {
         b.text(
-          "${row.key} : ${sanitizeInput(row.key, user, customer, itemReceitModel)}",
+          "${row.key} : ${sanitizeInput(row.value, user, customer, itemReceitModel)}",
           bold: row.isBold,
         );
         continue;

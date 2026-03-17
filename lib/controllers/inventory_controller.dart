@@ -479,12 +479,7 @@ class InventoryController extends GetxController {
   Rx<CompanyModel?> company = Rx<CompanyModel?>(null);
   void loadCompany() async {
     GetStorage storage = GetStorage();
-    final companyFromJson = storage.read("company");
-    if (companyFromJson != null) {
-      company.value = CompanyModel.fromJson(companyFromJson);
-    }
-    if (loadingCompany.value) return;
-    loadingCompany.value = true;
+    company.value = CompanyModel.fromStorage();
     companyError.value = "";
     final response = await Net.get("/company");
     loadingCompany.value = false;
