@@ -1295,14 +1295,14 @@ class ItemsController extends GetxController {
       user.receitsCount++;
       User.saveToStorage(user);
       updateReceitsInBackground(newReceitId, itemReceitModel);
-      if (printReceits) {
-        DevicesController.printReceitToBackround(
-          itemReceitModel,
-          user,
-          selectedCustomer.value,
-          salesTaxes,
-        );
-      }
+      // if (printReceits) {
+      DevicesController.printReceitToBackround(
+        itemReceitModel,
+        user,
+        selectedCustomer.value,
+        salesTaxes,
+      );
+      // }
       salesTaxes.clear();
       discounts.clear();
       checkOutItems.clear();

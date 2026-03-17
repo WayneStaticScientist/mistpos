@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -30,6 +31,7 @@ class OfflinePrinter {
     int receitWidth = model.printerRecietLength;
     String padRight(String text, int length) => text.padRight(length, ' ');
     for (final item in itemReceitModel.items) {
+      log("printing ${item.name}");
       final itemPrice = item.addenum + item.price;
       final totalItemPrice = itemPrice * item.count;
       final totalStr = CurrenceConverter.getCurrenceFloatInStrings(

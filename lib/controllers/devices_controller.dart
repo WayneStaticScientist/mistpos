@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:isar_plus/isar_plus.dart';
@@ -175,10 +176,13 @@ class DevicesController extends GetxController {
     int receitWidth = model.printerRecietLength;
     bool enableQrCode = model.enableQrCode;
     String padRight(String text, int length) => text.padRight(length, ' ');
+    log("Printing receits");
     for (final row in model.extras) {
       if (!row.enabled) {
+        log("row-skipped ${row.key}");
         continue;
       }
+      log("row-watched ${row.key}");
       if (row.key == "Company Logo" && row.type == "system") {
         OfflinePrinter.printLogo(model, b);
         continue;
