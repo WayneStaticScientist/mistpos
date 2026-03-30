@@ -1,5 +1,9 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/models/company_model.dart';
+import 'package:mistpos/utils/currence_converter.dart';
+import 'package:mistpos/controllers/items_controller.dart';
+import 'package:mistpos/screens/gateways/paynow/screen_automated_payment.dart';
 
 class AutomatedSyncScreen extends StatefulWidget {
   final CompanyModel company;
@@ -13,7 +17,7 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
   late bool isSubscribed;
   final _phoneController = TextEditingController();
   int _selectedMonths = 1;
-
+  final _itemController = Get.find<ItemsController>();
   @override
   void initState() {
     super.initState();
@@ -30,8 +34,11 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
       ),
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) {
-          double monthlyPrice = 10.0; // Example price
-          double totalPrice = _selectedMonths * monthlyPrice;
+          double totalPrice =
+              _selectedMonths *
+              (widget.company.automatedSync.price > 0
+                  ? widget.company.automatedSync.price
+                  : 3);
 
           return Padding(
             padding: EdgeInsets.only(
@@ -111,7 +118,7 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
                     children: [
                       const Text("Total Payable:"),
                       Text(
-                        "\$${totalPrice.toStringAsFixed(2)}",
+                        CurrenceConverter.selectedCurrencyInString(totalPrice),
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
@@ -127,15 +134,7 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Logic to process subscription
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Subscription initiated..."),
-                        ),
-                      );
-                    },
+                    onPressed: () => _subsribe(totalPrice),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -245,9 +244,9 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
             _InfoTile(
               icon: Icons.payments_outlined,
               title: "Subscription Fee",
-              value: "\$${sync.price.toStringAsFixed(2)} / mo",
+              value:
+                  "${CurrenceConverter.selectedCurrencyInString(sync.price)} / mo",
             ),
-
             const SizedBox(height: 40),
 
             // Action Button
@@ -301,6 +300,23 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _subsribe(double amount) async {
+    final response = await _itemController.payWeForAutomation(amount);
+    if (response.returnUrl == null ||
+        response.redirectUrl == null ||
+        response.pollUrl == null) {
+      return;
+    }
+    Get.off(
+      () => ScreenAutomatedPayment(
+        amount: amount,
+        pollUrl: response.pollUrl!,
+        returnUrl: response.returnUrl!,
+        webHookUrl: response.redirectUrl!,
       ),
     );
   }

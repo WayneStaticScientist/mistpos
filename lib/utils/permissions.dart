@@ -41,5 +41,6 @@ class UserPermissions {
     PermissionStructure(name: "Payment Integrations", value: "payment"),
     PermissionStructure(name: "Add/Remove and manage taxes", value: "tax"),
     PermissionStructure(name: "Subscribe to paid plans", value: "subscribe"),
+    PermissionStructure(name: "Whatsapp integrations", value: "whatsapp"),
   ];
 }

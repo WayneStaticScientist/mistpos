@@ -7,6 +7,7 @@ import 'package:mistpos/models/tax_model.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/models/shifts_model.dart';
+import 'package:mistpos/models/company_model.dart';
 import 'package:mistpos/models/response_model.dart';
 import 'package:mistpos/models/discount_model.dart';
 import 'package:mistpos/models/customer_model.dart';
@@ -20,6 +21,7 @@ import 'package:mistpos/utils/labeller.dart' show Labeller;
 import 'package:mistpos/models/item_saved_items_model.dart';
 import 'package:mistpos/controllers/devices_controller.dart';
 import 'package:mistpos/models/embedded_discount_model.dart';
+import 'package:mistpos/controllers/inventory_controller.dart';
 
 class ItemsController extends GetxController {
   RxDouble totalPrice = RxDouble(0);
@@ -1502,5 +1504,63 @@ class ItemsController extends GetxController {
     }
     salesTaxes.value = isar.taxModels.where().findAll();
     _calculatedTotalPrice();
+  }
+
+  Future<({String? redirectUrl, String? returnUrl, String? pollUrl})>
+  payWeForAutomation(double amount) async {
+    if (webProcessingPayment.value) {
+      Toaster.showError("mobile payment still processing");
+      return (redirectUrl: null, returnUrl: null, pollUrl: null);
+    }
+    webProcessingPayment.value = true;
+    final response = await Net.post(
+      '/cashier/payweb/paynow-whatsapp',
+      data: {"amount": amount},
+    );
+    webProcessingPayment.value = false;
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return (redirectUrl: null, returnUrl: null, pollUrl: null);
+    }
+    return (
+      redirectUrl: response.body['redirectUrl'] as String?,
+      returnUrl: response.body['returnUrl'] as String?,
+      pollUrl: response.body['pollUrl'] as String?,
+    );
+  }
+
+  Future<bool> pollAutomation(String pollUrl) async {
+    final inv = Get.find<InventoryController>();
+    final poll = await Net.post(
+      '/cashier/paymobile/paynow/poll-whatsapp',
+      data: {"pollUrl": pollUrl},
+    );
+    if (poll.hasError) {
+      Toaster.showError(poll.response);
+      return false;
+    }
+    if (poll.body['paid'] == true) {
+      inv.company.value = CompanyModel.fromJson(poll.body['company']);
+      inv.company.value!.saveToStorage();
+      return true;
+    }
+    mobilePaymentProcessing.value = true;
+    Toaster.showError("payment failed >> retry again in 5 seconds");
+    await Future.delayed(Duration(seconds: 5));
+    final poll2 = await Net.post(
+      '/cashier/paymobile/paynow/poll-whatsapp',
+      data: {"pollUrl": pollUrl},
+    );
+    if (poll2.hasError) {
+      Toaster.showError(poll.response);
+      return false;
+    }
+    if (poll2.body['paid'] == true) {
+      inv.company.value = CompanyModel.fromJson(poll2.body['company']);
+      inv.company.value!.saveToStorage();
+      return true;
+    }
+    Toaster.showError("payment reflected false");
+    return false;
   }
 }
