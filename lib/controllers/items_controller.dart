@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import 'package:isar_plus/isar_plus.dart';
 import 'package:mistpos/main.dart';
+import 'package:isar_plus/isar_plus.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/mini_tax.dart';
 import 'package:mistpos/models/tax_model.dart';
@@ -548,7 +548,10 @@ class ItemsController extends GetxController {
         Toaster.showError(response.response);
         return null;
       }
-      if (selectedShift.value != null) {
+      final mseconds = DateTime.now().millisecondsSinceEpoch;
+      if (selectedShift.value != null &&
+          mseconds >=
+              selectedShift.value!.openShiftTime.millisecondsSinceEpoch) {
         double price = model.items[index].price * count;
         selectedShift.value!.totalSales =
             selectedShift.value!.totalSales - price;
@@ -558,6 +561,9 @@ class ItemsController extends GetxController {
         Toaster.showError("database not initialized");
         return null;
       }
+      await isar.write((isar) async {
+        isar.shiftsModels.put(selectedShift.value!);
+      });
       final modelUpdate = ItemReceitModel.fromJson(response.body['update']);
       model.items = modelUpdate.items;
       model.total = modelUpdate.total;
@@ -577,12 +583,7 @@ class ItemsController extends GetxController {
         Toaster.showError("item not found");
         return null;
       }
-      if (itemModel.trackStock) {
-        itemModel.stockQuantity = itemModel.stockQuantity + count;
-        await isar.write((isar) async {
-          isar.itemModels.put(itemModel);
-        });
-      }
+
       loadReceits();
       return modelUpdate;
     } catch (e) {

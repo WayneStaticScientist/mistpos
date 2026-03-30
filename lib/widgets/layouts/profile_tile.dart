@@ -77,7 +77,7 @@ class _ProfileTileState extends State<ProfileTile> {
                         .text(
                           style: TextStyle(fontSize: 12, color: Colors.grey),
                         ),
-                  ].row(),
+                  ].row(mainAxisAlignment: MainAxisAlignment.start),
                   if (company.subscriptionType.validUntil != null &&
                       company.subscriptionType.type != "free") ...[
                     4.gapWidth,
@@ -113,7 +113,7 @@ class _ProfileTileState extends State<ProfileTile> {
                         ),
                   ],
                 ],
-              ].column();
+              ].column(crossAxisAlignment: CrossAxisAlignment.start);
             }),
           ]
           .column(
