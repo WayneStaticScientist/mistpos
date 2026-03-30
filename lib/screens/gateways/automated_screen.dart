@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mistpos/models/company_model.dart';
 
-// Note: Ensure the model classes provided in your snippet are imported or available in your project.
-// For this demo, I'm using the logic from your provided CompanyModel and AutomatedSyncModel.
-
 class AutomatedSyncScreen extends StatefulWidget {
   final CompanyModel company;
   const AutomatedSyncScreen({super.key, required this.company});

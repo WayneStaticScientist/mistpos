@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
+import 'package:mistpos/screens/gateways/automated_screen.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
@@ -375,6 +376,13 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                       subtitle: "send daily reports to whatsapp".text(
                         style: TextStyle(color: Colors.grey, fontSize: 12),
                       ),
+                      onTap: () => {
+                        Get.to(
+                          () => AutomatedSyncScreen(
+                            company: _invController.company.value!,
+                          ),
+                        ),
+                      },
                       title: "Whatsapp reports".text(),
                       leading: Iconify(
                         Bx.bxl_whatsapp,
