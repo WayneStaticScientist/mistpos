@@ -1,8 +1,10 @@
+import 'package:exui/exui.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/models/company_model.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/controllers/items_controller.dart';
+import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/screens/gateways/paynow/screen_automated_payment.dart';
 
 class AutomatedSyncScreen extends StatefulWidget {
@@ -18,11 +20,17 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
   final _phoneController = TextEditingController();
   int _selectedMonths = 1;
   final _itemController = Get.find<ItemsController>();
+  final _inventoryController = Get.find<InventoryController>();
   @override
   void initState() {
     super.initState();
-    isSubscribed = widget.company.automatedSync.hasSubscription;
-    _phoneController.text = widget.company.automatedSync.phone;
+    isSubscribed =
+        _inventoryController.company.value!.automatedSync.hasSubscription &&
+        (_inventoryController.company.value!.automatedSync.validUntil == null ||
+            _inventoryController.company.value!.automatedSync.validUntil!
+                .isAfter(DateTime.now()));
+    _phoneController.text =
+        _inventoryController.company.value!.automatedSync.phone;
   }
 
   void _showSubscribeSheet() {
@@ -36,8 +44,8 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
         builder: (context, setModalState) {
           double totalPrice =
               _selectedMonths *
-              (widget.company.automatedSync.price > 0
-                  ? widget.company.automatedSync.price
+              (_inventoryController.company.value!.automatedSync.price > 0
+                  ? _inventoryController.company.value!.automatedSync.price
                   : 3);
 
           return Padding(
@@ -142,7 +150,74 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text("PROCEED TO PAYMENT"),
+                    child: Obx(
+                      () => _itemController.webProcessingPayment.value
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : const Text("PROCEED TO PAYMENT"),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showChangeNumberSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              left: 20,
+              right: 20,
+              top: 24,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Phone Number Field
+                TextField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    labelText: "Phone Number",
+                    prefixIcon: const Icon(Icons.phone_android),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+
+                // Submit Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: () => _changeNumber(_phoneController.text),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Obx(
+                      () =>
+                          _inventoryController.updatingAutomatedSyncPhone.value
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : const Text("Change Number"),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -157,7 +232,7 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final sync = widget.company.automatedSync;
+    final sync = _inventoryController.company.value!.automatedSync;
 
     return Scaffold(
       appBar: AppBar(
@@ -236,10 +311,20 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
             ),
             const SizedBox(height: 16),
 
-            _InfoTile(
-              icon: Icons.phone_android,
-              title: "Registered Phone",
-              value: sync.phone.isEmpty ? "Not provided" : sync.phone,
+            Obx(
+              () => _InfoTile(
+                icon: Icons.phone_android,
+                title: "Registered Phone",
+                value:
+                    _inventoryController
+                        .company
+                        .value!
+                        .automatedSync
+                        .phone
+                        .isEmpty
+                    ? "Not provided"
+                    : _inventoryController.company.value!.automatedSync.phone,
+              ).onTap(() => _showChangeNumberSheet()),
             ),
             _InfoTile(
               icon: Icons.payments_outlined,
@@ -252,20 +337,7 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
             // Action Button
             Center(
               child: isSubscribed
-                  ? OutlinedButton.icon(
-                      onPressed: () {}, // Extend or Manage logic
-                      icon: const Icon(Icons.history),
-                      label: const Text("VIEW SUBSCRIPTION HISTORY"),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 32,
-                          vertical: 16,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    )
+                  ? 0.gapHeight
                   : ElevatedButton(
                       onPressed: _showSubscribeSheet,
                       style: ElevatedButton.styleFrom(
@@ -292,7 +364,7 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
 
             const SizedBox(height: 24),
             Text(
-              "Note: Automated sync requires an active internet connection and a registered device phone number.",
+              "Note: Automated sync requires an active internet connection and a registered device phone number.Where you can receive updates and notifications about your inventory and sales.",
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
@@ -305,7 +377,10 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
   }
 
   void _subsribe(double amount) async {
-    final response = await _itemController.payWeForAutomation(amount);
+    final response = await _itemController.payWeForAutomation(
+      amount,
+      formatPhoneNumber(_phoneController.text),
+    );
     if (response.returnUrl == null ||
         response.redirectUrl == null ||
         response.pollUrl == null) {
@@ -319,6 +394,26 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
         webHookUrl: response.redirectUrl!,
       ),
     );
+  }
+
+  void _changeNumber(String text) {
+    final formatted = formatPhoneNumber(text);
+    if (formatted.length < 10) {
+      Get.snackbar("Invalid Number", "Please enter a valid phone number");
+      return;
+    }
+    _inventoryController.updateAutomatedSyncPhone(formatted);
+    Get.back();
+  }
+
+  String formatPhoneNumber(String text) {
+    String formatted = text.replaceAll(' ', '');
+    if (formatted.startsWith('0')) {
+      formatted = '263${formatted.substring(1)}';
+    } else if (formatted.startsWith('7') && formatted.length == 9) {
+      formatted = '263$formatted';
+    }
+    return formatted.replaceAll('+', '');
   }
 }
 

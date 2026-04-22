@@ -49,6 +49,7 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   isar_plus: ^1.2.2
   isar_plus_flutter_libs: ^1.2.2
+  sms_autofill: ^2.4.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

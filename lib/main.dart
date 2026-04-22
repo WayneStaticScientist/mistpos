@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -34,6 +35,7 @@ import 'package:mistpos/controllers/firebase_controller.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/controllers/items_unsaved_controller.dart';
 import 'package:mistpos/firebase-messanging/firebase_bg_notification_handler.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 
 class IsarStatic {
   static Isar? isar;
@@ -55,6 +57,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final dir = await getApplicationDocumentsDirectory();
   final path = "${dir.path}/default.isar";
+  log("The app signature is ${await SmsAutoFill().getAppSignature}");
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   try {

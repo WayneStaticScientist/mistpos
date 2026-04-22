@@ -163,7 +163,7 @@ class _ScreenShiftsScreenState extends State<ScreenShiftsScreen> {
     return ListTile(
       onTap: () {
         if (!shift.shiftIsClosed) {
-          Toaster.showError("shift is still open");
+          return Toaster.showError("shift is still open");
         }
         Get.to(() => ScreenShiftView(shift: shift));
       },

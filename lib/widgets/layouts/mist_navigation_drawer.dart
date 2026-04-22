@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/screens/gateways/automated_screen.dart';
 import 'package:mistpos/screens/support/sales_help.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/icons/bx.dart';
@@ -119,6 +120,17 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
             ).visibleIf(
               _userController.user.value?.role.toLowerCase() == 'admin' ||
                   _userController.user.value?.role.toLowerCase() == 'manager',
+            ),
+            ListTile(
+              onTap: () => {
+                Get.to(
+                  () => AutomatedSyncScreen(
+                    company: _inventoryController.company.value!,
+                  ),
+                ),
+              },
+              title: "Whatsapp Integrations".text(),
+              leading: Iconify(Bx.bxl_whatsapp, color: AppTheme.color(context)),
             ),
             ListTile(
               leading: Iconify(Bx.cog, color: AppTheme.color(context)),

@@ -1507,7 +1507,7 @@ class ItemsController extends GetxController {
   }
 
   Future<({String? redirectUrl, String? returnUrl, String? pollUrl})>
-  payWeForAutomation(double amount) async {
+  payWeForAutomation(double amount, String phone) async {
     if (webProcessingPayment.value) {
       Toaster.showError("mobile payment still processing");
       return (redirectUrl: null, returnUrl: null, pollUrl: null);
@@ -1515,7 +1515,7 @@ class ItemsController extends GetxController {
     webProcessingPayment.value = true;
     final response = await Net.post(
       '/cashier/payweb/paynow-whatsapp',
-      data: {"amount": amount},
+      data: {"amount": amount, 'phoneNumber': phone},
     );
     webProcessingPayment.value = false;
     if (response.hasError) {

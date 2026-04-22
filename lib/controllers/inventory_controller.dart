@@ -1,18 +1,18 @@
-import 'dart:convert';
 import 'dart:io';
+import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart';
-import 'package:mistpos/models/app_settings_model.dart';
-import 'package:mistpos/models/receit_extras_model.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/models/inv_item.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:mistpos/models/item_model.dart';
 import 'package:mistpos/models/company_model.dart';
 import 'package:mistpos/models/supplier_model.dart';
 import 'package:mistpos/models/production_model.dart';
+import 'package:mistpos/models/app_settings_model.dart';
+import 'package:mistpos/models/receit_extras_model.dart';
 import 'package:mistpos/services/network_wrapper.dart';
 import 'package:mistpos/models/product_stats_model.dart';
 import 'package:mistpos/models/item_unsaved_model.dart';
@@ -867,5 +867,23 @@ class InventoryController extends GetxController {
     company.value?.saveToStorage();
     Toaster.showSuccess("receits visuals updated");
     return true;
+  }
+
+  RxBool updatingAutomatedSyncPhone = RxBool(false);
+  void updateAutomatedSyncPhone(String formatted) async {
+    if (updatingAutomatedSyncPhone.value) return;
+    updatingAutomatedSyncPhone.value = true;
+    final response = await Net.post(
+      "/admin/company/automated-sync-phone/update",
+      data: {"phone": formatted},
+    );
+    updatingAutomatedSyncPhone.value = false;
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return;
+    }
+    company.value = CompanyModel.fromJson(response.body['update']);
+    company.value?.saveToStorage();
+    Toaster.showSuccess ("Automated sync phone updated successfully");
   }
 }
