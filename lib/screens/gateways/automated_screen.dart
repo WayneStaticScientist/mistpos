@@ -5,6 +5,7 @@ import 'package:mistpos/models/company_model.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
+import 'package:mistpos/screens/gateways/automated_phone_verification.dart';
 import 'package:mistpos/screens/gateways/paynow/screen_automated_payment.dart';
 
 class AutomatedSyncScreen extends StatefulWidget {
@@ -377,9 +378,27 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
   }
 
   void _subsribe(double amount) async {
+    Get.back(); // Close the subscription sheet
+
+    final formatted = formatPhoneNumber(_phoneController.text);
+    if (formatted.length < 10) {
+      Get.snackbar("Invalid Number", "Please enter a valid phone number");
+      return;
+    }
+
+    final requestSuccess = await _inventoryController
+        .requestAutomatedSyncPhoneChange(formatted);
+    if (!requestSuccess) return;
+
+    final verified = await Get.to(
+      () => AutomatedPhoneVerificationScreen(phone: formatted),
+    );
+    if (verified != true) return;
+
+    // Proceed to payment after verification
     final response = await _itemController.payWeForAutomation(
       amount,
-      formatPhoneNumber(_phoneController.text),
+      formatted,
     );
     if (response.returnUrl == null ||
         response.redirectUrl == null ||
@@ -396,14 +415,24 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
     );
   }
 
-  void _changeNumber(String text) {
+  void _changeNumber(String text) async {
     final formatted = formatPhoneNumber(text);
     if (formatted.length < 10) {
       Get.snackbar("Invalid Number", "Please enter a valid phone number");
       return;
     }
-    _inventoryController.updateAutomatedSyncPhone(formatted);
+
+    final requestSuccess = await _inventoryController
+        .requestAutomatedSyncPhoneChange(formatted);
+    if (!requestSuccess) return;
+
     Get.back();
+    final verified = await Get.to(
+      () => AutomatedPhoneVerificationScreen(phone: formatted),
+    );
+    if (verified == true) {
+      setState(() {});
+    }
   }
 
   String formatPhoneNumber(String text) {

@@ -870,8 +870,10 @@ class InventoryController extends GetxController {
   }
 
   RxBool updatingAutomatedSyncPhone = RxBool(false);
-  void updateAutomatedSyncPhone(String formatted) async {
-    if (updatingAutomatedSyncPhone.value) return;
+  RxBool verifyingAutomatedSyncPhone = RxBool(false);
+
+  Future<bool> requestAutomatedSyncPhoneChange(String formatted) async {
+    if (updatingAutomatedSyncPhone.value) return false;
     updatingAutomatedSyncPhone.value = true;
     final response = await Net.post(
       "/admin/company/automated-sync-phone/update",
@@ -880,10 +882,32 @@ class InventoryController extends GetxController {
     updatingAutomatedSyncPhone.value = false;
     if (response.hasError) {
       Toaster.showError(response.response);
-      return;
+      return false;
     }
-    company.value = CompanyModel.fromJson(response.body['update']);
-    company.value?.saveToStorage();
-    Toaster.showSuccess ("Automated sync phone updated successfully");
+    if (response.body != null && response.body['update'] != null) {
+      company.value = CompanyModel.fromJson(response.body['update']);
+      company.value?.saveToStorage();
+    }
+    Toaster.showSuccess("Verification code sent to $formatted");
+    return true;
+  }
+
+  Future<bool> verifyAutomatedSyncPhone(String phone, String code) async {
+    if (verifyingAutomatedSyncPhone.value) return false;
+    verifyingAutomatedSyncPhone.value = true;
+    final response = await Net.post(
+      "/admin/company/automated-sync-phone/verify",
+      data: {"phone": phone, "code": code},
+    );
+    verifyingAutomatedSyncPhone.value = false;
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return false;
+    }
+    if (response.body != null && response.body['update'] != null) {
+      company.value = CompanyModel.fromJson(response.body['update']);
+      company.value?.saveToStorage();
+    }
+    return true;
   }
 }

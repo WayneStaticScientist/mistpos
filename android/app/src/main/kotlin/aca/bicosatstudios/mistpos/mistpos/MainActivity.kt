@@ -82,7 +82,6 @@ class MainActivity: FlutterActivity() {
             result.error("INVALID_URL", "URL argument is missing or null.", null)
             return
         }
-        
         // This is the standard Android code to launch a URL, compatible with SDK 22 (Lollipop 5.1)
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         
