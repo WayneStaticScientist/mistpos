@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/models/item_model.dart';
@@ -9,15 +10,19 @@ class MistAvatar {
     if (item.avatar != null && item.avatar!.isNotEmpty) {
       return _getImage(item.avatar!);
     }
-    
+
     // Fallback to shape or default cube icon
-    String shapeToUse = (item.shape != null && item.shape!.isNotEmpty) ? item.shape! : Bx.cube;
-    
+    String shapeToUse = (item.shape != null && item.shape!.isNotEmpty)
+        ? item.shape!
+        : Bx.cube;
+
     return Container(
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: item.color != null ? Color(int.parse('${item.color!}')).withAlpha(50) : Get.theme.colorScheme.primary.withAlpha(50),
+        color: item.color != null
+            ? Color(int.parse('${item.color!}')).withAlpha(50)
+            : Get.theme.colorScheme.primary.withAlpha(50),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Center(
@@ -35,12 +40,18 @@ class MistAvatar {
   static Widget _getImage(String url) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
-      child: Image.network(
-        url,
+      child: CachedNetworkImage(
+        imageUrl: url,
         width: 48,
         height: 48,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Container(
+        placeholder: (context, url) => Container(
+          width: 48,
+          height: 48,
+          color: Colors.grey.withAlpha(50),
+          child: Icon(Icons.broken_image, color: Colors.grey),
+        ),
+        errorWidget: (context, url, error) => Container(
           width: 48,
           height: 48,
           color: Colors.grey.withAlpha(50),

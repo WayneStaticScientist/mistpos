@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
@@ -270,11 +271,23 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
           leading: _isUploadingImage
               ? MistLoader1()
               : _avatarUrl.isNotEmpty
-              ? Image.network(
-                  _avatarUrl,
+              ? CachedNetworkImage(
+                  imageUrl: _avatarUrl,
                   width: 40,
                   height: 40,
                   fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    width: 40,
+                    height: 40,
+                    color: Colors.grey.withAlpha(50),
+                    child: Icon(Icons.image, color: Colors.grey),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    width: 40,
+                    height: 40,
+                    color: Colors.grey.withAlpha(50),
+                    child: Icon(Icons.broken_image, color: Colors.grey),
+                  ),
                 )
               : Iconify(Bx.image, color: AppTheme.color(context)),
           title: "Pick Image".text(),
@@ -529,11 +542,23 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
           [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                _avatarUrl,
+              child: CachedNetworkImage(
+                imageUrl: _avatarUrl,
                 width: 80,
                 height: 80,
                 fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  width: 80,
+                  height: 80,
+                  color: Colors.grey.withAlpha(50),
+                  child: Icon(Icons.image, color: Colors.grey),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  width: 80,
+                  height: 80,
+                  color: Colors.grey.withAlpha(50),
+                  child: Icon(Icons.broken_image, color: Colors.grey),
+                ),
               ),
             ),
             12.gapWidth,
@@ -825,12 +850,18 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
             child: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  _avatarUrl,
+                child: CachedNetworkImage(
+                  imageUrl: _avatarUrl,
                   width: 120,
                   height: 120,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
+                  placeholder: (context, url) => Container(
+                    width: 120,
+                    height: 120,
+                    color: Colors.grey.withAlpha(50),
+                    child: Icon(Icons.image, color: Colors.grey),
+                  ),
+                  errorWidget: (context, error, stackTrace) => Container(
                     width: 120,
                     height: 120,
                     color: Colors.grey.withAlpha(50),

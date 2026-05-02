@@ -23,7 +23,7 @@ class AppSettingsModel {
     this.receitLogoPath = "",
     required this.extras,
     this.prioritizeShift = true,
-    this.useGridViewForItems = true,
+    this.useGridViewForItems = false,
     this.hasAlertedAboutFreeVersion = false,
   });
   factory AppSettingsModel.fromJson(Map<String, dynamic> json) =>
@@ -41,7 +41,7 @@ class AppSettingsModel {
         decimalPlaces: json["decimalPlaces"] ?? 2,
         receitLogoPath: json["receitLogoPath"] ?? "",
         prioritizeShift: json["prioritizeShift"] ?? true,
-        useGridViewForItems: json["useGridViewForItems"] ?? true,
+        useGridViewForItems: json["useGridViewForItems"] ?? false,
         hasAlertedAboutFreeVersion: json["hasAlertedAboutFreeVersion"] ?? false,
       );
   Map<String, dynamic> toJson() => {

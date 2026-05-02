@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
@@ -89,11 +90,17 @@ class _SalesItemGridState extends State<SalesItemGrid> {
             child: ClipRRect(
               borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               child: (item.avatar != null && item.avatar!.isNotEmpty)
-                  ? Image.network(
-                      item.avatar!,
+                  ? CachedNetworkImage(
+                      imageUrl: item.avatar!,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          _fallbackIcon(item),
+                      placeholder: (context, url) => Container(
+                        color: Colors.grey.withAlpha(50),
+                        child: Icon(Icons.image, color: Colors.grey),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.grey.withAlpha(50),
+                        child: Icon(Icons.broken_image, color: Colors.grey),
+                      ),
                     )
                   : _fallbackIcon(item),
             ),
