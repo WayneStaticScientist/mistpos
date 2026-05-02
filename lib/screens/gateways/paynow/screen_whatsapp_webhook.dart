@@ -1,32 +1,29 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/utils/toast.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
-import 'package:mistpos/controllers/inventory_controller.dart';
 
-class ScreenAutomatedPayment extends StatefulWidget {
+class ScreenWhatsappWebhook extends StatefulWidget {
   final double amount;
   final String pollUrl;
   final String returnUrl;
   final String webHookUrl;
-  final String type;
-  const ScreenAutomatedPayment({
+  const ScreenWhatsappWebhook({
     super.key,
     required this.amount,
     required this.pollUrl,
     required this.returnUrl,
     required this.webHookUrl,
-    this.type = 'daily',
   });
 
   @override
-  State<ScreenAutomatedPayment> createState() => _ScreenAutomatedPaymentState();
+  State<ScreenWhatsappWebhook> createState() => _ScreenWhatsappWebhookState();
 }
 
-class _ScreenAutomatedPaymentState extends State<ScreenAutomatedPayment> {
-  final _inventoryController = Get.find<InventoryController>();
+class _ScreenWhatsappWebhookState extends State<ScreenWhatsappWebhook> {
+  final _itemsController = Get.find<ItemsController>();
   late WebViewController _controller;
   bool _loading = true;
   @override
@@ -85,13 +82,9 @@ class _ScreenAutomatedPaymentState extends State<ScreenAutomatedPayment> {
     setState(() {
       _loading = true;
     });
-    final respone = await _inventoryController.pollAuutomated(
-      widget.pollUrl,
-      type: widget.type,
-    );
+    final respone = await _itemsController.poll(widget.pollUrl);
     if (respone) {
       Get.back();
-      Toaster.showSuccess("Payment successful");
       return;
     }
   }

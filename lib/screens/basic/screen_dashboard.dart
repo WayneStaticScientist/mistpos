@@ -13,6 +13,7 @@ import 'package:mistpos/navs/admin/nav_admin_stores.dart';
 import 'package:mistpos/controllers/admin_controller.dart';
 import 'package:mistpos/navs/admin/nav_admin_employees.dart';
 import 'package:mistpos/navs/admin/nav_admin_overview.dart';
+import 'package:mistpos/navs/admin/nav_all_shifts_view.dart';
 import 'package:mistpos/navs/items_navs/nav_items_list.dart';
 import 'package:mistpos/screens/basic/screen_add_store.dart';
 import 'package:mistpos/navs/admin/nav_transfer_orders.dart';
@@ -75,6 +76,7 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     "Sales By Employee": NavSalesByEmployee(key: _salesByEmployeeKeys),
     "Sales By Payments": NavSalesByPayment(key: _salesByPayment),
     "Shifts": NavShiftsView(key: _shiftsKey),
+    "Shift Logs": const NavAllShiftsView(),
     "Transfer Orders": const NavTransferOrders(),
     "Productions": const NavInventoryProduction(),
     "Inventory Counts": const NavInventoryCounts(),

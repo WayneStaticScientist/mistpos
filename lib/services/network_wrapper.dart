@@ -113,6 +113,39 @@ class Net {
     }
   }
 
+  static Future<ResponseModel> uploadFile(String url, File file) async {
+    if (Net._dio == null) {
+      await initDio();
+    }
+    try {
+      String fileName = file.path.split('/').last;
+      FormData formData = FormData.fromMap({
+        "file": await MultipartFile.fromFile(file.path, filename: fileName),
+      });
+      final response = await _dio!.post(url, data: formData);
+      return ResponseModel(hasError: false, response: "", body: response.data);
+    } on DioException catch (e) {
+      log("Error: ${e.response?.data}");
+      return getError(e);
+    }
+  }
+
+  static Future<ResponseModel> deleteFile(String urlToDelete) async {
+    if (Net._dio == null) {
+      await initDio();
+    }
+    try {
+      final response = await _dio!.post(
+        '/delete-file',
+        data: {"url": urlToDelete},
+      );
+      return ResponseModel(hasError: false, response: "", body: response.data);
+    } on DioException catch (e) {
+      log("Error deleting file: ${e.response?.data}");
+      return getError(e);
+    }
+  }
+
   static Future<void> initDio() async {
     _dio = Dio(BaseOptions(baseUrl: baseUrl));
     _dio!.interceptors.add(AuthenticationInterceptor());

@@ -1414,6 +1414,7 @@ class ItemsController extends GetxController {
       isar.shiftsModels.put(model);
     });
     selectedShift.value = model;
+    Toaster.showSuccess("shift opened");
     loadShifts();
   }
 
@@ -1507,7 +1508,7 @@ class ItemsController extends GetxController {
   }
 
   Future<({String? redirectUrl, String? returnUrl, String? pollUrl})>
-  payWeForAutomation(double amount, String phone) async {
+  payWeForAutomation(double amount, String phone, {String type = 'daily'}) async {
     if (webProcessingPayment.value) {
       Toaster.showError("mobile payment still processing");
       return (redirectUrl: null, returnUrl: null, pollUrl: null);
@@ -1515,7 +1516,7 @@ class ItemsController extends GetxController {
     webProcessingPayment.value = true;
     final response = await Net.post(
       '/cashier/payweb/paynow-whatsapp',
-      data: {"amount": amount, 'phoneNumber': phone},
+      data: {"amount": amount, 'phoneNumber': phone, 'type': type},
     );
     webProcessingPayment.value = false;
     if (response.hasError) {
@@ -1529,11 +1530,11 @@ class ItemsController extends GetxController {
     );
   }
 
-  Future<bool> pollAutomation(String pollUrl) async {
+  Future<bool> pollAutomation(String pollUrl, {String type = 'daily'}) async {
     final inv = Get.find<InventoryController>();
     final poll = await Net.post(
       '/cashier/paymobile/paynow/poll-whatsapp',
-      data: {"pollUrl": pollUrl},
+      data: {"pollUrl": pollUrl, 'type': type},
     );
     if (poll.hasError) {
       Toaster.showError(poll.response);
@@ -1549,7 +1550,7 @@ class ItemsController extends GetxController {
     await Future.delayed(Duration(seconds: 5));
     final poll2 = await Net.post(
       '/cashier/paymobile/paynow/poll-whatsapp',
-      data: {"pollUrl": pollUrl},
+      data: {"pollUrl": pollUrl, 'type': type},
     );
     if (poll2.hasError) {
       Toaster.showError(poll.response);

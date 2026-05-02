@@ -11,6 +11,7 @@ class AppSettingsModel {
   int decimalPlaces = 2;
   bool prioritizeShift = true;
   String receitLogoPath;
+  bool useGridViewForItems;
   bool hasAlertedAboutFreeVersion = false;
   AppSettingsModel({
     required this.externalBarCodeEnabled,
@@ -22,6 +23,7 @@ class AppSettingsModel {
     this.receitLogoPath = "",
     required this.extras,
     this.prioritizeShift = true,
+    this.useGridViewForItems = true,
     this.hasAlertedAboutFreeVersion = false,
   });
   factory AppSettingsModel.fromJson(Map<String, dynamic> json) =>
@@ -39,6 +41,7 @@ class AppSettingsModel {
         decimalPlaces: json["decimalPlaces"] ?? 2,
         receitLogoPath: json["receitLogoPath"] ?? "",
         prioritizeShift: json["prioritizeShift"] ?? true,
+        useGridViewForItems: json["useGridViewForItems"] ?? true,
         hasAlertedAboutFreeVersion: json["hasAlertedAboutFreeVersion"] ?? false,
       );
   Map<String, dynamic> toJson() => {
@@ -47,6 +50,7 @@ class AppSettingsModel {
     "decimalPlaces": decimalPlaces,
     "receitLogoPath": receitLogoPath,
     "prioritizeShift": prioritizeShift,
+    "useGridViewForItems": useGridViewForItems,
     "useSystemDarkMode": useSystemDarkMode,
     "printerRecietLength": printerRecietLength,
     "extras": extras.map((e) => e.toJson()).toList(),

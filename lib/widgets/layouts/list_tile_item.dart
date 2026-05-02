@@ -59,12 +59,17 @@ class _MistListTileItemState extends State<MistListTileItem> {
         .sizedBox(height: 80)
         .decoratedBox(
           decoration: BoxDecoration(
-            border: Border(
-              top: BorderSide(color: Colors.grey.withAlpha(40), width: 1),
-              bottom: BorderSide(color: Colors.grey.withAlpha(40), width: 1),
-            ),
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(10),
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
           ),
         )
-        .padding(EdgeInsets.symmetric(vertical: 5));
+        .padding(EdgeInsets.symmetric(vertical: 6, horizontal: 4));
   }
 }

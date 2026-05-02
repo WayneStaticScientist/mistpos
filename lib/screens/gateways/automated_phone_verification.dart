@@ -6,7 +6,12 @@ import 'package:mistpos/utils/toast.dart';
 
 class AutomatedPhoneVerificationScreen extends StatefulWidget {
   final String phone;
-  const AutomatedPhoneVerificationScreen({super.key, required this.phone});
+  final String type;
+  const AutomatedPhoneVerificationScreen({
+    super.key,
+    required this.phone,
+    this.type = 'daily',
+  });
 
   @override
   State<AutomatedPhoneVerificationScreen> createState() =>
@@ -118,6 +123,7 @@ class _AutomatedPhoneVerificationScreenState
     final success = await _inventoryController.verifyAutomatedSyncPhone(
       widget.phone,
       verificationCode,
+      type: widget.type,
     );
     if (!success || !mounted) return;
 
@@ -143,6 +149,9 @@ class _AutomatedPhoneVerificationScreenState
   }
 
   void _resendCode() async {
-    await _inventoryController.requestAutomatedSyncPhoneChange(widget.phone);
+    await _inventoryController.requestAutomatedSyncPhoneChange(
+      widget.phone,
+      type: widget.type,
+    );
   }
 }

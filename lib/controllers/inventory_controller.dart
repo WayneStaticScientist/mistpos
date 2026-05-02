@@ -872,12 +872,15 @@ class InventoryController extends GetxController {
   RxBool updatingAutomatedSyncPhone = RxBool(false);
   RxBool verifyingAutomatedSyncPhone = RxBool(false);
 
-  Future<bool> requestAutomatedSyncPhoneChange(String formatted) async {
+  Future<bool> requestAutomatedSyncPhoneChange(
+    String formatted, {
+    String type = 'daily',
+  }) async {
     if (updatingAutomatedSyncPhone.value) return false;
     updatingAutomatedSyncPhone.value = true;
     final response = await Net.post(
       "/admin/company/automated-sync-phone/update",
-      data: {"phone": formatted},
+      data: {"phone": formatted, "type": type},
     );
     updatingAutomatedSyncPhone.value = false;
     if (response.hasError) {
@@ -892,12 +895,16 @@ class InventoryController extends GetxController {
     return true;
   }
 
-  Future<bool> verifyAutomatedSyncPhone(String phone, String code) async {
+  Future<bool> verifyAutomatedSyncPhone(
+    String phone,
+    String code, {
+    String type = 'daily',
+  }) async {
     if (verifyingAutomatedSyncPhone.value) return false;
     verifyingAutomatedSyncPhone.value = true;
     final response = await Net.post(
       "/admin/company/automated-sync-phone/verify",
-      data: {"phone": phone, "code": code},
+      data: {"phone": phone, "code": code, "type": type},
     );
     verifyingAutomatedSyncPhone.value = false;
     if (response.hasError) {
@@ -909,5 +916,38 @@ class InventoryController extends GetxController {
       company.value?.saveToStorage();
     }
     return true;
+  }
+
+  Future<bool> pollAuutomated(String pollUrl, {String type = 'daily'}) async {
+    final poll = await Net.post(
+      '/cashier/paymobile/paynow/poll-whatsapp',
+      data: {"pollUrl": pollUrl, "type": type},
+    );
+    if (poll.hasError) {
+      Toaster.showError(poll.response);
+      return false;
+    }
+    if (poll.body['paid'] == true) {
+      company.value = CompanyModel.fromJson(poll.body['company']);
+      company.value!.saveToStorage();
+      return true;
+    }
+    mobilePaymentProcessing.value = true;
+    Toaster.showError("payment failed >> retry again in 5 seconds");
+    await Future.delayed(Duration(seconds: 5));
+    final poll2 = await Net.post(
+      '/cashier/paymobile/paynow/poll-whatsapp',
+      data: {"pollUrl": pollUrl, "type": type},
+    );
+    if (poll2.hasError) {
+      Toaster.showError(poll2.response);
+      return false;
+    }
+    if (poll2.body['paid'] == true) {
+      company.value = CompanyModel.fromJson(poll2.body['company']);
+      company.value!.saveToStorage();
+      return true;
+    }
+    return false;
   }
 }

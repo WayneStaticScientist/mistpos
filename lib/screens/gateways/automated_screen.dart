@@ -1,8 +1,10 @@
-import 'package:exui/exui.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/utils/toast.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/models/company_model.dart';
 import 'package:mistpos/utils/currence_converter.dart';
+import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/screens/gateways/automated_phone_verification.dart';
@@ -17,24 +19,26 @@ class AutomatedSyncScreen extends StatefulWidget {
 }
 
 class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
-  late bool isSubscribed;
   final _phoneController = TextEditingController();
   int _selectedMonths = 1;
   final _itemController = Get.find<ItemsController>();
   final _inventoryController = Get.find<InventoryController>();
+  final _userController = Get.find<UserController>();
+
   @override
   void initState() {
     super.initState();
-    isSubscribed =
-        _inventoryController.company.value!.automatedSync.hasSubscription &&
-        (_inventoryController.company.value!.automatedSync.validUntil == null ||
-            _inventoryController.company.value!.automatedSync.validUntil!
-                .isAfter(DateTime.now()));
     _phoneController.text =
-        _inventoryController.company.value!.automatedSync.phone;
+        _inventoryController.company.value!.automatedSync.phone.isEmpty
+        ? _inventoryController.company.value!.weeklyAutomatedSync.phone
+        : _inventoryController.company.value!.automatedSync.phone;
   }
 
-  void _showSubscribeSheet() {
+  void _showSubscribeSheet(String type) {
+    final sync = type == 'weekly'
+        ? _inventoryController.company.value!.weeklyAutomatedSync
+        : _inventoryController.company.value!.automatedSync;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -43,11 +47,10 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
       ),
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) {
-          double totalPrice =
-              _selectedMonths *
-              (_inventoryController.company.value!.automatedSync.price > 0
-                  ? _inventoryController.company.value!.automatedSync.price
-                  : 3);
+          double price = sync.price > 0
+              ? sync.price
+              : (type == 'weekly' ? 5 : 3);
+          double totalPrice = _selectedMonths * price;
 
           return Padding(
             padding: EdgeInsets.only(
@@ -61,7 +64,7 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Activate Automated Sync",
+                  "Activate ${type.capitalizeFirst} Automated Sync",
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -143,7 +146,7 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: () => _subsribe(totalPrice),
+                    onPressed: () => _subscribe(totalPrice, type),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -167,7 +170,7 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
     );
   }
 
-  void _showChangeNumberSheet() {
+  void _showChangeNumberSheet(String type) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -187,6 +190,11 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(
+                  "Update Phone Number",
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 16),
                 // Phone Number Field
                 TextField(
                   controller: _phoneController,
@@ -199,13 +207,13 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
                     ),
                   ),
                 ),
-
+                const SizedBox(height: 24),
                 // Submit Button
                 SizedBox(
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: () => _changeNumber(_phoneController.text),
+                    onPressed: () => _changeNumber(_phoneController.text, type),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -233,11 +241,15 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final sync = _inventoryController.company.value!.automatedSync;
+
+    final bool isProOrEnterprise =
+        _userController.user.value?.subscriptions.contains('pro') == true ||
+        _userController.user.value?.subscriptions.contains('enterprise') ==
+            true;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Sync Settings"),
+        title: const Text("Automated Sync & Backup"),
         elevation: 0,
         backgroundColor: Colors.transparent,
         centerTitle: true,
@@ -247,58 +259,22 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Status Header Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: isSubscribed
-                      ? [colorScheme.primary, colorScheme.secondary]
-                      : [
-                          colorScheme.surfaceContainerHighest,
-                          colorScheme.surfaceContainerHighest,
-                        ],
-                ),
-                borderRadius: BorderRadius.circular(28),
-                boxShadow: [
-                  BoxShadow(
-                    color: colorScheme.shadow.withAlpha(26),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Icon(
-                    isSubscribed ? Icons.sync : Icons.sync_disabled,
-                    size: 48,
-                    color: isSubscribed
-                        ? Colors.white
-                        : colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    isSubscribed ? "AUTOMATED SYNC ACTIVE" : "SYNC INACTIVE",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                      color: isSubscribed
-                          ? Colors.white
-                          : colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  if (isSubscribed && sync.validUntil != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      sync.validUntil!.toLocal().toString().split(' ')[0],
-                      style: TextStyle(color: Colors.white.withAlpha(204)),
-                    ),
-                  ],
-                ],
-              ),
+            // Daily Sync Card
+            _StatusCard(
+              title: "DAILY AUTOMATED SYNC",
+              sync: _inventoryController.company.value!.automatedSync,
+              isProOrEnterprise: isProOrEnterprise,
+              onSubscribe: () => _showSubscribeSheet('daily'),
+              colorScheme: colorScheme,
+            ),
+            const SizedBox(height: 16),
+            // Weekly Sync Card
+            _StatusCard(
+              title: "WEEKLY AUTOMATED SYNC",
+              sync: _inventoryController.company.value!.weeklyAutomatedSync,
+              isProOrEnterprise: isProOrEnterprise,
+              onSubscribe: () => _showSubscribeSheet('weekly'),
+              colorScheme: colorScheme,
             ),
 
             const SizedBox(height: 32),
@@ -312,60 +288,34 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
             ),
             const SizedBox(height: 16),
 
-            Obx(
-              () => _InfoTile(
-                icon: Icons.phone_android,
-                title: "Registered Phone",
-                value:
-                    _inventoryController
-                        .company
-                        .value!
-                        .automatedSync
-                        .phone
-                        .isEmpty
-                    ? "Not provided"
-                    : _inventoryController.company.value!.automatedSync.phone,
-              ).onTap(() => _showChangeNumberSheet()),
-            ),
-            _InfoTile(
-              icon: Icons.payments_outlined,
-              title: "Subscription Fee",
-              value:
-                  "${CurrenceConverter.selectedCurrencyInString(sync.price)} / mo",
-            ),
-            const SizedBox(height: 40),
+            Obx(() {
+              final dailySync =
+                  _inventoryController.company.value!.automatedSync;
+              final weeklySync =
+                  _inventoryController.company.value!.weeklyAutomatedSync;
 
-            // Action Button
-            Center(
-              child: isSubscribed
-                  ? 0.gapHeight
-                  : ElevatedButton(
-                      onPressed: _showSubscribeSheet,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colorScheme.primary,
-                        foregroundColor: colorScheme.onPrimary,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 48,
-                          vertical: 20,
-                        ),
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: const Text(
-                        "SUBSCRIBE NOW",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-            ),
+              return Column(
+                children: [
+                  _PhoneTile(
+                    label: "Daily Sync Phone",
+                    sync: dailySync,
+                    onEdit: () => _showChangeNumberSheet('daily'),
+                    colorScheme: colorScheme,
+                  ),
+                  const SizedBox(height: 12),
+                  _PhoneTile(
+                    label: "Weekly Sync Phone",
+                    sync: weeklySync,
+                    onEdit: () => _showChangeNumberSheet('weekly'),
+                    colorScheme: colorScheme,
+                  ),
+                ],
+              );
+            }),
 
             const SizedBox(height: 24),
             Text(
-              "Note: Automated sync requires an active internet connection and a registered device phone number.Where you can receive updates and notifications about your inventory and sales.",
+              "Note: Automated sync requires an active internet connection and a registered device phone number where you can receive updates and notifications about your inventory and sales.",
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
@@ -377,8 +327,8 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
     );
   }
 
-  void _subsribe(double amount) async {
-    Get.back(); // Close the subscription sheet
+  void _subscribe(double amount, String type) async {
+    Get.back();
 
     final formatted = formatPhoneNumber(_phoneController.text);
     if (formatted.length < 10) {
@@ -386,12 +336,41 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
       return;
     }
 
+    final currentSync = type == 'weekly'
+        ? _inventoryController.company.value!.weeklyAutomatedSync
+        : _inventoryController.company.value!.automatedSync;
+
+    if (currentSync.phone.isNotEmpty &&
+        formatted == currentSync.phone &&
+        currentSync.phoneVerified) {
+      final response = await _itemController.payWeForAutomation(
+        amount,
+        formatted,
+        type: type,
+      );
+      if (response.returnUrl == null ||
+          response.redirectUrl == null ||
+          response.pollUrl == null) {
+        Toaster.showError("Failed to initiate payment, try again later");
+        return;
+      }
+      Get.off(
+        () => ScreenAutomatedPayment(
+          amount: amount,
+          pollUrl: response.pollUrl!,
+          returnUrl: response.returnUrl!,
+          webHookUrl: response.redirectUrl!,
+        ),
+      );
+      return;
+    }
+
     final requestSuccess = await _inventoryController
-        .requestAutomatedSyncPhoneChange(formatted);
+        .requestAutomatedSyncPhoneChange(formatted, type: type);
     if (!requestSuccess) return;
 
     final verified = await Get.to(
-      () => AutomatedPhoneVerificationScreen(phone: formatted),
+      () => AutomatedPhoneVerificationScreen(phone: formatted, type: type),
     );
     if (verified != true) return;
 
@@ -399,10 +378,12 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
     final response = await _itemController.payWeForAutomation(
       amount,
       formatted,
+      type: type,
     );
     if (response.returnUrl == null ||
         response.redirectUrl == null ||
         response.pollUrl == null) {
+      Toaster.showError("Failed to initiate payment, try again later");
       return;
     }
     Get.off(
@@ -415,20 +396,29 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
     );
   }
 
-  void _changeNumber(String text) async {
+  void _changeNumber(String text, String type) async {
+    final currentSync = type == 'weekly'
+        ? _inventoryController.company.value!.weeklyAutomatedSync
+        : _inventoryController.company.value!.automatedSync;
+
+    if (text == currentSync.phone) {
+      Get.back();
+      return;
+    }
     final formatted = formatPhoneNumber(text);
+
     if (formatted.length < 10) {
       Get.snackbar("Invalid Number", "Please enter a valid phone number");
       return;
     }
 
     final requestSuccess = await _inventoryController
-        .requestAutomatedSyncPhoneChange(formatted);
+        .requestAutomatedSyncPhoneChange(formatted, type: type);
     if (!requestSuccess) return;
 
     Get.back();
     final verified = await Get.to(
-      () => AutomatedPhoneVerificationScreen(phone: formatted),
+      () => AutomatedPhoneVerificationScreen(phone: formatted, type: type),
     );
     if (verified == true) {
       setState(() {});
@@ -446,53 +436,199 @@ class _AutomatedSyncScreenState extends State<AutomatedSyncScreen> {
   }
 }
 
-class _InfoTile extends StatelessWidget {
-  final IconData icon;
+class _StatusCard extends StatelessWidget {
   final String title;
-  final String value;
+  final AutomatedSyncModel sync;
+  final bool isProOrEnterprise;
+  final VoidCallback onSubscribe;
+  final ColorScheme colorScheme;
 
-  const _InfoTile({
-    required this.icon,
+  const _StatusCard({
     required this.title,
-    required this.value,
+    required this.sync,
+    required this.isProOrEnterprise,
+    required this.onSubscribe,
+    required this.colorScheme,
+  });
+
+  bool get isActive =>
+      isProOrEnterprise ||
+      (sync.hasSubscription &&
+          (sync.validUntil == null ||
+              sync.validUntil!.isAfter(DateTime.now())));
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isActive
+              ? [colorScheme.primary, colorScheme.secondary]
+              : [
+                  colorScheme.surfaceContainerHighest,
+                  colorScheme.surfaceContainerHighest,
+                ],
+        ),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.shadow.withAlpha(26),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(
+            isActive ? Icons.sync : Icons.sync_disabled,
+            size: 40,
+            color: isActive ? Colors.white : colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            isActive ? "$title ACTIVE" : "$title INACTIVE",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+              color: isActive ? Colors.white : colorScheme.onSurfaceVariant,
+            ),
+          ),
+          if (isActive) ...[
+            const SizedBox(height: 8),
+            Text(
+              isProOrEnterprise
+                  ? "Premium Tier Sync Access"
+                  : "Valid Until: ${sync.validUntil?.toLocal().toString().split(' ')[0] ?? 'Continuous'}",
+              style: TextStyle(color: Colors.white.withAlpha(204)),
+            ),
+          ] else ...[
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: onSubscribe,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: colorScheme.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text("SUBSCRIBE NOW"),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _PhoneTile extends StatelessWidget {
+  final String label;
+  final AutomatedSyncModel sync;
+  final VoidCallback onEdit;
+  final ColorScheme colorScheme;
+
+  const _PhoneTile({
+    required this.label,
+    required this.sync,
+    required this.onEdit,
+    required this.colorScheme,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
+    final bool isVerified = sync.phoneVerified;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.surface(context),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.withAlpha(30)),
+      ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Theme.of(
-                context,
-              ).colorScheme.primaryContainer.withAlpha(102),
+              color: colorScheme.primary.withAlpha(20),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: Theme.of(context).colorScheme.primary),
+            child: Icon(Icons.phone_android, color: colorScheme.primary),
           ),
           const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelLarge?.copyWith(color: Colors.grey),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  sync.phone.isEmpty ? "Not provided" : sync.phone,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (sync.phone.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Icon(
+                        isVerified
+                            ? Icons.verified_user
+                            : Icons.warning_amber_rounded,
+                        size: 14,
+                        color: isVerified
+                            ? Colors.green
+                            : Colors.amber.shade800,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        isVerified ? "Verified" : "Unverified Number",
+                        style: TextStyle(
+                          color: isVerified
+                              ? Colors.green
+                              : Colors.amber.shade800,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+          TextButton.icon(
+            onPressed: onEdit,
+            icon: Icon(Icons.edit, size: 16, color: colorScheme.primary),
+            label: Text(
+              sync.phone.isEmpty ? "Add" : "Change",
+              style: TextStyle(
+                color: colorScheme.primary,
+                fontWeight: FontWeight.bold,
               ),
-              Text(
-                value,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-              ),
-            ],
+            ),
           ),
         ],
       ),
     );
   }
+}
+
+String formatPhoneNumber(String text) {
+  String formatted = text.replaceAll(' ', '');
+  if (formatted.startsWith('0')) {
+    formatted = '263${formatted.substring(1)}';
+  } else if (formatted.startsWith('7') && formatted.length == 9) {
+    formatted = '263$formatted';
+  }
+  return formatted.replaceAll('+', '');
 }

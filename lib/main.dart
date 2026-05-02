@@ -39,7 +39,11 @@ import 'package:sms_autofill/sms_autofill.dart';
 
 class IsarStatic {
   static Isar? isar;
+  static Directory? externalDirectory;
   static Isar? getInstance() {
+    if (IsarStatic.isar == null && externalDirectory != null) {
+      initIsarDatabase(externalDirectory!);
+    }
     return isar;
   }
 }
@@ -55,13 +59,13 @@ class IdGen {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final dir = await getApplicationDocumentsDirectory();
-  final path = "${dir.path}/default.isar";
+  IsarStatic.externalDirectory = await getApplicationDocumentsDirectory();
+  final path = "${IsarStatic.externalDirectory!.path}/default.isar";
   log("The app signature is ${await SmsAutoFill().getAppSignature}");
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   try {
-    await initIsarDatabase(dir);
+    initIsarDatabase(IsarStatic.externalDirectory!);
   } catch (e) {
     if (e.toString().contains('deserialize') ||
         e.toString().contains('Schema')) {
@@ -71,7 +75,7 @@ void main() async {
         final lockFile = File("$path.lock");
         if (await lockFile.exists()) await lockFile.delete();
       }
-      await initIsarDatabase(dir);
+      initIsarDatabase(IsarStatic.externalDirectory!);
     }
   }
   await GetStorage.init();
@@ -79,7 +83,7 @@ void main() async {
   Get.put(ItemsController());
 }
 
-Future<void> initIsarDatabase(Directory dir) async {
+void initIsarDatabase(Directory dir) {
   IsarStatic.isar = Isar.open(
     schemas: [
       GatewaySchema,

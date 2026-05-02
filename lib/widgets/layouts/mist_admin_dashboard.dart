@@ -86,6 +86,14 @@ class _MistAdminDashboardState extends State<MistAdminDashboard> {
                     ? Colors.grey.withAlpha(50)
                     : null,
               ),
+              ListTile(
+                leading: Iconify(Carbon.event_schedule, color: Colors.indigo),
+                title: "Shift Logs".text(),
+                onTap: () => widget.onTap("Shift Logs"),
+                tileColor: widget.selectedTile == "Shift Logs"
+                    ? Colors.grey.withAlpha(50)
+                    : null,
+              ),
             ],
           ),
           ListTile(

@@ -1,9 +1,9 @@
-import 'dart:developer';
-
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/models/item_unsaved_model.dart';
+import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/utils/sold_by.dart';
 import 'package:mistpos/models/inv_item.dart';
@@ -11,15 +11,18 @@ import 'package:mistpos/utils/color_list.dart';
 import 'package:mistpos/utils/icons_list.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:mistpos/services/network_wrapper.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
-import 'package:mistpos/models/item_unsaved_model.dart';
 import 'package:mistpos/screens/basic/modern_layout.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/models/item_categories_model.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/widgets/layouts/list_of_all_icons.dart';
+import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:radio_group_v2/utils/radio_group_decoration.dart';
 import 'package:mistpos/controllers/items_unsaved_controller.dart';
 import 'package:radio_group_v2/widgets/views/radio_group.dart' as rg;
@@ -79,10 +82,11 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
   );
   late final List<String> _modifiers = List.from(widget.model.modifiers ?? []);
   bool _isLoading = false;
+  late String _avatarUrl = widget.model.avatar ?? "";
+  bool _isUploadingImage = false;
   @override
   void initState() {
     super.initState();
-    log("the item is ${widget.model.toJson()}");
     if (widget.model.isCompositeItem) {
       _inventorController.selectedInvItems.clear();
       _inventorController.selectedInvItems.addAll(widget.model.compositeItems);
@@ -124,6 +128,8 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
         child: ListView(
           padding: EdgeInsets.all(5),
           children: [
+            _buildImageSection(),
+            32.gapHeight,
             _buildItemInformationSection(),
             32.gapHeight,
             _buildInventoryManagementSection(),
@@ -251,6 +257,30 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
               });
             },
           ),
+        ),
+        32.gapHeight,
+        "Product Image".text(
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
+        14.gapHeight,
+        ListTile(
+          onTap: _pickAndUploadImage,
+          tileColor: Colors.grey.withAlpha(50),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          leading: _isUploadingImage
+              ? MistLoader1()
+              : _avatarUrl.isNotEmpty
+              ? Image.network(
+                  _avatarUrl,
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.cover,
+                )
+              : Iconify(Bx.image, color: AppTheme.color(context)),
+          title: "Pick Image".text(),
+          subtitle:
+              (_avatarUrl.isNotEmpty ? "Image uploaded" : "No image selected")
+                  .text(style: TextStyle(fontSize: 12, color: Colors.grey)),
         ),
         32.gapHeight,
         Obx(
@@ -493,17 +523,71 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
           },
         ),
         16.gapHeight,
-        'Selected Icon'.text(),
+        'Current Appearance'.text(),
         8.gapHeight,
-        if (widget.model.shape != null)
+        if (_avatarUrl.isNotEmpty) ...[
+          [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                _avatarUrl,
+                width: 80,
+                height: 80,
+                fit: BoxFit.cover,
+              ),
+            ),
+            12.gapWidth,
+            TextButton.icon(
+              onPressed: () {
+                setState(() {
+                  _avatarUrl = "";
+                  widget.model.avatar = "";
+                });
+                Toaster.showSuccess("Image removed");
+              },
+              icon: Icon(Icons.delete, color: Colors.red),
+              label: Text("Remove Image", style: TextStyle(color: Colors.red)),
+            ),
+          ].row(),
+        ] else if (widget.model.shape != null &&
+            widget.model.shape!.isNotEmpty) ...[
           [
             Iconify(
               widget.model.shape!,
               size: 60,
-              color: Color(int.parse('${widget.model.color!}')),
+              color: widget.model.color != null
+                  ? Color(int.parse('${widget.model.color!}'))
+                  : Get.theme.colorScheme.primary,
+            ),
+            12.gapWidth,
+            TextButton.icon(
+              onPressed: () {
+                setState(() {
+                  widget.model.shape = "";
+                });
+                Toaster.showSuccess("Icon removed");
+              },
+              icon: Icon(Icons.delete, color: Colors.red),
+              label: Text("Remove Icon", style: TextStyle(color: Colors.red)),
             ),
           ].row(),
-        // Implement this widget as needed
+        ] else ...[
+          "No appearance selected, defaulting to cube.".text(
+            style: TextStyle(color: Colors.grey),
+          ),
+        ],
+        16.gapHeight,
+        TextButton.icon(
+          onPressed: _isUploadingImage ? null : _pickAndUploadImage,
+          icon: _isUploadingImage
+              ? SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Icon(Icons.upload_file),
+          label: Text(_avatarUrl.isNotEmpty ? "Change Image" : "Upload Image"),
+        ),
       ],
     );
   }
@@ -697,6 +781,7 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
     } else {
       price = cost;
     }
+    widget.model.avatar = _avatarUrl;
     widget.model.miniItems = miniItems;
     widget.model.wholesalePrice = CurrenceConverter.baseCurrency(
       wholeSalePrice,
@@ -727,6 +812,144 @@ class _ScreenEditItemState extends State<ScreenEditItem> {
     if (response) {
       Get.back();
       Toaster.showSuccess('Item created successfully');
+    }
+  }
+
+  Widget _buildImageSection() {
+    return MistMordernLayout(
+      label: "Product Image",
+      children: [
+        14.gapHeight,
+        if (_avatarUrl.isNotEmpty) ...[
+          Center(
+            child: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  _avatarUrl,
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    width: 120,
+                    height: 120,
+                    color: Colors.grey.withAlpha(50),
+                    child: Icon(
+                      Icons.broken_image,
+                      size: 40,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              ),
+              16.gapHeight,
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.shade50,
+                  foregroundColor: Colors.red,
+                  elevation: 0,
+                ),
+                onPressed: () async {
+                  final urlToDelete = _avatarUrl;
+
+                  final response = await Net.deleteFile(urlToDelete);
+                  if (!response.hasError) {
+                    Toaster.showSuccess("Image removed from server");
+                    setState(() {
+                      _avatarUrl = "";
+                      widget.model.avatar = "";
+                    });
+                  } else {
+                    Toaster.showError(response.response);
+                  }
+                },
+                icon: Icon(Icons.delete),
+                label: Text("Remove Image"),
+              ),
+            ].column(mainAxisSize: MainAxisSize.min),
+          ),
+        ] else ...[
+          Center(
+            child: [
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withAlpha(30),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.image, size: 50, color: Colors.grey),
+              ),
+              16.gapHeight,
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(elevation: 0),
+                onPressed: _isUploadingImage ? null : _pickAndUploadImage,
+                icon: _isUploadingImage
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Icon(Icons.upload_file),
+                label: Text(
+                  _isUploadingImage ? "Uploading..." : "Upload Image",
+                ),
+              ),
+            ].column(mainAxisSize: MainAxisSize.min),
+          ),
+        ],
+      ],
+    );
+  }
+
+  void _pickAndUploadImage() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 40,
+        maxWidth: 600,
+        maxHeight: 600,
+      );
+      if (image == null) return;
+
+      final oldUrl = _avatarUrl;
+      setState(() {
+        _isUploadingImage = true;
+      });
+
+      final response = await Net.uploadFile('/upload', File(image.path));
+      if (!mounted) return;
+
+      if (!response.hasError && oldUrl.isNotEmpty) {
+        await Net.deleteFile(oldUrl);
+      }
+
+      setState(() {
+        _isUploadingImage = false;
+      });
+
+      if (response.hasError) {
+        Toaster.showError("Failed to upload image: ${response.response}");
+        return;
+      }
+
+      if (response.body != null && response.body['url'] != null) {
+        setState(() {
+          _avatarUrl = response.body['url'];
+        });
+        Toaster.showSuccess("Image uploaded");
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isUploadingImage = false;
+        });
+      }
+      Toaster.showError("Error: $e");
     }
   }
 }

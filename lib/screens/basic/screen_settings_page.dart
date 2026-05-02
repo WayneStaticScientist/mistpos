@@ -264,6 +264,33 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                 ),
           ),
           24.gapColumn,
+          MistMordernLayout(
+            label: "Display Settings",
+            children: [
+              ListTile(
+                contentPadding: EdgeInsets.all(0),
+                onTap: () {
+                  model.useGridViewForItems = !model.useGridViewForItems;
+                  model.saveToStorage();
+                  setState(() {});
+                },
+                trailing: Switch(
+                  value: model.useGridViewForItems,
+                  onChanged: (c) {
+                    model.useGridViewForItems = c;
+                    model.saveToStorage();
+                    setState(() {});
+                  },
+                ),
+                leading: Iconify(Bx.grid, color: AppTheme.color(context)),
+                title: "Use Grid View for Items".text(),
+                subtitle: "Toggle between grid and list view for products in sales screen".text(
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+              ),
+            ],
+          ),
+          24.gapColumn,
           Obx(
             () =>
                 MistMordernLayout(

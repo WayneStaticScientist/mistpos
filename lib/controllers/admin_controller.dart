@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:get/get.dart';
+import 'package:mistpos/models/shifts_model.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:open_file/open_file.dart';
 import 'package:file_picker/file_picker.dart';
@@ -268,6 +269,32 @@ class AdminController extends GetxController {
       shiftsStats.value = list
           .map((e) => ShiftsStatsModel.fromJson(e))
           .toList();
+    }
+  }
+
+  RxBool loadingAllShifts = RxBool(false);
+  RxList<ShiftsModel> allShifts = RxList<ShiftsModel>();
+  RxInt allShiftsPage = RxInt(1);
+  RxInt allShiftsTotalPages = RxInt(1);
+
+  Future<void> loadAllShifts({int page = 1}) async {
+    if (loadingAllShifts.value) return;
+    loadingAllShifts.value = true;
+    final result = await Net.get("/admin/shifts?page=$page&limit=15");
+    loadingAllShifts.value = false;
+    if (result.hasError) {
+      Toaster.showError("Failed to load shifts log: ${result.response}");
+      return;
+    }
+    if (result.body['shifts'] != null) {
+      List<dynamic> list = result.body['shifts'];
+      if (page == 1) {
+        allShifts.assignAll(list.map((e) => ShiftsModel.fromJson(e)).toList());
+      } else {
+        allShifts.addAll(list.map((e) => ShiftsModel.fromJson(e)).toList());
+      }
+      allShiftsPage.value = result.body['pagination']['page'] ?? 1;
+      allShiftsTotalPages.value = result.body['pagination']['pages'] ?? 1;
     }
   }
 

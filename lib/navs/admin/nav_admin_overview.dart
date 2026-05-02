@@ -2,18 +2,17 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:mistpos/screens/basic/modern_layout.dart';
+import 'package:mistpos/utils/date_utils.dart';
 import 'package:pdf_maker/pdf_maker.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/utils/currence_converter.dart';
-import 'package:mistpos/widgets/inputs/range_view.dart';
 import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/screens/basic/modern_layout.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/controllers/admin_controller.dart';
-import 'package:mistpos/widgets/layouts/card_overview.dart';
 import 'package:mistpos/utils/pdfdocuments/pdf_overview.dart';
 
 class NavAdminOverView extends StatefulWidget {
@@ -44,215 +43,246 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
       return SingleChildScrollView(
         child: Column(
           children: [
-            18.gapHeight,
-            Wrap(
-              children: [
-                MistRangeView(
-                  label: "From Date",
-                  date: _startDate,
-                  onDatePicked: (time) {
-                    setState(() {
-                      _startDate = time;
-                    });
-                    _loadWithUpdatedTimeFrame();
-                  },
-                ),
-                MistRangeView(
-                  label: "To Date",
-                  date: _endDate,
-                  onDatePicked: (time) {
-                    setState(() {
-                      _endDate = time;
-                    });
-                    _loadWithUpdatedTimeFrame();
-                  },
-                ),
-              ],
-            ),
-            18.gapHeight,
-            [
-              "Product Overview".text(
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
               ),
-            ].row(),
-            18.gapHeight,
-            Obx(
-              () => SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: [
-                  CardOverview(
-                    label: "Total Products",
-                    value: _adminController.totalProducts.value.toString(),
+              child: InkWell(
+                onTap: _showPrimaryDateRangePicker,
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 14,
                   ),
-                  18.gapWidth,
-                  CardOverview(
-                    label: "Total Items In Stock",
-                    value:
+                  decoration: BoxDecoration(
+                    color: AppTheme.surface(context),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.withAlpha(40)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(5),
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.calendar_today_outlined,
+                        size: 18,
+                        color: Get.theme.colorScheme.primary,
+                      ),
+                      12.gapWidth,
+                      Text(
+                        _startDate == null
+                            ? "All Time Data"
+                            : "${MistDateUtils.getInformalShortDate(_startDate!)}  —  ${MistDateUtils.getInformalShortDate(_endDate ?? DateTime.now())}",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const Spacer(),
+                      const Icon(
+                        Icons.keyboard_arrow_down,
+                        size: 20,
+                        color: Colors.grey,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: "Product Overview".text(
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ),
+            16.gapHeight,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final crossAxisCount = constraints.maxWidth > 800
+                      ? 4
+                      : (constraints.maxWidth > 500 ? 2 : 1);
+                  return GridView.count(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 1.6,
+                    children: [
+                      _buildDashboardMetricCard(
+                        "Total Products",
+                        _adminController.totalProducts.value.toString(),
+                        Icons.inventory_2_outlined,
+                        Colors.indigo,
+                      ),
+                      _buildDashboardMetricCard(
+                        "Items In Stock",
                         _adminController.statsPoducts.value?.totalStock
-                            .toString() ??
-                        "0",
-                  ),
-                  18.gapWidth,
-                  CardOverview(
-                    label: "Stock Value",
-                    value: CurrenceConverter.getCurrenceFloatInStrings(
-                      _adminController.statsPoducts.value?.totalCost ?? 0,
-                      _userController.user.value?.baseCurrence ?? '',
-                    ),
-                  ),
-                  18.gapWidth,
-                  CardOverview(
-                    label: "Total Revenue",
-                    value: CurrenceConverter.getCurrenceFloatInStrings(
-                      _adminController.statsPoducts.value?.totalRevenue ?? 0,
-                      _userController.user.value?.baseCurrence ?? '',
-                    ),
-                  ),
-                  18.gapWidth,
-                  CardOverview(
-                    color: Colors.orange.withAlpha(120),
-                    label: "Average Cost",
-                    value: CurrenceConverter.getCurrenceFloatInStrings(
-                      _adminController.statsPoducts.value?.totalAverageCosts ??
-                          0,
-                      _userController.user.value?.baseCurrence ?? '',
-                    ),
-                  ),
-                ].row(),
-              ).sizedBox(height: 150, width: double.infinity),
-            ),
-            18.gapHeight,
-            [
-              "Sales Overview".text(
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                .toString() ??
+                            "0",
+                        Icons.warehouse_outlined,
+                        Colors.blue,
+                      ),
+                      _buildDashboardMetricCard(
+                        "Stock Value",
+                        CurrenceConverter.getCurrenceFloatInStrings(
+                          _adminController.statsPoducts.value?.totalCost ?? 0,
+                          _userController.user.value?.baseCurrence ?? '',
+                        ),
+                        Icons.attach_money,
+                        Colors.teal,
+                      ),
+                      _buildDashboardMetricCard(
+                        "Projected Revenue",
+                        CurrenceConverter.getCurrenceFloatInStrings(
+                          _adminController.statsPoducts.value?.totalRevenue ??
+                              0,
+                          _userController.user.value?.baseCurrence ?? '',
+                        ),
+                        Icons.trending_up,
+                        Colors.green,
+                      ),
+                    ],
+                  );
+                },
               ),
-            ].row(),
-            18.gapHeight,
-            Obx(
-              () => SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: [
-                  CardOverview(
-                    label: "Gross Profit ",
-                    value: CurrenceConverter.getCurrenceFloatInStrings(
-                      (_adminController.statsSales.value?.totalSales ?? 0) -
-                          (_adminController.statsSales.value?.totalCost ?? 0),
-                      _userController.user.value?.baseCurrence ?? '',
-                    ),
+            ),
+            24.gapHeight,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: "Sales Overview".text(
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
                   ),
-                  18.gapWidth,
-                  CardOverview(
-                    label: "Expenses ",
-                    value: CurrenceConverter.getCurrenceFloatInStrings(
-                      (_adminController.statsSales.value?.totalExpenses ?? 0),
-                      _userController.user.value?.baseCurrence ?? '',
-                    ),
-                  ),
-                  18.gapWidth,
-                  CardOverview(
-                    label: "Net Profit ",
-                    value: CurrenceConverter.getCurrenceFloatInStrings(
-                      ((_adminController.statsSales.value?.totalSales ?? 0) -
+                ),
+              ),
+            ),
+            16.gapHeight,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final crossAxisCount = constraints.maxWidth > 800
+                      ? 4
+                      : (constraints.maxWidth > 500 ? 2 : 1);
+                  return GridView.count(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 1.6,
+                    children: [
+                      _buildDashboardMetricCard(
+                        "Total Sales",
+                        CurrenceConverter.getCurrenceFloatInStrings(
+                          _adminController.statsSales.value?.totalSales ?? 0,
+                          _userController.user.value?.baseCurrence ?? '',
+                        ),
+                        Icons.point_of_sale_outlined,
+                        Colors.green,
+                      ),
+                      _buildDashboardMetricCard(
+                        "Gross Profit",
+                        CurrenceConverter.getCurrenceFloatInStrings(
+                          (_adminController.statsSales.value?.totalSales ?? 0) -
                               (_adminController.statsSales.value?.totalCost ??
-                                  0)) -
-                          (_adminController.statsSales.value?.totalExpenses ??
-                              0),
-                      _userController.user.value?.baseCurrence ?? '',
-                    ),
-                  ),
-                  18.gapWidth,
-                  CardOverview(
-                    label: "Total Sales",
-                    value: CurrenceConverter.getCurrenceFloatInStrings(
-                      _adminController.statsSales.value?.totalSales ?? 0,
-                      _userController.user.value?.baseCurrence ?? '',
-                    ),
-                  ),
-                  18.gapWidth,
-                  CardOverview(
-                    label: "Average Cost of Sales",
-                    value: CurrenceConverter.getCurrenceFloatInStrings(
-                      _adminController.statsSales.value?.totalAverageCosts ?? 0,
-                      _userController.user.value?.baseCurrence ?? '',
-                    ),
-                  ),
-                  18.gapWidth,
-                  CardOverview(
-                    label: "Average Profit",
-                    value: CurrenceConverter.getCurrenceFloatInStrings(
-                      ((_adminController.statsSales.value?.totalSales ?? 0) -
+                                  0),
+                          _userController.user.value?.baseCurrence ?? '',
+                        ),
+                        Icons.account_balance_wallet_outlined,
+                        Colors.teal,
+                      ),
+                      _buildDashboardMetricCard(
+                        "Net Profit",
+                        CurrenceConverter.getCurrenceFloatInStrings(
+                          ((_adminController.statsSales.value?.totalSales ??
+                                      0) -
+                                  (_adminController
+                                          .statsSales
+                                          .value
+                                          ?.totalCost ??
+                                      0)) -
                               (_adminController
                                       .statsSales
                                       .value
-                                      ?.totalAverageCosts ??
-                                  0)) -
+                                      ?.totalExpenses ??
+                                  0),
+                          _userController.user.value?.baseCurrence ?? '',
+                        ),
+                        Icons.savings_outlined,
+                        Colors.deepPurple,
+                      ),
+                      _buildDashboardMetricCard(
+                        "Expenses",
+                        CurrenceConverter.getCurrenceFloatInStrings(
                           (_adminController.statsSales.value?.totalExpenses ??
                               0),
-                      _userController.user.value?.baseCurrence ?? '',
-                    ),
-                  ),
-                  18.gapWidth,
-                  CardOverview(
-                    label: "Taxes",
-                    value: CurrenceConverter.getCurrenceFloatInStrings(
-                      _adminController.statsSales.value?.totalTaxs ?? 0,
-                      _userController.user.value?.baseCurrence ?? '',
-                    ),
-                  ),
-                  18.gapWidth,
-                  CardOverview(
-                    label: "Active Cashiers",
-                    value:
+                          _userController.user.value?.baseCurrence ?? '',
+                        ),
+                        Icons.money_off_outlined,
+                        Colors.red,
+                      ),
+                      _buildDashboardMetricCard(
+                        "Taxes",
+                        CurrenceConverter.getCurrenceFloatInStrings(
+                          _adminController.statsSales.value?.totalTaxs ?? 0,
+                          _userController.user.value?.baseCurrence ?? '',
+                        ),
+                        Icons.gavel_outlined,
+                        Colors.blueGrey,
+                      ),
+                      _buildDashboardMetricCard(
+                        "Active Cashiers",
                         _adminController.statsSales.value?.numberOfCashiers
-                            .toString() ??
-                        "0",
-                  ),
-                  18.gapWidth,
-                  CardOverview(
-                    label: "Receipts",
-                    value:
+                                .toString() ??
+                            "0",
+                        Icons.people_outline,
+                        Colors.purple,
+                      ),
+                      _buildDashboardMetricCard(
+                        "Total Receipts",
                         _adminController.statsSales.value?.totalReceipts
-                            .toString() ??
-                        "0",
-                  ),
-                  18.gapWidth,
-
-                  CardOverview(
-                    color: Colors.green.withAlpha(150),
-                    label: "Discounts",
-                    value: CurrenceConverter.getCurrenceFloatInStrings(
-                      _adminController.statsSales.value?.totalDiscounts ?? 0,
-                      _userController.user.value?.baseCurrence ?? '',
-                    ),
-                  ),
-                  18.gapWidth,
-                  CardOverview(
-                    label: "Credits",
-                    value: CurrenceConverter.getCurrenceFloatInStrings(
-                      _adminController.statsSales.value?.totalCredits ?? 0,
-                      _userController.user.value?.baseCurrence ?? '',
-                    ),
-                  ),
-                  18.gapWidth,
-                  CardOverview(
-                    color: Colors.blue.withAlpha(50),
-                    label: "Total Refunds",
-                    value: CurrenceConverter.getCurrenceFloatInStrings(
-                      _adminController.statsSales.value?.totalRefunds ?? 0,
-                      _userController.user.value?.baseCurrence ?? '',
-                    ),
-                  ),
-                  18.gapWidth,
-                  CardOverview(
-                    color: Colors.red.withAlpha(120),
-                    label: "Total Loss",
-                    value: CurrenceConverter.getCurrenceFloatInStrings(
-                      _adminController.statsSales.value?.totalLossValue ?? 0,
-                      _userController.user.value?.baseCurrence ?? '',
-                    ),
-                  ),
-                ].row(),
-              ).sizedBox(height: 150, width: double.infinity),
+                                .toString() ??
+                            "0",
+                        Icons.receipt_long_outlined,
+                        Colors.amber.shade800,
+                      ),
+                      _buildDashboardMetricCard(
+                        "Discounts",
+                        CurrenceConverter.getCurrenceFloatInStrings(
+                          _adminController.statsSales.value?.totalDiscounts ??
+                              0,
+                          _userController.user.value?.baseCurrence ?? '',
+                        ),
+                        Icons.local_offer_outlined,
+                        Colors.orange,
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
 
             Obx(
@@ -281,19 +311,54 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
                   : SizedBox(),
             ),
             32.gapHeight,
-            Wrap(
-              children: [
-                MistRangeView(
-                  label: "Choose End Day",
-                  date: _weeklyRange,
-                  onDatePicked: (time) {
-                    setState(() {
-                      _weeklyRange = time;
-                    });
-                    _loadWithWeekTimeFrame();
-                  },
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: InkWell(
+                onTap: _showSecondaryDatePicker,
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 14,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surface(context),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.withAlpha(40)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(5),
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.calendar_month_outlined,
+                        size: 18,
+                        color: Get.theme.colorScheme.primary,
+                      ),
+                      12.gapWidth,
+                      Text(
+                        "End Date: ${MistDateUtils.getInformalShortDate(_weeklyRange)}",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const Spacer(),
+                      const Icon(
+                        Icons.keyboard_arrow_down,
+                        size: 20,
+                        color: Colors.grey,
+                      ),
+                    ],
+                  ),
                 ),
-              ],
+              ),
             ),
             18.gapHeight,
             MistMordernLayout(
@@ -324,7 +389,10 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
         return MistLoader1();
       }
       if (list.isEmpty) {
-        return "Weekly profit chart is empty".text();
+        return _buildEmptyChartDisplay(
+          "No profit metrics recorded this week",
+          Icons.bar_chart_rounded,
+        );
       }
 
       // --- MODERN STYLING VARIABLES ---
@@ -481,7 +549,10 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
         return MistLoader1();
       }
       if (list.isEmpty) {
-        return "Weekly sales chart is empty".text();
+        return _buildEmptyChartDisplay(
+          "No sales trends found for this period",
+          Icons.show_chart_rounded,
+        );
       }
 
       // --- MODERN STYLING ENHANCEMENTS ---
@@ -650,7 +721,10 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
         return MistLoader1();
       }
       if (list.isEmpty) {
-        return "Weekly visitors chart is empty".text();
+        return _buildEmptyChartDisplay(
+          "No visitor analytics gathered yet",
+          Icons.analytics_rounded,
+        );
       }
 
       // --- MODERN STYLING VARIABLES ---
@@ -835,5 +909,156 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
         .catchError((e) {
           Toaster.showError("Failed to generate PDF: $e");
         });
+  }
+
+  Widget _buildDashboardMetricCard(
+    String title,
+    String value,
+    IconData icon,
+    Color baseColor,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.surface(context),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(10),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: baseColor.withAlpha(30),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: baseColor, size: 28),
+          ),
+          16.gapWidth,
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                8.gapHeight,
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showPrimaryDateRangePicker() async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now().add(const Duration(days: 1)),
+      initialDateRange: _startDate != null && _endDate != null
+          ? DateTimeRange(start: _startDate!, end: _endDate!)
+          : DateTimeRange(
+              start: DateTime.now().subtract(const Duration(days: 7)),
+              end: DateTime.now(),
+            ),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Get.theme.colorScheme.primary,
+              onPrimary: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _startDate = picked.start;
+        _endDate = picked.end;
+      });
+      _loadWithUpdatedTimeFrame();
+    }
+  }
+
+  Future<void> _showSecondaryDatePicker() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _weeklyRange,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now().add(const Duration(days: 1)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Get.theme.colorScheme.primary,
+              onPrimary: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _weeklyRange = picked;
+      });
+      _loadWithWeekTimeFrame();
+    }
+  }
+
+  Widget _buildEmptyChartDisplay(String message, IconData icon) {
+    return Container(
+      height: 200,
+      width: double.infinity,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: AppTheme.surface(context).withAlpha(100),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.withAlpha(20)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 48, color: Colors.grey.withAlpha(150)),
+          12.gapHeight,
+          Text(
+            message,
+            style: TextStyle(
+              color: Colors.grey.shade500,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
-import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/themes/app_theme.dart';
@@ -20,8 +19,10 @@ import 'package:mistpos/widgets/layouts/cards_recent.dart';
 import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/widgets/layouts/layout_cashout.dart';
 import 'package:mistpos/screens/basic/screen_manual_cart.dart';
+import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/widgets/sales_widgets/sales_app_bar.dart';
 import 'package:mistpos/widgets/sales_widgets/sales_item_list.dart';
+import 'package:mistpos/widgets/sales_widgets/sales_item_grid.dart';
 import 'package:mistpos/widgets/sales_widgets/sales_tax_list.dart';
 import 'package:mistpos/screens/basic/screen_edit_manual_cart.dart';
 import 'package:flutter_barcode_listener/flutter_barcode_listener.dart';
@@ -105,6 +106,9 @@ class _NavSaleState extends State<NavSale> {
       children: [
         Positioned.fill(
           child: SmartRefresher(
+            onLoading: () async {
+              _refreshController.loadComplete();
+            },
             enablePullUp: true,
             onRefresh: () async {
               await _itemsListController.syncCartItemsOnBackground();
@@ -265,6 +269,10 @@ class _NavSaleState extends State<NavSale> {
   StatefulWidget _buidItemList() {
     if (_selectedListGroup == "discounts") return SalesDiscountsList();
     if (_selectedListGroup == "tax") return SalesTaxList();
+    final model = AppSettingsModel.fromStorage();
+    if (model.useGridViewForItems) {
+      return SalesItemGrid(onTap: (a, b) => _handleWidgetClick(a, b));
+    }
     return SalesItemList(onTap: (a, b) => _handleWidgetClick(a, b));
   }
 
@@ -487,7 +495,6 @@ class _NavSaleState extends State<NavSale> {
               return;
             }
             Get.back();
-            Toaster.showSuccess("shift opened");
             _itemsListController.openShift(amount, _userController.user.value!);
           },
         ),
