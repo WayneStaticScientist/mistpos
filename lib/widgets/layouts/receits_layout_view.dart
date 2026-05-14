@@ -33,6 +33,7 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
   String _searchKey = "";
   String _filterStatus = "All"; // "All" or "Credit"
   late Timer? _debounce;
+  ItemReceitModel? _selectedReceit;
 
   @override
   void initState() {
@@ -73,123 +74,175 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
 
   @override
   Widget build(BuildContext context) {
-    return SmartRefresher(
-      controller: _refreshController,
-      onRefresh: () async {
-        await _syncReceits(1, _searchKey);
-        _refreshController.refreshCompleted();
-      },
-      child: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
-          // Floating and Snapping Header
-          // This will scroll away when going down and reappear on scroll up
-          SliverAppBar(
-            floating: true,
-            snap: true,
-            pinned: false,
-            elevation: 0,
-            automaticallyImplyLeading: false,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            toolbarHeight: 120.0, // Height to fit search and filters
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                padding: const EdgeInsets.only(
-                  top: 8,
-                  left: 8,
-                  right: 8,
-                  bottom: 5,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    MistSearchField(
-                      controller: _searchController,
-                      label: "Search Receits",
-                    ).padding(const EdgeInsets.symmetric(horizontal: 2)),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isDesktop = constraints.maxWidth > 700;
 
-                    // Filter Chips Row
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          _buildFilterChip("All"),
-                          10.gapWidth,
-                          _buildFilterChip("Payed"),
-                          10.gapWidth,
-                          _buildFilterChip("Credit"),
-                        ],
-                      ).padding(const EdgeInsets.symmetric(horizontal: 2)),
+        final listWidget = SmartRefresher(
+          key: const ValueKey('receits_refresher'),
+          controller: _refreshController,
+          onRefresh: () async {
+            await _syncReceits(1, _searchKey);
+            _refreshController.refreshCompleted();
+          },
+          child: CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              // Floating and Snapping Header
+              // This will scroll away when going down and reappear on scroll up
+              SliverAppBar(
+                floating: true,
+                snap: true,
+                pinned: false,
+                elevation: 0,
+                automaticallyImplyLeading: false,
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                toolbarHeight: 120.0, // Height to fit search and filters
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
+                    padding: const EdgeInsets.only(
+                      top: 8,
+                      left: 8,
+                      right: 8,
+                      bottom: 5,
                     ),
-                  ],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        MistSearchField(
+                          controller: _searchController,
+                          label: "Search Receits",
+                        ).padding(const EdgeInsets.symmetric(horizontal: 2)),
+
+                        // Filter Chips Row
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              _buildFilterChip("All"),
+                              10.gapWidth,
+                              _buildFilterChip("Payed"),
+                              10.gapWidth,
+                              _buildFilterChip("Credit"),
+                            ],
+                          ).padding(const EdgeInsets.symmetric(horizontal: 2)),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
 
-          // The List Content
-          Obx(() {
-            // 2. Check if empty after filter
-            if (_itemsListController.receits.isNotEmpty) {
-              // Group logic
-              final Map<String, List<ItemReceitModel>> grouped = {};
-              for (var item in _itemsListController.receits) {
-                final date = MistDateUtils.formatSortableDate(item.createdAt);
-                if (!grouped.containsKey(date)) {
-                  grouped[date] = [];
-                }
-                grouped[date]!.add(item);
-              }
-
-              // Flatten logic: [Header, Item, Item, Header, Item...]
-              final List<dynamic> flatList = [];
-              final sortedKeys = grouped.keys.toList()
-                ..sort((a, b) => b.compareTo(a));
-
-              for (var key in sortedKeys) {
-                flatList.add(key); // Add Date String as Header
-                flatList.addAll(grouped[key]!); // Add Items
-              }
-
-              return SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final item = flatList[index];
-                  if (item is String) {
-                    return _buildGroupHeader(item);
-                  } else if (item is ItemReceitModel) {
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [_buildItem(item), 14.gapHeight],
+              // The List Content
+              Obx(() {
+                // 2. Check if empty after filter
+                if (_itemsListController.receits.isNotEmpty) {
+                  // Group logic
+                  final Map<String, List<ItemReceitModel>> grouped = {};
+                  for (var item in _itemsListController.receits) {
+                    final date = MistDateUtils.formatSortableDate(
+                      item.createdAt,
                     );
+                    if (!grouped.containsKey(date)) {
+                      grouped[date] = [];
+                    }
+                    grouped[date]!.add(item);
                   }
-                  return const SizedBox.shrink();
-                }, childCount: flatList.length),
-              );
-            } else {
-              // Empty State
-              return SliverFillRemaining(
-                hasScrollBody: false,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Iconify(
-                      Bx.receipt,
-                      color: AppTheme.color(context),
-                      size: 43,
-                    ),
-                    14.gapHeight,
-                    "No Receits found".text(
-                      style: TextStyle(color: AppTheme.color(context)),
-                    ),
-                  ],
-                ).padding(const EdgeInsets.all(20)),
-              );
-            }
-          }),
-        ],
-      ),
+
+                  // Flatten logic: [Header, Item, Item, Header, Item...]
+                  final List<dynamic> flatList = [];
+                  final sortedKeys = grouped.keys.toList()
+                    ..sort((a, b) => b.compareTo(a));
+
+                  for (var key in sortedKeys) {
+                    flatList.add(key); // Add Date String as Header
+                    flatList.addAll(grouped[key]!); // Add Items
+                  }
+
+                  return SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final item = flatList[index];
+                      if (item is String) {
+                        return _buildGroupHeader(item);
+                      } else if (item is ItemReceitModel) {
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [_buildItem(item), 14.gapHeight],
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    }, childCount: flatList.length),
+                  );
+                } else {
+                  // Empty State
+                  return SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Iconify(
+                          Bx.receipt,
+                          color: AppTheme.color(context),
+                          size: 43,
+                        ),
+                        14.gapHeight,
+                        "No Receits found".text(
+                          style: TextStyle(color: AppTheme.color(context)),
+                        ),
+                      ],
+                    ).padding(const EdgeInsets.all(20)),
+                  );
+                }
+              }),
+            ],
+          ),
+        );
+
+        if (isDesktop) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(flex: 35, child: listWidget),
+              VerticalDivider(
+                width: 1,
+                thickness: 1,
+                color: Colors.grey.withAlpha(50),
+              ),
+              Expanded(
+                flex: 65,
+                child: _selectedReceit != null
+                    ? ReceitDetailsWidget(
+                        receitModel: _selectedReceit!,
+                        key: ValueKey(_selectedReceit!.id),
+                      )
+                    : Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Iconify(
+                              Carbon.receipt,
+                              size: 64,
+                              color: Colors.grey.withAlpha(100),
+                            ),
+                            const SizedBox(height: 16),
+                            "Select a receipt to view details".text(
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+              ),
+            ],
+          );
+        }
+
+        return listWidget;
+      },
     );
   }
 
@@ -261,7 +314,15 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
             "${receit.createdAt.hour.toString().padLeft(2, '0')}:${receit.createdAt.minute.toString().padLeft(2, '0')} ${receit.creditSale ? '(credit)' : ''}",
             style: TextStyle(color: receit.creditSale ? Colors.red : null),
           ),
-          onTap: () => Get.to(() => ScreenReceitView(receitModel: receit)),
+          onTap: () {
+            if (MediaQuery.of(context).size.width > 700) {
+              setState(() {
+                _selectedReceit = receit;
+              });
+            } else {
+              Get.to(() => ScreenReceitView(receitModel: receit));
+            }
+          },
         )
         .decoratedBox(
           decoration: BoxDecoration(

@@ -1,20 +1,31 @@
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:mistpos/models/app_settings_model.dart';
 import 'package:mistpos/models/item_receit_model.dart';
 import 'package:mistpos/models/tax_model.dart';
 import 'package:mistpos/models/user_model.dart';
 import 'package:mistpos/utils/currence_converter.dart';
-import 'package:pos_universal_printer/pos_universal_printer.dart';
+import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
+import 'package:mistpos/utils/esc_pos_builder.dart';
 
 class OfflinePrinter {
-  static void printLogo(AppSettingsModel model, EscPosBuilder b) {
+  /// Prints the receipt logo. The image file is decoded and converted to
+  /// ESC/POS raster bytes before sending, preventing raw file bytes from
+  /// being printed as garbage characters.
+  static Future<void> printLogo(AppSettingsModel model, EscPosBuilder b) async {
     if (model.receitLogoPath.isNotEmpty) {
-      final rasterImage = getRasterImage(model.receitLogoPath);
-      if (rasterImage != null) {
+      // Calculate pixel width: each receipt character ≈ 12 dots on 58mm paper
+      final int maxPixelWidth = model.printerRecietLength * 12;
+      final rasterBytes = await _getEscPosRasterImage(
+        model.receitLogoPath,
+        maxWidth: maxPixelWidth,
+      );
+      if (rasterBytes != null && rasterBytes.isNotEmpty) {
         b.feed(1);
-        b.raster(rasterImage);
+        b.raster(rasterBytes);
         b.feed(1);
       }
     }
@@ -111,6 +122,87 @@ class OfflinePrinter {
     b.text('.' * receitWidth);
   }
 
+  /// Reads an image file and converts it to ESC/POS raster bytes (GS v 0).
+  /// Decodes PNG/JPEG via dart:ui, converts to monochrome, and builds
+  /// the proper ESC/POS raster command sequence.
+  /// [maxWidth] controls the raster pixel width — derived from receipt char width.
+  static Future<Uint8List?> _getEscPosRasterImage(
+    String imagePath, {
+    int maxWidth = 384,
+  }) async {
+    try {
+      final imageBytes = File(imagePath).readAsBytesSync();
+      final raw = Uint8List.fromList(imageBytes);
+
+      // If already ESC/POS raster data (starts with GS v 0), pass through
+      if (raw.length >= 4 &&
+          raw[0] == 0x1D &&
+          raw[1] == 0x76 &&
+          raw[2] == 0x30) {
+        return raw;
+      }
+
+      // Decode PNG/JPEG to pixel data using dart:ui
+      final codec = await ui.instantiateImageCodec(raw);
+      final frame = await codec.getNextFrame();
+      final img = frame.image;
+
+      // Scale to configured receipt width preserving aspect ratio
+      final targetWidth = img.width > maxWidth ? maxWidth : img.width;
+      final scale = targetWidth / img.width;
+      final targetHeight = (img.height * scale).round();
+
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      canvas.scale(scale);
+      canvas.drawImage(img, const ui.Offset(0, 0), ui.Paint());
+      final picture = recorder.endRecording();
+      final resized = await picture.toImage(targetWidth, targetHeight);
+      final byteData =
+          await resized.toByteData(format: ui.ImageByteFormat.rawRgba);
+      if (byteData == null) return null;
+      final pixels = byteData.buffer.asUint8List();
+
+      // Build GS v 0 raster command: monochrome conversion
+      const int threshold = 160;
+      final bytes = <int>[];
+      final widthBytes = (targetWidth + 7) ~/ 8; // Round up to byte boundary
+      final xL = widthBytes % 256;
+      final xH = widthBytes ~/ 256;
+      final yL = targetHeight % 256;
+      final yH = targetHeight ~/ 256;
+      bytes.addAll([0x1D, 0x76, 0x30, 0x00, xL, xH, yL, yH]);
+
+      for (int y = 0; y < targetHeight; y++) {
+        for (int x = 0; x < targetWidth; x += 8) {
+          int b = 0;
+          for (int bit = 0; bit < 8; bit++) {
+            final px = x + bit;
+            bool isDark = false;
+            if (px < targetWidth) {
+              final idx = (y * targetWidth + px) * 4;
+              final r = pixels[idx];
+              final g = pixels[idx + 1];
+              final bl = pixels[idx + 2];
+              final lum = (0.299 * r + 0.587 * g + 0.114 * bl).round();
+              if (lum < threshold) isDark = true;
+            }
+            b <<= 1;
+            if (isDark) b |= 0x01;
+          }
+          bytes.add(b);
+        }
+      }
+
+      return Uint8List.fromList(bytes);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// @deprecated Use _getEscPosRasterImage instead.
+  /// Kept for backward compatibility but returns raw file bytes which
+  /// should NOT be passed directly to raster().
   static List<int>? getRasterImage(String receitLogoPath) {
     try {
       final imageBytes = File(receitLogoPath).readAsBytesSync();
@@ -120,3 +212,4 @@ class OfflinePrinter {
     }
   }
 }
+

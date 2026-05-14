@@ -9,6 +9,8 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/widgets/buttons/mist_form_button.dart';
+import 'package:mistpos/widgets/layouts/auth_layout_wrapper.dart';
+import 'package:mistpos/screens/auth/screen_login.dart';
 
 class ScreenCreateAccount extends StatefulWidget {
   const ScreenCreateAccount({super.key});
@@ -25,18 +27,31 @@ class _ScreenCreateAccountState extends State<ScreenCreateAccount> {
   final _passwordController = TextEditingController();
   final _fullNameController = TextEditingController();
   final _businessNameController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
+      body: AuthLayoutWrapper(
+        child: Form(
+          key: _formKey,
           child: [
             CircleAvatar(
-              radius: 45,
-              child: Iconify(Bx.user, size: 34, color: Colors.white),
+              radius: 40,
+              backgroundColor: Get.theme.colorScheme.secondary,
+              child: const Iconify(Bx.user_plus, size: 40, color: Colors.white),
             ),
-            28.gapHeight,
+            16.gapHeight,
+            "Create Account".text().styled(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Get.theme.colorScheme.secondary,
+                ),
+            8.gapHeight,
+            "Sign up to get started with MistPos".text().styled(
+                  color: Colors.grey,
+                  fontSize: 14,
+                ),
+            32.gapHeight,
             MistFormInput(
               label: 'Full Name',
               controller: _fullNameController,
@@ -76,18 +91,34 @@ class _ScreenCreateAccountState extends State<ScreenCreateAccount> {
               icon: Iconify(Bx.key, color: Get.theme.colorScheme.primary),
             ),
             32.gapHeight,
-
-            32.gapHeight,
             Obx(
               () => MistFormButton(
                 isLoading: _userController.loading.value,
                 label: 'Create Account',
-                icon: Iconify(Bx.log_in, color: Colors.white),
+                icon: const Iconify(Bx.log_in, color: Colors.white),
                 onTap: _createAccount,
               ),
             ),
+            24.gapHeight,
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: "Already have an account? Login"
+                  .text(textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w500))
+                  .onTap(() {
+                Get.off(() => const ScreenLogin());
+              }),
+            ),
+            24.gapHeight,
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: "Back to Splash"
+                  .text(textAlign: TextAlign.center, style: TextStyle(color: Get.theme.colorScheme.primary))
+                  .onTap(() {
+                Get.back();
+              }),
+            ),
           ].column(),
-        ).constrained(maxWidth: 800).center().padding(EdgeInsets.all(14)),
+        ),
       ),
     );
   }

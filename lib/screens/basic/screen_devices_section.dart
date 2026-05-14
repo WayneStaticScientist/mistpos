@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/models/app_settings_model.dart';
+import 'package:mistpos/controllers/devices_controller.dart';
 import 'package:mistpos/screens/basic/screen_connected_printers.dart';
 import 'package:mistpos/themes/app_theme.dart';
 
@@ -18,6 +19,7 @@ class _ScreenDevicesSectionState extends State<ScreenDevicesSection> {
   @override
   Widget build(BuildContext context) {
     final model = AppSettingsModel.fromStorage();
+    final devicesController = Get.find<DevicesController>();
     return Scaffold(
       appBar: AppBar(title: Text("Connected Devices")),
       body: ListView(
@@ -28,14 +30,30 @@ class _ScreenDevicesSectionState extends State<ScreenDevicesSection> {
                 "Systematic Devices"
                     .text(style: TextStyle(fontWeight: FontWeight.bold))
                     .padding(EdgeInsets.all(14)),
-                ListTile(
-                  onTap: () => Get.to(() => ScreenConnectedPrinters()),
-                  leading: Iconify(Bx.printer, color: AppTheme.color(context)),
-                  title: "Printers".text(),
-                  subtitle: "bluetooth , wifi , ethernet printers".text(
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
-                  ),
-                ),
+                Obx(() {
+                  final isMulti =
+                      devicesController.printingMode.value == "multi";
+                  final printerCount = devicesController.printerDevices.length;
+                  final selectedCount =
+                      devicesController.multiPointSelectedCount;
+                  final modeLabel = isMulti
+                      ? "Multi Point · $selectedCount/$printerCount selected"
+                      : "Single Point · $printerCount printer${printerCount == 1 ? '' : 's'}";
+                  return ListTile(
+                    onTap: () async {
+                      await Get.to(() => ScreenConnectedPrinters());
+                      setState(() {});
+                    },
+                    leading: Iconify(
+                      Bx.printer,
+                      color: AppTheme.color(context),
+                    ),
+                    title: "Printers".text(),
+                    subtitle: modeLabel.text(
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                  );
+                }),
               ]
               .column(
                 mainAxisSize: MainAxisSize.min,

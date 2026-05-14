@@ -8,6 +8,7 @@ import 'package:mistpos/widgets/inputs/input_form.dart';
 import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/screens/auth/screen_create_account.dart';
 import 'package:mistpos/widgets/buttons/mist_form_button.dart';
+import 'package:mistpos/widgets/layouts/auth_layout_wrapper.dart';
 
 class ScreenLogin extends StatefulWidget {
   const ScreenLogin({super.key});
@@ -21,18 +22,31 @@ class _ScreenLoginState extends State<ScreenLogin> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _userController = Get.find<UserController>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
+      body: AuthLayoutWrapper(
+        child: Form(
+          key: _formKey,
           child: [
             CircleAvatar(
-              radius: 45,
-              child: Iconify(Bx.user, size: 34, color: Colors.white),
+              radius: 40,
+              backgroundColor: Get.theme.colorScheme.primary,
+              child: const Iconify(Bx.user, size: 40, color: Colors.white),
             ),
-            28.gapHeight,
+            16.gapHeight,
+            "Welcome Back".text().styled(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Get.theme.colorScheme.primary,
+                ),
+            8.gapHeight,
+            "Please login to your account".text().styled(
+                  color: Colors.grey,
+                  fontSize: 14,
+                ),
+            32.gapHeight,
             MistFormInput(
               label: 'Email Address',
               controller: _emailController,
@@ -48,27 +62,43 @@ class _ScreenLoginState extends State<ScreenLogin> {
               icon: Iconify(Bx.key, color: Get.theme.colorScheme.primary),
             ),
             32.gapHeight,
-
             Obx(
               () => MistFormButton(
                 label: 'Login',
                 onTap: _login,
                 isLoading: _userController.loading.value,
-                icon: Iconify(Bx.log_in, color: Colors.white),
+                icon: const Iconify(Bx.log_in, color: Colors.white),
               ),
             ),
-            18.gapHeight,
-            "Don't have an account ? ".text(textAlign: TextAlign.center).onTap(
-              () {
-                Get.to(() => ScreenCreateAccount());
-              },
+            24.gapHeight,
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: "Don't have an account? Sign up"
+                  .text(textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w500))
+                  .onTap(() {
+                Get.off(() => const ScreenCreateAccount());
+              }),
             ),
-            18.gapHeight,
-            "Forgot Password ? ".text(textAlign: TextAlign.center).onTap(() {
-              Net.launchForgotPassword();
-            }),
+            16.gapHeight,
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: "Forgot Password?"
+                  .text(textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey))
+                  .onTap(() {
+                Net.launchForgotPassword();
+              }),
+            ),
+            24.gapHeight,
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: "Back to Splash"
+                  .text(textAlign: TextAlign.center, style: TextStyle(color: Get.theme.colorScheme.primary))
+                  .onTap(() {
+                Get.back();
+              }),
+            ),
           ].column(),
-        ).constrained(maxWidth: 800).center().padding(EdgeInsets.all(14)),
+        ),
       ),
     );
   }

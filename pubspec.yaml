@@ -2,7 +2,7 @@ name: mistpos
 description: "Inventory App , track sales and reports"
 publish_to: "none"
 
-version: 1.0.4+23
+version: 1.0.5+24
 
 environment:
   sdk: ^3.8.1
@@ -13,7 +13,7 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   get: ^4.7.2
-  exui: ^1.0.7
+  exui: ^1.0.11
   iconify_flutter: ^0.0.7
   build_runner: ^2.4.13
   path_provider: ^2.1.5
@@ -26,11 +26,11 @@ dependencies:
   loading_animation_widget: ^1.3.0
   pull_to_refresh: ^2.0.0
   pinput: ^6.0.2
-  date_picker_plus: ^6.0.0
+  date_picker_plus: ^7.0.0
   fl_chart: ^1.1.1
   flutter_barcode_scanner_plus: ^3.0.8
   data_table_2: ^2.6.0
-  pos_universal_printer: ^0.2.10
+  flutter_pos_printer_platform_image_3: ^1.2.4
   flutter_blue_plus: ^2.0.0
   permission_handler: ^12.0.1
   esc_pos_utils_plus: ^2.0.4
@@ -40,26 +40,41 @@ dependencies:
   flutter_animate: ^4.5.2
   firebase_core: ^4.2.1
   firebase_messaging: ^16.0.4
-  flutter_local_notifications: ^20.1.0
+  flutter_local_notifications: ^21.0.0
   webview_flutter: ^4.8.0
   pdf_maker: ^1.1.0
   open_file: ^3.5.10
-  file_picker: ^10.3.6
-  device_info_plus: ^12.3.0
+  file_picker: ^8.1.7
+  device_info_plus: ^12.4.0
   flutter_launcher_icons: ^0.14.4
   isar_plus: ^1.2.2
   isar_plus_flutter_libs: ^1.2.2
   sms_autofill: ^2.4.1
   cached_network_image: ^3.4.1
+  window_manager: ^0.4.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^6.0.0
+  msix: ^3.16.1
+
+msix_config:
+  display_name: MistPos
+  publisher_display_name: Openchains Technologies
+  publisher: CN=Openchains Technologies, O=Openchains Technologies, L=Harare, S=Harare, C=ZW
+  identity_name: com.openchains.mistpos
+  msix_version: 1.0.0.0
+  logo_path: assets/launcher.png
+  capabilities: internetClient, location, bluetooth
+  install_certificate: true
 
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
+  windows:
+    generate: true
+    image_path: "assets/launcher.png"
   image_path: "assets/launcher.png"
   adaptive_icon_foreground: "assets/launcher.png"
   adaptive_icon_background: "#193452"
@@ -69,5 +84,6 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/
     - assets/avatars/
     - assets/tutorials/

@@ -1,6 +1,8 @@
+import 'package:get/get.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 Future<bool> joinTopic(String groupId) async {
+  if (GetPlatform.isDesktop) return false;
   try {
     await FirebaseMessaging.instance.subscribeToTopic(groupId);
     return true;
@@ -10,6 +12,7 @@ Future<bool> joinTopic(String groupId) async {
 }
 
 Future<bool> leaveTopic(String groupId) async {
+  if (GetPlatform.isDesktop) return false;
   try {
     await FirebaseMessaging.instance.unsubscribeFromTopic(groupId);
     return true;

@@ -18,218 +18,369 @@ import 'package:mistpos/utils/pdfdocuments/pdf_receit.dart';
 import 'package:mistpos/controllers/devices_controller.dart';
 import 'package:mistpos/screens/basic/screen_refund_cart.dart';
 
-class ScreenReceitView extends StatefulWidget {
+class ScreenReceitView extends StatelessWidget {
   final ItemReceitModel receitModel;
   const ScreenReceitView({super.key, required this.receitModel});
-  @override
-  State<ScreenReceitView> createState() => _ScreenReceitViewState();
-}
 
-class _ScreenReceitViewState extends State<ScreenReceitView> {
-  final _userController = Get.find<UserController>();
-  final _adminController = Get.find<AdminController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.receitModel.label),
-        actions: [
-          "refund"
-              .text()
-              .textIconButton(
-                onPressed: () async {
-                  final result = await Get.to(
-                    () => ScreenRefundCart(receitModel: widget.receitModel),
-                    arguments: widget.receitModel,
-                  );
-                  if (result != null) {
-                    setState(() {
-                      widget.receitModel.items = result.items;
-                      widget.receitModel.total = result.total;
-                      widget.receitModel.amount = result.amount;
-                    });
-                  }
-                },
-                icon: Iconify(Bx.recycle, color: Colors.red),
-              )
-              .visibleIfNot(widget.receitModel.creditSale),
-          "Pay"
-              .text(style: TextStyle(color: Colors.white))
-              .textIconButton(
-                onPressed: () async {
-                  final result = await Get.to(
-                    () => ScreenCreditPayment(receitModel: widget.receitModel),
-                    arguments: widget.receitModel,
-                  );
-                  if (result != null) {
-                    setState(() {
-                      widget.receitModel.creditSale = result.creditSale;
-                      widget.receitModel.total = result.total;
-                      widget.receitModel.amount = result.amount;
-                    });
-                  }
-                },
-                icon: Iconify(Bx.coin, color: Colors.white),
-                style: TextButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                ),
-              )
-              .visibleIf(widget.receitModel.creditSale),
-          IconButton(
-            onPressed: _printReceit,
-            icon: Iconify(Bx.printer, color: AppTheme.color(context)),
-          ),
-        ],
-      ),
-      body: Center(
+      appBar: AppBar(title: Text(receitModel.label)),
+      body: ReceitDetailsWidget(receitModel: receitModel),
+    );
+  }
+}
+
+class ReceitDetailsWidget extends StatefulWidget {
+  final ItemReceitModel receitModel;
+  const ReceitDetailsWidget({super.key, required this.receitModel});
+
+  @override
+  State<ReceitDetailsWidget> createState() => _ReceitDetailsWidgetState();
+}
+
+class _ReceitDetailsWidgetState extends State<ReceitDetailsWidget> {
+  final _userController = Get.find<UserController>();
+  final _adminController = Get.find<AdminController>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: AppTheme.surface(context),
+      child: Center(
         child: SingleChildScrollView(
-          child: [
-            ["Not synced ".text().padding(EdgeInsets.all(10))]
-                .row(mainAxisAlignment: MainAxisAlignment.center)
-                .decoratedBox(decoration: BoxDecoration(color: Colors.red))
-                .visibleIfNot(widget.receitModel.synced),
-            CurrenceConverter.getCurrenceFloatInStrings(
-              widget.receitModel.total,
-              _userController.user.value?.baseCurrence ?? '',
-            ).text(
-              style: TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
-                color: widget.receitModel.creditSale ? Colors.red : null,
-              ),
+          child: Container(
+            width: double.infinity,
+            constraints: const BoxConstraints(maxWidth: 600),
+            padding: const EdgeInsets.all(24),
+            margin: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.surface(context),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha(20),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                ),
+              ],
             ),
-            "Total${widget.receitModel.creditSale ? '(Credit)' : ''}".text(),
-            18.gapHeight,
-            Divider(color: Colors.grey.withAlpha(80), thickness: 1),
-            [
-                  18.gapHeight,
-                  ListTile(
-                    contentPadding: EdgeInsets.all(0),
-                    title: "Employee : ${widget.receitModel.cashier}".text(),
-                    subtitle: "POS : pos 1".text(),
-                  ),
-                  18.gapHeight,
-                  Divider(color: Colors.grey.withAlpha(80), thickness: 1),
-                  18.gapHeight,
-                  ...widget.receitModel.items.map((e) {
-                    double totalPrice = (e.price + e.addenum) * e.count;
-                    if (e.discountId != null && e.discountId!.isNotEmpty) {
-                      if (e.percentageDiscount) {
-                        totalPrice = totalPrice * (1 - e.discount / 100);
-                      } else {
-                        totalPrice = totalPrice - e.discount;
-                      }
-                    }
-                    return ListTile(
-                      contentPadding: EdgeInsets.all(0),
-                      leading: e.refunded
-                          ? Iconify(Bx.refresh, color: Colors.red)
-                          : null,
-                      subtitle: [
-                        "${e.count.toString()} x ${CurrenceConverter.getCurrenceFloatInStrings(e.price + e.addenum, _userController.user.value?.baseCurrence ?? '')}"
-                                "${e.refunded ? "   ${e.originalCount} -> ${e.count} " : ''}"
-                            .text(),
-                        12.gapWidth,
-                        (e.percentageDiscount
-                                ? "${e.discount}% off"
-                                : "\$${CurrenceConverter.getCurrenceFloatInStrings(e.discount, _userController.user.value?.baseCurrence ?? "")}")
-                            .text(style: TextStyle(color: Colors.red))
-                            .visibleIf(
-                              e.discountId != null && e.discountId!.isNotEmpty,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Top Action Bar
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      widget.receitModel.label,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        if (!widget.receitModel.creditSale)
+                          TextButton.icon(
+                            onPressed: _refund,
+                            icon: const Iconify(Bx.recycle, color: Colors.red),
+                            label: const Text(
+                              "Refund",
+                              style: TextStyle(color: Colors.red),
                             ),
-                      ].row(),
-                      title: e.name.text(),
-                      tileColor: e.refunded ? Colors.red.withAlpha(100) : null,
-                      trailing: CurrenceConverter.getCurrenceFloatInStrings(
-                        totalPrice,
-                        _userController.user.value?.baseCurrence ?? '',
-                      ).text(),
-                    );
-                  }),
-                  18.gapHeight,
-                  if (widget.receitModel.discounts.isNotEmpty) ...[
-                    "Discounts".text(
+                          ),
+                        if (widget.receitModel.creditSale)
+                          ElevatedButton.icon(
+                            onPressed: _payCredit,
+                            icon: const Iconify(Bx.coin, color: Colors.white),
+                            label: const Text(
+                              "Pay",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
+                            ),
+                          ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          onPressed: _printReceit,
+                          icon: Iconify(
+                            Bx.printer,
+                            color: AppTheme.color(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Sync Status
+                if (!widget.receitModel.synced)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withAlpha(20),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.red.withAlpha(50)),
+                    ),
+                    child: const Text(
+                      "Not Synced",
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 16,
+                        color: Colors.red,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    12.gapHeight,
-                    ...widget.receitModel.discounts.map(
-                      (e) => [
-                        e.name?.text() ?? "".text(),
-                        ((e.percentageDiscount == true)
-                                ? " - ${e.discount}% off"
-                                : CurrenceConverter.getCurrenceFloatInStrings(
-                                    e.discount ?? 0,
-                                    _userController.user.value?.baseCurrence ??
-                                        '',
-                                  ))
-                            .text(
-                              style: TextStyle(
-                                color: Colors.red,
+                  ),
+
+                // Total
+                CurrenceConverter.getCurrenceFloatInStrings(
+                  widget.receitModel.total,
+                  _userController.user.value?.baseCurrence ?? '',
+                ).text(
+                  style: TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    color: widget.receitModel.creditSale
+                        ? Colors.red
+                        : Get.theme.colorScheme.primary,
+                  ),
+                ),
+                "Total${widget.receitModel.creditSale ? ' (Credit)' : ''}".text(
+                  style: TextStyle(color: Colors.grey.shade600),
+                ),
+
+                const SizedBox(height: 24),
+                Divider(color: Colors.grey.withAlpha(50), thickness: 1),
+                const SizedBox(height: 16),
+
+                // Details
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: "Employee: ${widget.receitModel.cashier}".text(),
+                      subtitle: "POS: pos 1".text(),
+                    ),
+                    const SizedBox(height: 16),
+                    Divider(color: Colors.grey.withAlpha(50), thickness: 1),
+                    const SizedBox(height: 16),
+
+                    // Items
+                    ...widget.receitModel.items.map((e) {
+                      double totalPrice = (e.price + e.addenum) * e.count;
+                      if (e.discountId != null && e.discountId!.isNotEmpty) {
+                        if (e.percentageDiscount) {
+                          totalPrice = totalPrice * (1 - e.discount / 100);
+                        } else {
+                          totalPrice = totalPrice - e.discount;
+                        }
+                      }
+                      return ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: e.refunded
+                            ? const Iconify(Bx.refresh, color: Colors.red)
+                            : null,
+                        subtitle: Row(
+                          children: [
+                            "${e.count} x ${CurrenceConverter.getCurrenceFloatInStrings(e.price + e.addenum, _userController.user.value?.baseCurrence ?? '')}"
+                                    "${e.refunded ? "   ${e.originalCount} -> ${e.count} " : ''}"
+                                .text(),
+                            const SizedBox(width: 12),
+                            if (e.discountId != null &&
+                                e.discountId!.isNotEmpty)
+                              (e.percentageDiscount
+                                      ? "${e.discount}% off"
+                                      : "\$${CurrenceConverter.getCurrenceFloatInStrings(e.discount, _userController.user.value?.baseCurrence ?? "")}")
+                                  .text(
+                                    style: const TextStyle(color: Colors.red),
+                                  ),
+                          ],
+                        ),
+                        title: e.name.text(
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                        tileColor: e.refunded ? Colors.red.withAlpha(10) : null,
+                        trailing:
+                            CurrenceConverter.getCurrenceFloatInStrings(
+                              totalPrice,
+                              _userController.user.value?.baseCurrence ?? '',
+                            ).text(
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                      ].row(),
+                      );
+                    }),
+
+                    const SizedBox(height: 16),
+
+                    // Discounts
+                    if (widget.receitModel.discounts.isNotEmpty) ...[
+                      "Discounts".text(
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ...widget.receitModel.discounts.map(
+                        (e) => Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            e.name?.text() ?? "".text(),
+                            ((e.percentageDiscount == true)
+                                    ? " - ${e.discount}% off"
+                                    : CurrenceConverter.getCurrenceFloatInStrings(
+                                        e.discount ?? 0,
+                                        _userController
+                                                .user
+                                                .value
+                                                ?.baseCurrence ??
+                                            '',
+                                      ))
+                                .text(
+                                  style: const TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                          ],
+                        ).padding(const EdgeInsets.only(bottom: 8)),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+
+                    // Taxes
+                    if (widget.receitModel.miniTax.isNotEmpty) ...[
+                      Divider(color: Colors.grey.withAlpha(50), thickness: 1),
+                      const SizedBox(height: 8),
+                      "Taxes".text(
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 12),
+                      ...widget.receitModel.miniTax.map(
+                        (e) => Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [e.label.text(), "${e.value}%".text()],
+                        ).padding(const EdgeInsets.only(bottom: 8)),
+                      ),
+                    ],
+
+                    const SizedBox(height: 8),
+                    Divider(color: Colors.grey.withAlpha(50), thickness: 1),
+                    const SizedBox(height: 16),
+
+                    // Summary
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: 'Total'.text(
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      trailing:
+                          CurrenceConverter.getCurrenceFloatInStrings(
+                            widget.receitModel.total,
+                            _userController.user.value?.baseCurrence ?? '',
+                          ).text(
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
                     ),
-                    18.gapHeight,
-                  ],
-                  if (widget.receitModel.miniTax.isNotEmpty) ...[
-                    Divider(color: Colors.grey.withAlpha(80), thickness: 1),
-                    "Taxes".text(),
-                    12.gapHeight,
-                    ...widget.receitModel.miniTax.map(
-                      (e) => [
-                        e.label.text(),
-                        14.gapWidth,
-                        "${e.value}%".text(),
-                      ].row(),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: widget.receitModel.payment.text(),
+                      trailing: CurrenceConverter.getCurrenceFloatInStrings(
+                        widget.receitModel.amount,
+                        _userController.user.value?.baseCurrence ?? '',
+                      ).text(),
                     ),
+
+                    const SizedBox(height: 8),
+                    Divider(color: Colors.grey.withAlpha(50), thickness: 1),
+                    const SizedBox(height: 16),
+
+                    widget.receitModel.createdAt.toString().text(
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                    const SizedBox(height: 16),
+
+                    if (!widget.receitModel.creditSale)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withAlpha(20),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.green.withAlpha(50)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            'Change'.text(
+                              style: const TextStyle(
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            CurrenceConverter.getCurrenceFloatInStrings(
+                              widget.receitModel.amount -
+                                  widget.receitModel.total,
+                              _userController.user.value?.baseCurrence ?? '',
+                            ).text(
+                              style: const TextStyle(
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                   ],
-                  Divider(color: Colors.grey.withAlpha(80), thickness: 1),
-                  18.gapHeight,
-                  ListTile(
-                    contentPadding: EdgeInsets.all(0),
-                    title: 'Total'.text(),
-                    trailing: CurrenceConverter.getCurrenceFloatInStrings(
-                      widget.receitModel.total,
-                      _userController.user.value?.baseCurrence ?? '',
-                    ).text(),
-                  ),
-                  ListTile(
-                    contentPadding: EdgeInsets.all(0),
-                    title: widget.receitModel.payment.text(),
-                    trailing: CurrenceConverter.getCurrenceFloatInStrings(
-                      widget.receitModel.amount,
-                      _userController.user.value?.baseCurrence ?? '',
-                    ).text(),
-                  ),
-                  Divider(color: Colors.grey.withAlpha(80), thickness: 1),
-                  18.gapHeight,
-                  widget.receitModel.createdAt.toString().text(),
-                  18.gapHeight,
-                  ListTile(
-                    contentPadding: EdgeInsets.all(5),
-                    title: 'Change'.text(),
-                    tileColor: Colors.green,
-                    textColor: Colors.white,
-                    trailing: CurrenceConverter.getCurrenceFloatInStrings(
-                      widget.receitModel.amount - widget.receitModel.total,
-                      _userController.user.value?.baseCurrence ?? '',
-                    ).text(style: TextStyle(fontWeight: FontWeight.bold)),
-                  ).visibleIfNot(widget.receitModel.creditSale),
-                  18.gapHeight,
-                ]
-                .column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                )
-                .sizedBox(width: double.infinity),
-          ].column(crossAxisAlignment: CrossAxisAlignment.center),
+                ),
+              ],
+            ),
+          ),
         ),
-      ).constrained(maxWidth: ScreenSizes.maxWidth).padding(EdgeInsets.all(20)),
+      ),
     );
+  }
+
+  void _refund() async {
+    final result = await Get.to(
+      () => ScreenRefundCart(receitModel: widget.receitModel),
+      arguments: widget.receitModel,
+    );
+    if (result != null) {
+      setState(() {
+        widget.receitModel.items = result.items;
+        widget.receitModel.total = result.total;
+        widget.receitModel.amount = result.amount;
+      });
+    }
+  }
+
+  void _payCredit() async {
+    final result = await Get.to(
+      () => ScreenCreditPayment(receitModel: widget.receitModel),
+      arguments: widget.receitModel,
+    );
+    if (result != null) {
+      setState(() {
+        widget.receitModel.creditSale = result.creditSale;
+        widget.receitModel.total = result.total;
+        widget.receitModel.amount = result.amount;
+      });
+    }
   }
 
   void _printReceit() async {

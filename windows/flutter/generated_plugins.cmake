@@ -6,8 +6,11 @@ list(APPEND FLUTTER_PLUGIN_LIST
   file_selector_windows
   firebase_core
   flutter_blue_plus_winrt
+  flutter_pos_printer_platform_image_3
   isar_plus_flutter_libs
   permission_handler_windows
+  screen_retriever_windows
+  window_manager
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

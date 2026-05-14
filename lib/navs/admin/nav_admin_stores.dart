@@ -32,6 +32,7 @@ class _NavAdminStoresState extends State<NavAdminStores> {
   @override
   Widget build(BuildContext context) {
     return SmartRefresher(
+      key: const ValueKey('admin_stores_refresher'),
       controller: _refreshController,
       onRefresh: () async {
         await _adminController.loadCompanies();

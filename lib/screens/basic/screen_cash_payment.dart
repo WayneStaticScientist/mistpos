@@ -77,10 +77,28 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
         ],
       ),
       body: SingleChildScrollView(
-        child:
-            [
+        child: Container(
+          width: 500, // Constrain width for a better look on desktop
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: AppTheme.surface(context),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(15),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+            border: Border.all(color: Colors.grey.withAlpha(30), width: 1),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Iconify(Carbon.receipt, size: 48, color: Get.theme.colorScheme.primary),
+              16.gapHeight,
               "Amount to Pay".text(
-                style: Get.textTheme.titleMedium?.copyWith(color: Colors.grey),
+                style: Get.textTheme.titleMedium?.copyWith(color: Colors.grey, fontWeight: FontWeight.w600),
               ),
               CurrenceConverter.getCurrenceFloatInStrings(
                 _itemsListController.totalPrice.value,
@@ -90,8 +108,11 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
                   fontSize: 48,
                   fontWeight: FontWeight.bold,
                   color: Get.theme.colorScheme.primary,
+                  height: 1.2,
                 ),
               ),
+              32.gapHeight,
+              Divider(color: Colors.grey.withAlpha(50)),
               24.gapHeight,
               MistFormInput(
                 label: "Amount Tendered",
@@ -99,12 +120,20 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
                 keyboardType: TextInputType.number,
               ),
               24.gapHeight,
-              _buildBalanceDisplay(),
-            ].column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-            ),
-      ).center().padding(const EdgeInsets.all(30)),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: change < 0 ? Colors.red.withAlpha(10) : Get.theme.colorScheme.primary.withAlpha(10),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: change < 0 ? Colors.red.withAlpha(30) : Get.theme.colorScheme.primary.withAlpha(30)),
+                ),
+                child: Center(child: _buildBalanceDisplay()),
+              ),
+            ],
+          ),
+        ),
+      ).center().padding(const EdgeInsets.all(24)),
       bottomNavigationBar: _buildBottomActions(),
     );
   }

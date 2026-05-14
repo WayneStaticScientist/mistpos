@@ -75,6 +75,7 @@ class FirebaseController extends GetxController {
   }
 
   void initUser() async {
+    if (GetPlatform.isDesktop) return;
     final user = User.fromStorage();
     if (user == null) {
       return;
@@ -100,6 +101,7 @@ class FirebaseController extends GetxController {
   }
 
   Future<void> initFirebase() async {
+    if (GetPlatform.isDesktop) return;
     final FirebaseMessaging fcm = FirebaseMessaging.instance;
     await fcm.requestPermission(alert: true, badge: true, sound: true);
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {

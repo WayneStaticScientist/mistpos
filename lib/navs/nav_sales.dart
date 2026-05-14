@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/screens/basic/screen_checkout.dart';
 import 'package:mistpos/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/themes/app_theme.dart';
@@ -83,135 +84,162 @@ class _NavSaleState extends State<NavSale> {
       },
       child: LayoutBuilder(
         builder: (context, constraints) {
-          if (constraints.maxWidth > 700) {
+          final isDesktop = constraints.maxWidth > 700;
+          if (isDesktop) {
             return Row(
               children: [
-                Expanded(child: _buildNormalFlowLayout()),
-                SizedBox(
-                  width: constraints.maxWidth * 0.5,
-                  child: _selectedItemsList(),
+                Expanded(
+                  flex: 65,
+                  child: _buildNormalFlowLayout(isDesktop: isDesktop),
+                ),
+                Expanded(
+                  flex: 35,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppTheme.surface(context),
+                      border: Border(
+                        left: BorderSide(color: Colors.grey.withAlpha(50)),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(10),
+                          blurRadius: 10,
+                          offset: Offset(-5, 0),
+                        ),
+                      ],
+                    ),
+                    child: _selectedItemsList(isDesktop: isDesktop),
+                  ),
                 ),
               ],
             );
           }
-          return _buildNormalFlowLayout();
+          return _buildNormalFlowLayout(isDesktop: isDesktop);
         },
       ),
     );
   }
 
-  Stack _buildNormalFlowLayout() {
+  Stack _buildNormalFlowLayout({bool isDesktop = false}) {
     final model = AppSettingsModel.fromStorage();
     return Stack(
       children: [
         Positioned.fill(
-          child: SmartRefresher(
-            onLoading: () async {
-              _refreshController.loadComplete();
-            },
-            enablePullUp: true,
-            onRefresh: () async {
-              await _itemsListController.syncCartItemsOnBackground();
-              await _itemsListController.updateUnsyncedReceits();
-              _invController.loadCompany();
-              _refreshController.refreshCompleted();
-              setState(() {
-                _searchTerm = '';
-              });
-            },
-            controller: _refreshController,
-            child: CustomScrollView(
-              controller: _scrollController,
-              slivers: [
-                /*
+          child: GestureDetector(
+            onSecondaryTapDown: (details) =>
+                _showContextMenu(context, details.globalPosition),
+            child: SmartRefresher(
+              key: const ValueKey('nav_sale_refresher'),
+              onLoading: () async {
+                _refreshController.loadComplete();
+              },
+              enablePullUp: true,
+              onRefresh: () async {
+                await _itemsListController.syncCartItemsOnBackground();
+                await _itemsListController.updateUnsyncedReceits();
+                _invController.loadCompany();
+                _refreshController.refreshCompleted();
+                setState(() {
+                  _searchTerm = '';
+                });
+              },
+              controller: _refreshController,
+              child: CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  /*
                 ==================================================================================
                     THE APP TOB BAR
                 ==================================================================================
                 */
-                SalesAppBar(),
-                /*
+                  SalesAppBar(),
+                  /*
               ==============================================================================
               THE SAVED ITEMS LISTS
               ==============================================================================            
               */
-                SliverToBoxAdapter(
-                  child:
-                      [
-                            Expanded(
-                              child: MistSearchField(
-                                controller: _searchController,
-                              ),
-                            ),
-                            12.gapWidth,
-                            Iconify(
-                                  key: _scanKey,
-                                  Bx.barcode_reader,
-                                  color: AppTheme.color(context),
-                                )
-                                .padding(
-                                  EdgeInsets.symmetric(
-                                    horizontal: 18,
-                                    vertical: 14,
-                                  ),
-                                )
-                                .decoratedBox(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(207),
-                                    color: AppTheme.surface(context),
-                                  ),
+                  SliverToBoxAdapter(
+                    child:
+                        [
+                              Expanded(
+                                child: MistSearchField(
+                                  controller: _searchController,
                                 ),
-                          ]
-                          .row()
-                          .padding(EdgeInsets.all(14))
-                          .onTapUp((e) => scanItem(e)),
-                ),
-
-                if (!_inSearchMode)
-                  Obx(
-                    () => _itemsListController.savedItems.isNotEmpty
-                        ? SliverToBoxAdapter(
-                            child: SizedBox(
-                              height: 199,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return CardsRecent(
-                                    savedModel:
-                                        _itemsListController.savedItems[index],
-                                  ).onTap(
-                                    () => _itemsListController.unwrapToCart(
-                                      _itemsListController.savedItems[index],
-                                    ),
-                                  );
-                                },
-                                itemCount:
-                                    _itemsListController.savedItems.length,
                               ),
-                            ).padding(EdgeInsets.symmetric(horizontal: 18)),
-                          )
-                        : SliverToBoxAdapter(child: SizedBox.shrink()),
+                              12.gapWidth,
+                              Iconify(
+                                    key: _scanKey,
+                                    Bx.barcode_reader,
+                                    color: AppTheme.color(context),
+                                  )
+                                  .padding(
+                                    EdgeInsets.symmetric(
+                                      horizontal: 18,
+                                      vertical: 14,
+                                    ),
+                                  )
+                                  .decoratedBox(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(207),
+                                      color: AppTheme.surface(context),
+                                    ),
+                                  ),
+                            ]
+                            .row()
+                            .padding(EdgeInsets.all(14))
+                            .onTapUp((e) => scanItem(e)),
                   ),
-                /*
+
+                  if (!_inSearchMode)
+                    Obx(
+                      () => _itemsListController.savedItems.isNotEmpty
+                          ? SliverToBoxAdapter(
+                              child: SizedBox(
+                                height: 199,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                        return CardsRecent(
+                                          savedModel: _itemsListController
+                                              .savedItems[index],
+                                        ).onTap(
+                                          () =>
+                                              _itemsListController.unwrapToCart(
+                                                _itemsListController
+                                                    .savedItems[index],
+                                              ),
+                                        );
+                                      },
+                                  itemCount:
+                                      _itemsListController.savedItems.length,
+                                ),
+                              ).padding(EdgeInsets.symmetric(horizontal: 18)),
+                            )
+                          : SliverToBoxAdapter(child: SizedBox.shrink()),
+                    ),
+                  /*
                   ============================================================================================
                   THE APP CATEGORIES
                   ============================================================================================
                   */
-                SliverToBoxAdapter(child: SizedBox(height: 18)),
-                if (!_inSearchMode) _buidCategoriesLayout(),
+                  SliverToBoxAdapter(child: SizedBox(height: 18)),
+                  if (!_inSearchMode) _buidCategoriesLayout(),
 
-                /*
+                  /*
                 ===============================================================================================
                 The items LIST 
                 ===============================================================================================
               */
-                Obx(
-                  () =>
-                      _itemsListController.selectedShift.value == null &&
-                          model.prioritizeShift
-                      ? _makeShifts()
-                      : _buidItemList(),
-                ),
-              ],
+                  Obx(
+                    () =>
+                        _itemsListController.selectedShift.value == null &&
+                            model.prioritizeShift
+                        ? _makeShifts()
+                        : _buidItemList(),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -241,7 +269,7 @@ class _NavSaleState extends State<NavSale> {
         ),
         // --- THE TARGET BUTTON (BOTTOM STACK) ---
         Obx(
-          () => _itemsListController.checkOutItems.isNotEmpty
+          () => _itemsListController.checkOutItems.isNotEmpty && !isDesktop
               ? Positioned(
                   bottom: 24,
                   right: 24,
@@ -276,47 +304,153 @@ class _NavSaleState extends State<NavSale> {
     return SalesItemList(onTap: (a, b) => _handleWidgetClick(a, b));
   }
 
-  SafeArea _selectedItemsList() {
+  Widget _selectedItemsList({bool isDesktop = false}) {
     return SafeArea(
       child: Obx(
         () => [
-          SingleChildScrollView(
-            child: _itemsListController.checkOutItems
-                .map<Widget>((e) {
-                  final count = e['count'] as num;
-                  final model = e['item'] as ItemModel;
-                  return ListTile(
-                    title: Text(model.name, style: TextStyle(fontSize: 24)),
-                    leading: Text("x $count"),
-                    onTap: () => Get.to(() => ScreenEditManualCart(map: e)),
-                    subtitle: Text(
-                      CurrenceConverter.getCurrenceFloatInStrings(
-                        model.price,
-                        _userController.user.value?.baseCurrence ?? '',
+          if (isDesktop)
+            [
+                  "Current Order".text(
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  Badge.count(
+                    count: _itemsListController.checkOutItems.length,
+                    child: Iconify(
+                      Bx.cart_alt,
+                      color: AppTheme.color(context),
+                      size: 28,
+                    ),
+                  ),
+                ]
+                .row(mainAxisAlignment: MainAxisAlignment.spaceBetween)
+                .padding(EdgeInsets.all(18))
+                .decoratedBox(
+                  decoration: BoxDecoration(color: AppTheme.surface(context)),
+                ),
+          if (isDesktop) Divider(height: 1, color: Colors.grey.withAlpha(50)),
+
+          Expanded(
+            child: _itemsListController.checkOutItems.isEmpty && isDesktop
+                ? [
+                    Iconify(
+                      Bx.cart_alt,
+                      size: 64,
+                      color: Colors.grey.withAlpha(80),
+                    ),
+                    16.gapHeight,
+                    "Cart is empty".text(
+                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
+                  ].column(mainAxisAlignment: MainAxisAlignment.center).center()
+                : SingleChildScrollView(
+                    child: _itemsListController.checkOutItems
+                        .map<Widget>((e) {
+                          final count = e['count'] as num;
+                          final model = e['item'] as ItemModel;
+                          return ListTile(
+                            title: Text(
+                              model.name,
+                              style: TextStyle(
+                                fontSize: isDesktop ? 16 : 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            leading: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Get.theme.colorScheme.primary.withAlpha(
+                                  30,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                "x $count",
+                                style: TextStyle(
+                                  fontSize: isDesktop ? 14 : 20,
+                                  color: Get.theme.colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            onTap: () =>
+                                Get.to(() => ScreenEditManualCart(map: e)),
+                            subtitle: Text(
+                              CurrenceConverter.getCurrenceFloatInStrings(
+                                model.price,
+                                _userController.user.value?.baseCurrence ?? '',
+                              ),
+                            ),
+                            trailing:
+                                CurrenceConverter.getCurrenceFloatInStrings(
+                                  model.price * count,
+                                  _userController.user.value?.baseCurrence ??
+                                      '',
+                                ).text(
+                                  style: TextStyle(
+                                    fontSize: isDesktop ? 16 : 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                          );
+                        })
+                        .toList()
+                        .column(),
+                  ),
+          ),
+
+          if (_itemsListController.checkOutItems.isNotEmpty) ...[
+            12.gapHeight,
+            Divider(height: 1, color: Colors.grey.withAlpha(50)),
+            ListTile(
+              tileColor: isDesktop ? Colors.transparent : Colors.green,
+              textColor: isDesktop ? AppTheme.color(context) : Colors.white,
+              title: Text(
+                "Total",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: isDesktop ? 20 : 24,
+                ),
+              ),
+              trailing:
+                  CurrenceConverter.getCurrenceFloatInStrings(
+                    _itemsListController.totalPrice.value,
+                    _userController.user.value?.baseCurrence ?? '',
+                  ).text(
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: isDesktop ? 20 : 24,
+                      color: isDesktop
+                          ? Get.theme.colorScheme.primary
+                          : Colors.white,
+                    ),
+                  ),
+            ),
+            if (isDesktop)
+              "Checkout"
+                  .text(
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                  .textButton(
+                    onPressed: () => Get.to(() => ScreenCheckout()),
+                    style: TextButton.styleFrom(
+                      backgroundColor: Get.theme.colorScheme.primary,
+                      minimumSize: Size(double.infinity, 54),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    trailing: CurrenceConverter.getCurrenceFloatInStrings(
-                      model.price * count,
-                      _userController.user.value?.baseCurrence ?? '',
-                    ).text(style: TextStyle(fontSize: 24)),
-                  );
-                })
-                .toList()
-                .column(),
-          ).expanded1,
-          12.gapHeight,
-          ListTile(
-            tileColor: Colors.green,
-            textColor: Colors.white,
-            title: Text(
-              "Total",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-            ),
-            trailing: CurrenceConverter.getCurrenceFloatInStrings(
-              _itemsListController.totalPrice.value,
-              _userController.user.value?.baseCurrence ?? '',
-            ).text(style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
-          ),
+                  )
+                  .padding(
+                    EdgeInsets.only(left: 18, right: 18, bottom: 18, top: 8),
+                  ),
+          ],
         ].column(mainAxisSize: MainAxisSize.max),
       ),
     );
@@ -500,5 +634,36 @@ class _NavSaleState extends State<NavSale> {
         ),
       ],
     );
+  }
+
+  void _showContextMenu(BuildContext context, Offset position) async {
+    final RenderObject? overlay = Overlay.of(
+      context,
+    ).context.findRenderObject();
+    if (overlay == null) return;
+
+    final result = await showMenu(
+      context: context,
+      position: RelativeRect.fromRect(
+        position & const Size(40, 40),
+        Offset.zero & overlay.semanticBounds.size,
+      ),
+      items: [
+        PopupMenuItem(
+          value: 'refresh',
+          child: Row(
+            children: [
+              Icon(Icons.refresh, color: Get.theme.colorScheme.primary),
+              SizedBox(width: 12),
+              Text('Refresh Data'),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    if (result == 'refresh') {
+      _refreshController.requestRefresh();
+    }
   }
 }

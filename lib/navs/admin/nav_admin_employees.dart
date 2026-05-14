@@ -66,6 +66,7 @@ class _NavAdminEmployeesState extends State<NavAdminEmployees> {
         return SubscriptionAlert();
       }
       return SmartRefresher(
+        key: const ValueKey('admin_employees_refresher'),
         controller: _refreshController,
         header: WaterDropHeader(),
         onRefresh: _onRefresh,

@@ -51,6 +51,7 @@ class _ScreenAccountSelectionState extends State<ScreenAccountSelection> {
                 ),
                 Expanded(
                   child: SmartRefresher(
+                    key: const ValueKey('account_selection_refresher'),
                     controller: _refreshController,
                     enablePullUp: true,
                     onRefresh: () async {

@@ -13,6 +13,8 @@ class AppSettingsModel {
   String receitLogoPath;
   bool useGridViewForItems;
   bool hasAlertedAboutFreeVersion = false;
+  /// Printing mode: "single" (one printer) or "multi" (all selected printers)
+  String printingMode;
   AppSettingsModel({
     required this.externalBarCodeEnabled,
     required this.useSystemDarkMode,
@@ -25,6 +27,7 @@ class AppSettingsModel {
     this.prioritizeShift = true,
     this.useGridViewForItems = false,
     this.hasAlertedAboutFreeVersion = false,
+    this.printingMode = "single",
   });
   factory AppSettingsModel.fromJson(Map<String, dynamic> json) =>
       AppSettingsModel(
@@ -43,6 +46,7 @@ class AppSettingsModel {
         prioritizeShift: json["prioritizeShift"] ?? true,
         useGridViewForItems: json["useGridViewForItems"] ?? false,
         hasAlertedAboutFreeVersion: json["hasAlertedAboutFreeVersion"] ?? false,
+        printingMode: json["printingMode"] ?? "single",
       );
   Map<String, dynamic> toJson() => {
     "darkMode": darkMode,
@@ -56,6 +60,7 @@ class AppSettingsModel {
     "extras": extras.map((e) => e.toJson()).toList(),
     "externalBarCodeEnabled": externalBarCodeEnabled,
     "hasAlertedAboutFreeVersion": hasAlertedAboutFreeVersion,
+    "printingMode": printingMode,
   };
   static AppSettingsModel fromStorage() {
     GetStorage box = GetStorage();

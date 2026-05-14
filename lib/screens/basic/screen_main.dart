@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:mistpos/navs/nav_admin.dart';
 import 'package:mistpos/navs/nav_items.dart';
 import 'package:mistpos/navs/nav_sales.dart';
@@ -46,6 +47,7 @@ class _ScreenMainState extends State<ScreenMain> {
     super.initState();
     _startValidationTimer();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkDateIntegrity();
       final company = CompanyModel.fromStorage();
       if (company != null &&
           company.subscriptionType.type == 'free' &&
@@ -186,5 +188,70 @@ class _ScreenMainState extends State<ScreenMain> {
         textCancel: "Later",
       );
     }
+  }
+
+  // ─── Date Integrity Check ──────────────────────────────────
+
+  /// Records the latest date each time the app opens.
+  /// If the current date is before the last recorded date,
+  /// the user has rolled back their system clock — show a warning.
+  void _checkDateIntegrity() {
+    final storage = GetStorage();
+    final now = DateTime.now();
+    final lastDateStr = storage.read<String>('mist_last_known_date');
+
+    if (lastDateStr != null) {
+      final lastDate = DateTime.tryParse(lastDateStr);
+      if (lastDate != null) {
+        // Compare date only (ignore time)
+        final lastDateOnly = DateTime(lastDate.year, lastDate.month, lastDate.day);
+        final nowDateOnly = DateTime(now.year, now.month, now.day);
+
+        if (nowDateOnly.isBefore(lastDateOnly)) {
+          _showDateWarningDialog(lastDateOnly);
+          return;
+        }
+      }
+    }
+
+    // Save the current date as the latest known date
+    storage.write('mist_last_known_date', now.toIso8601String());
+  }
+
+  void _showDateWarningDialog(DateTime expectedDate) {
+    Get.defaultDialog(
+      barrierDismissible: false,
+      title: "Date Error Detected",
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 48),
+          16.gapHeight,
+          Text(
+            "Your device date appears to be incorrect.",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+          ),
+          12.gapHeight,
+          Text(
+            "The system expects the date to be at least "
+            "${MistDateUtils.getInformalShortDate(expectedDate)}. "
+            "Please correct your device's date and time settings to continue using MistPos.",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+          ),
+        ],
+      ),
+      actions: [
+        ElevatedButton.icon(
+          onPressed: () {
+            Get.back();
+            _checkDateIntegrity();
+          },
+          icon: Icon(Icons.refresh_rounded),
+          label: Text("I've Fixed It"),
+        ),
+      ],
+    );
   }
 }

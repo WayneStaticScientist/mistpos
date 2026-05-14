@@ -22,6 +22,7 @@ import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/screens/auth/screen_user_profile.dart';
 import 'package:mistpos/screens/basic/screen_receit_designer.dart';
+import 'package:mistpos/screens/basic/screen_receipt_logo_crop.dart';
 
 class ScreenSettingsPage extends StatefulWidget {
   const ScreenSettingsPage({super.key});
@@ -540,9 +541,21 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
       final String fileName = 'receit_logo.jpg';
       final String localPath = p.join(appDocPath, fileName);
       final File localImage = await File(image.path).copy(localPath);
-      model.receitLogoPath = localImage.path;
-      model.saveToStorage();
-      setState(() {});
+
+      // Navigate to cropping screen so user can fit the logo to receipt width
+      final result = await Get.to(
+        () => ScreenReceiptLogoCrop(
+          imagePath: localImage.path,
+          receiptCharWidth: model.printerRecietLength,
+        ),
+      );
+
+      if (result == true) {
+        model.receitLogoPath = localImage.path;
+        model.saveToStorage();
+        setState(() {});
+        Toaster.showSuccess("Logo saved and cropped for receipt");
+      }
     } catch (e) {
       Toaster.showError("Error : $e");
     }

@@ -79,13 +79,17 @@ class AuthenticationInterceptor extends Interceptor {
 }
 
 Future<String> getDeviceId() async {
-  String? id = await MobileDeviceIdentifier().getDeviceId();
-  if (id != null && id.trim().isNotEmpty) return id;
-  GetStorage box = GetStorage();
-  id = box.read('deviceIdapp');
-  if (id != null && id.trim().isNotEmpty) return id;
-  id =
-      "x${10000 + Random().nextInt(100000)}-${DateTime.now().toIso8601String()}";
-  box.write("deviceIdapp", id);
-  return id;
+  try {
+    String? id = await MobileDeviceIdentifier().getDeviceId();
+    if (id != null && id.trim().isNotEmpty) return id;
+    throw "unknown error";
+  } catch (e) {
+    GetStorage box = GetStorage();
+    String? id = box.read('deviceIdapp');
+    if (id != null && id.trim().isNotEmpty) return id;
+    id =
+        "x${10000 + Random().nextInt(100000)}-${DateTime.now().toIso8601String()}";
+    box.write("deviceIdapp", id);
+    return id;
+  }
 }

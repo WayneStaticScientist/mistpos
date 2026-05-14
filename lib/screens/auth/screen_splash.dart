@@ -7,7 +7,7 @@ import 'package:mistpos/screens/auth/screen_create_account.dart';
 import 'package:mistpos/screens/auth/screen_login.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/widgets/buttons/card_buttons.dart';
-import 'package:mistpos/widgets/buttons/mist_default.dart';
+import 'package:mistpos/widgets/layouts/auth_layout_wrapper.dart';
 
 class ScreenSplash extends StatefulWidget {
   const ScreenSplash({super.key});
@@ -18,11 +18,6 @@ class ScreenSplash extends StatefulWidget {
 
 class _ScreenSplashState extends State<ScreenSplash> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     precacheImage(const AssetImage("assets/avatars/splash.jpg"), context);
@@ -32,48 +27,44 @@ class _ScreenSplashState extends State<ScreenSplash> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
+      body: AuthLayoutWrapper(
         child: [
-          Image.asset(
-            Get.isDarkMode
-                ? "assets/avatars/splash-dark.jpg"
-                : "assets/avatars/splash.jpg",
-            fit: BoxFit.cover,
-          ).sizedBox(width: double.infinity, height: Get.height * 0.5),
+          Iconify(Bx.cube, size: 64, color: Get.theme.colorScheme.primary),
           14.gapHeight,
           "MistPos".text().styled(
             color: Get.theme.colorScheme.primary,
-            fontSize: 28,
+            fontSize: 32,
             fontWeight: FontWeight.bold,
           ),
-          8.gapHeight,
-          "Welcome to MistPos , your point of sell system with modern advanced above human system"
-              .text(textAlign: TextAlign.center)
-              .padding(EdgeInsets.all(14)),
-          12.gapHeight,
-          MistButton(text: "Start", onPressed: _openBottomNav),
-        ].column(),
+          16.gapHeight,
+          "Welcome to MistPos. Experience a modern, advanced, and highly intuitive point of sale system designed for professionals."
+              .text(
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16, height: 1.5),
+              )
+              .padding(const EdgeInsets.symmetric(horizontal: 14)),
+          32.gapHeight,
+          // Desktop buttons instead of bottom sheet
+          [
+            CardButtons(
+              onTap: () => Get.to(() => const ScreenLogin()),
+              icon: Iconify(Bx.user, color: AppTheme.color(context)),
+              label: "Login",
+              color: Get.theme.colorScheme.primary.withAlpha(20),
+            ).expanded1,
+            8.gapWidth,
+            CardButtons(
+              onTap: () => Get.to(() => const ScreenCreateAccount()),
+              icon: Iconify(Bx.user_plus, color: AppTheme.color(context)),
+              label: "Create Account",
+              color: Get.theme.colorScheme.secondary.withAlpha(20),
+            ).expanded1,
+          ].row(),
+        ].column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+        ),
       ),
-    );
-  }
-
-  void _openBottomNav() {
-    Get.bottomSheet(
-      [
-        CardButtons(
-          onTap: () => Get.to(() => ScreenLogin()),
-          icon: Iconify(Bx.user, color: AppTheme.color(context)),
-          label: "Login",
-          color: Get.theme.colorScheme.primary.withAlpha(50),
-        ).expanded1,
-        CardButtons(
-          onTap: () => Get.to(() => ScreenCreateAccount()),
-          icon: Iconify(Bx.user_plus, color: AppTheme.color(context)),
-          label: "Create Account",
-          color: Get.theme.colorScheme.secondary.withAlpha(50),
-        ).expanded1,
-      ].row().padding(EdgeInsets.only(top: 18)).safeArea(),
-      backgroundColor: Get.theme.colorScheme.surface,
     );
   }
 }

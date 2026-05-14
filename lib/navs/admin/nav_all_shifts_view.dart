@@ -42,6 +42,7 @@ class _NavAllShiftsViewState extends State<NavAllShiftsView> {
   @override
   Widget build(BuildContext context) {
     return SmartRefresher(
+      key: const ValueKey('all_shifts_refresher'),
       controller: _refreshController,
       enablePullUp: true,
       onRefresh: () async {

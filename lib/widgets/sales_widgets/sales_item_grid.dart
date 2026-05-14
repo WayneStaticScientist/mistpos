@@ -10,6 +10,7 @@ import 'package:mistpos/controllers/items_controller.dart';
 import 'package:mistpos/screens/basic/screen_manual_cart.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/controllers/user_controller.dart';
+import 'package:mistpos/controllers/inventory_controller.dart';
 
 class SalesItemGrid extends StatefulWidget {
   final void Function(TapUpDetails, ItemModel) onTap;
@@ -22,6 +23,7 @@ class SalesItemGrid extends StatefulWidget {
 class _SalesItemGridState extends State<SalesItemGrid> {
   final _itemsListController = Get.find<ItemsController>();
   final _userController = Get.find<UserController>();
+  final _invController = Get.find<InventoryController>();
 
   @override
   Widget build(BuildContext context) {
@@ -76,33 +78,60 @@ class _SalesItemGridState extends State<SalesItemGrid> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(10),
-            blurRadius: 10,
-            offset: Offset(0, 4),
+            color: Colors.black.withAlpha(15),
+            blurRadius: 12,
+            offset: Offset(0, 5),
           ),
         ],
+        border: Border.all(color: Colors.grey.withAlpha(30), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
             flex: 3,
-            child: ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-              child: (item.avatar != null && item.avatar!.isNotEmpty)
-                  ? CachedNetworkImage(
-                      imageUrl: item.avatar!,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: Colors.grey.withAlpha(50),
-                        child: Icon(Icons.image, color: Colors.grey),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+                  child: (item.avatar != null && item.avatar!.isNotEmpty)
+                      ? CachedNetworkImage(
+                          imageUrl: item.avatar!,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            color: Colors.grey.withAlpha(50),
+                            child: Icon(Icons.image, color: Colors.grey),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            color: Colors.grey.withAlpha(50),
+                            child: Icon(Icons.broken_image, color: Colors.grey),
+                          ),
+                        )
+                      : _fallbackIcon(item),
+                ),
+                if (item.trackStock && !(item.isCompositeItem && !item.useProduction))
+                  Obx(() {
+                    bool showCount = _invController.company.value?.showSalesCount == true;
+                    if (!showCount) return SizedBox.shrink();
+                    bool lowStock = item.stockQuantity < item.lowStockThreshold;
+                    return Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: lowStock ? Colors.red.withAlpha(220) : Colors.black.withAlpha(150),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          "${item.stockQuantity} in stock",
+                          style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                        ),
                       ),
-                      errorWidget: (context, url, error) => Container(
-                        color: Colors.grey.withAlpha(50),
-                        child: Icon(Icons.broken_image, color: Colors.grey),
-                      ),
-                    )
-                  : _fallbackIcon(item),
+                    );
+                  }),
+              ],
             ),
           ),
           Expanded(

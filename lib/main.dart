@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:get/instance_manager.dart';
+import 'package:get/get.dart';
 import 'package:isar_plus/isar_plus.dart';
 import 'package:mistpos/controllers/expenses_controller.dart';
 import 'package:mistpos/models/gateway.dart';
@@ -16,7 +16,7 @@ import 'package:mistpos/models/shifts_model.dart';
 import 'package:mistpos/models/discount_model.dart';
 import 'package:mistpos/models/item_receit_model.dart';
 import 'package:mistpos/screens/basic/screen_main.dart';
-import 'package:get/get_navigation/get_navigation.dart';
+
 import 'package:mistpos/models/app_settings_model.dart';
 import 'package:mistpos/screens/auth/screen_splash.dart';
 import 'package:mistpos/models/item_unsaved_model.dart';
@@ -34,6 +34,8 @@ import 'package:mistpos/controllers/firebase_controller.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/controllers/items_unsaved_controller.dart';
 import 'package:mistpos/firebase-messanging/firebase_bg_notification_handler.dart';
+import 'package:window_manager/window_manager.dart';
+import 'package:mistpos/widgets/layouts/custom_title_bar.dart';
 
 class IsarStatic {
   static Isar? isar;
@@ -59,10 +61,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   IsarStatic.externalDirectory = await getApplicationDocumentsDirectory();
   final path = "${IsarStatic.externalDirectory!.path}/default.isar";
-  await Firebase.initializeApp();
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   try {
     initIsarDatabase(IsarStatic.externalDirectory!);
+    if (!GetPlatform.isDesktop) {
+      await Firebase.initializeApp();
+      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    }
   } catch (e) {
     if (e.toString().contains('deserialize') ||
         e.toString().contains('Schema')) {
@@ -76,6 +80,22 @@ void main() async {
     }
   }
   await GetStorage.init();
+
+  if (GetPlatform.isDesktop) {
+    await windowManager.ensureInitialized();
+    WindowOptions windowOptions = const WindowOptions(
+      size: Size(1200, 800),
+      center: true,
+      backgroundColor: Colors.transparent,
+      skipTaskbar: false,
+      titleBarStyle: TitleBarStyle.hidden,
+    );
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
+
   runApp(const MyApp());
   Get.put(ItemsController());
 }
@@ -126,9 +146,11 @@ class MyApp extends StatelessWidget {
           : model.darkMode
           ? ThemeMode.dark
           : ThemeMode.light,
-      home: User.fromStorage() == null
-          ? const ScreenSplash()
-          : const ScreenMain(),
+      home: DesktopWindowWrapper(
+        child: User.fromStorage() == null
+            ? const ScreenSplash()
+            : const ScreenMain(),
+      ),
     );
   }
 }
