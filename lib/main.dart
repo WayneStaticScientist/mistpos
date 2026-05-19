@@ -37,6 +37,8 @@ import 'package:mistpos/firebase-messanging/firebase_bg_notification_handler.dar
 import 'package:window_manager/window_manager.dart';
 import 'package:mistpos/widgets/layouts/custom_title_bar.dart';
 
+import 'dart:ui';
+
 class IsarStatic {
   static Isar? isar;
   static Directory? externalDirectory;
@@ -57,9 +59,36 @@ class IdGen {
   }
 }
 
+void _logError(dynamic error, StackTrace? stackTrace) async {
+  try {
+    final dir = IsarStatic.externalDirectory;
+    if (dir != null) {
+      final logFile = File('${dir.path}/mistpos_crash_log.txt');
+      final now = DateTime.now().toIso8601String();
+      final logMessage = '[$now] ERROR: $error\nSTACK TRACE:\n$stackTrace\n\n==================================================\n\n';
+      await logFile.writeAsString(logMessage, mode: FileMode.append);
+    }
+  } catch (e) {
+    debugPrint('Failed to write crash log: $e');
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   IsarStatic.externalDirectory = await getApplicationDocumentsDirectory();
+  
+  // Catch Flutter framework errors
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    _logError(details.exception, details.stack);
+  };
+
+  // Catch asynchronous errors outside of Flutter framework
+  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+    _logError(error, stack);
+    return false;
+  };
+
   final path = "${IsarStatic.externalDirectory!.path}/default.isar";
   try {
     initIsarDatabase(IsarStatic.externalDirectory!);

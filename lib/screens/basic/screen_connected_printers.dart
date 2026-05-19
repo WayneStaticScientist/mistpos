@@ -1,6 +1,7 @@
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_pos_printer_platform_image_3/flutter_pos_printer_platform_image_3.dart';
 import 'package:get/get.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/bx.dart';
@@ -79,7 +80,8 @@ class _ScreenConnectedPrintersState extends State<ScreenConnectedPrinters> {
             if (!_devicesController.connectingToDevice.value &&
                 _devicesController.printerDevices.isNotEmpty)
               ..._devicesController.printerDevices.map(
-                (device) => _buildPrinterTile(device, surfaceColor, primaryColor),
+                (device) =>
+                    _buildPrinterTile(device, surfaceColor, primaryColor),
               ),
           ],
         ),
@@ -94,10 +96,7 @@ class _ScreenConnectedPrintersState extends State<ScreenConnectedPrinters> {
       decoration: BoxDecoration(
         color: surfaceColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: primaryColor.withAlpha(30),
-          width: 1,
-        ),
+        border: Border.all(color: primaryColor.withAlpha(30), width: 1),
       ),
       padding: EdgeInsets.all(6),
       child: Row(
@@ -111,9 +110,7 @@ class _ScreenConnectedPrintersState extends State<ScreenConnectedPrinters> {
                 curve: Curves.easeInOut,
                 padding: EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
-                  color: !isMulti
-                      ? primaryColor
-                      : Colors.transparent,
+                  color: !isMulti ? primaryColor : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -128,7 +125,9 @@ class _ScreenConnectedPrintersState extends State<ScreenConnectedPrinters> {
                     Text(
                       "Single Point",
                       style: TextStyle(
-                        color: !isMulti ? Colors.white : AppTheme.color(context),
+                        color: !isMulti
+                            ? Colors.white
+                            : AppTheme.color(context),
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
                       ),
@@ -148,9 +147,7 @@ class _ScreenConnectedPrintersState extends State<ScreenConnectedPrinters> {
                 curve: Curves.easeInOut,
                 padding: EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
-                  color: isMulti
-                      ? primaryColor
-                      : Colors.transparent,
+                  color: isMulti ? primaryColor : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -162,7 +159,9 @@ class _ScreenConnectedPrintersState extends State<ScreenConnectedPrinters> {
                       children: [
                         Icon(
                           Icons.print_rounded,
-                          color: isMulti ? Colors.white : AppTheme.color(context),
+                          color: isMulti
+                              ? Colors.white
+                              : AppTheme.color(context),
                           size: 18,
                         ),
                         Icon(
@@ -214,7 +213,9 @@ class _ScreenConnectedPrintersState extends State<ScreenConnectedPrinters> {
         children: [
           Icon(
             isMulti ? Icons.info_outline_rounded : Icons.print_rounded,
-            color: isMulti ? Colors.orange : Theme.of(context).colorScheme.primary,
+            color: isMulti
+                ? Colors.orange
+                : Theme.of(context).colorScheme.primary,
             size: 20,
           ),
           10.gapWidth,
@@ -243,7 +244,11 @@ class _ScreenConnectedPrintersState extends State<ScreenConnectedPrinters> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Iconify(Bx.wifi, color: AppTheme.color(context).withAlpha(100), size: 42),
+          Iconify(
+            Bx.wifi,
+            color: AppTheme.color(context).withAlpha(100),
+            size: 42,
+          ),
           16.gapHeight,
           Text(
             "No connected devices",
@@ -281,7 +286,11 @@ class _ScreenConnectedPrintersState extends State<ScreenConnectedPrinters> {
       ),
       child: Row(
         children: [
-          Icon(Icons.check_circle_outline_rounded, color: Colors.green, size: 18),
+          Icon(
+            Icons.check_circle_outline_rounded,
+            color: Colors.green,
+            size: 18,
+          ),
           8.gapWidth,
           Text(
             "$selectedCount of $totalCount printers selected for multi-point printing",
@@ -472,17 +481,20 @@ class _ScreenConnectedPrintersState extends State<ScreenConnectedPrinters> {
             // Start scan once
             PrinterManager.instance
                 .discovery(type: PrinterType.usb)
-                .listen((device) {
-              if (!usbDevices.any((d) => d.address == device.address)) {
-                setState(() {
-                  usbDevices.add(device);
-                });
-              }
-            }, onDone: () {
-              setState(() {
-                isScanning = false;
-              });
-            });
+                .listen(
+                  (device) {
+                    if (!usbDevices.any((d) => d.address == device.address)) {
+                      setState(() {
+                        usbDevices.add(device);
+                      });
+                    }
+                  },
+                  onDone: () {
+                    setState(() {
+                      isScanning = false;
+                    });
+                  },
+                );
           }
 
           return SizedBox(
@@ -516,15 +528,14 @@ class _ScreenConnectedPrintersState extends State<ScreenConnectedPrinters> {
                       },
                     ),
                   ),
-                if (isScanning) "Scanning...".text(size: 12),
+                if (isScanning)
+                  "Scanning...".text(style: TextStyle(fontSize: 12)),
               ],
             ),
           );
         },
       ),
-      actions: [
-        "Cancel".text().textButton(onPressed: () => Get.back()),
-      ],
+      actions: ["Cancel".text().textButton(onPressed: () => Get.back())],
     );
   }
 

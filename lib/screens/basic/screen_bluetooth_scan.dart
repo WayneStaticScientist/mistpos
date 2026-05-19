@@ -28,6 +28,7 @@ class _ScreenBluetoothScanState extends State<ScreenBluetoothScan> {
   final _devicesController = Get.find<DevicesController>();
   final _userController = Get.find<UserController>();
   bool _isScanning = false;
+  bool _isBle = false; // Toggle for BLE vs Classic
   final List<PrinterDevice> _bluetoothDevices = [];
   StreamSubscription<PrinterDevice>? _scanSubscription;
 
@@ -52,7 +53,7 @@ class _ScreenBluetoothScanState extends State<ScreenBluetoothScan> {
     });
 
     try {
-      final scanStream = _printerManager.discovery(type: PrinterType.bluetooth, isBle: false);
+      final scanStream = _printerManager.discovery(type: PrinterType.bluetooth, isBle: _isBle);
       // 1. Fetch System Paired/Known Devices
       // Using the synchronous getter 'systemDevices' as is common in newer versions.
       final List<BluetoothDevice> systemDevices =
@@ -140,6 +141,21 @@ class _ScreenBluetoothScanState extends State<ScreenBluetoothScan> {
               icon: CircularProgressIndicator(color: AppTheme.color(context)),
             ).visibleIf(_devicesController.connectingToDevice.value),
           ),
+          // BLE Toggle
+          Row(
+            children: [
+              "BLE".text(style: TextStyle(fontSize: 12)),
+              Switch(
+                value: _isBle,
+                onChanged: (val) {
+                  setState(() {
+                    _isBle = val;
+                  });
+                  _scanBluetoothDevices();
+                },
+              ),
+            ],
+          ).padding(EdgeInsets.only(right: 8)),
         ],
       ),
       body: [
@@ -157,10 +173,11 @@ class _ScreenBluetoothScanState extends State<ScreenBluetoothScan> {
                 try {
                   await _scanSubscription?.cancel();
                   _resetScanningState();
-                  final result = await _devicesController.connectToBluetooth(
+                   final result = await _devicesController.connectToBluetooth(
                     device.name,
                     device.address ?? '',
                     _userController.user.value,
+                    isBle: _isBle,
                   );
                   if (result) {
                     Get.back();
