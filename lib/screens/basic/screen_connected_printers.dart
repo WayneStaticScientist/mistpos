@@ -448,8 +448,83 @@ class _ScreenConnectedPrintersState extends State<ScreenConnectedPrinters> {
           label: "BlueTooth",
           color: Get.theme.colorScheme.secondary.withAlpha(50),
         ).expanded1,
+        CardButtons(
+          onTap: _connectWithUsb,
+          icon: Iconify(Bx.usb, color: AppTheme.color(context)),
+          label: "USB",
+          color: Get.theme.colorScheme.tertiary.withAlpha(50),
+        ).expanded1,
       ].row().padding(EdgeInsets.only(top: 18)).safeArea(),
       backgroundColor: Get.theme.colorScheme.surface,
+    );
+  }
+
+  void _connectWithUsb() async {
+    Get.back();
+    final List<PrinterDevice> usbDevices = [];
+    bool isScanning = true;
+
+    Get.defaultDialog(
+      title: "Connect via USB",
+      content: StatefulBuilder(
+        builder: (context, setState) {
+          if (isScanning) {
+            // Start scan once
+            PrinterManager.instance
+                .discovery(type: PrinterType.usb)
+                .listen((device) {
+              if (!usbDevices.any((d) => d.address == device.address)) {
+                setState(() {
+                  usbDevices.add(device);
+                });
+              }
+            }, onDone: () {
+              setState(() {
+                isScanning = false;
+              });
+            });
+          }
+
+          return SizedBox(
+            width: double.maxFinite,
+            height: 300,
+            child: Column(
+              children: [
+                if (isScanning && usbDevices.isEmpty)
+                  MistLoader1().padding(EdgeInsets.all(20))
+                else if (usbDevices.isEmpty)
+                  "No USB devices found".text().padding(EdgeInsets.all(20))
+                else
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: usbDevices.length,
+                      itemBuilder: (context, index) {
+                        final device = usbDevices[index];
+                        return ListTile(
+                          leading: Icon(Icons.usb),
+                          title: Text(device.name),
+                          subtitle: Text(device.address ?? ""),
+                          onTap: () async {
+                            Get.back();
+                            await _devicesController.connectToUsb(
+                              device.name,
+                              device.address ?? "",
+                              _userController.user.value,
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                if (isScanning) "Scanning...".text(size: 12),
+              ],
+            ),
+          );
+        },
+      ),
+      actions: [
+        "Cancel".text().textButton(onPressed: () => Get.back()),
+      ],
     );
   }
 

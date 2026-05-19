@@ -113,8 +113,9 @@ class DevicesController extends GetxController {
   Future<bool> connectToBluetooth(
     String name,
     String macAddress,
-    User? user,
-  ) async {
+    User? user, {
+    bool isBle = false,
+  }) async {
     final isar = IsarStatic.getInstance();
     if (isar == null) {
       Toaster.showError("Database was not initialized");
@@ -131,11 +132,11 @@ class DevicesController extends GetxController {
         model: BluetoothPrinterInput(
           name: name,
           address: macAddress,
-          isBle: false,
+          isBle: isBle,
           autoConnect: false,
         ),
       );
-      
+
       connectingToDevice.value = false;
       hasPrinterConnections.value = cashierConnected.value;
       if (!cashierConnected.value) {
@@ -164,6 +165,57 @@ class DevicesController extends GetxController {
     }
   }
 
+  Future<bool> connectToUsb(
+    String name,
+    String address,
+    User? user,
+  ) async {
+    final isar = IsarStatic.getInstance();
+    if (isar == null) {
+      Toaster.showError("Database was not initialized");
+      return false;
+    }
+    if (user == null) {
+      Toaster.showError("User should be register first");
+      return false;
+    }
+    try {
+      connectingToDevice.value = true;
+      cashierConnected.value = await PrinterManager.instance.connect(
+        type: PrinterType.usb,
+        model: UsbPrinterInput(
+          name: name,
+          productId: address.split('-').last,
+          vendorId: address.split('-').first,
+        ),
+      );
+
+      connectingToDevice.value = false;
+      hasPrinterConnections.value = cashierConnected.value;
+      if (!cashierConnected.value) {
+        Toaster.showError("Failed to connect to USB device");
+        return false;
+      }
+      await isar.write((isar) async {
+        isar.printerDeviceModels.put(
+          PrinterDeviceModel(
+            name: name,
+            address: address,
+            isConnected: cashierConnected.value,
+            port: 0,
+            connectionType: "usb",
+          ),
+        );
+      });
+      getConnectedDevices();
+      return true;
+    } catch (e) {
+      connectingToDevice.value = false;
+      Toaster.showError("USB Error: $e");
+      return false;
+    }
+  }
+
   void getConnectedDevices() async {
     final isar = IsarStatic.getInstance();
     if (isar == null) {
@@ -179,7 +231,9 @@ class DevicesController extends GetxController {
     }
     final type = printerDevic.connectionType == "network"
         ? PrinterType.network
-        : PrinterType.bluetooth;
+        : (printerDevic.connectionType == "usb"
+            ? PrinterType.usb
+            : PrinterType.bluetooth);
     await PrinterManager.instance.disconnect(type: type);
     cashierConnected.value = false;
     hasPrinterConnections.value = false;
@@ -214,7 +268,9 @@ class DevicesController extends GetxController {
   ) async {
     final printerType = device.connectionType == "network"
         ? PrinterType.network
-        : PrinterType.bluetooth;
+        : (device.connectionType == "usb"
+            ? PrinterType.usb
+            : PrinterType.bluetooth);
 
     bool connected = false;
     if (printerType == PrinterType.network) {
@@ -222,10 +278,24 @@ class DevicesController extends GetxController {
         type: printerType,
         model: TcpPrinterInput(ipAddress: device.address, port: device.port),
       );
+    } else if (printerType == PrinterType.usb) {
+      connected = await PrinterManager.instance.connect(
+        type: printerType,
+        model: UsbPrinterInput(
+          name: device.name,
+          productId: device.address.split('-').last,
+          vendorId: device.address.split('-').first,
+        ),
+      );
     } else {
       connected = await PrinterManager.instance.connect(
         type: printerType,
-        model: BluetoothPrinterInput(name: device.name, address: device.address, isBle: false, autoConnect: false),
+        model: BluetoothPrinterInput(
+          name: device.name,
+          address: device.address,
+          isBle: false,
+          autoConnect: false,
+        ),
       );
     }
 
@@ -242,7 +312,11 @@ class DevicesController extends GetxController {
     if (isar == null) return;
     final device = isar.printerDeviceModels.where().sortByIsConnected().findFirst();
     if (device != null) {
-      final type = device.connectionType == "network" ? PrinterType.network : PrinterType.bluetooth;
+      final type = device.connectionType == "network"
+          ? PrinterType.network
+          : (device.connectionType == "usb"
+              ? PrinterType.usb
+              : PrinterType.bluetooth);
       await PrinterManager.instance.send(type: type, bytes: b.bytes);
     }
   }
@@ -431,16 +505,32 @@ class DevicesController extends GetxController {
     if (device != null) {
       final printerType = device.connectionType == "network"
           ? PrinterType.network
-          : PrinterType.bluetooth;
+          : (device.connectionType == "usb"
+              ? PrinterType.usb
+              : PrinterType.bluetooth);
       if (printerType == PrinterType.network) {
         cashierConnected.value = await PrinterManager.instance.connect(
           type: printerType,
           model: TcpPrinterInput(ipAddress: device.address, port: device.port),
         );
+      } else if (printerType == PrinterType.usb) {
+        cashierConnected.value = await PrinterManager.instance.connect(
+          type: printerType,
+          model: UsbPrinterInput(
+            name: device.name,
+            productId: device.address.split('-').last,
+            vendorId: device.address.split('-').first,
+          ),
+        );
       } else {
         cashierConnected.value = await PrinterManager.instance.connect(
           type: printerType,
-          model: BluetoothPrinterInput(name: device.name, address: device.address, isBle: false, autoConnect: false),
+          model: BluetoothPrinterInput(
+            name: device.name,
+            address: device.address,
+            isBle: false,
+            autoConnect: false,
+          ),
         );
       }
       hasPrinterConnections.value = cashierConnected.value;
