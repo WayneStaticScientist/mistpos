@@ -13,7 +13,7 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   get: ^4.7.2
-  exui: ^1.0.7
+  exui: ^1.0.11
   iconify_flutter: ^0.0.7
   build_runner: ^2.4.13
   path_provider: ^2.1.5
