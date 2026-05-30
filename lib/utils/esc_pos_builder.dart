@@ -24,6 +24,10 @@ class EscPosBuilder {
     _bytes.addAll(_generator.qrcode(text));
   }
 
+  void openCashDrawer({PosDrawer pin = PosDrawer.pin2}) {
+    _bytes.addAll(_generator.drawer(pin: pin));
+  }
+
   void raster(List<int> rasterBytes) {
     // EscPosBuilder raster expects raw GS v 0 raster bytes
     _bytes.addAll(rasterBytes);

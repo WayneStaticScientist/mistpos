@@ -15,6 +15,9 @@ class AppSettingsModel {
   bool hasAlertedAboutFreeVersion = false;
   /// Printing mode: "single" (one printer) or "multi" (all selected printers)
   String printingMode;
+  bool enableCashDrawer;
+  /// Trigger mode: "cash" (cash sales only) or "all" (all sales)
+  String cashDrawerTriggerMode;
   AppSettingsModel({
     required this.externalBarCodeEnabled,
     required this.useSystemDarkMode,
@@ -28,6 +31,8 @@ class AppSettingsModel {
     this.useGridViewForItems = false,
     this.hasAlertedAboutFreeVersion = false,
     this.printingMode = "single",
+    this.enableCashDrawer = false,
+    this.cashDrawerTriggerMode = "all",
   });
   factory AppSettingsModel.fromJson(Map<String, dynamic> json) =>
       AppSettingsModel(
@@ -47,6 +52,8 @@ class AppSettingsModel {
         useGridViewForItems: json["useGridViewForItems"] ?? false,
         hasAlertedAboutFreeVersion: json["hasAlertedAboutFreeVersion"] ?? false,
         printingMode: json["printingMode"] ?? "single",
+        enableCashDrawer: json["enableCashDrawer"] ?? false,
+        cashDrawerTriggerMode: json["cashDrawerTriggerMode"] ?? "all",
       );
   Map<String, dynamic> toJson() => {
     "darkMode": darkMode,
@@ -61,10 +68,17 @@ class AppSettingsModel {
     "externalBarCodeEnabled": externalBarCodeEnabled,
     "hasAlertedAboutFreeVersion": hasAlertedAboutFreeVersion,
     "printingMode": printingMode,
+    "enableCashDrawer": enableCashDrawer,
+    "cashDrawerTriggerMode": cashDrawerTriggerMode,
   };
   static AppSettingsModel fromStorage() {
     GetStorage box = GetStorage();
     final settings = AppSettingsModel.fromJson(box.read('appSettings') ?? {});
+    bool changed = false;
+    if (settings.extras.any((e) => e.value == "drawer")) {
+      settings.extras.removeWhere((e) => e.value == "drawer");
+      changed = true;
+    }
     if (settings.extras.isEmpty) {
       settings.extras = [
         ReceitExtrasModel(
@@ -131,6 +145,10 @@ class AppSettingsModel {
           type: "system",
         ),
       ];
+      changed = true;
+    }
+    if (changed) {
+      settings.saveToStorage();
     }
     return settings;
   }

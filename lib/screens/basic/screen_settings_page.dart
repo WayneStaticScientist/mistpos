@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
-import 'package:mistpos/screens/gateways/automated_screen.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/material.dart';
 import 'package:mistpos/utils/toast.dart';
@@ -21,6 +20,7 @@ import 'package:mistpos/controllers/user_controller.dart';
 import 'package:mistpos/widgets/loaders/small_loader.dart';
 import 'package:mistpos/controllers/inventory_controller.dart';
 import 'package:mistpos/screens/auth/screen_user_profile.dart';
+import 'package:mistpos/screens/gateways/automated_screen.dart';
 import 'package:mistpos/screens/basic/screen_receit_designer.dart';
 import 'package:mistpos/screens/basic/screen_receipt_logo_crop.dart';
 
@@ -176,6 +176,41 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                 _user.user.value?.role == 'admin' ||
                     _user.user.value?.role == 'manager',
               ),
+              ListTile(
+                contentPadding: EdgeInsets.all(0),
+                onTap: () {
+                  model.enableCashDrawer = !model.enableCashDrawer;
+                  model.saveToStorage();
+                  setState(() {});
+                },
+                trailing: Switch(
+                  value: model.enableCashDrawer,
+                  onChanged: (c) {
+                    model.enableCashDrawer = c;
+                    model.saveToStorage();
+                    setState(() {});
+                  },
+                ),
+                leading: Iconify(Bx.archive, color: AppTheme.color(context)),
+                title: "Enable Cash Drawer".text(),
+                subtitle: "Kick drawer open when printing receipts".text(
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+              ),
+              ListTile(
+                onTap: () =>
+                    _changeCashDrawerTriggerMode(model.cashDrawerTriggerMode),
+                contentPadding: EdgeInsets.all(0),
+                title: const Text("Cash Drawer Trigger"),
+                subtitle:
+                    (model.cashDrawerTriggerMode == "cash"
+                            ? "Cash Sales Only"
+                            : "All Sales / Receipts")
+                        .text(
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
+                leading: Iconify(Bx.cog, color: AppTheme.color(context)),
+              ).visibleIf(model.enableCashDrawer),
             ],
           ),
           24.gapColumn,
@@ -285,9 +320,11 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                 ),
                 leading: Iconify(Bx.grid, color: AppTheme.color(context)),
                 title: "Use Grid View for Items".text(),
-                subtitle: "Toggle between grid and list view for products in sales screen".text(
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
+                subtitle:
+                    "Toggle between grid and list view for products in sales screen"
+                        .text(
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
               ),
             ],
           ),
@@ -527,6 +564,44 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
           },
         ),
       ],
+    );
+  }
+
+  void _changeCashDrawerTriggerMode(String currentMode) {
+    final model = AppSettingsModel.fromStorage();
+    Get.defaultDialog(
+      title: "Cash Drawer Trigger",
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          RadioListTile<String>(
+            title: const Text("All Sales / Receipts"),
+            value: "all",
+            groupValue: currentMode,
+            onChanged: (val) {
+              if (val != null) {
+                model.cashDrawerTriggerMode = val;
+                model.saveToStorage();
+                Get.back();
+                setState(() {});
+              }
+            },
+          ),
+          RadioListTile<String>(
+            title: const Text("Cash Sales Only"),
+            value: "cash",
+            groupValue: currentMode,
+            onChanged: (val) {
+              if (val != null) {
+                model.cashDrawerTriggerMode = val;
+                model.saveToStorage();
+                Get.back();
+                setState(() {});
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 

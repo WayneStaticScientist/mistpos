@@ -364,6 +364,13 @@ class DevicesController extends GetxController {
     final profile = await CapabilityProfile.load();
     final b = EscPosBuilder(Generator(PaperSize.mm58, profile));
     final model = AppSettingsModel.fromStorage();
+    if (model.enableCashDrawer) {
+      if (model.cashDrawerTriggerMode == "all" ||
+          (model.cashDrawerTriggerMode == "cash" &&
+              itemReceitModel.payment == "cash")) {
+        b.openCashDrawer();
+      }
+    }
     int receitWidth = model.printerRecietLength;
     bool enableQrCode = model.enableQrCode;
     String padRight(String text, int length) => text.padRight(length, ' ');

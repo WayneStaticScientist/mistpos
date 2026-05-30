@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
-import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/screens/basic/screen_credit_payment.dart';
 import 'package:mistpos/utils/toast.dart';
@@ -9,7 +8,6 @@ import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/themes/app_theme.dart';
 import 'package:mistpos/models/tax_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:mistpos/responsive/screen_sizes.dart';
 import 'package:mistpos/utils/currence_converter.dart';
 import 'package:mistpos/models/item_receit_model.dart';
 import 'package:mistpos/controllers/user_controller.dart';
