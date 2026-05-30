@@ -3,37 +3,37 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/instance_manager.dart';
 import 'package:isar_plus/isar_plus.dart';
-import 'package:mistpos/controllers/expenses_controller.dart';
-import 'package:mistpos/models/gateway.dart';
+import 'package:mistpos/features/inventory/controllers/expenses_controller.dart';
+import 'package:mistpos/data/models/gateway.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:mistpos/models/tax_model.dart';
-import 'package:mistpos/themes/app_theme.dart';
-import 'package:mistpos/models/user_model.dart';
-import 'package:mistpos/models/item_model.dart';
+import 'package:mistpos/data/models/tax_model.dart';
+import 'package:mistpos/core/themes/app_theme.dart';
+import 'package:mistpos/data/models/user_model.dart';
+import 'package:mistpos/data/models/item_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:mistpos/models/shifts_model.dart';
-import 'package:mistpos/models/discount_model.dart';
-import 'package:mistpos/models/item_receit_model.dart';
-import 'package:mistpos/screens/basic/screen_main.dart';
+import 'package:mistpos/data/models/shifts_model.dart';
+import 'package:mistpos/data/models/discount_model.dart';
+import 'package:mistpos/data/models/item_receit_model.dart';
+import 'package:mistpos/features/settings/screens/screen_main.dart';
 import 'package:get/get_navigation/get_navigation.dart';
-import 'package:mistpos/models/app_settings_model.dart';
-import 'package:mistpos/screens/auth/screen_splash.dart';
-import 'package:mistpos/models/item_unsaved_model.dart';
-import 'package:mistpos/models/notification_model.dart';
-import 'package:mistpos/models/item_modifier_model.dart';
-import 'package:mistpos/controllers/user_controller.dart';
-import 'package:mistpos/models/printer_device_model.dart';
-import 'package:mistpos/models/item_categories_model.dart';
-import 'package:mistpos/controllers/items_controller.dart';
-import 'package:mistpos/controllers/admin_controller.dart';
-import 'package:mistpos/models/item_saved_items_model.dart';
+import 'package:mistpos/data/models/app_settings_model.dart';
+import 'package:mistpos/features/auth/screens/screen_splash.dart';
+import 'package:mistpos/data/models/item_unsaved_model.dart';
+import 'package:mistpos/data/models/notification_model.dart';
+import 'package:mistpos/data/models/item_modifier_model.dart';
+import 'package:mistpos/features/auth/controllers/user_controller.dart';
+import 'package:mistpos/data/models/printer_device_model.dart';
+import 'package:mistpos/data/models/item_categories_model.dart';
+import 'package:mistpos/features/inventory/controllers/items_controller.dart';
+import 'package:mistpos/features/admin/controllers/admin_controller.dart';
+import 'package:mistpos/data/models/item_saved_items_model.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:mistpos/controllers/devices_controller.dart';
-import 'package:mistpos/controllers/firebase_controller.dart';
-import 'package:mistpos/controllers/inventory_controller.dart';
-import 'package:mistpos/controllers/items_unsaved_controller.dart';
-import 'package:mistpos/firebase-messanging/firebase_bg_notification_handler.dart';
+import 'package:mistpos/features/devices/controllers/devices_controller.dart';
+import 'package:mistpos/core/services/firebase/firebase_controller.dart';
+import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
+import 'package:mistpos/features/inventory/controllers/items_unsaved_controller.dart';
+import 'package:mistpos/core/services/firebase/firebase_bg_notification_handler.dart';
 
 class IsarStatic {
   static Isar? isar;
@@ -59,8 +59,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   IsarStatic.externalDirectory = await getApplicationDocumentsDirectory();
   final path = "${IsarStatic.externalDirectory!.path}/default.isar";
-  await Firebase.initializeApp();
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  try {
+    await Firebase.initializeApp();
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  } catch (e) {
+    print("Firebase initialization failed (likely missing Play Services): $e");
+  }
   try {
     initIsarDatabase(IsarStatic.externalDirectory!);
   } catch (e) {
@@ -135,7 +139,12 @@ class MyApp extends StatelessWidget {
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    print("Firebase bg init failed: $e");
+    return;
+  }
   await GetStorage.init();
   addMessage(message);
 }

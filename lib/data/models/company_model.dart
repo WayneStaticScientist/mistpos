@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:get_storage/get_storage.dart';
 import 'package:mistpos/data/models/exchange_rate_model.dart';
 import 'package:mistpos/data/models/receit_extras_model.dart';
@@ -40,9 +42,8 @@ class AutomatedSyncModel {
       hasSubscription: json['hasSubscription'] ?? false,
       phone: json['phone'] ?? "",
       phoneVerified: json['phoneVerified'] ?? false,
-      validUntil: json['validUntil'] != null
-          ? DateTime.parse(json['validUntil'])
-          : null,
+      validUntil:
+          json['validUntil'] != null ? DateTime.parse(json['validUntil']) : null,
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
     );
   }
@@ -90,9 +91,8 @@ class CompanyModel {
   factory CompanyModel.fromJson(Map<String, dynamic> json) {
     return CompanyModel(
       automatedSync: AutomatedSyncModel.fromJson(json['automatedSync']),
-      weeklyAutomatedSync: AutomatedSyncModel.fromJson(
-        json['weeklyAutomatedSync'],
-      ),
+      weeklyAutomatedSync:
+          AutomatedSyncModel.fromJson(json['weeklyAutomatedSync']),
       autoApproveAllExpenses: json['autoApproveAllExpenses'] ?? false,
       enableCreditSale: json['enableCreditSale'] ?? true,
       owner: json['owner'],
@@ -106,9 +106,10 @@ class CompanyModel {
       name: json['name'] ?? "-",
       verified: json['verified'] ?? false,
       showSalesCount: json['showSalesCount'] ?? false,
-      subscriptionType: json['subscriptionType'] != null
-          ? SubscriptionModel.fromJson(json['subscriptionType'])
-          : SubscriptionModel(),
+      subscriptionType:
+          json['subscriptionType'] != null
+              ? SubscriptionModel.fromJson(json['subscriptionType'])
+              : SubscriptionModel(),
       exchangeRates: ExchangeRateModel.fromJson(json['exchangeRates']),
     );
   }

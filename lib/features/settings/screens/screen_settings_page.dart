@@ -3,25 +3,25 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
-import 'package:mistpos/core/themes/app_theme.dart';
-import 'package:mistpos/core/utils/sdk_int.dart';
-import 'package:mistpos/core/utils/toast.dart';
-import 'package:mistpos/core/widgets/inputs/input_form.dart';
-import 'package:mistpos/core/widgets/loaders/small_loader.dart';
-import 'package:mistpos/data/models/app_settings_model.dart';
-import 'package:mistpos/features/admin/controllers/admin_controller.dart';
-import 'package:mistpos/features/auth/controllers/user_controller.dart';
-import 'package:mistpos/features/auth/screens/screen_user_profile.dart';
-import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
-import 'package:mistpos/features/settings/screens/modern_layout.dart';
-import 'package:mistpos/features/settings/screens/screen_receit_designer.dart';
 import 'package:mistpos/features/settings/screens_gateways/automated_screen.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/material.dart';
+import 'package:mistpos/core/utils/toast.dart';
+import 'package:mistpos/core/utils/sdk_int.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/core/themes/app_theme.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/core/widgets/inputs/input_form.dart';
+import 'package:mistpos/data/models/app_settings_model.dart';
+import 'package:mistpos/features/settings/screens/modern_layout.dart';
+import 'package:mistpos/features/admin/controllers/admin_controller.dart';
+import 'package:mistpos/features/auth/controllers/user_controller.dart';
+import 'package:mistpos/core/widgets/loaders/small_loader.dart';
+import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
+import 'package:mistpos/features/auth/screens/screen_user_profile.dart';
+import 'package:mistpos/features/settings/screens/screen_receit_designer.dart';
 
 class ScreenSettingsPage extends StatefulWidget {
   const ScreenSettingsPage({super.key});
@@ -284,11 +284,9 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                 ),
                 leading: Iconify(Bx.grid, color: AppTheme.color(context)),
                 title: "Use Grid View for Items".text(),
-                subtitle:
-                    "Toggle between grid and list view for products in sales screen"
-                        .text(
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
-                        ),
+                subtitle: "Toggle between grid and list view for products in sales screen".text(
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                ),
               ),
             ],
           ),
