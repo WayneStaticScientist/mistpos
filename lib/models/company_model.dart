@@ -63,6 +63,7 @@ class CompanyModel {
   String email;
   String name;
   bool enableCreditSale;
+  bool shiftBasedSales;
   bool verified;
   bool showSalesCount;
   ExchangeRateModel exchangeRates;
@@ -83,6 +84,7 @@ class CompanyModel {
     required this.showSalesCount,
     required this.subscriptionType,
     required this.enableCreditSale,
+    this.shiftBasedSales = false,
     this.autoApproveAllExpenses = false,
     required this.automatedSync,
     required this.weeklyAutomatedSync,
@@ -95,6 +97,7 @@ class CompanyModel {
       ),
       autoApproveAllExpenses: json['autoApproveAllExpenses'] ?? false,
       enableCreditSale: json['enableCreditSale'] ?? true,
+      shiftBasedSales: json['shiftBasedSales'] ?? false,
       owner: json['owner'],
       email: json['email'],
       hexId: json['_id'] ?? "",
@@ -123,6 +126,7 @@ class CompanyModel {
       'weeklyAutomatedSync': weeklyAutomatedSync.toJson(),
       "showSalesCount": showSalesCount,
       'enableCreditSale': enableCreditSale,
+      'shiftBasedSales': shiftBasedSales,
       "exchangeRates": exchangeRates.toJson(),
       "subscriptionType": subscriptionType.toJson(),
       'autoApproveAllExpenses': autoApproveAllExpenses,

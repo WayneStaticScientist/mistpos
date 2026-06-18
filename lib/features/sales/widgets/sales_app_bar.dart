@@ -12,7 +12,8 @@ import 'package:mistpos/features/settings/screens/screens_select_customers.dart'
 import 'package:mistpos/features/settings/screens/screen_view_selected_customer.dart';
 
 class SalesAppBar extends StatefulWidget {
-  const SalesAppBar({super.key});
+  final GlobalKey<ScaffoldState>? scaffoldKey;
+  const SalesAppBar({super.key, this.scaffoldKey});
 
   @override
   State<SalesAppBar> createState() => _SalesAppBarState();
@@ -28,6 +29,23 @@ class _SalesAppBarState extends State<SalesAppBar> {
       elevation: 0,
       floating: true,
       centerTitle: false,
+      leading: IconButton(
+        onPressed: () {
+          if (widget.scaffoldKey?.currentState != null) {
+            widget.scaffoldKey!.currentState!.openDrawer();
+          } else {
+            Scaffold.of(context).openDrawer();
+          }
+        },
+        icon: Container(
+          padding: EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppTheme.surface(context),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(Icons.menu_rounded, size: 20, color: AppTheme.color(context)),
+        ),
+      ),
       title: Text("MistPos", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, letterSpacing: 1.2)),
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       actions: [
@@ -72,6 +90,36 @@ class _SalesAppBarState extends State<SalesAppBar> {
             ),
           );
         }),
+        IconButton(
+          onPressed: () {
+            Get.defaultDialog(
+              title: "Force Sync",
+              content: "This will clear your local offline cache and download all items, categories, and settings from the server. Are you sure?".text(textAlign: TextAlign.center),
+              actions: [
+                TextButton(
+                  onPressed: () => Get.back(),
+                  child: const Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Get.back();
+                    _itemsListController.clearAndResyncData();
+                    Toaster.showSuccess("Cache cleared. Syncing started in background.");
+                  },
+                  child: const Text("Sync Now"),
+                ),
+              ],
+            );
+          },
+          icon: Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppTheme.surface(context),
+              shape: BoxShape.circle,
+            ),
+            child: Iconify(Bx.cloud_download, color: AppTheme.color(context)),
+          ),
+        ),
         Obx(
           () => IconButton(
             onPressed: () => Get.to(() => ScreenNotifications()),

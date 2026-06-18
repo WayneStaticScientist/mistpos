@@ -12,7 +12,7 @@ import 'package:mistpos/core/services/api/auth_interceptor.dart';
 
 class Net {
   static Dio? _dio;
-  // static const String baseUrl = "http://192.168.1.199:3001/v1";
+  // static const String baseUrl = "http://10.191.216.43:3001/v1";
   static const String baseUrl = "https://api.mistpos.co.zw/v1";
   static Future<ResponseModel> get(String url) async {
     if (Net._dio == null) {

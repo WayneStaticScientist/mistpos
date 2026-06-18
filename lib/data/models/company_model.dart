@@ -1,9 +1,25 @@
-import 'dart:developer';
-
 import 'package:get_storage/get_storage.dart';
 import 'package:mistpos/data/models/exchange_rate_model.dart';
 import 'package:mistpos/data/models/receit_extras_model.dart';
 import 'package:mistpos/data/models/subscripiton_model.dart';
+
+class AiSubscriptionsModel {
+  final int tokens;
+  AiSubscriptionsModel({required this.tokens});
+  
+  factory AiSubscriptionsModel.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return AiSubscriptionsModel(tokens: 0);
+    return AiSubscriptionsModel(
+      tokens: json['tokens'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'tokens': tokens,
+    };
+  }
+}
 
 class AutomatedSyncModel {
   final bool hasSubscription;
@@ -42,8 +58,9 @@ class AutomatedSyncModel {
       hasSubscription: json['hasSubscription'] ?? false,
       phone: json['phone'] ?? "",
       phoneVerified: json['phoneVerified'] ?? false,
-      validUntil:
-          json['validUntil'] != null ? DateTime.parse(json['validUntil']) : null,
+      validUntil: json['validUntil'] != null
+          ? DateTime.parse(json['validUntil'])
+          : null,
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
     );
   }
@@ -64,6 +81,7 @@ class CompanyModel {
   String email;
   String name;
   bool enableCreditSale;
+  bool shiftBasedSales;
   bool verified;
   bool showSalesCount;
   ExchangeRateModel exchangeRates;
@@ -72,6 +90,7 @@ class CompanyModel {
   String hexId;
   final AutomatedSyncModel automatedSync;
   final AutomatedSyncModel weeklyAutomatedSync;
+  AiSubscriptionsModel aiSubscriptions;
   List<ReceitExtrasModel> receitExtras;
   CompanyModel({
     required this.owner,
@@ -84,17 +103,22 @@ class CompanyModel {
     required this.showSalesCount,
     required this.subscriptionType,
     required this.enableCreditSale,
+    this.shiftBasedSales = false,
     this.autoApproveAllExpenses = false,
     required this.automatedSync,
     required this.weeklyAutomatedSync,
+    required this.aiSubscriptions,
   });
   factory CompanyModel.fromJson(Map<String, dynamic> json) {
     return CompanyModel(
       automatedSync: AutomatedSyncModel.fromJson(json['automatedSync']),
-      weeklyAutomatedSync:
-          AutomatedSyncModel.fromJson(json['weeklyAutomatedSync']),
+      weeklyAutomatedSync: AutomatedSyncModel.fromJson(
+        json['weeklyAutomatedSync'],
+      ),
+      aiSubscriptions: AiSubscriptionsModel.fromJson(json['aiSubscriptions']),
       autoApproveAllExpenses: json['autoApproveAllExpenses'] ?? false,
       enableCreditSale: json['enableCreditSale'] ?? true,
+      shiftBasedSales: json['shiftBasedSales'] ?? false,
       owner: json['owner'],
       email: json['email'],
       hexId: json['_id'] ?? "",
@@ -106,10 +130,9 @@ class CompanyModel {
       name: json['name'] ?? "-",
       verified: json['verified'] ?? false,
       showSalesCount: json['showSalesCount'] ?? false,
-      subscriptionType:
-          json['subscriptionType'] != null
-              ? SubscriptionModel.fromJson(json['subscriptionType'])
-              : SubscriptionModel(),
+      subscriptionType: json['subscriptionType'] != null
+          ? SubscriptionModel.fromJson(json['subscriptionType'])
+          : SubscriptionModel(),
       exchangeRates: ExchangeRateModel.fromJson(json['exchangeRates']),
     );
   }
@@ -122,8 +145,10 @@ class CompanyModel {
       "verified": verified,
       'automatedSync': automatedSync.toJson(),
       'weeklyAutomatedSync': weeklyAutomatedSync.toJson(),
+      'aiSubscriptions': aiSubscriptions.toJson(),
       "showSalesCount": showSalesCount,
       'enableCreditSale': enableCreditSale,
+      'shiftBasedSales': shiftBasedSales,
       "exchangeRates": exchangeRates.toJson(),
       "subscriptionType": subscriptionType.toJson(),
       'autoApproveAllExpenses': autoApproveAllExpenses,

@@ -23,6 +23,7 @@ class _ScreenSubscriptionState extends State<ScreenSubscription> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _controller.loadCompany();
+      _controller.getSubscriptionPricing();
     });
   }
 
@@ -52,143 +53,237 @@ class _ScreenSubscriptionState extends State<ScreenSubscription> {
   }
 
   Widget _buildList() {
-    return SingleChildScrollView(
-      child: Wrap(
-        spacing: 14,
-        runSpacing: 14,
-        alignment: WrapAlignment.center,
-        children: [
-          Obx(
-            () =>
-                SubscriptionCard(
-                  title: 'Trial Plan',
-                  remainingTime:
-                      _controller.company.value!.subscriptionType.validUntil,
-                  selectedPlan:
-                      _controller.company.value!.subscriptionType.type,
-                  plan: MistSubscriptionUtils.trialPlan,
-                  price: 0.0,
-                  fillColor: Colors.orange,
-                  buttonLabel: _controller.loadingFreeTrial.value
-                      ? "Loading..."
-                      : "Start Free Trial",
-                  features: ["All Features", "For 2 Weeks Only"],
-                  onSubscribe: _startFreeTrial,
-                ).visibleIfNot(
-                  _controller
-                          .company
-                          .value!
-                          .subscriptionType
-                          .hasExhaustedCredits &&
-                      !(_controller.company.value!.subscriptionType.type ==
-                          MistSubscriptionUtils.trialPlan),
-                ),
-          ),
-          24.gapHeight,
-          Obx(
-            () => SubscriptionCard(
-              title: 'Free Plan',
-              onSubscribe: _freePlan,
-              selectedPlan: _controller.company.value!.subscriptionType.type,
-              plan: MistSubscriptionUtils.freePlan,
-              price: 0.0,
-              features: ["Basic Features", "Limited Support", "Sales Reports"],
-            ),
-          ),
-          24.gapHeight,
-          Obx(
-            () => SubscriptionCard(
-              title: 'Basic Plan',
-              remainingTime:
-                  _controller.company.value!.subscriptionType.validUntil,
-              selectedPlan: _controller.company.value!.subscriptionType.type,
-              plan: MistSubscriptionUtils.basicPlan,
-              features: [
-                "Basic Features",
-                "Add/Edit stock",
-                "Full Support",
-                "Sales Reports",
-                "Manage Cashiers",
-                "Add/Remove Manager s",
-                "Manage Multiple Stores",
-              ],
-              onSubscribe: () => _subscribe(
-                MistSubscriptionUtils.basicPlan,
-                5.00,
-                "Basic Plan",
+    if (_controller.loadingSubscriptionPricing.value) {
+      return MistLoader1().center();
+    }
+    final plans = _controller.subscriptionPlans;
+    final currentPlan = _controller.company.value!.subscriptionType.type;
+
+    return Container(
+      color: Color(0xFF161622), // Dark background matching the image
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Modern Hero Header
+            Container(
+              padding: const EdgeInsets.only(
+                top: 60,
+                bottom: 40,
+                left: 24,
+                right: 24,
               ),
-              price: 5.00,
-            ),
-          ),
-          24.gapHeight,
-          Obx(
-            () => SubscriptionCard(
-              remainingTime:
-                  _controller.company.value!.subscriptionType.validUntil,
-              title: 'Pro Plan',
-              price: 10.00,
-              selectedPlan: _controller.company.value!.subscriptionType.type,
-              plan: MistSubscriptionUtils.proPlan,
-              features: [
-                "Basic Features",
-                "Add/Edit stock",
-                "Full Support",
-                "Sales Reports",
-                "Manage Cashiers",
-                "Add/Remove Managers",
-                "Advanced Analytics",
-                "Manage Multiple Stores",
-                "Advanced Inventory Management",
-              ],
-              onSubscribe: () =>
-                  _subscribe(MistSubscriptionUtils.proPlan, 10.00, "Pro Plan"),
-            ),
-          ),
-          24.gapHeight,
-          Obx(
-            () => SubscriptionCard(
-              title: 'Enterprise Plan',
-              remainingTime:
-                  _controller.company.value!.subscriptionType.validUntil,
-              selectedPlan: _controller.company.value!.subscriptionType.type,
-              plan: MistSubscriptionUtils.enterprisePlan,
-              price: 15.00,
-              features: [
-                "Basic Features",
-                "Add/Edit stock",
-                "Full Support",
-                "Sales Reports",
-                "Manage Cashiers",
-                "Add/Remove Managers",
-                "Advanced Analytics",
-                "Manage Multiple Stores",
-                "Advanced Inventory Management",
-                "Composite Items",
-                "Productions",
-              ],
-              onSubscribe: () => _subscribe(
-                MistSubscriptionUtils.enterprisePlan,
-                15.00,
-                "Enterprise Plan",
+              child: Column(
+                children: [
+                  "Upgrade Your Experience".text(
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  8.gapHeight,
+                  "Choose the best plan for your needs.".text(
+                    style: TextStyle(fontSize: 16, color: Colors.white70),
+                    textAlign: TextAlign.center,
+                  ),
+                  24.gapHeight,
+                  if (currentPlan.isNotEmpty)
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(20),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.white.withAlpha(30)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.stars, color: Colors.amber, size: 16),
+                          8.gapWidth,
+                          "Current Plan: ${currentPlan.toUpperCase()}".text(
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
               ),
             ),
-          ),
-        ],
-      ).padding(EdgeInsets.all(16)),
+
+            // Plans List
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 16.0,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Obx(
+                    () =>
+                        SubscriptionCard(
+                          title: 'Trial Plan',
+                          remainingTime: _controller
+                              .company
+                              .value!
+                              .subscriptionType
+                              .validUntil,
+                          selectedPlan:
+                              _controller.company.value!.subscriptionType.type,
+                          plan: MistSubscriptionUtils.trialPlan,
+                          price: 0.0,
+                          buttonLabel: _controller.loadingFreeTrial.value
+                              ? "Loading..."
+                              : "Start 30-Day Trial",
+                          features: [
+                            "30-Day Pro Access",
+                            "All Pro Features",
+                            "Try Risk-Free",
+                            "Ends in 30 Days",
+                          ],
+                          onSubscribe: _startFreeTrial,
+                        ).visibleIfNot(
+                          _controller
+                                  .company
+                                  .value!
+                                  .subscriptionType
+                                  .hasExhaustedCredits &&
+                              !(_controller
+                                      .company
+                                      .value!
+                                      .subscriptionType
+                                      .type ==
+                                  MistSubscriptionUtils.trialPlan),
+                        ),
+                  ),
+                  Obx(
+                    () => SubscriptionCard(
+                      title: 'Free Plan',
+                      onSubscribe: _freePlan,
+                      selectedPlan:
+                          _controller.company.value!.subscriptionType.type,
+                      plan: MistSubscriptionUtils.freePlan,
+                      price: 0.0,
+                      buttonLabel: "Get Started",
+                      features: [
+                        "1 Project",
+                        "500 MB Storage",
+                        "Basic Support",
+                        "Access 10 Templates",
+                      ],
+                    ),
+                  ),
+                  ...plans.map((p) {
+                    if (p['id'] == 'free') return SizedBox();
+
+                    List<String> features = [];
+                   if (p['features'] != null && p['features'] is List) {
+                      features = (p['features'] as List).map((e) => e.toString()).toList();
+                   }
+
+                    return Obx(
+                      () => SubscriptionCard(
+                        title: p['name'],
+                        remainingTime: _controller
+                            .company
+                            .value!
+                            .subscriptionType
+                            .validUntil,
+                        selectedPlan:
+                            _controller.company.value!.subscriptionType.type,
+                        plan: p['id'],
+                        features: features,
+                        price: double.tryParse(p['price'].toString()) ?? 0.0,
+                        onSubscribe: () => _subscribe(
+                          p['id'],
+                          double.tryParse(p['price'].toString()) ?? 0.0,
+                          p['name'],
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   void _subscribe(String basicPlan, double d, String s) {
+    int durationMonths = 1;
+    final currentPlan = _controller.company.value!.subscriptionType.type;
+    final isUpgrade =
+        currentPlan != MistSubscriptionUtils.freePlan &&
+        currentPlan != MistSubscriptionUtils.trialPlan &&
+        currentPlan != basicPlan;
+
     Get.defaultDialog(
       title: "Subscribe",
-      middleText: "Subribing to $s plan for \$$d per month",
+      content: StatefulBuilder(
+        builder: (context, setState) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isUpgrade)
+                "Warning: You are upgrading your plan to a different tier. Ensure you understand that you might lose some remaining time if not accounted for."
+                    .text(style: TextStyle(color: Colors.red, fontSize: 12)),
+              if (isUpgrade) 12.gapHeight,
+              "Subscribing to $s plan for \$$d per month".text(),
+              12.gapHeight,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  "Duration:".text(),
+                  8.gapWidth,
+                  DropdownButton<int>(
+                    value: durationMonths,
+                    items: [1, 3, 6, 12]
+                        .map(
+                          (e) => DropdownMenuItem(
+                            value: e,
+                            child: "$e Month${e > 1 ? 's' : ''}".text(),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) {
+                      setState(() {
+                        durationMonths = v ?? 1;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              12.gapHeight,
+              "Total: \$${(d * durationMonths).toStringAsFixed(2)}".text(
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+            ],
+          );
+        },
+      ),
       onConfirm: () {
         Get.off(
-          () =>
-              ScreenSubscriptionPayment(subKey: basicPlan, title: s, amount: d),
+          () => ScreenSubscriptionPayment(
+            subKey: basicPlan,
+            title: s,
+            amount: d * durationMonths,
+            durationMonths: durationMonths,
+          ),
         );
       },
-      textConfirm: "OK",
+      textConfirm: "Proceed to Payment",
       textCancel: "Cancel",
     );
   }

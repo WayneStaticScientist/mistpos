@@ -1,5 +1,5 @@
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:mistpos/core/themes/app_theme.dart';
 
 class CardsCategory extends StatelessWidget {
@@ -12,39 +12,44 @@ class CardsCategory extends StatelessWidget {
     this.isSelected,
     this.onTap,
   });
+
   @override
   Widget build(BuildContext context) {
-    bool selected = isSelected == true;
-    return InkWell(
+    final bool selected = isSelected == true;
+    final primary = Get.theme.colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(24),
       child: AnimatedContainer(
-        duration: Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        margin: EdgeInsets.only(right: 12),
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? Get.theme.colorScheme.primary : AppTheme.surface(context),
-          borderRadius: BorderRadius.circular(24),
+          // Selected: subtle primary tint fill, not harsh solid
+          color: selected
+              ? primary.withAlpha(isDark ? 40 : 30)
+              : AppTheme.surface(context),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: selected ? Get.theme.colorScheme.primary : Colors.grey.withAlpha(50),
+            color: selected
+                ? primary.withAlpha(isDark ? 160 : 180)
+                : (isDark
+                    ? Colors.white.withAlpha(12)
+                    : Colors.grey.withAlpha(35)),
             width: 1,
           ),
-          boxShadow: selected ? [
-            BoxShadow(
-              color: Get.theme.colorScheme.primary.withAlpha(80),
-              blurRadius: 8,
-              offset: Offset(0, 4),
-            )
-          ] : [],
         ),
-        child: Center(
-          child: Text(
-            category,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: selected ? FontWeight.bold : FontWeight.w500,
-              color: selected ? Colors.white : AppTheme.color(context),
-            ),
+        child: Text(
+          category,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            color: selected
+                ? primary
+                : (isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+            letterSpacing: 0.1,
           ),
         ),
       ),

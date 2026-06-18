@@ -13,6 +13,7 @@ import 'package:mistpos/data/models/discount_model.dart';
 import 'package:mistpos/data/models/customer_model.dart';
 import 'package:mistpos/data/models/item_saved_model.dart';
 import 'package:mistpos/data/models/item_receit_item.dart';
+import 'package:mistpos/data/models/app_settings_model.dart';
 import 'package:mistpos/core/services/api/network_wrapper.dart';
 import 'package:mistpos/data/models/item_receit_model.dart';
 import 'package:mistpos/data/models/item_modifier_model.dart';
@@ -22,6 +23,7 @@ import 'package:mistpos/data/models/item_saved_items_model.dart';
 import 'package:mistpos/features/devices/controllers/devices_controller.dart';
 import 'package:mistpos/data/models/embedded_discount_model.dart';
 import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
+import 'package:mistpos/features/auth/controllers/user_controller.dart';
 
 class ItemsController extends GetxController {
   RxDouble totalPrice = RxDouble(0);
@@ -169,10 +171,22 @@ class ItemsController extends GetxController {
     if (isar == null) {
       return;
     }
+
+    final appSettings = AppSettingsModel.fromStorage();
+    if (Get.isRegistered<UserController>()) {
+      final currentCompany = Get.find<UserController>().user.value?.company ?? "";
+      if (appSettings.syncedCompanyId.isNotEmpty && appSettings.syncedCompanyId != currentCompany) {
+        clearAndResyncData();
+        return;
+      }
+    }
+
+    final lastSyncTime = appSettings.lastItemsSyncTime;
+
     syncingItems.value = true;
     syncingItemsFailed.value = "";
     final response = await Net.get(
-      "/cashier/products?page=$page&search=$search&category=$category&salesOnly=true",
+      "/cashier/products?page=$page&search=$search&category=$category&salesOnly=true&lastSync=$lastSyncTime",
     );
     syncingItems.value = false;
     if (response.hasError) {
@@ -188,12 +202,30 @@ class ItemsController extends GetxController {
     }).toList();
 
     await isar.write((isar) async {
-      isar.itemModels.where().deleteAll();
-      if (itemsPage.value > 1) {
-        isar.itemModels.putAll(cartItems);
+      for (var model in models) {
+        final existingItem = isar.itemModels
+            .where()
+            .hexIdEqualTo(model.hexId)
+            .findFirst();
+
+        if (model.isDeleted) {
+          if (existingItem != null) {
+            isar.itemModels.delete(existingItem.id);
+          }
+        } else {
+          if (existingItem != null) {
+            model.id = existingItem.id;
+          }
+          isar.itemModels.put(model);
+        }
       }
-      isar.itemModels.putAll(models);
     });
+
+    if (itemsPage.value >= totalPages.value) {
+      appSettings.lastItemsSyncTime = DateTime.now().millisecondsSinceEpoch;
+      appSettings.saveToStorage();
+    }
+
     final loadedItems = isar.itemModels.where().findAll();
     cartItems.assignAll(loadedItems);
     syncingItems.value = false;
@@ -262,26 +294,40 @@ class ItemsController extends GetxController {
       "/cashier/receits?page=$page&search=$search&filter=$filter",
     );
     receitsLoading.value = false;
-    final unsyncedReceits = isar.itemReceitModels
-        .where()
-        .syncedEqualTo(false)
-        .findAll();
     if (!response.hasError) {
       receitsPage.value = response.body['currentPage'] as int;
       receitsTotalPages.value = response.body['totalPages'] as int;
       if (response.body['list'] != null) {
         final list = response.body['list'] as List<dynamic>;
         final lv = list.map((e) => ItemReceitModel.fromJson(e)).toList();
-        if (page == 1) {
-          receits.assignAll(lv);
-          receits.addAll(unsyncedReceits);
-        } else {
-          receits.addAll(lv);
-        }
+        
         await isar.write((isar) async {
-          isar.itemReceitModels.where().deleteAll();
-          isar.itemReceitModels.putAll(receits);
+          final allExisting = isar.itemReceitModels.where().findAll();
+          final existingMap = {for (var e in allExisting) e.hexId: e.id};
+
+          for (var model in lv) {
+            if (existingMap.containsKey(model.hexId)) {
+              model.id = existingMap[model.hexId]!;
+            }
+          }
+          isar.itemReceitModels.putAll(lv);
         });
+
+        if (search.isEmpty && filter.isEmpty) {
+          final r = isar.itemReceitModels.where().sortByCreatedAtDesc().findAll();
+          receits.assignAll(r);
+        } else {
+          final unsyncedReceits = isar.itemReceitModels
+              .where()
+              .syncedEqualTo(false)
+              .findAll();
+          if (page == 1) {
+            receits.assignAll(lv);
+            receits.addAll(unsyncedReceits);
+          } else {
+            receits.addAll(lv);
+          }
+        }
       }
       _updateUnsyncedReceits();
       return;
@@ -1066,6 +1112,12 @@ class ItemsController extends GetxController {
       Toaster.showError("Database initilization error");
       return;
     }
+    final invController = Get.find<InventoryController>();
+    if (invController.company.value?.shiftBasedSales == true &&
+        selectedShift.value == null) {
+      Toaster.showError("You must open a shift to sell items");
+      return;
+    }
     if (checkOutItems.isEmpty) {
       salesTaxes.value = isar.taxModels
           .where()
@@ -1508,7 +1560,11 @@ class ItemsController extends GetxController {
   }
 
   Future<({String? redirectUrl, String? returnUrl, String? pollUrl})>
-  payWeForAutomation(double amount, String phone, {String type = 'daily'}) async {
+  payWeForAutomation(
+    double amount,
+    String phone, {
+    String type = 'daily',
+  }) async {
     if (webProcessingPayment.value) {
       Toaster.showError("mobile payment still processing");
       return (redirectUrl: null, returnUrl: null, pollUrl: null);
@@ -1563,5 +1619,37 @@ class ItemsController extends GetxController {
     }
     Toaster.showError("payment reflected false");
     return false;
+  }
+
+  void clearAndResyncData() async {
+    final isar = IsarStatic.getInstance();
+    if (isar != null) {
+      await isar.write((isar) async {
+        isar.itemModels.where().deleteAll();
+        isar.itemCategoryModels.where().deleteAll();
+        isar.itemReceitModels.where().deleteAll();
+        isar.discountModels.where().deleteAll();
+        isar.shiftsModels.where().deleteAll();
+        isar.taxModels.where().deleteAll();
+        isar.itemModifiers.where().deleteAll();
+        isar.itemSavedItemsModels.where().deleteAll();
+      });
+    }
+    
+    final appSettings = AppSettingsModel.fromStorage();
+    appSettings.lastItemsSyncTime = 0;
+    if (Get.isRegistered<UserController>()) {
+      appSettings.syncedCompanyId = Get.find<UserController>().user.value?.company ?? "";
+    }
+    appSettings.saveToStorage();
+
+    loadCategoriesAsync();
+    syncCartItemsOnBackground(page: 1);
+    loadTaxes();
+    loadDiscounts();
+    loadCustomers();
+    loadShifts();
+    loadMofiers();
+    loadReceits();
   }
 }

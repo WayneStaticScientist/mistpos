@@ -305,20 +305,39 @@ class DevicesController extends GetxController {
     if (isar == null || user == null) {
       return;
     }
-    final device = isar.printerDeviceModels
-        .where()
-        .sortByIsConnected()
-        .findFirst();
-    if (device != null) {
-      await printer.registerDevice(
-        PosPrinterRole.cashier,
-        PrinterDevice(
-          id: user.hexId,
-          name: user.fullName,
-          type: PrinterType.bluetooth,
-          address: device.address,
-        ),
-      );
+    final model = AppSettingsModel.fromStorage();
+    if (model.printToMultiplePrinters) {
+      final devices =
+          isar.printerDeviceModels.where().sortByIsConnected().findAll();
+      for (final device in devices) {
+        await printer.registerDevice(
+          PosPrinterRole.cashier,
+          PrinterDevice(
+            id: device.id.toString(),
+            name: device.name,
+            type: device.port == 0 ? PrinterType.bluetooth : PrinterType.tcp,
+            address: device.address,
+            port: device.port,
+          ),
+        );
+      }
+    } else {
+      final device = isar.printerDeviceModels
+          .where()
+          .sortByIsConnected()
+          .findFirst();
+      if (device != null) {
+        await printer.registerDevice(
+          PosPrinterRole.cashier,
+          PrinterDevice(
+            id: user.hexId,
+            name: user.fullName,
+            type: device.port == 0 ? PrinterType.bluetooth : PrinterType.tcp,
+            address: device.address,
+            port: device.port,
+          ),
+        );
+      }
     }
   }
 

@@ -31,7 +31,8 @@ import 'package:mistpos/features/sales/widgets/sales_categories_list.dart';
 import 'package:flutter_barcode_scanner_plus/flutter_barcode_scanner_plus.dart';
 
 class NavSale extends StatefulWidget {
-  const NavSale({super.key});
+  final GlobalKey<ScaffoldState>? scaffoldKey;
+  const NavSale({super.key, this.scaffoldKey});
 
   @override
   State<NavSale> createState() => _NavSaleState();
@@ -128,57 +129,58 @@ class _NavSaleState extends State<NavSale> {
                     THE APP TOB BAR
                 ==================================================================================
                 */
-                SalesAppBar(),
+                SalesAppBar(scaffoldKey: widget.scaffoldKey),
                 /*
               ==============================================================================
               THE SAVED ITEMS LISTS
               ==============================================================================            
               */
                 SliverToBoxAdapter(
-                  child:
-                      [
-                            Expanded(
-                              child: MistSearchField(
-                                controller: _searchController,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+                    child: Row(
+                      children: [
+                        // Search field
+                        Expanded(
+                          child: MistSearchField(
+                            controller: _searchController,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        // Scan button — blended, modern
+                        GestureDetector(
+                          onTapUp: (e) => scanItem(e),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            key: _scanKey,
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              color: Get.theme.colorScheme.primary,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Get.theme.colorScheme.primary
+                                      .withAlpha(60),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Iconify(
+                                Bx.barcode_reader,
+                                color: Colors.white,
+                                size: 22,
                               ),
                             ),
-                            12.gapWidth,
-                            Iconify(
-                                  key: _scanKey,
-                                  Bx.barcode_reader,
-                                  color: Colors.white,
-                                )
-                                .padding(
-                                  EdgeInsets.symmetric(
-                                    horizontal: 18,
-                                    vertical: 14,
-                                  ),
-                                )
-                                .decoratedBox(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(16),
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Get.theme.colorScheme.primary,
-                                        Get.theme.colorScheme.primary.withAlpha(200),
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Get.theme.colorScheme.primary.withAlpha(80),
-                                        blurRadius: 8,
-                                        offset: Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                          ]
-                          .row()
-                          .padding(EdgeInsets.all(18))
-                          .onTapUp((e) => scanItem(e)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
+
 
                 if (!_inSearchMode)
                   Obx(
@@ -221,7 +223,7 @@ class _NavSaleState extends State<NavSale> {
                 Obx(
                   () =>
                       _itemsListController.selectedShift.value == null &&
-                          model.prioritizeShift
+                          (_invController.company.value?.shiftBasedSales ?? false)
                       ? _makeShifts()
                       : _buidItemList(),
                 ),

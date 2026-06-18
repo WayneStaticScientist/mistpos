@@ -13,6 +13,9 @@ class AppSettingsModel {
   String receitLogoPath;
   bool useGridViewForItems;
   bool hasAlertedAboutFreeVersion = false;
+  bool printToMultiplePrinters = false;
+  int lastItemsSyncTime = 0;
+  String syncedCompanyId;
   AppSettingsModel({
     required this.externalBarCodeEnabled,
     required this.useSystemDarkMode,
@@ -25,6 +28,9 @@ class AppSettingsModel {
     this.prioritizeShift = true,
     this.useGridViewForItems = false,
     this.hasAlertedAboutFreeVersion = false,
+    this.printToMultiplePrinters = false,
+    this.lastItemsSyncTime = 0,
+    this.syncedCompanyId = "",
   });
   factory AppSettingsModel.fromJson(Map<String, dynamic> json) =>
       AppSettingsModel(
@@ -43,6 +49,9 @@ class AppSettingsModel {
         prioritizeShift: json["prioritizeShift"] ?? true,
         useGridViewForItems: json["useGridViewForItems"] ?? false,
         hasAlertedAboutFreeVersion: json["hasAlertedAboutFreeVersion"] ?? false,
+        printToMultiplePrinters: json["printToMultiplePrinters"] ?? false,
+        lastItemsSyncTime: json["lastItemsSyncTime"] ?? 0,
+        syncedCompanyId: json["syncedCompanyId"] ?? "",
       );
   Map<String, dynamic> toJson() => {
     "darkMode": darkMode,
@@ -56,6 +65,9 @@ class AppSettingsModel {
     "extras": extras.map((e) => e.toJson()).toList(),
     "externalBarCodeEnabled": externalBarCodeEnabled,
     "hasAlertedAboutFreeVersion": hasAlertedAboutFreeVersion,
+    "printToMultiplePrinters": printToMultiplePrinters,
+    "lastItemsSyncTime": lastItemsSyncTime,
+    "syncedCompanyId": syncedCompanyId,
   };
   static AppSettingsModel fromStorage() {
     GetStorage box = GetStorage();

@@ -22,6 +22,7 @@ import 'package:mistpos/core/widgets/loaders/small_loader.dart';
 import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:mistpos/features/auth/screens/screen_user_profile.dart';
 import 'package:mistpos/features/settings/screens/screen_receit_designer.dart';
+import 'package:mistpos/features/inventory/controllers/items_controller.dart';
 
 class ScreenSettingsPage extends StatefulWidget {
   const ScreenSettingsPage({super.key});
@@ -115,12 +116,12 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
           ),
           24.gapColumn,
           MistMordernLayout(
-            label: "Receits",
+            label: "Receipts",
             children: [
               ListTile(
                 onTap: () => _changeSize(model.printerRecietLength),
                 contentPadding: EdgeInsets.all(0),
-                title: Text("Printer Receit Length"),
+                title: Text("Printer Receipt Length"),
                 subtitle: "${model.printerRecietLength} units".text(
                   style: TextStyle(color: Colors.grey, fontSize: 12),
                 ),
@@ -142,14 +143,14 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                   },
                 ),
                 leading: Iconify(Bx.qr_scan, color: AppTheme.color(context)),
-                title: "Print Receit Qr Code".text(),
-                subtitle: "enable qrcode scanning of receits".text(
+                title: "Print Receipt Qr Code".text(),
+                subtitle: "enable qrcode scanning of receipts".text(
                   style: TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ),
               ListTile(
                 onTap: _pickImage,
-                title: "Receit Logo".text(),
+                title: "Receipt Logo".text(),
                 contentPadding: EdgeInsets.all(0),
                 leading: Iconify(Bx.camera, color: AppTheme.color(context)),
                 trailing: model.receitLogoPath.isEmpty
@@ -168,7 +169,7 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
               ),
               ListTile(
                 onTap: () => Get.to(() => ScreenReceiptDesigner()),
-                title: "Receit Design".text(),
+                title: "Receipt Design".text(),
                 contentPadding: EdgeInsets.all(0),
                 leading: Iconify(Bx.receipt, color: AppTheme.color(context)),
               ).visibleIf(
@@ -229,6 +230,12 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                                             .value
                                             ?.autoApproveAllExpenses ??
                                         false,
+                                    shiftBasedSales:
+                                        _invController
+                                            .company
+                                            .value
+                                            ?.shiftBasedSales ??
+                                        false,
                                   );
                                 },
                               ),
@@ -244,6 +251,9 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                                 .company
                                 .value
                                 ?.autoApproveAllExpenses ??
+                            false,
+                        shiftBasedSales:
+                            _invController.company.value?.shiftBasedSales ??
                             false,
                       ),
                       contentPadding: EdgeInsets.all(0),
@@ -284,9 +294,56 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                 ),
                 leading: Iconify(Bx.grid, color: AppTheme.color(context)),
                 title: "Use Grid View for Items".text(),
-                subtitle: "Toggle between grid and list view for products in sales screen".text(
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                subtitle:
+                    "Toggle between grid and list view for products in sales screen"
+                        .text(
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
+              ),
+            ],
+          ),
+          24.gapColumn,
+          MistMordernLayout(
+            label: "Data & Synchronization",
+            children: [
+              ListTile(
+                contentPadding: EdgeInsets.all(0),
+                onTap: () {
+                  Get.defaultDialog(
+                    title: "Force Sync",
+                    content:
+                        "This will clear your local offline cache and download all items, categories, and settings from the server. Are you sure?"
+                            .text(textAlign: TextAlign.center),
+                    actions: [
+                      "Cancel".text().textButton(onPressed: () => Get.back()),
+                      "Sync Now".text().textButton(
+                        onPressed: () {
+                          Get.back();
+                          if (Get.isRegistered<ItemsController>()) {
+                            Get.find<ItemsController>().clearAndResyncData();
+                            Toaster.showSuccess(
+                              "Cache cleared. Syncing started in background.",
+                            );
+                          } else {
+                            Toaster.showError(
+                              "Failed to access items controller.",
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  );
+                },
+                leading: Iconify(
+                  Bx.cloud_download,
+                  color: AppTheme.color(context),
                 ),
+                title: "Force Sync / Clear Cache".text(),
+                subtitle:
+                    "Manually clear offline cache and re-download store data"
+                        .text(
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
               ),
             ],
           ),
@@ -321,6 +378,12 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                                             .value
                                             ?.autoApproveAllExpenses ??
                                         false,
+                                    shiftBasedSales:
+                                        _invController
+                                            .company
+                                            .value
+                                            ?.shiftBasedSales ??
+                                        false,
                                   );
                                 },
                               ),
@@ -336,6 +399,9 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                                 .value
                                 ?.autoApproveAllExpenses ??
                             false),
+                        shiftBasedSales:
+                            _invController.company.value?.shiftBasedSales ??
+                            false,
                       ),
                       contentPadding: EdgeInsets.all(0),
                       title: "Enable Credit Sale".text(),
@@ -372,6 +438,12 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                                             ?.enableCreditSale ??
                                         true),
                                     autoApproveAllExpenses: c,
+                                    shiftBasedSales:
+                                        _invController
+                                            .company
+                                            .value
+                                            ?.shiftBasedSales ??
+                                        false,
                                   );
                                 },
                               ),
@@ -387,6 +459,9 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                                     .value
                                     ?.autoApproveAllExpenses ??
                                 true),
+                        shiftBasedSales:
+                            _invController.company.value?.shiftBasedSales ??
+                            false,
                       ),
                       contentPadding: EdgeInsets.all(0),
                       title: "AutoApprove All Expenses".text(),
@@ -398,6 +473,63 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                         Bx.credit_card,
                         color: AppTheme.color(context),
                       ),
+                    ),
+                    ListTile(
+                      trailing: Obx(
+                        () => _adminController.companyLoading.value
+                            ? CircularProgressIndicator()
+                            : Switch(
+                                value:
+                                    _invController
+                                        .company
+                                        .value
+                                        ?.shiftBasedSales ??
+                                    false,
+                                onChanged: (c) {
+                                  _updateCompanyModel(
+                                    _invController
+                                            .company
+                                            .value
+                                            ?.showSalesCount ??
+                                        false,
+                                    enableCreditSale:
+                                        (_invController
+                                            .company
+                                            .value
+                                            ?.enableCreditSale ??
+                                        true),
+                                    autoApproveAllExpenses:
+                                        _invController
+                                            .company
+                                            .value
+                                            ?.autoApproveAllExpenses ??
+                                        false,
+                                    shiftBasedSales: c,
+                                  );
+                                },
+                              ),
+                      ),
+                      onTap: () => _updateCompanyModel(
+                        _invController.company.value?.showSalesCount ?? false,
+                        enableCreditSale:
+                            (_invController.company.value?.enableCreditSale ??
+                            true),
+                        autoApproveAllExpenses:
+                            (_invController
+                                .company
+                                .value
+                                ?.autoApproveAllExpenses ??
+                            false),
+                        shiftBasedSales:
+                            !(_invController.company.value?.shiftBasedSales ??
+                                false),
+                      ),
+                      contentPadding: EdgeInsets.all(0),
+                      title: "Enable Shift Based Sales".text(),
+                      subtitle: "enforce opening shifts to sell items".text(
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
+                      leading: Iconify(Bx.time, color: AppTheme.color(context)),
                     ),
                     ListTile(
                       subtitle: "send daily reports to whatsapp".text(
@@ -464,7 +596,7 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
     final model = AppSettingsModel.fromStorage();
     final sizeController = TextEditingController(text: size.toString());
     Get.defaultDialog(
-      title: "Printer Receit Length",
+      title: "Printer Receipt Length",
       content: MistFormInput(
         label: "size",
         controller: sizeController,
@@ -574,6 +706,7 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
     bool bool, {
     required bool enableCreditSale,
     required bool autoApproveAllExpenses,
+    required bool shiftBasedSales,
   }) async {
     final company = _invController.company.value;
     if (company == null) {
@@ -583,6 +716,7 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
     company.showSalesCount = bool;
     company.enableCreditSale = enableCreditSale;
     company.autoApproveAllExpenses = autoApproveAllExpenses;
+    company.shiftBasedSales = shiftBasedSales;
     final response = await _adminController.updateCompany(
       company.toJson(),
       company.hexId,

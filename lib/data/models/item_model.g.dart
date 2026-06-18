@@ -42,6 +42,7 @@ final ItemModelSchema = IsarGeneratedSchema(
       IsarPropertySchema(name: 'useProduction', type: IsarType.bool),
       IsarPropertySchema(name: 'isCompositeItem', type: IsarType.bool),
       IsarPropertySchema(name: 'isForSale', type: IsarType.bool),
+      IsarPropertySchema(name: 'isDeleted', type: IsarType.bool),
       IsarPropertySchema(
         name: 'compositeItems',
         type: IsarType.objectList,
@@ -107,9 +108,10 @@ int serializeItemModel(IsarWriter writer, ItemModel object) {
   IsarCore.writeBool(writer, 20, value: object.useProduction);
   IsarCore.writeBool(writer, 21, value: object.isCompositeItem);
   IsarCore.writeBool(writer, 22, value: object.isForSale);
+  IsarCore.writeBool(writer, 23, value: object.isDeleted);
   {
     final list = object.compositeItems;
-    final listWriter = IsarCore.beginList(writer, 23, list.length);
+    final listWriter = IsarCore.beginList(writer, 24, list.length);
     for (var i = 0; i < list.length; i++) {
       {
         final value = list[i];
@@ -211,9 +213,11 @@ ItemModel deserializeItemModel(IsarReader reader) {
       _isForSale = IsarCore.readBool(reader, 22);
     }
   }
+  final bool _isDeleted;
+  _isDeleted = IsarCore.readBool(reader, 23);
   final List<InvItem> _compositeItems;
   {
-    final length = IsarCore.readList(reader, 23, IsarCore.readerPtrPtr);
+    final length = IsarCore.readList(reader, 24, IsarCore.readerPtrPtr);
     {
       final reader = IsarCore.readerPtr;
       if (reader.isNull) {
@@ -260,6 +264,7 @@ ItemModel deserializeItemModel(IsarReader reader) {
     useProduction: _useProduction,
     isCompositeItem: _isCompositeItem,
     isForSale: _isForSale,
+    isDeleted: _isDeleted,
     compositeItems: _compositeItems,
   );
   object.id = IsarCore.readId(reader);
@@ -358,8 +363,10 @@ dynamic deserializeItemModelProp(IsarReader reader, int property) {
         }
       }
     case 23:
+      return IsarCore.readBool(reader, 23);
+    case 24:
       {
-        final length = IsarCore.readList(reader, 23, IsarCore.readerPtrPtr);
+        final length = IsarCore.readList(reader, 24, IsarCore.readerPtrPtr);
         {
           final reader = IsarCore.readerPtr;
           if (reader.isNull) {
@@ -416,6 +423,7 @@ sealed class _ItemModelUpdate {
     bool? useProduction,
     bool? isCompositeItem,
     bool? isForSale,
+    bool? isDeleted,
   });
 }
 
@@ -448,6 +456,7 @@ class _ItemModelUpdateImpl implements _ItemModelUpdate {
     Object? useProduction = ignore,
     Object? isCompositeItem = ignore,
     Object? isForSale = ignore,
+    Object? isDeleted = ignore,
   }) {
     return collection.updateProperties(
           [id],
@@ -473,6 +482,7 @@ class _ItemModelUpdateImpl implements _ItemModelUpdate {
             if (useProduction != ignore) 20: useProduction as bool?,
             if (isCompositeItem != ignore) 21: isCompositeItem as bool?,
             if (isForSale != ignore) 22: isForSale as bool?,
+            if (isDeleted != ignore) 23: isDeleted as bool?,
           },
         ) >
         0;
@@ -503,6 +513,7 @@ sealed class _ItemModelUpdateAll {
     bool? useProduction,
     bool? isCompositeItem,
     bool? isForSale,
+    bool? isDeleted,
   });
 }
 
@@ -535,6 +546,7 @@ class _ItemModelUpdateAllImpl implements _ItemModelUpdateAll {
     Object? useProduction = ignore,
     Object? isCompositeItem = ignore,
     Object? isForSale = ignore,
+    Object? isDeleted = ignore,
   }) {
     return collection.updateProperties(id, {
       if (sku != ignore) 1: sku as String?,
@@ -558,6 +570,7 @@ class _ItemModelUpdateAllImpl implements _ItemModelUpdateAll {
       if (useProduction != ignore) 20: useProduction as bool?,
       if (isCompositeItem != ignore) 21: isCompositeItem as bool?,
       if (isForSale != ignore) 22: isForSale as bool?,
+      if (isDeleted != ignore) 23: isDeleted as bool?,
     });
   }
 }
@@ -591,6 +604,7 @@ sealed class _ItemModelQueryUpdate {
     bool? useProduction,
     bool? isCompositeItem,
     bool? isForSale,
+    bool? isDeleted,
   });
 }
 
@@ -623,6 +637,7 @@ class _ItemModelQueryUpdateImpl implements _ItemModelQueryUpdate {
     Object? useProduction = ignore,
     Object? isCompositeItem = ignore,
     Object? isForSale = ignore,
+    Object? isDeleted = ignore,
   }) {
     return query.updateProperties(limit: limit, {
       if (sku != ignore) 1: sku as String?,
@@ -646,6 +661,7 @@ class _ItemModelQueryUpdateImpl implements _ItemModelQueryUpdate {
       if (useProduction != ignore) 20: useProduction as bool?,
       if (isCompositeItem != ignore) 21: isCompositeItem as bool?,
       if (isForSale != ignore) 22: isForSale as bool?,
+      if (isDeleted != ignore) 23: isDeleted as bool?,
     });
   }
 }
@@ -686,6 +702,7 @@ class _ItemModelQueryBuilderUpdateImpl implements _ItemModelQueryUpdate {
     Object? useProduction = ignore,
     Object? isCompositeItem = ignore,
     Object? isForSale = ignore,
+    Object? isDeleted = ignore,
   }) {
     final q = query.build();
     try {
@@ -711,6 +728,7 @@ class _ItemModelQueryBuilderUpdateImpl implements _ItemModelQueryUpdate {
         if (useProduction != ignore) 20: useProduction as bool?,
         if (isCompositeItem != ignore) 21: isCompositeItem as bool?,
         if (isForSale != ignore) 22: isForSale as bool?,
+        if (isDeleted != ignore) 23: isDeleted as bool?,
       });
     } finally {
       q.close();
@@ -2805,6 +2823,16 @@ extension ItemModelQueryFilter
     });
   }
 
+  QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition> isDeletedEqualTo(
+    bool value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 23, value: value),
+      );
+    });
+  }
+
   QueryBuilder<ItemModel, ItemModel, QAfterFilterCondition>
   compositeItemsIsEmpty() {
     return not().compositeItemsIsNotEmpty();
@@ -2814,7 +2842,7 @@ extension ItemModelQueryFilter
   compositeItemsIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterOrEqualCondition(property: 23, value: null),
+        const GreaterOrEqualCondition(property: 24, value: null),
       );
     });
   }
@@ -3121,6 +3149,18 @@ extension ItemModelQuerySortBy on QueryBuilder<ItemModel, ItemModel, QSortBy> {
       return query.addSortBy(22, sort: Sort.desc);
     });
   }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(23);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> sortByIsDeletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(23, sort: Sort.desc);
+    });
+  }
 }
 
 extension ItemModelQuerySortThenBy
@@ -3422,6 +3462,18 @@ extension ItemModelQuerySortThenBy
       return query.addSortBy(22, sort: Sort.desc);
     });
   }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(23);
+    });
+  }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterSortBy> thenByIsDeletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(23, sort: Sort.desc);
+    });
+  }
 }
 
 extension ItemModelQueryWhereDistinct
@@ -3577,6 +3629,12 @@ extension ItemModelQueryWhereDistinct
       return query.addDistinctBy(22);
     });
   }
+
+  QueryBuilder<ItemModel, ItemModel, QAfterDistinct> distinctByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(23);
+    });
+  }
 }
 
 extension ItemModelQueryProperty1
@@ -3719,10 +3777,16 @@ extension ItemModelQueryProperty1
     });
   }
 
+  QueryBuilder<ItemModel, bool, QAfterProperty> isDeletedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(23);
+    });
+  }
+
   QueryBuilder<ItemModel, List<InvItem>, QAfterProperty>
   compositeItemsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(23);
+      return query.addProperty(24);
     });
   }
 }
@@ -3871,10 +3935,16 @@ extension ItemModelQueryProperty2<R>
     });
   }
 
+  QueryBuilder<ItemModel, (R, bool), QAfterProperty> isDeletedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(23);
+    });
+  }
+
   QueryBuilder<ItemModel, (R, List<InvItem>), QAfterProperty>
   compositeItemsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(23);
+      return query.addProperty(24);
     });
   }
 }
@@ -4025,10 +4095,16 @@ extension ItemModelQueryProperty3<R1, R2>
     });
   }
 
+  QueryBuilder<ItemModel, (R1, R2, bool), QOperations> isDeletedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(23);
+    });
+  }
+
   QueryBuilder<ItemModel, (R1, R2, List<InvItem>), QOperations>
   compositeItemsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(23);
+      return query.addProperty(24);
     });
   }
 }

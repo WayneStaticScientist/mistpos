@@ -13,12 +13,16 @@ class ScreenWebSubscription extends StatefulWidget {
   final String title;
   final String subKey;
   final double amount;
+  final int durationMonths;
+  final String? type;
   const ScreenWebSubscription({
     super.key,
     required this.mobilePaymentInfo,
     required this.title,
     required this.subKey,
     required this.amount,
+    required this.durationMonths,
+    this.type,
   });
 
   @override
@@ -67,6 +71,8 @@ class _ScreenWebSubscriptionState extends State<ScreenWebSubscription> {
       widget.mobilePaymentInfo,
       widget.amount,
       widget.subKey,
+      durationMonths: widget.durationMonths,
+      type: widget.type,
     );
     if (response.returnUrl == null ||
         response.redirectUrl == null ||

@@ -41,6 +41,19 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
   String _debounceCache = "";
   bool _savingReceit = false;
 
+  String _selectedPaymentMethod = "Cash";
+  final List<Map<String, dynamic>> _paymentMethods = [
+    {"name": "Cash", "color": Colors.green.shade600, "icon": Icons.payments},
+    {"name": "EcoCash", "color": const Color(0xFF0078C1), "icon": Icons.phone_android},
+    {"name": "InBucks", "color": Colors.teal.shade600, "icon": Icons.phone_iphone},
+    {"name": "OneMoney", "color": Colors.orange.shade800, "icon": Icons.mobile_friendly},
+    {"name": "Telecash", "color": Colors.red.shade600, "icon": Icons.send_to_mobile},
+    {"name": "ZimSwitch", "color": const Color(0xFF1B3A68), "icon": Icons.credit_card},
+    {"name": "Visa", "color": const Color(0xFF1A1F71), "icon": Icons.credit_card},
+    {"name": "MasterCard", "color": const Color(0xFFEB001B), "icon": Icons.credit_card},
+    {"name": "Bank Transfer", "color": Colors.deepPurple, "icon": Icons.account_balance},
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -56,9 +69,17 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF8F9FA),
       appBar: AppBar(
-        title: "Payment Summary".text(),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        title: "Checkout".text(
+          style: const TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.5),
+        ),
         actions: [
           IconButton(
             onPressed: _cancelPayment,
@@ -77,35 +98,215 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
         ],
       ),
       body: SingleChildScrollView(
-        child:
-            [
-              "Amount to Pay".text(
-                style: Get.textTheme.titleMedium?.copyWith(color: Colors.grey),
-              ),
-              CurrenceConverter.getCurrenceFloatInStrings(
-                _itemsListController.totalPrice.value,
-                _userController.user.value?.baseCurrence ?? '',
-              ).text(
-                style: TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  color: Get.theme.colorScheme.primary,
+        child: Column(
+          children: [
+            _buildTotalSummaryCard(isDark),
+            24.gapHeight,
+            _buildPaymentMethodsCard(isDark),
+            24.gapHeight,
+            _buildTenderedCard(isDark),
+            12.gapHeight,
+            _buildBalanceDisplay(),
+            40.gapHeight,
+          ],
+        ).padding(const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
+      ),
+      bottomNavigationBar: _buildBottomActions(),
+    );
+  }
+
+  Widget _buildTotalSummaryCard(bool isDark) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Get.theme.colorScheme.primary,
+            Get.theme.colorScheme.primary.withAlpha(200),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Get.theme.colorScheme.primary.withAlpha(80),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          "TOTAL AMOUNT TO PAY".text(
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
+            ),
+          ),
+          12.gapHeight,
+          CurrenceConverter.getCurrenceFloatInStrings(
+            _itemsListController.totalPrice.value,
+            _userController.user.value?.baseCurrence ?? '',
+          ).text(
+            style: const TextStyle(
+              fontSize: 48,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+              letterSpacing: -1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentMethodsCard(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        "PAYMENT METHOD".text(
+          style: TextStyle(
+            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+          ),
+        ).padding(const EdgeInsets.only(left: 8, bottom: 16)),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.1,
+          ),
+          itemCount: _paymentMethods.length,
+          itemBuilder: (context, index) {
+            final method = _paymentMethods[index];
+            final name = method['name'] as String;
+            final color = method['color'] as Color;
+            final icon = method['icon'] as IconData;
+            final isSelected = _selectedPaymentMethod == name;
+            
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedPaymentMethod = name;
+                  if (name != "Cash") {
+                    _amountController.text = CurrenceConverter.prevailingAmount(
+                      _itemsListController.totalPrice.value,
+                      _userController.user.value?.baseCurrence ?? '',
+                    ).toString();
+                    _debounceCache = ""; 
+                  }
+                });
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                  color: isSelected ? color.withAlpha(20) : (isDark ? const Color(0xFF1E1E1E) : Colors.white),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isSelected ? color : (isDark ? Colors.grey.shade800 : Colors.grey.shade300),
+                    width: isSelected ? 2 : 1,
+                  ),
+                  boxShadow: isSelected ? [
+                    BoxShadow(
+                      color: color.withAlpha(40),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    )
+                  ] : [],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      icon,
+                      color: isSelected ? color : (isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+                      size: 28,
+                    ),
+                    8.gapHeight,
+                    Text(
+                      name,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: isSelected ? color : (isDark ? Colors.grey.shade300 : Colors.grey.shade700),
+                        fontSize: 12,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              24.gapHeight,
-              MistFormInput(
-                label: "Amount Tendered",
-                controller: _amountController,
-                keyboardType: TextInputType.number,
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTenderedCard(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        "AMOUNT TENDERED".text(
+          style: TextStyle(
+            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+          ),
+        ).padding(const EdgeInsets.only(left: 8, bottom: 12)),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: isDark ? Colors.grey.shade800 : Colors.grey.shade300),
+            boxShadow: [
+              if (!isDark)
+                BoxShadow(
+                  color: Colors.black.withAlpha(5),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Text(
+                _userController.user.value?.baseCurrence ?? '\$',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+                ),
               ),
-              24.gapHeight,
-              _buildBalanceDisplay(),
-            ].column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-            ),
-      ).center().padding(const EdgeInsets.all(30)),
-      bottomNavigationBar: _buildBottomActions(),
+              16.gapWidth,
+              Expanded(
+                child: TextFormField(
+                  controller: _amountController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -113,22 +314,23 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
   Widget _buildBalanceDisplay() {
     if (change < 0.0) {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.red.withAlpha(30),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.red.withAlpha(80)),
+          color: Colors.red.withAlpha(20),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.red.withAlpha(60)),
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, color: Colors.red, size: 20),
-            8.gapWidth,
+            const Icon(Icons.error_outline, color: Colors.red, size: 28),
+            12.gapWidth,
             "Insufficient Funds".text(
               style: const TextStyle(
                 color: Colors.red,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
               ),
             ),
           ],
@@ -136,83 +338,158 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
       );
     }
 
-    return Column(
-      children: [
-        "Change Due".text(
-          style: Get.textTheme.bodySmall?.copyWith(letterSpacing: 1.2),
-        ),
-        CurrenceConverter.getCurrenceFloatInStrings(
-          change,
-          _userController.user.value?.baseCurrence ?? '',
-        ).text(
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
-            color: Colors.green,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.green.withAlpha(20),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.green.withAlpha(60)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.check_circle_outline, color: Colors.green, size: 28),
+          12.gapWidth,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              "Change Due".text(
+                style: const TextStyle(
+                  color: Colors.green,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
+              ),
+              CurrenceConverter.getCurrenceFloatInStrings(
+                change,
+                _userController.user.value?.baseCurrence ?? '',
+              ).text(
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.green,
+                ),
+              ),
+            ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   /// Modern dual-button action bar
   Widget _buildBottomActions() {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
-          children: [
-            // Pay on Credit Button
-            Expanded(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Container(
+      padding: const EdgeInsets.only(left: 24, right: 24, bottom: 32, top: 20),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(10),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
+        ],
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+      ),
+      child: Row(
+        children: [
+          // Pay on Credit Button
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.orange.withAlpha(20),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: Colors.orange.shade600, width: 2),
+              ),
               child: OutlinedButton.icon(
                 onPressed: _payOnCredit,
-                icon: const Iconify(Carbon.user_avatar, color: Colors.orange),
-                label: "Credit".text(),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  side: const BorderSide(color: Colors.orange, width: 1.5),
-                  foregroundColor: Colors.orange,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                icon: Icon(Icons.assignment_ind_outlined, color: Colors.orange.shade700, size: 20),
+                label: const Text(
+                  "Credit",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.orange,
                   ),
                 ),
-              ),
-            ).visibleIf(_invController.company.value?.enableCreditSale ?? true),
-            const SizedBox(width: 16),
-            // Pay Now Button (Primary)
-            Expanded(
-              flex: 2,
-              child: ElevatedButton.icon(
-                onPressed: _pay,
-                icon: _savingReceit
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : const Iconify(
-                        Carbon.checkmark_filled,
-                        color: Colors.white,
-                      ),
-                label: "Pay Now".text(),
-                style: ElevatedButton.styleFrom(
+                style: OutlinedButton.styleFrom(
                   elevation: 0,
+                  backgroundColor: Colors.transparent,
+                  side: BorderSide.none,
                   padding: const EdgeInsets.symmetric(vertical: 20),
-                  backgroundColor: change >= 0.0
-                      ? Get.theme.colorScheme.primary
-                      : Colors.grey.shade400,
-                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(18),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ).visibleIf(_invController.company.value?.enableCreditSale ?? true),
+          const SizedBox(width: 16),
+          // Pay Now Button (Primary)
+          Expanded(
+            flex: 2,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: change >= 0.0 ? [
+                    Get.theme.colorScheme.primary,
+                    Get.theme.colorScheme.primary.withAlpha(200),
+                  ] : [
+                    Colors.grey.shade600,
+                    Colors.grey.shade500,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  if (change >= 0.0)
+                    BoxShadow(
+                      color: Get.theme.colorScheme.primary.withAlpha(80),
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
+                    ),
+                ],
+              ),
+              child: ElevatedButton.icon(
+                onPressed: _pay,
+                icon: _savingReceit
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.5,
+                        ),
+                      )
+                    : const Icon(Icons.check_circle_outline, color: Colors.white, size: 22),
+                label: const Text(
+                  "CONFIRM PAYMENT",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.white,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  elevation: 0,
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -326,7 +603,7 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
       _userController.user.value?.baseCurrence ?? '',
     );
 
-    if (amount < total) {
+    if (amount < total && !creditPayment) {
       Toaster.showError("Insufficient funds for cash payment");
       return;
     }
@@ -341,7 +618,7 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
 
     final state = await _itemsListController.addReceitFromItemModel(
       CurrenceConverter.baseCurrency(amount),
-      "cash",
+      _selectedPaymentMethod,
       creditPayment: creditPayment,
       allowOfflinePurchase:
           _userController.user.value?.allowOfflinePurchase ?? false,

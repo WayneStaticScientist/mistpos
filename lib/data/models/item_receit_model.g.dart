@@ -27,6 +27,7 @@ final ItemReceitModelSchema = IsarGeneratedSchema(
       IsarPropertySchema(name: 'creditSale', type: IsarType.bool),
       IsarPropertySchema(name: 'tax', type: IsarType.double),
       IsarPropertySchema(name: 'amount', type: IsarType.double),
+      IsarPropertySchema(name: 'currentAmountPayed', type: IsarType.double),
       IsarPropertySchema(name: 'total', type: IsarType.double),
       IsarPropertySchema(name: 'synced', type: IsarType.bool),
       IsarPropertySchema(name: 'createdAt', type: IsarType.dateTime),
@@ -71,26 +72,27 @@ int serializeItemReceitModel(IsarWriter writer, ItemReceitModel object) {
   IsarCore.writeBool(writer, 4, value: object.creditSale);
   IsarCore.writeDouble(writer, 5, object.tax);
   IsarCore.writeDouble(writer, 6, object.amount);
-  IsarCore.writeDouble(writer, 7, object.total);
-  IsarCore.writeBool(writer, 8, value: object.synced);
+  IsarCore.writeDouble(writer, 7, object.currentAmountPayed);
+  IsarCore.writeDouble(writer, 8, object.total);
+  IsarCore.writeBool(writer, 9, value: object.synced);
   IsarCore.writeLong(
     writer,
-    9,
+    10,
     object.createdAt.toUtc().microsecondsSinceEpoch,
   );
-  IsarCore.writeString(writer, 10, object.hexId);
+  IsarCore.writeString(writer, 11, object.hexId);
   {
     final value = object.customerId;
     if (value == null) {
-      IsarCore.writeNull(writer, 11);
+      IsarCore.writeNull(writer, 12);
     } else {
-      IsarCore.writeString(writer, 11, value);
+      IsarCore.writeString(writer, 12, value);
     }
   }
-  IsarCore.writeString(writer, 12, object.label);
+  IsarCore.writeString(writer, 13, object.label);
   {
     final list = object.miniTax;
-    final listWriter = IsarCore.beginList(writer, 13, list.length);
+    final listWriter = IsarCore.beginList(writer, 14, list.length);
     for (var i = 0; i < list.length; i++) {
       {
         final value = list[i];
@@ -103,7 +105,7 @@ int serializeItemReceitModel(IsarWriter writer, ItemReceitModel object) {
   }
   {
     final list = object.items;
-    final listWriter = IsarCore.beginList(writer, 14, list.length);
+    final listWriter = IsarCore.beginList(writer, 15, list.length);
     for (var i = 0; i < list.length; i++) {
       {
         final value = list[i];
@@ -116,7 +118,7 @@ int serializeItemReceitModel(IsarWriter writer, ItemReceitModel object) {
   }
   {
     final list = object.discounts;
-    final listWriter = IsarCore.beginList(writer, 15, list.length);
+    final listWriter = IsarCore.beginList(writer, 16, list.length);
     for (var i = 0; i < list.length; i++) {
       {
         final value = list[i];
@@ -151,13 +153,22 @@ ItemReceitModel deserializeItemReceitModel(IsarReader reader) {
   }
   final double _amount;
   _amount = IsarCore.readDouble(reader, 6);
+  final double _currentAmountPayed;
+  {
+    final value = IsarCore.readDouble(reader, 7);
+    if (value.isNaN) {
+      _currentAmountPayed = 0.0;
+    } else {
+      _currentAmountPayed = value;
+    }
+  }
   final double _total;
-  _total = IsarCore.readDouble(reader, 7);
+  _total = IsarCore.readDouble(reader, 8);
   final bool _synced;
-  _synced = IsarCore.readBool(reader, 8);
+  _synced = IsarCore.readBool(reader, 9);
   final DateTime _createdAt;
   {
-    final value = IsarCore.readLong(reader, 9);
+    final value = IsarCore.readLong(reader, 10);
     if (value == -9223372036854775808) {
       _createdAt = DateTime.fromMillisecondsSinceEpoch(
         0,
@@ -171,14 +182,14 @@ ItemReceitModel deserializeItemReceitModel(IsarReader reader) {
     }
   }
   final String _hexId;
-  _hexId = IsarCore.readString(reader, 10) ?? '';
+  _hexId = IsarCore.readString(reader, 11) ?? '';
   final String? _customerId;
-  _customerId = IsarCore.readString(reader, 11);
+  _customerId = IsarCore.readString(reader, 12);
   final String _label;
-  _label = IsarCore.readString(reader, 12) ?? "";
+  _label = IsarCore.readString(reader, 13) ?? "";
   final List<MiniTax> _miniTax;
   {
-    final length = IsarCore.readList(reader, 13, IsarCore.readerPtrPtr);
+    final length = IsarCore.readList(reader, 14, IsarCore.readerPtrPtr);
     {
       final reader = IsarCore.readerPtr;
       if (reader.isNull) {
@@ -204,7 +215,7 @@ ItemReceitModel deserializeItemReceitModel(IsarReader reader) {
   }
   final List<ItemReceitItem> _items;
   {
-    final length = IsarCore.readList(reader, 14, IsarCore.readerPtrPtr);
+    final length = IsarCore.readList(reader, 15, IsarCore.readerPtrPtr);
     {
       final reader = IsarCore.readerPtr;
       if (reader.isNull) {
@@ -234,7 +245,7 @@ ItemReceitModel deserializeItemReceitModel(IsarReader reader) {
   }
   final List<EmbeddedDiscountModel> _discounts;
   {
-    final length = IsarCore.readList(reader, 15, IsarCore.readerPtrPtr);
+    final length = IsarCore.readList(reader, 16, IsarCore.readerPtrPtr);
     {
       final reader = IsarCore.readerPtr;
       if (reader.isNull) {
@@ -269,6 +280,7 @@ ItemReceitModel deserializeItemReceitModel(IsarReader reader) {
     creditSale: _creditSale,
     tax: _tax,
     amount: _amount,
+    currentAmountPayed: _currentAmountPayed,
     total: _total,
     synced: _synced,
     createdAt: _createdAt,
@@ -308,12 +320,21 @@ dynamic deserializeItemReceitModelProp(IsarReader reader, int property) {
     case 6:
       return IsarCore.readDouble(reader, 6);
     case 7:
-      return IsarCore.readDouble(reader, 7);
-    case 8:
-      return IsarCore.readBool(reader, 8);
-    case 9:
       {
-        final value = IsarCore.readLong(reader, 9);
+        final value = IsarCore.readDouble(reader, 7);
+        if (value.isNaN) {
+          return 0.0;
+        } else {
+          return value;
+        }
+      }
+    case 8:
+      return IsarCore.readDouble(reader, 8);
+    case 9:
+      return IsarCore.readBool(reader, 9);
+    case 10:
+      {
+        final value = IsarCore.readLong(reader, 10);
         if (value == -9223372036854775808) {
           return DateTime.fromMillisecondsSinceEpoch(0, isUtc: true).toLocal();
         } else {
@@ -323,15 +344,15 @@ dynamic deserializeItemReceitModelProp(IsarReader reader, int property) {
           ).toLocal();
         }
       }
-    case 10:
-      return IsarCore.readString(reader, 10) ?? '';
     case 11:
-      return IsarCore.readString(reader, 11);
+      return IsarCore.readString(reader, 11) ?? '';
     case 12:
-      return IsarCore.readString(reader, 12) ?? "";
+      return IsarCore.readString(reader, 12);
     case 13:
+      return IsarCore.readString(reader, 13) ?? "";
+    case 14:
       {
-        final length = IsarCore.readList(reader, 13, IsarCore.readerPtrPtr);
+        final length = IsarCore.readList(reader, 14, IsarCore.readerPtrPtr);
         {
           final reader = IsarCore.readerPtr;
           if (reader.isNull) {
@@ -359,9 +380,9 @@ dynamic deserializeItemReceitModelProp(IsarReader reader, int property) {
           }
         }
       }
-    case 14:
+    case 15:
       {
-        final length = IsarCore.readList(reader, 14, IsarCore.readerPtrPtr);
+        final length = IsarCore.readList(reader, 15, IsarCore.readerPtrPtr);
         {
           final reader = IsarCore.readerPtr;
           if (reader.isNull) {
@@ -389,9 +410,9 @@ dynamic deserializeItemReceitModelProp(IsarReader reader, int property) {
           }
         }
       }
-    case 15:
+    case 16:
       {
-        final length = IsarCore.readList(reader, 15, IsarCore.readerPtrPtr);
+        final length = IsarCore.readList(reader, 16, IsarCore.readerPtrPtr);
         {
           final reader = IsarCore.readerPtr;
           if (reader.isNull) {
@@ -435,6 +456,7 @@ sealed class _ItemReceitModelUpdate {
     bool? creditSale,
     double? tax,
     double? amount,
+    double? currentAmountPayed,
     double? total,
     bool? synced,
     DateTime? createdAt,
@@ -458,6 +480,7 @@ class _ItemReceitModelUpdateImpl implements _ItemReceitModelUpdate {
     Object? creditSale = ignore,
     Object? tax = ignore,
     Object? amount = ignore,
+    Object? currentAmountPayed = ignore,
     Object? total = ignore,
     Object? synced = ignore,
     Object? createdAt = ignore,
@@ -474,12 +497,13 @@ class _ItemReceitModelUpdateImpl implements _ItemReceitModelUpdate {
             if (creditSale != ignore) 4: creditSale as bool?,
             if (tax != ignore) 5: tax as double?,
             if (amount != ignore) 6: amount as double?,
-            if (total != ignore) 7: total as double?,
-            if (synced != ignore) 8: synced as bool?,
-            if (createdAt != ignore) 9: createdAt as DateTime?,
-            if (hexId != ignore) 10: hexId as String?,
-            if (customerId != ignore) 11: customerId as String?,
-            if (label != ignore) 12: label as String?,
+            if (currentAmountPayed != ignore) 7: currentAmountPayed as double?,
+            if (total != ignore) 8: total as double?,
+            if (synced != ignore) 9: synced as bool?,
+            if (createdAt != ignore) 10: createdAt as DateTime?,
+            if (hexId != ignore) 11: hexId as String?,
+            if (customerId != ignore) 12: customerId as String?,
+            if (label != ignore) 13: label as String?,
           },
         ) >
         0;
@@ -495,6 +519,7 @@ sealed class _ItemReceitModelUpdateAll {
     bool? creditSale,
     double? tax,
     double? amount,
+    double? currentAmountPayed,
     double? total,
     bool? synced,
     DateTime? createdAt,
@@ -518,6 +543,7 @@ class _ItemReceitModelUpdateAllImpl implements _ItemReceitModelUpdateAll {
     Object? creditSale = ignore,
     Object? tax = ignore,
     Object? amount = ignore,
+    Object? currentAmountPayed = ignore,
     Object? total = ignore,
     Object? synced = ignore,
     Object? createdAt = ignore,
@@ -532,12 +558,13 @@ class _ItemReceitModelUpdateAllImpl implements _ItemReceitModelUpdateAll {
       if (creditSale != ignore) 4: creditSale as bool?,
       if (tax != ignore) 5: tax as double?,
       if (amount != ignore) 6: amount as double?,
-      if (total != ignore) 7: total as double?,
-      if (synced != ignore) 8: synced as bool?,
-      if (createdAt != ignore) 9: createdAt as DateTime?,
-      if (hexId != ignore) 10: hexId as String?,
-      if (customerId != ignore) 11: customerId as String?,
-      if (label != ignore) 12: label as String?,
+      if (currentAmountPayed != ignore) 7: currentAmountPayed as double?,
+      if (total != ignore) 8: total as double?,
+      if (synced != ignore) 9: synced as bool?,
+      if (createdAt != ignore) 10: createdAt as DateTime?,
+      if (hexId != ignore) 11: hexId as String?,
+      if (customerId != ignore) 12: customerId as String?,
+      if (label != ignore) 13: label as String?,
     });
   }
 }
@@ -557,6 +584,7 @@ sealed class _ItemReceitModelQueryUpdate {
     bool? creditSale,
     double? tax,
     double? amount,
+    double? currentAmountPayed,
     double? total,
     bool? synced,
     DateTime? createdAt,
@@ -580,6 +608,7 @@ class _ItemReceitModelQueryUpdateImpl implements _ItemReceitModelQueryUpdate {
     Object? creditSale = ignore,
     Object? tax = ignore,
     Object? amount = ignore,
+    Object? currentAmountPayed = ignore,
     Object? total = ignore,
     Object? synced = ignore,
     Object? createdAt = ignore,
@@ -594,12 +623,13 @@ class _ItemReceitModelQueryUpdateImpl implements _ItemReceitModelQueryUpdate {
       if (creditSale != ignore) 4: creditSale as bool?,
       if (tax != ignore) 5: tax as double?,
       if (amount != ignore) 6: amount as double?,
-      if (total != ignore) 7: total as double?,
-      if (synced != ignore) 8: synced as bool?,
-      if (createdAt != ignore) 9: createdAt as DateTime?,
-      if (hexId != ignore) 10: hexId as String?,
-      if (customerId != ignore) 11: customerId as String?,
-      if (label != ignore) 12: label as String?,
+      if (currentAmountPayed != ignore) 7: currentAmountPayed as double?,
+      if (total != ignore) 8: total as double?,
+      if (synced != ignore) 9: synced as bool?,
+      if (createdAt != ignore) 10: createdAt as DateTime?,
+      if (hexId != ignore) 11: hexId as String?,
+      if (customerId != ignore) 12: customerId as String?,
+      if (label != ignore) 13: label as String?,
     });
   }
 }
@@ -627,6 +657,7 @@ class _ItemReceitModelQueryBuilderUpdateImpl
     Object? creditSale = ignore,
     Object? tax = ignore,
     Object? amount = ignore,
+    Object? currentAmountPayed = ignore,
     Object? total = ignore,
     Object? synced = ignore,
     Object? createdAt = ignore,
@@ -643,12 +674,13 @@ class _ItemReceitModelQueryBuilderUpdateImpl
         if (creditSale != ignore) 4: creditSale as bool?,
         if (tax != ignore) 5: tax as double?,
         if (amount != ignore) 6: amount as double?,
-        if (total != ignore) 7: total as double?,
-        if (synced != ignore) 8: synced as bool?,
-        if (createdAt != ignore) 9: createdAt as DateTime?,
-        if (hexId != ignore) 10: hexId as String?,
-        if (customerId != ignore) 11: customerId as String?,
-        if (label != ignore) 12: label as String?,
+        if (currentAmountPayed != ignore) 7: currentAmountPayed as double?,
+        if (total != ignore) 8: total as double?,
+        if (synced != ignore) 9: synced as bool?,
+        if (createdAt != ignore) 10: createdAt as DateTime?,
+        if (hexId != ignore) 11: hexId as String?,
+        if (customerId != ignore) 12: customerId as String?,
+        if (label != ignore) 13: label as String?,
       });
     } finally {
       q.close();
@@ -1191,7 +1223,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  totalEqualTo(double value, {double epsilon = Filter.epsilon}) {
+  currentAmountPayedEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(property: 7, value: value, epsilon: epsilon),
@@ -1200,7 +1232,10 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  totalGreaterThan(double value, {double epsilon = Filter.epsilon}) {
+  currentAmountPayedGreaterThan(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(property: 7, value: value, epsilon: epsilon),
@@ -1209,7 +1244,10 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  totalGreaterThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+  currentAmountPayedGreaterThanOrEqualTo(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(property: 7, value: value, epsilon: epsilon),
@@ -1218,7 +1256,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  totalLessThan(double value, {double epsilon = Filter.epsilon}) {
+  currentAmountPayedLessThan(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessCondition(property: 7, value: value, epsilon: epsilon),
@@ -1227,7 +1265,10 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  totalLessThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+  currentAmountPayedLessThanOrEqualTo(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(property: 7, value: value, epsilon: epsilon),
@@ -1236,7 +1277,11 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  totalBetween(double lower, double upper, {double epsilon = Filter.epsilon}) {
+  currentAmountPayedBetween(
+    double lower,
+    double upper, {
+    double epsilon = Filter.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
@@ -1251,16 +1296,67 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  syncedEqualTo(bool value) {
+  totalEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        EqualCondition(property: 8, value: value),
+        EqualCondition(property: 8, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  createdAtEqualTo(DateTime value) {
+  totalGreaterThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 8, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  totalGreaterThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 8, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  totalLessThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 8, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  totalLessThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 8, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  totalBetween(double lower, double upper, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 8,
+          lower: lower,
+          upper: upper,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  syncedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(property: 9, value: value),
@@ -1269,10 +1365,19 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  createdAtEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 10, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   createdAtGreaterThan(DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        GreaterCondition(property: 9, value: value),
+        GreaterCondition(property: 10, value: value),
       );
     });
   }
@@ -1281,7 +1386,7 @@ extension ItemReceitModelQueryFilter
   createdAtGreaterThanOrEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        GreaterOrEqualCondition(property: 9, value: value),
+        GreaterOrEqualCondition(property: 10, value: value),
       );
     });
   }
@@ -1289,7 +1394,9 @@ extension ItemReceitModelQueryFilter
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   createdAtLessThan(DateTime value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(LessCondition(property: 9, value: value));
+      return query.addFilterCondition(
+        LessCondition(property: 10, value: value),
+      );
     });
   }
 
@@ -1297,7 +1404,7 @@ extension ItemReceitModelQueryFilter
   createdAtLessThanOrEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessOrEqualCondition(property: 9, value: value),
+        LessOrEqualCondition(property: 10, value: value),
       );
     });
   }
@@ -1306,7 +1413,7 @@ extension ItemReceitModelQueryFilter
   createdAtBetween(DateTime lower, DateTime upper) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        BetweenCondition(property: 9, lower: lower, upper: upper),
+        BetweenCondition(property: 10, lower: lower, upper: upper),
       );
     });
   }
@@ -1316,7 +1423,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(
-          property: 10,
+          property: 11,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1329,7 +1436,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(
-          property: 10,
+          property: 11,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1342,7 +1449,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(
-          property: 10,
+          property: 11,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1354,7 +1461,7 @@ extension ItemReceitModelQueryFilter
   hexIdLessThan(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessCondition(property: 10, value: value, caseSensitive: caseSensitive),
+        LessCondition(property: 11, value: value, caseSensitive: caseSensitive),
       );
     });
   }
@@ -1364,7 +1471,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(
-          property: 10,
+          property: 11,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1377,7 +1484,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
-          property: 10,
+          property: 11,
           lower: lower,
           upper: upper,
           caseSensitive: caseSensitive,
@@ -1391,7 +1498,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         StartsWithCondition(
-          property: 10,
+          property: 11,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1404,7 +1511,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EndsWithCondition(
-          property: 10,
+          property: 11,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1417,7 +1524,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         ContainsCondition(
-          property: 10,
+          property: 11,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1430,7 +1537,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         MatchesCondition(
-          property: 10,
+          property: 11,
           wildcard: pattern,
           caseSensitive: caseSensitive,
         ),
@@ -1442,7 +1549,7 @@ extension ItemReceitModelQueryFilter
   hexIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const EqualCondition(property: 10, value: ''),
+        const EqualCondition(property: 11, value: ''),
       );
     });
   }
@@ -1451,7 +1558,7 @@ extension ItemReceitModelQueryFilter
   hexIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterCondition(property: 10, value: ''),
+        const GreaterCondition(property: 11, value: ''),
       );
     });
   }
@@ -1459,14 +1566,14 @@ extension ItemReceitModelQueryFilter
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   customerIdIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const IsNullCondition(property: 11));
+      return query.addFilterCondition(const IsNullCondition(property: 12));
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   customerIdIsNotNull() {
     return QueryBuilder.apply(not(), (query) {
-      return query.addFilterCondition(const IsNullCondition(property: 11));
+      return query.addFilterCondition(const IsNullCondition(property: 12));
     });
   }
 
@@ -1475,7 +1582,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(
-          property: 11,
+          property: 12,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1488,7 +1595,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(
-          property: 11,
+          property: 12,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1501,7 +1608,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(
-          property: 11,
+          property: 12,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1513,7 +1620,7 @@ extension ItemReceitModelQueryFilter
   customerIdLessThan(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessCondition(property: 11, value: value, caseSensitive: caseSensitive),
+        LessCondition(property: 12, value: value, caseSensitive: caseSensitive),
       );
     });
   }
@@ -1523,7 +1630,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(
-          property: 11,
+          property: 12,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1536,7 +1643,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
-          property: 11,
+          property: 12,
           lower: lower,
           upper: upper,
           caseSensitive: caseSensitive,
@@ -1550,7 +1657,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         StartsWithCondition(
-          property: 11,
+          property: 12,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1563,7 +1670,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EndsWithCondition(
-          property: 11,
+          property: 12,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1576,7 +1683,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         ContainsCondition(
-          property: 11,
+          property: 12,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1589,7 +1696,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         MatchesCondition(
-          property: 11,
+          property: 12,
           wildcard: pattern,
           caseSensitive: caseSensitive,
         ),
@@ -1601,7 +1708,7 @@ extension ItemReceitModelQueryFilter
   customerIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const EqualCondition(property: 11, value: ''),
+        const EqualCondition(property: 12, value: ''),
       );
     });
   }
@@ -1610,7 +1717,7 @@ extension ItemReceitModelQueryFilter
   customerIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterCondition(property: 11, value: ''),
+        const GreaterCondition(property: 12, value: ''),
       );
     });
   }
@@ -1620,7 +1727,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(
-          property: 12,
+          property: 13,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1633,7 +1740,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(
-          property: 12,
+          property: 13,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1646,7 +1753,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(
-          property: 12,
+          property: 13,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1658,7 +1765,7 @@ extension ItemReceitModelQueryFilter
   labelLessThan(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessCondition(property: 12, value: value, caseSensitive: caseSensitive),
+        LessCondition(property: 13, value: value, caseSensitive: caseSensitive),
       );
     });
   }
@@ -1668,7 +1775,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(
-          property: 12,
+          property: 13,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1681,7 +1788,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
-          property: 12,
+          property: 13,
           lower: lower,
           upper: upper,
           caseSensitive: caseSensitive,
@@ -1695,7 +1802,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         StartsWithCondition(
-          property: 12,
+          property: 13,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1708,7 +1815,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EndsWithCondition(
-          property: 12,
+          property: 13,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1721,7 +1828,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         ContainsCondition(
-          property: 12,
+          property: 13,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1734,7 +1841,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         MatchesCondition(
-          property: 12,
+          property: 13,
           wildcard: pattern,
           caseSensitive: caseSensitive,
         ),
@@ -1746,7 +1853,7 @@ extension ItemReceitModelQueryFilter
   labelIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const EqualCondition(property: 12, value: ''),
+        const EqualCondition(property: 13, value: ''),
       );
     });
   }
@@ -1755,7 +1862,7 @@ extension ItemReceitModelQueryFilter
   labelIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterCondition(property: 12, value: ''),
+        const GreaterCondition(property: 13, value: ''),
       );
     });
   }
@@ -1769,7 +1876,7 @@ extension ItemReceitModelQueryFilter
   miniTaxIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterOrEqualCondition(property: 13, value: null),
+        const GreaterOrEqualCondition(property: 14, value: null),
       );
     });
   }
@@ -1783,7 +1890,7 @@ extension ItemReceitModelQueryFilter
   itemsIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterOrEqualCondition(property: 14, value: null),
+        const GreaterOrEqualCondition(property: 15, value: null),
       );
     });
   }
@@ -1797,7 +1904,7 @@ extension ItemReceitModelQueryFilter
   discountsIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterOrEqualCondition(property: 15, value: null),
+        const GreaterOrEqualCondition(property: 16, value: null),
       );
     });
   }
@@ -1902,43 +2009,57 @@ extension ItemReceitModelQuerySortBy
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortByTotal() {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByCurrentAmountPayed() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(7);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  sortByTotalDesc() {
+  sortByCurrentAmountPayedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(7, sort: Sort.desc);
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortBySynced() {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortByTotal() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(8);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  sortBySyncedDesc() {
+  sortByTotalDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(8, sort: Sort.desc);
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  sortByCreatedAt() {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortBySynced() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(9);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  sortByCreatedAtDesc() {
+  sortBySyncedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(9, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByCreatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(10);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByCreatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(10, sort: Sort.desc);
     });
   }
 
@@ -1946,7 +2067,7 @@ extension ItemReceitModelQuerySortBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(10, caseSensitive: caseSensitive);
+      return query.addSortBy(11, caseSensitive: caseSensitive);
     });
   }
 
@@ -1954,21 +2075,21 @@ extension ItemReceitModelQuerySortBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(10, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(11, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByCustomerId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(11, caseSensitive: caseSensitive);
+      return query.addSortBy(12, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByCustomerIdDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(11, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(12, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
@@ -1976,7 +2097,7 @@ extension ItemReceitModelQuerySortBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(12, caseSensitive: caseSensitive);
+      return query.addSortBy(13, caseSensitive: caseSensitive);
     });
   }
 
@@ -1984,7 +2105,7 @@ extension ItemReceitModelQuerySortBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(12, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(13, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 }
@@ -2085,43 +2206,57 @@ extension ItemReceitModelQuerySortThenBy
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenByTotal() {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByCurrentAmountPayed() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(7);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  thenByTotalDesc() {
+  thenByCurrentAmountPayedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(7, sort: Sort.desc);
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenBySynced() {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenByTotal() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(8);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  thenBySyncedDesc() {
+  thenByTotalDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(8, sort: Sort.desc);
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  thenByCreatedAt() {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenBySynced() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(9);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  thenByCreatedAtDesc() {
+  thenBySyncedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(9, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByCreatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(10);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByCreatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(10, sort: Sort.desc);
     });
   }
 
@@ -2129,7 +2264,7 @@ extension ItemReceitModelQuerySortThenBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(10, caseSensitive: caseSensitive);
+      return query.addSortBy(11, caseSensitive: caseSensitive);
     });
   }
 
@@ -2137,21 +2272,21 @@ extension ItemReceitModelQuerySortThenBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(10, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(11, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByCustomerId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(11, caseSensitive: caseSensitive);
+      return query.addSortBy(12, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByCustomerIdDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(11, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(12, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
@@ -2159,7 +2294,7 @@ extension ItemReceitModelQuerySortThenBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(12, caseSensitive: caseSensitive);
+      return query.addSortBy(13, caseSensitive: caseSensitive);
     });
   }
 
@@ -2167,7 +2302,7 @@ extension ItemReceitModelQuerySortThenBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(12, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(13, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 }
@@ -2217,44 +2352,51 @@ extension ItemReceitModelQueryWhereDistinct
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
-  distinctByTotal() {
+  distinctByCurrentAmountPayed() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(7);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
-  distinctBySynced() {
+  distinctByTotal() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(8);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
-  distinctByCreatedAt() {
+  distinctBySynced() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(9);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
-  distinctByHexId({bool caseSensitive = true}) {
+  distinctByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(10, caseSensitive: caseSensitive);
+      return query.addDistinctBy(10);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
-  distinctByCustomerId({bool caseSensitive = true}) {
+  distinctByHexId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(11, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
-  distinctByLabel({bool caseSensitive = true}) {
+  distinctByCustomerId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(12, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
+  distinctByLabel({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(13, caseSensitive: caseSensitive);
     });
   }
 }
@@ -2303,60 +2445,67 @@ extension ItemReceitModelQueryProperty1
     });
   }
 
-  QueryBuilder<ItemReceitModel, double, QAfterProperty> totalProperty() {
+  QueryBuilder<ItemReceitModel, double, QAfterProperty>
+  currentAmountPayedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(7);
     });
   }
 
-  QueryBuilder<ItemReceitModel, bool, QAfterProperty> syncedProperty() {
+  QueryBuilder<ItemReceitModel, double, QAfterProperty> totalProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(8);
     });
   }
 
-  QueryBuilder<ItemReceitModel, DateTime, QAfterProperty> createdAtProperty() {
+  QueryBuilder<ItemReceitModel, bool, QAfterProperty> syncedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(9);
     });
   }
 
-  QueryBuilder<ItemReceitModel, String, QAfterProperty> hexIdProperty() {
+  QueryBuilder<ItemReceitModel, DateTime, QAfterProperty> createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(10);
     });
   }
 
-  QueryBuilder<ItemReceitModel, String?, QAfterProperty> customerIdProperty() {
+  QueryBuilder<ItemReceitModel, String, QAfterProperty> hexIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(11);
     });
   }
 
-  QueryBuilder<ItemReceitModel, String, QAfterProperty> labelProperty() {
+  QueryBuilder<ItemReceitModel, String?, QAfterProperty> customerIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(12);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, String, QAfterProperty> labelProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(13);
     });
   }
 
   QueryBuilder<ItemReceitModel, List<MiniTax>, QAfterProperty>
   miniTaxProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(13);
+      return query.addProperty(14);
     });
   }
 
   QueryBuilder<ItemReceitModel, List<ItemReceitItem>, QAfterProperty>
   itemsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(14);
+      return query.addProperty(15);
     });
   }
 
   QueryBuilder<ItemReceitModel, List<EmbeddedDiscountModel>, QAfterProperty>
   discountsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(15);
+      return query.addProperty(16);
     });
   }
 }
@@ -2406,55 +2555,62 @@ extension ItemReceitModelQueryProperty2<R>
     });
   }
 
-  QueryBuilder<ItemReceitModel, (R, double), QAfterProperty> totalProperty() {
+  QueryBuilder<ItemReceitModel, (R, double), QAfterProperty>
+  currentAmountPayedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(7);
     });
   }
 
-  QueryBuilder<ItemReceitModel, (R, bool), QAfterProperty> syncedProperty() {
+  QueryBuilder<ItemReceitModel, (R, double), QAfterProperty> totalProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(8);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R, bool), QAfterProperty> syncedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(9);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, DateTime), QAfterProperty>
   createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(9);
+      return query.addProperty(10);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, String), QAfterProperty> hexIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(10);
+      return query.addProperty(11);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, String?), QAfterProperty>
   customerIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(11);
+      return query.addProperty(12);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, String), QAfterProperty> labelProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(12);
+      return query.addProperty(13);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, List<MiniTax>), QAfterProperty>
   miniTaxProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(13);
+      return query.addProperty(14);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, List<ItemReceitItem>), QAfterProperty>
   itemsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(14);
+      return query.addProperty(15);
     });
   }
 
@@ -2465,7 +2621,7 @@ extension ItemReceitModelQueryProperty2<R>
   >
   discountsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(15);
+      return query.addProperty(16);
     });
   }
 }
@@ -2519,55 +2675,62 @@ extension ItemReceitModelQueryProperty3<R1, R2>
     });
   }
 
-  QueryBuilder<ItemReceitModel, (R1, R2, double), QOperations> totalProperty() {
+  QueryBuilder<ItemReceitModel, (R1, R2, double), QOperations>
+  currentAmountPayedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(7);
     });
   }
 
-  QueryBuilder<ItemReceitModel, (R1, R2, bool), QOperations> syncedProperty() {
+  QueryBuilder<ItemReceitModel, (R1, R2, double), QOperations> totalProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(8);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R1, R2, bool), QOperations> syncedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(9);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, DateTime), QOperations>
   createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(9);
+      return query.addProperty(10);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, String), QOperations> hexIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(10);
+      return query.addProperty(11);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, String?), QOperations>
   customerIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(11);
+      return query.addProperty(12);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, String), QOperations> labelProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(12);
+      return query.addProperty(13);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, List<MiniTax>), QOperations>
   miniTaxProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(13);
+      return query.addProperty(14);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, List<ItemReceitItem>), QOperations>
   itemsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(14);
+      return query.addProperty(15);
     });
   }
 
@@ -2578,7 +2741,7 @@ extension ItemReceitModelQueryProperty3<R1, R2>
   >
   discountsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(15);
+      return query.addProperty(16);
     });
   }
 }

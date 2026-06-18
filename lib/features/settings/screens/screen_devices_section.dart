@@ -50,6 +50,43 @@ class _ScreenDevicesSectionState extends State<ScreenDevicesSection> {
               .padding(EdgeInsets.all(8)),
           18.gapHeight,
           [
+                "Receipt Printing"
+                    .text(style: TextStyle(fontWeight: FontWeight.bold))
+                    .padding(EdgeInsets.all(14)),
+                ListTile(
+                  onTap: () {
+                    model.printToMultiplePrinters =
+                        !model.printToMultiplePrinters;
+                    model.saveToStorage();
+                    setState(() {});
+                  },
+                  leading: Iconify(Bx.printer, color: AppTheme.color(context)),
+                  title: "Print to multiple printers".text(),
+                  trailing: Switch(
+                    value: model.printToMultiplePrinters,
+                    onChanged: (stat) {
+                      model.printToMultiplePrinters = stat;
+                      model.saveToStorage();
+                      setState(() {});
+                    },
+                  ),
+                  subtitle: "Print receipts on all connected printers"
+                      .text(style: TextStyle(color: Colors.grey, fontSize: 12)),
+                ),
+              ]
+              .column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+              )
+              .decoratedBox(
+                decoration: BoxDecoration(
+                  color: AppTheme.surface(context),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              )
+              .padding(EdgeInsets.all(8)),
+          18.gapHeight,
+          [
                 "Autonomous Communications"
                     .text(style: TextStyle(fontWeight: FontWeight.bold))
                     .padding(EdgeInsets.all(14)),

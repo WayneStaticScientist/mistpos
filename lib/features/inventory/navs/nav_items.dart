@@ -19,14 +19,15 @@ import 'package:mistpos/features/settings/screens/screen_subscription.dart';
 
 class NavItems extends StatefulWidget {
   final GlobalKey<ScaffoldState>? scaffoldKey;
-  const NavItems({super.key, this.scaffoldKey});
+  final int initialIndex;
+  const NavItems({super.key, this.scaffoldKey, this.initialIndex = 0});
 
   @override
   State<NavItems> createState() => _NavItemsState();
 }
 
 class _NavItemsState extends State<NavItems> {
-  int _selectedIndex = 0;
+  late int _selectedIndex = widget.initialIndex;
   final List<Widget> _navOptions = [
     NavItemsList(),
     NavCategoryList(),
@@ -38,9 +39,11 @@ class _NavItemsState extends State<NavItems> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: DrawerButton(
-          onPressed: () => widget.scaffoldKey?.currentState?.openDrawer(),
-        ),
+        leading: widget.scaffoldKey != null
+            ? DrawerButton(
+                onPressed: () => widget.scaffoldKey?.currentState?.openDrawer(),
+              )
+            : const BackButton(),
         title: Text('Items'),
         backgroundColor: Get.theme.colorScheme.primary,
         foregroundColor: Colors.white,

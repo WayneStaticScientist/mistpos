@@ -11,17 +11,14 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 void addMessage(RemoteMessage message) async {
   try {
     final dir = await getApplicationDocumentsDirectory();
+    IsarStatic.externalDirectory = dir;
     Isar? isarInstance = IsarStatic.getInstance();
-    isarInstance ??= Isar.open(
-      schemas: [NotificationModelSchema],
-      directory: dir.path,
-    );
     final model = NotificationModel(
       title: message.notification?.title ?? "-",
       message: message.notification?.body ?? 'no message body',
       updatedAt: DateTime.now(),
     );
-    await isarInstance.writeAsync((isarInstance) async {
+    await isarInstance?.write((isarInstance) async {
       isarInstance.notificationModels.put(model);
     });
     GetStorage storage = GetStorage();

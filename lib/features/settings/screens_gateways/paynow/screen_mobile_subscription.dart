@@ -13,12 +13,16 @@ class ScreenMobileSubscription extends StatefulWidget {
   final String title;
   final String subKey;
   final double amount;
+  final int durationMonths;
+  final String? type;
   const ScreenMobileSubscription({
     super.key,
     required this.title,
     required this.subKey,
     required this.amount,
     required this.mobilePaymentInfo,
+    required this.durationMonths,
+    this.type,
   });
 
   @override
@@ -83,6 +87,8 @@ class _ScreenMobileSubscriptionState extends State<ScreenMobileSubscription> {
       amount: widget.amount,
       phoneNumber: phone,
       subKey: widget.subKey,
+      durationMonths: widget.durationMonths,
+      type: widget.type,
     );
     if (!response) {
       return;

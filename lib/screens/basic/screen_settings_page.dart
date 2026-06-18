@@ -115,12 +115,12 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
           ),
           24.gapColumn,
           MistMordernLayout(
-            label: "Receits",
+            label: "Receipts",
             children: [
               ListTile(
                 onTap: () => _changeSize(model.printerRecietLength),
                 contentPadding: EdgeInsets.all(0),
-                title: Text("Printer Receit Length"),
+                title: Text("Printer Receipt Length"),
                 subtitle: "${model.printerRecietLength} units".text(
                   style: TextStyle(color: Colors.grey, fontSize: 12),
                 ),
@@ -142,8 +142,8 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                   },
                 ),
                 leading: Iconify(Bx.qr_scan, color: AppTheme.color(context)),
-                title: "Print Receit Qr Code".text(),
-                subtitle: "enable qrcode scanning of receits".text(
+                title: "Print Receipt Qr Code".text(),
+                subtitle: "enable qrcode scanning of receipts".text(
                   style: TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ),
@@ -466,7 +466,7 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
     final model = AppSettingsModel.fromStorage();
     final sizeController = TextEditingController(text: size.toString());
     Get.defaultDialog(
-      title: "Printer Receit Length",
+      title: "Printer Receipt Length",
       content: MistFormInput(
         label: "size",
         controller: sizeController,

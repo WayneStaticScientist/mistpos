@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/instance_manager.dart';
 import 'package:isar_plus/isar_plus.dart';
 import 'package:mistpos/features/inventory/controllers/expenses_controller.dart';
+import 'package:mistpos/features/admin/controllers/goals_tasks_controller.dart';
 import 'package:mistpos/data/models/gateway.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:mistpos/data/models/tax_model.dart';
@@ -63,7 +64,7 @@ void main() async {
     await Firebase.initializeApp();
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   } catch (e) {
-    print("Firebase initialization failed (likely missing Play Services): $e");
+    //
   }
   try {
     initIsarDatabase(IsarStatic.externalDirectory!);
@@ -121,6 +122,7 @@ class MyApp extends StatelessWidget {
         Get.put(ItemsUnsavedController());
         Get.put(FirebaseController());
         Get.put(ExpensesController());
+        Get.put(GoalsTasksController());
       }),
 
       theme: AppTheme.lightTheme,
@@ -142,7 +144,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   try {
     await Firebase.initializeApp();
   } catch (e) {
-    print("Firebase bg init failed: $e");
+    //
     return;
   }
   await GetStorage.init();

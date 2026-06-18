@@ -11,11 +11,15 @@ class ScreenSubscriptionPayment extends StatefulWidget {
   final String title;
   final String subKey;
   final double amount;
+  final int durationMonths;
+  final String? type;
   const ScreenSubscriptionPayment({
     super.key,
     required this.subKey,
     required this.title,
     required this.amount,
+    required this.durationMonths,
+    this.type,
   });
 
   @override
@@ -91,6 +95,8 @@ class _ScreenSubscriptionPaymentState extends State<ScreenSubscriptionPayment> {
         title: widget.title,
         subKey: widget.subKey,
         amount: widget.amount,
+        durationMonths: widget.durationMonths,
+        type: widget.type,
       ),
     );
   }
@@ -102,6 +108,8 @@ class _ScreenSubscriptionPaymentState extends State<ScreenSubscriptionPayment> {
         title: widget.title,
         subKey: widget.subKey,
         amount: widget.amount,
+        durationMonths: widget.durationMonths,
+        type: widget.type,
       ),
     );
   }

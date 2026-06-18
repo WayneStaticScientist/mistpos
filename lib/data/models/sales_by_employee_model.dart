@@ -7,6 +7,7 @@ class SalesByEmployeeModel {
   double discounts;
   double averageSales;
   int uniqueCustomerCount;
+  double expenses;
   SalesByEmployeeModel({
     required this.numberOfReceipts,
     required this.sellerName,
@@ -16,6 +17,7 @@ class SalesByEmployeeModel {
     required this.discounts,
     required this.averageSales,
     required this.uniqueCustomerCount,
+    required this.expenses,
   });
   factory SalesByEmployeeModel.fromJson(Map<String, dynamic> json) =>
       SalesByEmployeeModel(
@@ -27,5 +29,6 @@ class SalesByEmployeeModel {
         discounts: (json["discounts"] as num?)?.toDouble() ?? 0.0,
         averageSales: (json["averageSales"] as num?)?.toDouble() ?? 0.0,
         uniqueCustomerCount: json["uniqueCustomerCount"] ?? 0,
+        expenses: (json["expenses"] as num?)?.toDouble() ?? 0.0,
       );
 }

@@ -27,6 +27,32 @@ class MistSubscriptionUtils {
   static const basicList = ['trial', 'pro', 'enterprise', 'basic'];
   static const proList = ['trial', 'pro', 'enterprise'];
   static const enterpriseList = ['trial', 'enterprise'];
+
+  /// Returns true if [currentPlan] has access to [navKey].
+  /// Items not in twinSubs are accessible to everyone.
+  static bool hasAccessTo(String navKey, String currentPlan) {
+    final sub = twinSubs.firstWhere(
+      (e) => e.key == navKey,
+      orElse: () => MistTwinSub(key: navKey, plans: availablePlans.toList()),
+    );
+    return sub.plans.contains(currentPlan);
+  }
+
+  /// Returns the minimum plan name required for [navKey], or null if free.
+  static String? getRequiredPlanLabel(String navKey) {
+    final sub = twinSubs.firstWhere(
+      (e) => e.key == navKey,
+      orElse: () => MistTwinSub(key: navKey, plans: availablePlans.toList()),
+    );
+    // Plan hierarchy order (ascending cost): free < basic < pro < enterprise
+    const hierarchy = ['free', 'basic', 'pro', 'enterprise'];
+    for (final plan in hierarchy) {
+      if (sub.plans.contains(plan)) {
+        return getPlanDisplayName(plan);
+      }
+    }
+    return null;
+  }
   static String getPlanDisplayName(String plan) {
     switch (plan) {
       case 'free':
@@ -60,6 +86,22 @@ class MistSubscriptionUtils {
     MistTwinSub(
       key: "Stock Adjustments",
       plans: ['enterprise', 'trial', 'pro'],
+    ),
+    MistTwinSub(
+      key: "Monthly Reports",
+      plans: ['trial', 'pro', 'enterprise'],
+    ),
+    MistTwinSub(
+      key: "Yearly Reports",
+      plans: ['trial', 'pro', 'enterprise'],
+    ),
+    MistTwinSub(
+      key: "Inventory History",
+      plans: ['trial', 'pro', 'enterprise'],
+    ),
+    MistTwinSub(
+      key: "Inventory Valuation",
+      plans: ['trial', 'pro', 'enterprise'],
     ),
   ];
 }

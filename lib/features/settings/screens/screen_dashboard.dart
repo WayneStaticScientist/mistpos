@@ -13,7 +13,11 @@ import 'package:mistpos/features/admin/screens/nav_admin_stores.dart';
 import 'package:mistpos/features/admin/controllers/admin_controller.dart';
 import 'package:mistpos/features/admin/screens/nav_admin_employees.dart';
 import 'package:mistpos/features/admin/screens/nav_admin_overview.dart';
+import 'package:mistpos/features/admin/screens/nav_product_analytics.dart';
+import 'package:mistpos/features/admin/screens/nav_expenses_overview.dart';
 import 'package:mistpos/features/admin/screens/nav_all_shifts_view.dart';
+import 'package:mistpos/features/admin/screens/nav_monthly_reports.dart';
+import 'package:mistpos/features/admin/screens/nav_yearly_reports.dart';
 import 'package:mistpos/features/sales/screens/nav_items_list.dart';
 import 'package:mistpos/features/settings/screens/screen_add_store.dart';
 import 'package:mistpos/features/admin/screens/nav_transfer_orders.dart';
@@ -23,6 +27,7 @@ import 'package:mistpos/features/inventory/controllers/inventory_controller.dart
 import 'package:mistpos/features/admin/screens/screen_list_customers.dart';
 import 'package:mistpos/features/admin/screens/nav_inventory_history.dart';
 import 'package:mistpos/features/admin/screens/nav_sales_by_employee.dart';
+import 'package:mistpos/features/admin/screens/nav_billing_history.dart';
 import 'package:mistpos/features/settings/screens/screen_add_employee.dart';
 import 'package:mistpos/features/settings/screens/screen_add_customer.dart';
 import 'package:mistpos/features/sales/screens/nav_category_list.dart';
@@ -42,6 +47,15 @@ import 'package:mistpos/features/inventory/screens/screen_add_transfer_order.dar
 import 'package:mistpos/features/inventory/screens/screen_add_purchase_order.dart';
 import 'package:mistpos/features/inventory/screens/screen_add_inventory_counts.dart';
 import 'package:mistpos/features/inventory/screens/screen_add_stockadjustments.dart';
+import 'package:mistpos/features/support/screens/screen_tickets.dart';
+import 'package:mistpos/features/admin/screens/nav_product_import_export.dart';
+import 'package:mistpos/features/settings/screens/screen_edit_category.dart';
+import 'package:mistpos/features/settings/screens/screen_edit_discount.dart';
+import 'package:mistpos/features/settings/screens/screen_edit_modifier.dart';
+import 'package:mistpos/data/models/item_categories_model.dart';
+import 'package:mistpos/data/models/discount_model.dart';
+import 'package:mistpos/data/models/item_modifier_model.dart';
+import 'package:mistpos/features/support/screens/screen_mistpos_ai.dart';
 
 class ScreenDashboard extends StatefulWidget {
   const ScreenDashboard({super.key});
@@ -61,6 +75,7 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
   final _shiftsKey = GlobalKey<NavShiftsViewState>();
   final _navInvHistoryKey = GlobalKey<NavInventoryHistoryState>();
   final _navInvEvaluation = GlobalKey<NavInventoryValuationState>();
+  final _billingHistoryKey = GlobalKey<NavBillingHistoryState>();
   late final navs = {
     "Items": NavItemsList(),
     "Stores": NavAdminStores(),
@@ -73,6 +88,10 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     "Expenses": NavInventoryExpenses(),
     "Overview": NavAdminOverView(key: _adminOverviewKey),
     "Daily Sales": DailySales(key: _dailySalesKey),
+    "Product Analytics": const NavProductAnalytics(),
+    "Expenses Overview": const NavExpensesOverview(),
+    "Monthly Reports": const NavMonthlyReports(),
+    "Yearly Reports": const NavYearlyReports(),
     "Sales By Employee": NavSalesByEmployee(key: _salesByEmployeeKeys),
     "Sales By Payments": NavSalesByPayment(key: _salesByPayment),
     "Shifts": NavShiftsView(key: _shiftsKey),
@@ -85,6 +104,10 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     "Stock Adjustments": const NavInventoryStockAdjustments(),
     "Inventory History": NavInventoryHistory(key: _navInvHistoryKey),
     "Inventory Valuation": NavInventoryValuation(key: _navInvEvaluation),
+    "Mistpos AI": ScreenMistposAi(),
+    "Support Tickets": ScreenTickets(),
+    "Bulk Import/Export": const NavProductImportExport(),
+    "Billing History": NavBillingHistory(key: _billingHistoryKey),
   };
 
   @override
@@ -98,15 +121,55 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final bool isLargeScreen = screenWidth > (ScreenSizes.maxWidth);
+    final primary = Get.theme.colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF14161F) : const Color(0xFFF7F8FA),
       appBar: AppBar(
-        title: _selectedIndex.text(style: TextStyle(color: Colors.white)),
-        backgroundColor: Get.theme.colorScheme.primary,
-        iconTheme: IconThemeData(color: Colors.white),
+        title: Text(
+          _selectedIndex,
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.w700,
+            fontSize: 20,
+            letterSpacing: -0.5,
+          ),
+        ),
+        backgroundColor: isDark ? const Color(0xFF0F1117) : Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 4,
+        shadowColor: Colors.black.withAlpha(20),
+        iconTheme: IconThemeData(color: isDark ? Colors.white : Colors.black87),
+        centerTitle: false,
         actions: [
-          IconButton(
-            onPressed: _printDocument,
-            icon: Iconify(Bx.printer, color: Colors.white),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(colors: [Color(0xFF2563EB), Color(0xFF7C3AED)]),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              onPressed: () => Get.to(() => const ScreenMistposAi()),
+              icon: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
+              tooltip: "Mistpos AI Assistant",
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: primary.withAlpha(isDark ? 50 : 25),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              onPressed: _printDocument,
+              icon: Iconify(
+                Bx.printer,
+                color: primary,
+                size: 20,
+              ),
+              tooltip: "Export Report",
+            ),
           ).visibleIf(
             [
               "Overview",
@@ -116,8 +179,10 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
               "Shifts",
               "Inventory History",
               "Inventory Valuation",
+              "Billing History",
             ].contains(_selectedIndex),
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: Row(
@@ -149,6 +214,9 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     if (_selectedIndex == 'Stores') {
       Get.to(() => ScreenAddStore());
     }
+    if (_selectedIndex == 'Support Tickets') {
+      ScreenTickets.showNewTicketDialog(context);
+    }
     if (_selectedIndex == 'Purchase Orders') {
       Get.to(() => ScreenAddPurchaseOrder());
     }
@@ -167,6 +235,26 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     if (_selectedIndex == 'Stock Adjustments') {
       Get.to(() => ScreenAddStockadjustments());
     }
+    if (_selectedIndex == 'Categories') {
+      Get.to(() => ScreenEditCategory(
+            itemCategoryModel: ItemCategoryModel(name: ''),
+          ));
+    }
+    if (_selectedIndex == 'Discounts') {
+      Get.to(() => ScreenEditDiscount(
+            model: DiscountModel(
+              name: '',
+              value: 0,
+              company: '',
+              percentage: true,
+            ),
+          ));
+    }
+    if (_selectedIndex == 'Modifiers') {
+      Get.to(() => ScreenEditModifier(
+            modifier: ItemModifier(name: '', list: []),
+          ));
+    }
   }
 
   Obx _makeDrawer(bool r) {
@@ -175,7 +263,14 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
         userName: _userController.user.value?.fullName ?? "User",
         userEmail: _userController.user.value?.email ?? "Email",
         selectedTile: _selectedIndex,
+        currentPlan:
+            _inventoryController.company.value?.subscriptionType.type ?? 'free',
         onTap: (String label) {
+          if (label == 'Mistpos AI') {
+            if (r) Get.back();
+            Get.to(() => const ScreenMistposAi());
+            return;
+          }
           setState(() {
             _selectedIndex = label;
           });
@@ -214,6 +309,10 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
       _navInvEvaluation.currentState?.printDocument();
       return;
     }
+    if (_selectedIndex == "Billing History") {
+      _billingHistoryKey.currentState?.printDocument();
+      return;
+    }
     Toaster.showError("page is unprintable");
   }
 
@@ -229,7 +328,11 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     "Stock Adjustments",
   ];
   Widget _getInventorButton(String s) {
-    final visibilityCreteria =
+    final visibilityCreteria = _selectedIndex == 'Categories' ||
+        _selectedIndex == 'Discounts' ||
+        _selectedIndex == 'Modifiers' ||
+        _selectedIndex == 'Support Tickets' ||
+        _selectedIndex == 'Stock Adjustments' ||
         MistSubscriptionUtils.twinSubs.indexWhere(
           (element) =>
               element.key == _selectedIndex && element.plans.contains(s),

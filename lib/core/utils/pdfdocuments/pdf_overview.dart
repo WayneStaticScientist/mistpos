@@ -1,243 +1,191 @@
-import 'package:exui/exui.dart';
-import 'package:flutter/material.dart';
-import 'package:pdf_maker/pdf_maker.dart';
+import 'dart:typed_data';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:mistpos/core/utils/date_utils.dart';
-import 'package:mistpos/core/themes/app_theme.dart';
 import 'package:mistpos/data/models/user_model.dart';
 import 'package:mistpos/core/utils/currence_converter.dart';
 import 'package:mistpos/data/models/sales_stats_model.dart';
 import 'package:mistpos/data/models/product_stats_model.dart';
-import 'package:mistpos/core/widgets/layouts/card_overview.dart';
+import 'package:mistpos/data/models/this_month_summary_model.dart';
 
-class AdminOverviewPdf extends BlankPage {
-  final DateTime week;
-  final DateTime startDate;
-  final DateTime endDate;
-  final String baseCurrence;
-  final int totalProducts;
-  final StatsSalesModel? statsSalesModel;
-  final StatsProductModel? statsProductModel;
-
-  const AdminOverviewPdf({
-    super.key,
-    required this.week,
-    required this.endDate,
-    required this.startDate,
-    required this.baseCurrence,
-    required this.statsProductModel,
-    required this.totalProducts,
-    required this.statsSalesModel,
-  });
-
-  @override
-  Widget createPageContent(BuildContext context) {
+class AdminOverviewPdf {
+  static Future<pw.Document> generate({
+    required DateTime week,
+    required DateTime startDate,
+    required DateTime endDate,
+    required String baseCurrence,
+    required StatsProductModel? statsProductModel,
+    required int totalProducts,
+    required StatsSalesModel? statsSalesModel,
+    required ThisMonthSummaryModel? thisMonthSummary,
+  }) async {
+    final pdf = pw.Document();
     final user = User.fromStorage();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+
+    // Load Logo
+    pw.MemoryImage? logoImage;
+    try {
+      final ByteData data = await rootBundle.load('assets/launcher.png');
+      logoImage = pw.MemoryImage(data.buffer.asUint8List());
+    } catch (e) {
+      // ignore
+    }
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        build: (pw.Context context) {
+          return [
+            // ── Header with Logo ──
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(user?.companyName ?? "Company Name", style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, color: PdfColors.blue800)),
+                    pw.SizedBox(height: 4),
+                    pw.Text("Analytics & Overview Report", style: pw.TextStyle(fontSize: 18, color: PdfColors.grey700)),
+                  ],
+                ),
+                if (logoImage != null)
+                  pw.Image(logoImage, width: 60, height: 60),
+              ],
+            ),
+            pw.SizedBox(height: 18),
+            pw.Divider(color: PdfColors.grey400),
+            pw.SizedBox(height: 12),
+            
+            // ── Date Range ──
+            pw.Row(
+              children: [
+                pw.Text("Report Period: ", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12)),
+                pw.Text("${MistDateUtils.getInformalShortDate(startDate)} to ${MistDateUtils.getInformalShortDate(endDate)}", style: const pw.TextStyle(fontSize: 12)),
+              ],
+            ),
+            pw.SizedBox(height: 24),
+            
+            // ── Product Overview Table ──
+            pw.Text("Product Overview", style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.blue800)),
+            pw.SizedBox(height: 8),
+            _buildProductTable(statsProductModel, totalProducts, baseCurrence),
+            
+            pw.SizedBox(height: 32),
+
+            // ── Sales Overview Table ──
+            pw.Text("Sales Overview", style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.blue800)),
+            pw.SizedBox(height: 8),
+            _buildSalesTable(statsSalesModel, baseCurrence),
+            
+            pw.SizedBox(height: 32),
+
+            // ── This Month Summary ──
+            if (thisMonthSummary != null) ...[
+              pw.Text("This Month Summary", style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.blue800)),
+              pw.SizedBox(height: 8),
+              _buildThisMonthSummaryTable(thisMonthSummary, baseCurrence),
+            ],
+          ];
+        },
+      ),
+    );
+    return pdf;
+  }
+
+  static pw.Widget _buildProductTable(StatsProductModel? stats, int totalProducts, String baseCurrence) {
+    return pw.Table(
+      border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(1),
+        1: const pw.FlexColumnWidth(1),
+        2: const pw.FlexColumnWidth(1),
+        3: const pw.FlexColumnWidth(1),
+      },
       children: [
-        "${user?.companyName}".text(
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-        ),
-        "Sales Reports".text(
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        // 1. Date Range Header
-        SizedBox(height: 18),
-        Container(
-          padding: EdgeInsets.all(8.0), // Added padding for better look
-          decoration: BoxDecoration(color: AppTheme.surface(context)),
-          child: Row(
-            children: [
-              SizedBox(width: 18),
-              Text(
-                "${startDate.day}/${startDate.month}/${startDate.year}",
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium, // Using standard theme
-              ),
-              SizedBox(width: 18),
-              Text("-", style: Theme.of(context).textTheme.bodyMedium),
-              SizedBox(width: 18),
-              Text(
-                "${endDate.day}/${endDate.month}/${endDate.year}",
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-          ),
-        ),
-        [
-          'From : '.text(
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          MistDateUtils.formatNormalDate(
-            startDate,
-          ).text(style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-        ].row(),
-        [
-          'To : '.text(
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          MistDateUtils.formatNormalDate(
-            endDate,
-          ).text(style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-        ].row(),
-        // 2. Product Overview Section
-        SizedBox(height: 18),
-        Text(
-          "Product Overview",
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 18),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
+        pw.TableRow(
+          decoration: const pw.BoxDecoration(color: PdfColors.blue50),
           children: [
-            CardOverview(
-              label: "Total Products",
-              value: totalProducts.toString(),
-            ),
-            SizedBox(width: 18),
-            CardOverview(
-              label: "Total Items In Stock",
-              value: statsProductModel?.totalStock.toString() ?? "0",
-            ),
-            CardOverview(
-              label: "Stock Value",
-              value: CurrenceConverter.getCurrenceFloatInStrings(
-                statsProductModel?.totalCost ?? 0,
-                baseCurrence,
-              ),
-            ),
-            SizedBox(width: 18),
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text("Total Products", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text("Items In Stock", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text("Stock Value", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text("Total Revenue", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
           ],
-        ).sizedBox(
-          height: 110, // Retained the fixed height for consistency
-          width: double.infinity,
         ),
-
-        SizedBox(height: 18),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
+        pw.TableRow(
           children: [
-            CardOverview(
-              label: "Total Revenue",
-              value: CurrenceConverter.getCurrenceFloatInStrings(
-                statsProductModel?.totalRevenue ?? 0,
-                baseCurrence,
-              ),
-            ),
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text(totalProducts.toString(), style: const pw.TextStyle(fontSize: 11))),
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text(stats?.totalStock.toString() ?? "0", style: const pw.TextStyle(fontSize: 11))),
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text(CurrenceConverter.getCurrenceFloatInStrings(stats?.totalCost ?? 0, baseCurrence), style: const pw.TextStyle(fontSize: 11))),
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text(CurrenceConverter.getCurrenceFloatInStrings(stats?.totalRevenue ?? 0, baseCurrence), style: const pw.TextStyle(fontSize: 11))),
           ],
-        ).sizedBox(
-          height: 110, // Retained the fixed height for consistency
-          width: double.infinity,
         ),
+      ],
+    );
+  }
 
-        // 3. Sales Overview Section
-        SizedBox(height: 18),
-        Text(
-          "Sales Overview",
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+  static pw.Widget _buildSalesTable(StatsSalesModel? stats, String baseCurrence) {
+    final profit = (stats?.totalSales ?? 0) - (stats?.totalCost ?? 0);
+    
+    return pw.Table(
+      border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(1.5),
+        1: const pw.FlexColumnWidth(1),
+      },
+      children: [
+        pw.TableRow(
+          decoration: const pw.BoxDecoration(color: PdfColors.blue50),
+          children: [
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text("Metric", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text("Value", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
+          ],
         ),
-        SizedBox(height: 18),
-        // CRITICAL FIX: Replaced ListView(scrollDirection: Axis.horizontal) with a Row
-        SizedBox(
-          height: 110, // Retained the fixed height
-          width: double.infinity,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start, // Align to start
-            children: [
-              CardOverview(
-                label: "Profit ",
-                value: CurrenceConverter.getCurrenceFloatInStrings(
-                  (statsSalesModel?.totalSales ?? 0) -
-                      (statsSalesModel?.totalCost ?? 0),
-                  baseCurrence,
-                ),
-              ),
-              SizedBox(width: 18),
-              CardOverview(
-                label: "Total Sales",
-                value: CurrenceConverter.getCurrenceFloatInStrings(
-                  statsSalesModel?.totalSales ?? 0,
-                  baseCurrence,
-                ),
-              ),
-              SizedBox(width: 18),
-              CardOverview(
-                label: "Active Cashiers",
-                value: statsSalesModel?.numberOfCashiers.toString() ?? "0",
-              ),
-            ],
-          ),
+        _salesRow("Total Sales", CurrenceConverter.getCurrenceFloatInStrings(stats?.totalSales ?? 0, baseCurrence)),
+        _salesRow("Gross Profit", CurrenceConverter.getCurrenceFloatInStrings(profit, baseCurrence), isBold: true),
+        _salesRow("Discounts", CurrenceConverter.getCurrenceFloatInStrings(stats?.totalDiscounts ?? 0, baseCurrence)),
+        _salesRow("Taxes", CurrenceConverter.getCurrenceFloatInStrings(stats?.totalTaxs ?? 0, baseCurrence)),
+        _salesRow("Refunds", CurrenceConverter.getCurrenceFloatInStrings(stats?.totalRefunds ?? 0, baseCurrence)),
+        _salesRow("Total Loss", CurrenceConverter.getCurrenceFloatInStrings(stats?.totalLossValue ?? 0, baseCurrence), color: PdfColors.red800),
+        _salesRow("Total Receipts", stats?.totalReceipts.toString() ?? "0"),
+        _salesRow("Active Cashiers", stats?.numberOfCashiers.toString() ?? "0"),
+      ],
+    );
+  }
+
+  static pw.TableRow _salesRow(String label, String value, {bool isBold = false, PdfColor? color}) {
+    return pw.TableRow(
+      children: [
+        pw.Padding(padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8), child: pw.Text(label, style: pw.TextStyle(fontSize: 11, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal))),
+        pw.Padding(padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8), child: pw.Text(value, style: pw.TextStyle(fontSize: 11, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal, color: color))),
+      ],
+    );
+  }
+
+  static pw.Widget _buildThisMonthSummaryTable(ThisMonthSummaryModel stats, String baseCurrence) {
+    return pw.Table(
+      border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(1.5),
+        1: const pw.FlexColumnWidth(1),
+      },
+      children: [
+        pw.TableRow(
+          decoration: const pw.BoxDecoration(color: PdfColors.blue50),
+          children: [
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text("Metric", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text("Value", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
+          ],
         ),
-        [
-          18.gapWidth,
-          CardOverview(
-            label: "Total Sales",
-            value: statsSalesModel?.totalReceipts.toString() ?? "0",
-          ),
-          18.gapWidth,
-          CardOverview(
-            color: Colors.green.withAlpha(150),
-            label: "Discounts",
-            value: CurrenceConverter.getCurrenceFloatInStrings(
-              statsSalesModel?.totalDiscounts ?? 0,
-              baseCurrence,
-            ),
-          ),
-          18.gapWidth,
-          CardOverview(
-            label: "Taxes",
-            value: CurrenceConverter.getCurrenceFloatInStrings(
-              statsSalesModel?.totalTaxs ?? 0,
-              baseCurrence,
-            ),
-          ),
-        ].row(),
-        [
-          18.gapWidth,
-          CardOverview(
-            color: Colors.blue.withAlpha(50),
-            label: "Total Refunds",
-            value: CurrenceConverter.getCurrenceFloatInStrings(
-              statsSalesModel?.totalRefunds ?? 0,
-              baseCurrence,
-            ),
-          ),
-          18.gapWidth,
-          CardOverview(
-            color: Colors.red.withAlpha(120),
-            label: "Total Loss",
-            value: CurrenceConverter.getCurrenceFloatInStrings(
-              statsSalesModel?.totalLossValue ?? 0,
-              baseCurrence,
-            ),
-          ),
-        ].row(),
-        // 5. Weekly Summary Footer
-        SizedBox(height: 44),
-        SizedBox(height: 18), // Added another height for padding
-        // FIX: Removed SingleChildScrollView.
-        // Replaced .row().decoratedBox with standard Row and Container.
-        Container(
-          padding: EdgeInsets.all(8.0),
-          decoration: BoxDecoration(color: AppTheme.surface(context)),
-          child: Row(
-            children: [
-              SizedBox(width: 18),
-              Text(
-                "${week.subtract(Duration(days: 6)).day}/${week.subtract(Duration(days: 6)).month}/${week.subtract(Duration(days: 6)).year}",
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              SizedBox(width: 18),
-              Text("-", style: Theme.of(context).textTheme.bodyMedium),
-              SizedBox(width: 18),
-              Text(
-                "${week.day}/${week.month}/${week.year}",
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-          ),
-        ),
+        _salesRow("Total Revenue", CurrenceConverter.getCurrenceFloatInStrings(stats.totalRevenue, baseCurrence)),
+        _salesRow("Gross Profit", CurrenceConverter.getCurrenceFloatInStrings(stats.grossProfit, baseCurrence)),
+        _salesRow("Net Profit", CurrenceConverter.getCurrenceFloatInStrings(stats.netProfit, baseCurrence)),
+        _salesRow("Total Expenses", CurrenceConverter.getCurrenceFloatInStrings(stats.totalExpenses, baseCurrence)),
+        _salesRow("Items Sold", stats.totalItemsSold.toString()),
+        _salesRow("Receipts Processed", stats.totalReceipts.toString()),
+        _salesRow("Peak Sales Time", stats.peakSalesRange),
       ],
     );
   }

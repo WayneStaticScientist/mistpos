@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
+import 'package:mistpos/core/themes/app_theme.dart';
 import 'package:mistpos/core/utils/toast.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
@@ -24,13 +25,9 @@ class _ScreenCreditPaymentState extends State<ScreenCreditPayment> {
   final _userController = Get.find<UserController>();
   final _itemsListController = Get.find<ItemsController>();
 
-  late final TextEditingController _amountController = TextEditingController(
-    text: CurrenceConverter.prevailingAmount(
-      widget.receitModel.total,
-      _userController.user.value?.baseCurrence ?? '',
-    ).toString(),
-  );
+  late final TextEditingController _amountController;
 
+  double remaining = 0.0;
   double change = 0.0;
   Timer? _debounce;
   String _debounceCache = "";
@@ -39,6 +36,18 @@ class _ScreenCreditPaymentState extends State<ScreenCreditPayment> {
   @override
   void initState() {
     super.initState();
+    final total = widget.receitModel.total;
+    final paid = widget.receitModel.currentAmountPayed;
+    remaining = total - paid;
+    if (remaining < 0) remaining = 0;
+
+    _amountController = TextEditingController(
+      text: CurrenceConverter.prevailingAmount(
+        remaining,
+        _userController.user.value?.baseCurrence ?? '',
+      ).toStringAsFixed(2),
+    );
+
     _startDebouncer();
   }
 
@@ -52,61 +61,182 @@ class _ScreenCreditPaymentState extends State<ScreenCreditPayment> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: "Payment Credit".text()),
+      appBar: AppBar(
+        title: const Text(
+          "Settle Credit Balance",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        elevation: 0,
+      ),
       body: SingleChildScrollView(
-        child:
-            [
-              "Amount to Pay".text(
-                style: Get.textTheme.titleMedium?.copyWith(color: Colors.grey),
-              ),
-              CurrenceConverter.getCurrenceFloatInStrings(
-                widget.receitModel.total,
-                _userController.user.value?.baseCurrence ?? '',
-              ).text(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildBalanceCard(),
+              const SizedBox(height: 32),
+              const Text(
+                "Payment Amount",
                 style: TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  color: Get.theme.colorScheme.primary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey,
                 ),
               ),
-              24.gapHeight,
+              const SizedBox(height: 12),
               MistFormInput(
                 label: "Amount Tendered",
                 controller: _amountController,
-                keyboardType: TextInputType.number,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
               ),
-              24.gapHeight,
-              _buildBalanceDisplay(),
-            ].column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-            ),
-      ).center().padding(const EdgeInsets.all(30)),
+              const SizedBox(height: 16),
+              _buildQuickPicks(),
+              const SizedBox(height: 32),
+              _buildChangeDisplay(),
+            ],
+          ),
+        ),
+      ),
       bottomNavigationBar: _buildBottomActions(),
     );
   }
 
-  /// Displays either the change due or an error if funds are insufficient
-  Widget _buildBalanceDisplay() {
-    if (change < 0.0) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.red.withAlpha(30),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.red.withAlpha(80)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.error_outline, color: Colors.red, size: 20),
-            8.gapWidth,
-            "Insufficient Funds".text(
-              style: const TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+  Widget _buildBalanceCard() {
+    final currency = _userController.user.value?.baseCurrence ?? '';
+    final primary = Get.theme.colorScheme.primary;
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppTheme.surface(context),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: primary.withAlpha(20),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+        border: Border.all(color: primary.withAlpha(40)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Total Invoice:",
+                style: TextStyle(color: Colors.grey, fontSize: 14),
               ),
+              Text(
+                CurrenceConverter.getCurrenceFloatInStrings(
+                  widget.receitModel.total,
+                  currency,
+                ),
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Paid so far:",
+                style: TextStyle(color: Colors.grey, fontSize: 14),
+              ),
+              Text(
+                CurrenceConverter.getCurrenceFloatInStrings(
+                  widget.receitModel.currentAmountPayed,
+                  currency,
+                ),
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Divider(),
+          ),
+          const Text(
+            "Remaining Balance",
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 14,
+              letterSpacing: 1.1,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            CurrenceConverter.getCurrenceFloatInStrings(remaining, currency),
+            style: TextStyle(
+              fontSize: 42,
+              fontWeight: FontWeight.w900,
+              color: primary,
+              height: 1.1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickPicks() {
+    final totalRemaining = CurrenceConverter.prevailingAmount(
+      remaining,
+      _userController.user.value?.baseCurrence ?? '',
+    );
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _buildQuickPickChip("25%", totalRemaining * 0.25),
+        _buildQuickPickChip("50%", totalRemaining * 0.50),
+        _buildQuickPickChip("75%", totalRemaining * 0.75),
+        _buildQuickPickChip("Full", totalRemaining),
+      ],
+    );
+  }
+
+  Widget _buildQuickPickChip(String label, double value) {
+    return ActionChip(
+      label: Text(label),
+      onPressed: () {
+        _amountController.text = value.toStringAsFixed(2);
+      },
+      backgroundColor: Get.theme.colorScheme.primary.withAlpha(20),
+      labelStyle: TextStyle(
+        color: Get.theme.colorScheme.primary,
+        fontWeight: FontWeight.bold,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Get.theme.colorScheme.primary.withAlpha(50)),
+      ),
+    );
+  }
+
+  Widget _buildChangeDisplay() {
+    final currency = _userController.user.value?.baseCurrence ?? '';
+    if (change <= 0.0) {
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.blue.withAlpha(20),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.info_outline, color: Colors.blue, size: 20),
+            SizedBox(width: 8),
+            Text(
+              "Partial deposit — No change due",
+              style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -115,16 +245,20 @@ class _ScreenCreditPaymentState extends State<ScreenCreditPayment> {
 
     return Column(
       children: [
-        "Change Due".text(
-          style: Get.textTheme.bodySmall?.copyWith(letterSpacing: 1.2),
+        const Text(
+          "Change Due",
+          style: TextStyle(
+            color: Colors.grey,
+            letterSpacing: 1.2,
+            fontSize: 14,
+          ),
         ),
-        CurrenceConverter.getCurrenceFloatInStrings(
-          change,
-          _userController.user.value?.baseCurrence ?? '',
-        ).text(
+        const SizedBox(height: 8),
+        Text(
+          CurrenceConverter.getCurrenceFloatInStrings(change, currency),
           style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
+            fontSize: 28,
+            fontWeight: FontWeight.w800,
             color: Colors.green,
           ),
         ),
@@ -132,13 +266,12 @@ class _ScreenCreditPaymentState extends State<ScreenCreditPayment> {
     );
   }
 
-  /// Modern dual-button action bar
   Widget _buildBottomActions() {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        padding: const EdgeInsets.all(24),
         child: ElevatedButton.icon(
-          onPressed: _pay,
+          onPressed: _savingReceit ? null : _pay,
           icon: _savingReceit
               ? const SizedBox(
                   width: 20,
@@ -149,16 +282,17 @@ class _ScreenCreditPaymentState extends State<ScreenCreditPayment> {
                   ),
                 )
               : const Iconify(Carbon.checkmark_filled, color: Colors.white),
-          label: "Pay Now".text(),
+          label: const Text(
+            "Confirm Payment",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           style: ElevatedButton.styleFrom(
             elevation: 0,
             padding: const EdgeInsets.symmetric(vertical: 20),
-            backgroundColor: change >= 0.0
-                ? Get.theme.colorScheme.primary
-                : Colors.grey.shade400,
+            backgroundColor: Get.theme.colorScheme.primary,
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
             ),
           ),
         ),
@@ -167,21 +301,21 @@ class _ScreenCreditPaymentState extends State<ScreenCreditPayment> {
   }
 
   void _startDebouncer() {
-    _debounce = Timer.periodic(const Duration(milliseconds: 300), (timer) {
+    _debounce = Timer.periodic(const Duration(milliseconds: 150), (timer) {
       if (_debounceCache == _amountController.text) return;
       _debounceCache = _amountController.text;
 
-      final amount = double.tryParse(_amountController.text);
-      final total = CurrenceConverter.prevailingAmount(
-        widget.receitModel.total,
+      final amountTendered = double.tryParse(_amountController.text) ?? 0.0;
+      final remainingLocal = CurrenceConverter.prevailingAmount(
+        remaining,
         _userController.user.value?.baseCurrence ?? '',
       );
 
       setState(() {
-        if (amount == null) {
-          change = -total;
+        if (amountTendered > remainingLocal) {
+          change = amountTendered - remainingLocal;
         } else {
-          change = amount - total;
+          change = 0.0; // Partial payment
         }
       });
     });
@@ -189,18 +323,8 @@ class _ScreenCreditPaymentState extends State<ScreenCreditPayment> {
 
   void _pay({bool creditPayment = false}) async {
     final amount = double.tryParse(_amountController.text);
-    if (amount == null) {
+    if (amount == null || amount <= 0) {
       Toaster.showError("Please enter a valid amount");
-      return;
-    }
-
-    final total = CurrenceConverter.prevailingAmount(
-      widget.receitModel.total,
-      _userController.user.value?.baseCurrence ?? '',
-    );
-
-    if (amount < total) {
-      Toaster.showError("Insufficient funds for cash payment");
       return;
     }
 
@@ -211,15 +335,20 @@ class _ScreenCreditPaymentState extends State<ScreenCreditPayment> {
       setState(() => _savingReceit = false);
       return;
     }
+
     final response = await _itemsListController.payReceitCredit(
       amount: amount,
       id: widget.receitModel.hexId,
     );
+
     if (response) {
-      widget.receitModel.amount = amount;
-      widget.receitModel.creditSale = false;
+      // Update local model
+      widget.receitModel.currentAmountPayed += amount;
+      if (widget.receitModel.currentAmountPayed >= widget.receitModel.total) {
+        widget.receitModel.creditSale = false;
+      }
       Get.back(result: widget.receitModel);
-      Toaster.showSuccess("payment success");
+      Toaster.showSuccess("Payment processed successfully");
     }
 
     if (mounted) setState(() => _savingReceit = false);

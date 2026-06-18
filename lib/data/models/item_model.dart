@@ -28,6 +28,7 @@ class ItemModel {
   bool useProduction = false;
   bool isCompositeItem = false;
   bool isForSale = true;
+  bool isDeleted = false;
 
   List<InvItem> compositeItems = [];
 
@@ -55,6 +56,7 @@ class ItemModel {
     this.miniItems = 0,
     this.wholesaleActivated = false,
     this.wholesalePrice = 0,
+    this.isDeleted = false,
   });
   Map<String, dynamic> toJson() {
     return {
@@ -90,6 +92,7 @@ class ItemModel {
       wholesaleActivated: json["wholesaleActivated"] as bool? ?? false,
       wholesalePrice: (json['wholesalePrice'] as num?)?.toDouble() ?? 0.0,
       isForSale: json["isForSale"] as bool? ?? true,
+      isDeleted: json["isDeleted"] as bool? ?? false,
       color: json["color"] as int?,
       sku: json["sku"] as String? ?? "",
       name: json["name"] as String? ?? "",

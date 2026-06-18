@@ -14,6 +14,7 @@ class ItemReceitModel {
   bool creditSale = false;
   double tax;
   double amount;
+  double currentAmountPayed;
   double total;
   bool synced = false;
   DateTime createdAt;
@@ -38,6 +39,7 @@ class ItemReceitModel {
     this.label = "",
     this.synced = false,
     this.creditSale = false,
+    this.currentAmountPayed = 0.0,
     this.discounts = const [],
   });
   Map<String, dynamic> toJson() {
@@ -48,6 +50,7 @@ class ItemReceitModel {
       "payment": payment,
       "change": change,
       "amount": amount,
+      "currentAmountPayed": currentAmountPayed,
       "total": total,
       "synced": synced,
       "label": label,
@@ -81,6 +84,7 @@ class ItemReceitModel {
       hexId: data['_id'],
       total: (data['total'] as num?)?.toDouble() ?? 0.0,
       amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
+      currentAmountPayed: (data['currentAmountPayed'] as num?)?.toDouble() ?? 0.0,
       change: (data['change'] as num?)?.toDouble() ?? 0.0,
       cashier: data['cashier'],
       payment: data['payment'],

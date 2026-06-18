@@ -1,152 +1,223 @@
-import 'package:exui/exui.dart';
-import 'package:flutter/material.dart';
-import 'package:pdf_maker/pdf_maker.dart';
-import 'package:mistpos/data/models/user_model.dart';
-import 'package:mistpos/core/themes/app_theme.dart';
+import 'dart:typed_data';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:mistpos/core/utils/date_utils.dart';
-import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/data/models/user_model.dart';
 import 'package:mistpos/data/models/item_model.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/core/utils/currence_converter.dart';
 import 'package:mistpos/data/models/product_stats_model.dart';
-import 'package:mistpos/features/settings/screens/modern_layout.dart';
 
-class PdfInvEvaluation extends BlankPage {
-  final DateTime startDate;
-  final DateTime endDate;
-  final StatsProductModel statsProductModel;
-  final List<ItemModel> inventoryProducts;
-  final String baseCurrence;
-  const PdfInvEvaluation({
-    super.key,
-    required this.baseCurrence,
-    required this.startDate,
-    required this.endDate,
-    required this.statsProductModel,
-    required this.inventoryProducts,
-  });
-
-  @override
-  Widget createPageContent(BuildContext context) {
+class PdfInvEvaluation {
+  static Future<pw.Document> generate({
+    required DateTime? startDate,
+    required DateTime? endDate,
+    required StatsProductModel statsProductModel,
+    required List<ItemModel> inventoryProducts,
+    required String baseCurrence,
+  }) async {
+    final pdf = pw.Document();
     final user = User.fromStorage();
-    return [
-      "${user?.companyName}".text(
-        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+
+    // Load Logo
+    pw.MemoryImage? logoImage;
+    try {
+      final ByteData data = await rootBundle.load('assets/launcher.png');
+      logoImage = pw.MemoryImage(data.buffer.asUint8List());
+    } catch (e) {
+      // ignore
+    }
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        build: (pw.Context context) {
+          return [
+            // ── Header with Logo ──
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(user?.companyName ?? "Company Name",
+                        style: pw.TextStyle(
+                            fontSize: 24,
+                            fontWeight: pw.FontWeight.bold,
+                            color: PdfColors.blue800)),
+                    pw.SizedBox(height: 4),
+                    pw.Text("Inventory Valuation Report",
+                        style: pw.TextStyle(
+                            fontSize: 18, color: PdfColors.grey700)),
+                  ],
+                ),
+                if (logoImage != null)
+                  pw.Image(logoImage, width: 60, height: 60),
+              ],
+            ),
+            pw.SizedBox(height: 18),
+            pw.Divider(color: PdfColors.grey400),
+            pw.SizedBox(height: 12),
+
+            // ── Date Range ──
+            pw.Row(
+              children: [
+                pw.Text("Report Period: ",
+                    style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold, fontSize: 12)),
+                pw.Text(
+                    (startDate == null || endDate == null)
+                        ? "All Time"
+                        : "${MistDateUtils.getInformalShortDate(startDate)} to ${MistDateUtils.getInformalShortDate(endDate)}",
+                    style: const pw.TextStyle(fontSize: 12)),
+              ],
+            ),
+            pw.SizedBox(height: 24),
+
+            // ── Summary ──
+            pw.Text("Summary",
+                style: pw.TextStyle(
+                    fontSize: 14,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.blue800)),
+            pw.SizedBox(height: 8),
+            _buildSummaryTable(statsProductModel, baseCurrence),
+
+            pw.SizedBox(height: 32),
+
+            // ── Inventory Products ──
+            pw.Text("Inventory Products",
+                style: pw.TextStyle(
+                    fontSize: 14,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.blue800)),
+            pw.SizedBox(height: 8),
+            _buildProductsTable(inventoryProducts, baseCurrence),
+          ];
+        },
       ),
-      "Inventory Valuation Report".text(style: TextStyle(fontSize: 24)),
-      14.gapHeight,
-      [
-        Iconify(Bx.calendar, color: AppTheme.color(context)),
-        8.gapWidth,
-
-        "From ${MistDateUtils.getInformalShortDate(startDate)} - ${(DateUtils.isSameDay(endDate, DateTime.now()) ? "Today " : MistDateUtils.getInformalShortDate(endDate))}"
-            .text()
-            .visibleIfNotNull(startDate),
-      ].row(mainAxisAlignment: MainAxisAlignment.center),
-
-      _makeSummary(statsProductModel),
-      18.gapHeight,
-      _makeTable(inventoryProducts),
-    ].column();
+    );
+    return pdf;
   }
 
-  Widget _makeSummary(StatsProductModel statsProductModel) {
-    return MistMordernLayout(
-      label: "Summary",
-      children: [
-        [
-          "Total Inventory Value".text(),
-          CurrenceConverter.getCurrenceFloatInStrings(
-            statsProductModel.totalCost,
-            baseCurrence,
-          ).text(style: TextStyle(fontSize: 18)),
-        ].row(),
-        14.gapHeight,
-        [
-          "Total Retail Value".text(),
-          CurrenceConverter.getCurrenceFloatInStrings(
-            statsProductModel.totalRevenue,
-            baseCurrence,
-          ).text(style: TextStyle(fontSize: 18)),
-        ].row(),
-        14.gapHeight,
-        [
-          "Potential Profit".text(),
-          CurrenceConverter.getCurrenceFloatInStrings(
-            statsProductModel.totalRevenue - statsProductModel.totalCost,
-            baseCurrence,
-          ).text(style: TextStyle(fontSize: 18)),
-        ].row(),
-        [
-          "Margin".text(),
-          "${((statsProductModel.totalCost / statsProductModel.totalRevenue) * 100).toStringAsFixed(0)}%"
-              .text(style: TextStyle(fontSize: 18)),
-        ].row(),
-      ],
-    ).sizedBox(width: double.infinity);
-  }
-
-  Widget _makeTable(List<ItemModel> inventoryProducts) {
-    return Table(
-      columnWidths: const <int, TableColumnWidth>{
-        0: FixedColumnWidth(200.0), // Item
-        1: FixedColumnWidth(100.0),
-        2: FixedColumnWidth(100.0),
-        3: FixedColumnWidth(100.0),
-        4: FixedColumnWidth(100.0),
-        5: FixedColumnWidth(100.0),
+  static pw.Widget _buildSummaryTable(
+      StatsProductModel stats, String baseCurrence) {
+    return pw.Table(
+      border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(1.5),
+        1: const pw.FlexColumnWidth(1),
       },
       children: [
-        TableRow(
-          decoration: BoxDecoration(
-            color: Colors.grey,
-            borderRadius: BorderRadius.circular(10),
-          ),
+        pw.TableRow(
+          decoration: const pw.BoxDecoration(color: PdfColors.blue50),
           children: [
-            Text('Item Name').padding(EdgeInsets.all(10)),
-            Text('Quantity').padding(EdgeInsets.all(10)),
-            Text('Cost').padding(EdgeInsets.all(10)),
-            Text('Retail').padding(EdgeInsets.all(10)),
-            Text('Profit').padding(EdgeInsets.all(10)),
-            Text('Margin').padding(EdgeInsets.all(10)),
+            pw.Padding(
+                padding: const pw.EdgeInsets.all(10),
+                child: pw.Text("Metric",
+                    style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold, fontSize: 11))),
+            pw.Padding(
+                padding: const pw.EdgeInsets.all(10),
+                child: pw.Text("Value",
+                    style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold, fontSize: 11))),
           ],
         ),
-        ...inventoryProducts.map(
-          (e) => TableRow(
-            children: [
-              e.name.text().padding(EdgeInsets.all(10)),
-              e.stockQuantity.toString().text().padding(EdgeInsets.all(10)),
-              CurrenceConverter.getCurrenceFloatInStrings(
-                e.cost *
-                    ((e.isCompositeItem && !e.useProduction && e.trackStock) ||
-                            (!e.trackStock)
-                        ? 1
-                        : e.stockQuantity),
-                baseCurrence,
-              ).text().padding(EdgeInsets.all(10)),
-              CurrenceConverter.getCurrenceFloatInStrings(
-                e.price *
-                    ((e.isCompositeItem && !e.useProduction && e.trackStock) ||
-                            (!e.trackStock)
-                        ? 1
-                        : e.stockQuantity),
-                baseCurrence,
-              ).text().padding(EdgeInsets.all(10)),
-              CurrenceConverter.getCurrenceFloatInStrings(
-                (e.price - e.cost) *
-                    ((e.isCompositeItem && !e.useProduction && e.trackStock) ||
-                            (!e.trackStock)
-                        ? 1
-                        : e.stockQuantity),
-                baseCurrence,
-              ).text().padding(EdgeInsets.all(10)),
-              "${((e.cost / e.price) * 100).toStringAsFixed(2)}%"
-                  .text()
-                  .padding(EdgeInsets.all(10)),
-            ],
-          ),
-        ),
+        _summaryRow(
+            "Total Inventory Value",
+            CurrenceConverter.getCurrenceFloatInStrings(
+                stats.totalCost, baseCurrence)),
+        _summaryRow(
+            "Total Retail Value",
+            CurrenceConverter.getCurrenceFloatInStrings(
+                stats.totalRevenue, baseCurrence)),
+        _summaryRow(
+            "Potential Profit",
+            CurrenceConverter.getCurrenceFloatInStrings(
+                stats.totalRevenue - stats.totalCost, baseCurrence)),
+        _summaryRow(
+            "Margin",
+            "${stats.totalRevenue > 0 ? ((stats.totalCost / stats.totalRevenue) * 100).toStringAsFixed(0) : '0'}%"),
       ],
+    );
+  }
+
+  static pw.TableRow _summaryRow(String label, String value,
+      {bool isBold = false}) {
+    return pw.TableRow(
+      children: [
+        pw.Padding(
+            padding:
+                const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: pw.Text(label,
+                style: pw.TextStyle(
+                    fontSize: 11,
+                    fontWeight:
+                        isBold ? pw.FontWeight.bold : pw.FontWeight.normal))),
+        pw.Padding(
+            padding:
+                const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: pw.Text(value,
+                style: pw.TextStyle(
+                    fontSize: 11,
+                    fontWeight:
+                        isBold ? pw.FontWeight.bold : pw.FontWeight.normal))),
+      ],
+    );
+  }
+
+  static pw.Widget _buildProductsTable(
+      List<ItemModel> products, String baseCurrence) {
+    final tableHeaders = [
+      'Item Name',
+      'Quantity',
+      'Cost',
+      'Retail',
+      'Profit',
+      'Margin',
+    ];
+
+    final tableData = products.map((e) {
+      final effectiveQty = ((e.isCompositeItem && !e.useProduction && e.trackStock) || (!e.trackStock)) ? 1 : e.stockQuantity;
+      final margin = e.price > 0 ? ((e.cost / e.price) * 100).toStringAsFixed(2) : "0.00";
+      
+      return [
+        e.name,
+        e.stockQuantity.toString(),
+        CurrenceConverter.getCurrenceFloatInStrings(e.cost * effectiveQty, baseCurrence),
+        CurrenceConverter.getCurrenceFloatInStrings(e.price * effectiveQty, baseCurrence),
+        CurrenceConverter.getCurrenceFloatInStrings((e.price - e.cost) * effectiveQty, baseCurrence),
+        "$margin%",
+      ];
+    }).toList();
+
+    return pw.TableHelper.fromTextArray(
+      headers: tableHeaders,
+      data: tableData,
+      border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+      headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10, color: PdfColors.black),
+      headerDecoration: const pw.BoxDecoration(color: PdfColors.blue50),
+      cellHeight: 22,
+      cellAlignments: {
+        0: pw.Alignment.centerLeft,
+        1: pw.Alignment.centerLeft,
+        2: pw.Alignment.centerLeft,
+        3: pw.Alignment.centerLeft,
+        4: pw.Alignment.centerLeft,
+        5: pw.Alignment.centerLeft,
+      },
+      cellStyle: const pw.TextStyle(fontSize: 9),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(2),
+        1: const pw.FlexColumnWidth(1),
+        2: const pw.FlexColumnWidth(1),
+        3: const pw.FlexColumnWidth(1),
+        4: const pw.FlexColumnWidth(1),
+        5: const pw.FlexColumnWidth(1),
+      },
     );
   }
 }

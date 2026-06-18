@@ -6,15 +6,16 @@ import 'package:mistpos/data/models/item_receit_model.dart';
 import 'package:mistpos/data/models/tax_model.dart';
 import 'package:mistpos/data/models/user_model.dart';
 import 'package:mistpos/core/utils/currence_converter.dart';
+import 'package:image/image.dart' as img;
 import 'package:pos_universal_printer/pos_universal_printer.dart';
 
 class OfflinePrinter {
   static void printLogo(AppSettingsModel model, EscPosBuilder b) {
     if (model.receitLogoPath.isNotEmpty) {
-      final rasterImage = getRasterImage(model.receitLogoPath);
-      if (rasterImage != null) {
+      final rasterBytes = getRasterImage(model.receitLogoPath);
+      if (rasterBytes != null) {
         b.feed(1);
-        b.raster(rasterImage);
+        b.raster(rasterBytes);
         b.feed(1);
       }
     }
@@ -114,9 +115,49 @@ class OfflinePrinter {
   static List<int>? getRasterImage(String receitLogoPath) {
     try {
       final imageBytes = File(receitLogoPath).readAsBytesSync();
-      return imageBytes;
+      final decoded = img.decodeImage(imageBytes);
+      if (decoded == null) return null;
+      return _imageToRaster(decoded);
     } catch (_) {
       return null;
     }
+  }
+
+  static List<int> _imageToRaster(img.Image image) {
+    img.Image resized = image;
+    if (image.width > 384) {
+      resized = img.copyResize(image, width: 384);
+    }
+
+    final int widthPx = resized.width;
+    final int heightPx = resized.height;
+    final int widthBytes = (widthPx + 7) ~/ 8;
+
+    final List<int> bytes = [];
+    
+    // GS v 0 command (raster bit image)
+    bytes.addAll([0x1D, 0x76, 0x30, 0x00]); 
+    bytes.add(widthBytes % 256);
+    bytes.add(widthBytes ~/ 256);
+    bytes.add(heightPx % 256);
+    bytes.add(heightPx ~/ 256);
+
+    for (int y = 0; y < heightPx; y++) {
+      for (int x = 0; x < widthBytes; x++) {
+        int byte = 0;
+        for (int b = 0; b < 8; b++) {
+          final int px = x * 8 + b;
+          if (px < widthPx) {
+            final pixel = resized.getPixel(px, y);
+            final luminance = (0.299 * pixel.r + 0.587 * pixel.g + 0.114 * pixel.b);
+            if (luminance < 128 && pixel.a > 0) {
+              byte |= (1 << (7 - b));
+            }
+          }
+        }
+        bytes.add(byte);
+      }
+    }
+    return bytes;
   }
 }

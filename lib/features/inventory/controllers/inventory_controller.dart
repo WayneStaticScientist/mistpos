@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 
 import 'package:get/get.dart';
 import 'package:mistpos/core/utils/toast.dart';
@@ -582,6 +583,18 @@ class InventoryController extends GetxController {
     }
   }
 
+  Future<List<ItemModel>> getAllInventoryProductsForExport() async {
+    final response = await Net.get("/cashier/products?limit=100000&salesOnly=true");
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return [];
+    }
+    if (response.body['list'] != null) {
+      List<dynamic> list = response.body['list'];
+      return await compute(_parseExportItems, list);
+    }
+    return [];
+  }
   RxBool unwrappingToIds = RxBool(false);
   void unwrapToIds(List<String> ids) {}
 
@@ -591,6 +604,8 @@ class InventoryController extends GetxController {
     required double amount,
     required String subKey,
     required String phoneNumber,
+    int durationMonths = 1,
+    String? type,
   }) async {
     if (mobilePaymentProcessing.value) {
       Toaster.showError("mobile payment still processing");
@@ -598,12 +613,14 @@ class InventoryController extends GetxController {
     }
     mobilePaymentProcessing.value = true;
     final response = await Net.post(
-      '/admin/subscribe/paymobile',
+      '/subscribe/paymobile',
       data: {
         "method": method,
         "amount": amount,
         "subKey": subKey,
         "phoneNumber": phoneNumber,
+        "months": durationMonths,
+        if (type != null) "type": type,
       },
     );
     if (response.hasError) {
@@ -617,26 +634,70 @@ class InventoryController extends GetxController {
     return result;
   }
 
+  RxBool loadingSubscriptionPricing = false.obs;
+  RxList<Map<String, dynamic>> subscriptionPlans = <Map<String, dynamic>>[].obs;
+  RxList<Map<String, dynamic>> aiSubscriptionPlans = <Map<String, dynamic>>[].obs;
+  Future<void> getSubscriptionPricing() async {
+    if (loadingSubscriptionPricing.value) return;
+    loadingSubscriptionPricing.value = true;
+    final response = await Net.get('/admin/subscriptions/pricing');
+    loadingSubscriptionPricing.value = false;
+    if (response.hasError) {
+      Toaster.showError(response.response);
+      return;
+    }
+    if (response.body['plans'] != null) {
+      List<dynamic> plans = response.body['plans'];
+      subscriptionPlans.value = plans
+          .map((e) => e as Map<String, dynamic>)
+          .toList();
+    }
+    if (response.body['aiPlans'] != null) {
+      List<dynamic> aiPlans = response.body['aiPlans'];
+      aiSubscriptionPlans.value = aiPlans
+          .map((e) => e as Map<String, dynamic>)
+          .toList();
+    }
+  }
+
   RxBool webProcessingPayment = RxBool(false);
   Future<({String? redirectUrl, String? returnUrl, String? pollUrl})> payWeb(
     String method,
     double amount,
-    String subKey,
-  ) async {
+    String subKey, {
+    int durationMonths = 1,
+    String? type,
+  }) async {
     if (webProcessingPayment.value) {
       Toaster.showError("mobile payment still processing");
       return (redirectUrl: null, returnUrl: null, pollUrl: null);
     }
     webProcessingPayment.value = true;
     final response = await Net.post(
-      '/admin/subscribe/payweb',
-      data: {"method": method, "amount": amount, "plan": subKey},
+      '/subscribe/payweb',
+      data: {
+        "plan": subKey,
+        "months": durationMonths,
+        "method": method,
+        "amount": amount,
+        if (type != null) "type": type,
+      },
     );
     webProcessingPayment.value = false;
     if (response.hasError) {
       Toaster.showError(response.response);
       return (redirectUrl: null, returnUrl: null, pollUrl: null);
     }
+
+    // Update company after subscribing
+    if (response.body != null && response.body['update'] != null) {
+      company.value = CompanyModel.fromJson(response.body['update']);
+      company.value?.saveToStorage();
+    }
+
+    // Simulate a web return for now, since paynow web integration might need proper redirects
+    // if there was a real payment gateway
+    Toaster.showSuccess("Subscription successful!");
     return (
       redirectUrl: response.body['redirectUrl'] as String?,
       returnUrl: response.body['returnUrl'] as String?,
@@ -657,6 +718,10 @@ class InventoryController extends GetxController {
       company.value = CompanyModel.fromJson(poll.body['company']);
       company.value!.saveToStorage();
       return true;
+    }
+    if (poll.body['status'] == 'Failed') {
+      Toaster.showError("payment failed, retry again");
+      return false;
     }
     mobilePaymentProcessing.value = true;
     Toaster.showError("payment failed >> retry again in 5 seconds");
@@ -950,4 +1015,8 @@ class InventoryController extends GetxController {
     }
     return false;
   }
+}
+
+List<ItemModel> _parseExportItems(List<dynamic> list) {
+  return list.map((e) => ItemModel.fromJson(e)).toList();
 }

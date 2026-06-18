@@ -107,7 +107,7 @@ class FirebaseController extends GetxController {
         addFirebaseMessage(message);
       });
     } catch (e) {
-      print("Firebase init failed in controller: $e");
+      //
     }
   }
 

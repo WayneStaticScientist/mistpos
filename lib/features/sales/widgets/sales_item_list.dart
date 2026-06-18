@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/core/themes/app_theme.dart';
@@ -19,50 +18,47 @@ class SalesItemList extends StatefulWidget {
 
 class _SalesItemListState extends State<SalesItemList> {
   final _itemsListController = Get.find<ItemsController>();
+
   @override
   Widget build(BuildContext context) {
     return Obx(
       () => _itemsListController.cartItems.isNotEmpty
           ? SliverList.builder(
-              itemBuilder: (context, index) =>
-                  MistListTileItem(item: _itemsListController.cartItems[index])
-                      .padding(EdgeInsets.symmetric(horizontal: 18))
-                      .onTapUp(
-                        (e) => widget.onTap(
-                          e,
-                          _itemsListController.cartItems[index],
-                        ),
-                      )
-                      .paddingZero
-                      .onLongPress(
-                        () => Get.to(
-                          () => ScreenManualCart(
-                            item: _itemsListController.cartItems[index],
-                          ),
-                        ),
-                      )
-                      .padding(
-                        EdgeInsets.only(
-                          bottom:
-                              index == _itemsListController.cartItems.length - 1
-                              ? 100
-                              : 0,
-                        ),
-                      ),
+              itemBuilder: (context, index) {
+                final item = _itemsListController.cartItems[index];
+                final isLast = index == _itemsListController.cartItems.length - 1;
+                return GestureDetector(
+                  onTapUp: (e) => widget.onTap(e, item),
+                  onLongPress: () => Get.to(() => ScreenManualCart(item: item)),
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: isLast ? 110 : 0),
+                    child: MistListTileItem(item: item),
+                  ),
+                );
+              },
               itemCount: _itemsListController.cartItems.length,
             )
           : SliverFillRemaining(
-              child:
-                  [
-                        Iconify(Bx.cart_alt, color: AppTheme.color(context)),
-                        12.gapHeight,
-                        "no items".text(),
-                      ]
-                      .column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                      )
-                      .center(),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Iconify(
+                    Bx.cart_alt,
+                    color: AppTheme.color(context).withAlpha(80),
+                    size: 52,
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    "No items found",
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.grey.shade500,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
     );
   }

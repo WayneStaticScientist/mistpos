@@ -15,6 +15,7 @@ import 'package:mistpos/core/widgets/loaders/small_loader.dart';
 import 'package:mistpos/features/admin/controllers/admin_controller.dart';
 import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:mistpos/features/settings/screens_currency/edit_currencies.dart';
+import 'package:mistpos/features/inventory/controllers/items_controller.dart';
 
 class ScreenViewCompany extends StatefulWidget {
   final CompanyModel company;
@@ -134,6 +135,9 @@ class _ScreenViewCompanyState extends State<ScreenViewCompany> {
     final result = await _userController.switchStore(widget.company.hexId);
     if (result) {
       _inventoryController.loadCompany();
+      if (Get.isRegistered<ItemsController>()) {
+        Get.find<ItemsController>().clearAndResyncData();
+      }
     }
   }
 }

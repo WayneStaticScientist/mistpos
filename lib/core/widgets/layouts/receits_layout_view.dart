@@ -106,7 +106,7 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
                   children: [
                     MistSearchField(
                       controller: _searchController,
-                      label: "Search Receits",
+                      label: "Search Receipts",
                     ).padding(const EdgeInsets.symmetric(horizontal: 2)),
 
                     // Filter Chips Row
@@ -158,10 +158,7 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
                   if (item is String) {
                     return _buildGroupHeader(item);
                   } else if (item is ItemReceitModel) {
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [_buildItem(item), 14.gapHeight],
-                    );
+                    return _buildItem(item);
                   }
                   return const SizedBox.shrink();
                 }, childCount: flatList.length),
@@ -180,7 +177,7 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
                       size: 43,
                     ),
                     14.gapHeight,
-                    "No Receits found".text(
+                    "No Receipts found".text(
                       style: TextStyle(color: AppTheme.color(context)),
                     ),
                   ],
@@ -194,15 +191,18 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
   }
 
   Widget _buildGroupHeader(String date) {
-    return date
-        .split(" ")
-        .skip(1)
-        .join(" ")
-        .text(
-          style: TextStyle(fontSize: 12, color: Get.theme.colorScheme.primary),
-        )
-        .row()
-        .padding(const EdgeInsets.all(10));
+    return Container(
+      padding: const EdgeInsets.only(left: 24, top: 24, bottom: 8, right: 16),
+      child: Text(
+        date.split(" ").skip(1).join(" ").toUpperCase(),
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.5,
+          color: Colors.grey.shade500,
+        ),
+      ),
+    );
   }
 
   Widget _buildFilterChip(String label) {
@@ -237,41 +237,170 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
   }
 
   Widget _buildItem(ItemReceitModel receit) {
-    return ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: Iconify(
-            Carbon.receipt,
-            color: receit.creditSale ? Colors.red : AppTheme.color(context),
-          ),
-          title:
-              CurrenceConverter.getCurrenceFloatInStrings(
-                receit.total,
-                _userController.user.value?.baseCurrence ?? '',
-              ).text(
-                style: TextStyle(color: receit.creditSale ? Colors.red : null),
-              ),
-          trailing: Text(
-            receit.label,
-            style: TextStyle(
-              fontSize: 10,
-              color: receit.creditSale ? Colors.red : null,
-            ),
-          ),
-          subtitle: Text(
-            "${receit.createdAt.hour.toString().padLeft(2, '0')}:${receit.createdAt.minute.toString().padLeft(2, '0')} ${receit.creditSale ? '(credit)' : ''}",
-            style: TextStyle(color: receit.creditSale ? Colors.red : null),
-          ),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.grey.withAlpha((255 * 0.3).toInt()), // 30% opacity
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: receit.creditSale
+              ? Colors.red.withAlpha(30)
+              : Colors.transparent,
+          width: 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
           onTap: () => Get.to(() => ScreenReceitView(receitModel: receit)),
-        )
-        .decoratedBox(
-          decoration: BoxDecoration(
-            border: Border(
-              top: BorderSide(color: Colors.grey.withAlpha(50), width: 1),
-              bottom: BorderSide(color: Colors.grey.withAlpha(50), width: 1),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                // Icon Container
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: receit.creditSale
+                        ? Colors.red.withAlpha(20)
+                        : Get.theme.colorScheme.primary.withAlpha(20),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Iconify(
+                    Carbon.receipt,
+                    color: receit.creditSale
+                        ? Colors.red
+                        : Get.theme.colorScheme.primary,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              "#${receit.label}",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                letterSpacing: 0.5,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            CurrenceConverter.getCurrenceFloatInStrings(
+                              receit.total,
+                              _userController.user.value?.baseCurrence ?? '',
+                            ),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                              color: receit.creditSale
+                                  ? Colors.red.shade400
+                                  : AppTheme.color(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              "${receit.createdAt.hour.toString().padLeft(2, '0')}:${receit.createdAt.minute.toString().padLeft(2, '0')} • ${receit.items.length} items",
+                              style: TextStyle(
+                                color: Colors.grey.shade500,
+                                fontSize: 13,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          if (receit.creditSale)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withAlpha(20),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Text(
+                                "CREDIT",
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            )
+                          else if (!receit.synced)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withAlpha(20),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                "PENDING",
+                                style: TextStyle(
+                                  color: Colors.orange.shade700,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            )
+                          else
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withAlpha(20),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Text(
+                                "PAID",
+                                style: TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-        )
-        .padding(EdgeInsets.symmetric(horizontal: 10, vertical: 5));
+        ),
+      ),
+    );
   }
 
   Future _syncReceits(int i, String searchKey) async {

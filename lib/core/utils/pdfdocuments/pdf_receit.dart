@@ -1,171 +1,261 @@
-import 'package:exui/exui.dart';
-import 'package:flutter/material.dart';
-import 'package:pdf_maker/pdf_maker.dart';
-import 'package:mistpos/data/models/user_model.dart';
+import 'package:flutter/services.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:mistpos/core/utils/date_utils.dart';
 import 'package:mistpos/data/models/item_receit_model.dart';
+import 'package:mistpos/data/models/user_model.dart';
 import 'package:mistpos/core/utils/currence_converter.dart';
 
-class PdfReceit extends BlankPage {
-  final ItemReceitModel receitModel;
-  final String baseCurrence;
-  const PdfReceit({
-    super.key,
-    required this.baseCurrence,
-    required this.receitModel,
-  });
+class PdfReceit {
+  static Future<pw.Document> generate(
+    ItemReceitModel receitModel,
+    String baseCurrence,
+    User? user,
+  ) async {
+    final pdf = pw.Document();
 
-  @override
-  Widget createPageContent(BuildContext context) {
-    final user = User.fromStorage();
-    return [
-      "${user?.companyName}".text(
-        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-      ),
-      "Receit".text(
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-      ),
-      CurrenceConverter.getCurrenceFloatInStrings(
-        receitModel.total,
-        baseCurrence,
-      ).text(style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
-      "Total".text(),
-      18.gapHeight,
-      Divider(color: Colors.grey.withAlpha(80), thickness: 1),
-      [
-            18.gapHeight,
-            buildTitle(
-              title: "Employee : ${receitModel.cashier}".text(),
-              subtitle: "POS : pos 1".text(),
-            ),
-            12.gapHeight,
-            buildTitle(
-              title: "Receit".text(),
-              subtitle: receitModel.label.text(),
-            ),
-            18.gapHeight,
-            Divider(color: Colors.grey.withAlpha(80), thickness: 1),
-            18.gapHeight,
-            ...receitModel.items.map((e) {
-              double totalPrice = (e.price + e.addenum) * e.count;
-              if (e.discountId != null && e.discountId!.isNotEmpty) {
-                if (e.percentageDiscount) {
-                  totalPrice = totalPrice * (1 - e.discount / 100);
-                } else {
-                  totalPrice = totalPrice - e.discount;
-                }
-              }
-              return buildTitle(
-                subtitle: [
-                  "${e.count.toString()} x ${CurrenceConverter.getCurrenceFloatInStrings(e.price + e.addenum, baseCurrence)}"
-                      .text(),
-                  12.gapWidth,
-                  (e.percentageDiscount
-                          ? "${e.discount}% off"
-                          : "\$${CurrenceConverter.getCurrenceFloatInStrings(e.discount, baseCurrence)}")
-                      .text(style: TextStyle(color: Colors.red))
-                      .visibleIf(
-                        e.discountId != null && e.discountId!.isNotEmpty,
-                      ),
-                ].row(),
-                title: e.name.text(),
-                tileColor: e.refunded ? Colors.red.withAlpha(100) : null,
-                trailing: CurrenceConverter.getCurrenceFloatInStrings(
-                  totalPrice,
-                  baseCurrence,
-                ).text(),
-              );
-            }),
-            18.gapHeight,
-            if (receitModel.discounts.isNotEmpty) ...[
-              "Discounts".text(
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    // Load logo if available
+    pw.MemoryImage? logoImage;
+    try {
+      final ByteData data = await rootBundle.load('assets/launcher.png');
+      final Uint8List bytes = data.buffer.asUint8List();
+      logoImage = pw.MemoryImage(bytes);
+    } catch (_) {
+      // Ignored if logo not found
+    }
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.roll80,
+        margin: const pw.EdgeInsets.all(16),
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            children: [
+              // ── App Logo & Company Header ──
+              if (logoImage != null)
+                pw.Image(logoImage, height: 60, width: 60),
+              pw.SizedBox(height: 8),
+              pw.Text(
+                user?.companyName ?? "Company Name",
+                style: pw.TextStyle(
+                  fontSize: 20,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+                textAlign: pw.TextAlign.center,
               ),
-              12.gapHeight,
-              ...receitModel.discounts.map(
-                (e) => [
-                  e.name?.text() ?? "".text(),
-                  ((e.percentageDiscount == true)
-                          ? " - ${e.discount}% off"
-                          : CurrenceConverter.getCurrenceFloatInStrings(
-                              e.discount ?? 0,
-                              baseCurrence,
-                            ))
-                      .text(
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
+              pw.SizedBox(height: 4),
+              pw.Text(
+                "Thank you for your business",
+                style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                textAlign: pw.TextAlign.center,
+              ),
+              pw.SizedBox(height: 12),
+              pw.Divider(color: PdfColors.grey400, thickness: 1),
+              pw.SizedBox(height: 12),
+
+              // ── Receipt Details ──
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildInfoBlock("Receipt No", receitModel.label),
+                  _buildInfoBlock("Date", MistDateUtils.getInformalShortDate(receitModel.createdAt), crossAxisAlignment: pw.CrossAxisAlignment.end),
+                ],
+              ),
+              pw.SizedBox(height: 8),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildInfoBlock("Cashier", receitModel.cashier),
+                  _buildInfoBlock("Terminal", "pos 1", crossAxisAlignment: pw.CrossAxisAlignment.end),
+                ],
+              ),
+              pw.SizedBox(height: 16),
+
+              // ── Items Table Header ──
+              pw.Container(
+                padding: const pw.EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                decoration: pw.BoxDecoration(
+                  color: PdfColors.grey200,
+                  borderRadius: pw.BorderRadius.circular(4),
+                ),
+                child: pw.Row(
+                  children: [
+                    pw.Expanded(flex: 3, child: _colHeader("Item")),
+                    pw.Expanded(flex: 1, child: _colHeader("Qty", align: pw.TextAlign.center)),
+                    pw.Expanded(flex: 2, child: _colHeader("Price", align: pw.TextAlign.right)),
+                    pw.Expanded(flex: 2, child: _colHeader("Total", align: pw.TextAlign.right)),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 4),
+
+              // ── Items List ──
+              ...receitModel.items.map((e) {
+                double totalPrice = (e.price + e.addenum) * e.count;
+                if (e.discountId != null && e.discountId!.isNotEmpty) {
+                  if (e.percentageDiscount) {
+                    totalPrice = totalPrice * (1 - e.discount / 100);
+                  } else {
+                    totalPrice = totalPrice - e.discount;
+                  }
+                }
+                return pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                  decoration: const pw.BoxDecoration(
+                    border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.5)),
+                  ),
+                  child: pw.Row(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Expanded(
+                        flex: 3,
+                        child: pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text(
+                              e.name,
+                              style: pw.TextStyle(
+                                fontSize: 10, 
+                                fontWeight: pw.FontWeight.bold,
+                                color: e.refunded ? PdfColors.red700 : PdfColors.black,
+                                decoration: e.refunded ? pw.TextDecoration.lineThrough : pw.TextDecoration.none,
+                              ),
+                            ),
+                            if (e.refunded)
+                              pw.Text(
+                                "(Refunded ${e.originalCount} -> ${e.count})",
+                                style: const pw.TextStyle(fontSize: 8, color: PdfColors.red700),
+                              ),
+                            if (e.addenum > 0)
+                              pw.Text(
+                                "Addon: ${CurrenceConverter.getCurrenceFloatInStrings(e.addenum, baseCurrence)}",
+                                style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
+                              ),
+                            if (e.discountId != null && e.discountId!.isNotEmpty)
+                              pw.Text(
+                                "Discount: ${e.percentageDiscount ? '${e.discount}%' : CurrenceConverter.getCurrenceFloatInStrings(e.discount, baseCurrence)}",
+                                style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
+                              ),
+                          ],
                         ),
                       ),
-                ].row(),
-              ),
-              18.gapHeight,
-            ],
-            Divider(color: Colors.grey.withAlpha(80), thickness: 1),
-            18.gapHeight,
-            buildTitle(
-              title: 'Total'.text(),
-              trailing: CurrenceConverter.getCurrenceFloatInStrings(
-                receitModel.total,
-                baseCurrence,
-              ).text(),
-            ),
-            buildTitle(
-              title: receitModel.payment.text(),
-              trailing: CurrenceConverter.getCurrenceFloatInStrings(
-                receitModel.amount,
-                baseCurrence,
-              ).text(),
-            ),
-            Divider(color: Colors.grey.withAlpha(80), thickness: 1),
-            18.gapHeight,
-            receitModel.createdAt.toString().text(),
-            18.gapHeight,
-            buildTitle(
-              title: 'Change'.text(style: TextStyle(color: Colors.white)),
-              tileColor: Colors.green,
-              trailing:
-                  CurrenceConverter.getCurrenceFloatInStrings(
-                    receitModel.amount - receitModel.total,
-                    baseCurrence,
-                  ).text(
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                      pw.Expanded(
+                        flex: 1,
+                        child: pw.Text(
+                          e.count.toString(),
+                          textAlign: pw.TextAlign.center,
+                          style: const pw.TextStyle(fontSize: 10),
+                        ),
+                      ),
+                      pw.Expanded(
+                        flex: 2,
+                        child: pw.Text(
+                          CurrenceConverter.getCurrenceFloatk(e.price, baseCurrence),
+                          textAlign: pw.TextAlign.right,
+                          style: const pw.TextStyle(fontSize: 10),
+                        ),
+                      ),
+                      pw.Expanded(
+                        flex: 2,
+                        child: pw.Text(
+                          CurrenceConverter.getCurrenceFloatk(totalPrice, baseCurrence),
+                          textAlign: pw.TextAlign.right,
+                          style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+                        ),
+                      ),
+                    ],
                   ),
-            ),
-            18.gapHeight,
-          ]
-          .column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-          )
-          .sizedBox(width: double.infinity),
-    ].column(crossAxisAlignment: CrossAxisAlignment.center);
+                );
+              }).toList(),
+              pw.SizedBox(height: 16),
+
+              // ── Summary ──
+              _summaryRow("Subtotal", CurrenceConverter.getCurrenceFloatInStrings(receitModel.total - receitModel.tax, baseCurrence)),
+              
+              if (receitModel.discounts.isNotEmpty) ...[
+                ...receitModel.discounts.map(
+                  (e) => _summaryRow(
+                    e.name ?? "Discount",
+                    (e.percentageDiscount == true)
+                        ? "-${e.discount}%"
+                        : "-${CurrenceConverter.getCurrenceFloatInStrings(e.discount ?? 0, baseCurrence)}",
+                  ),
+                ),
+              ],
+              
+              _summaryRow("Taxes", CurrenceConverter.getCurrenceFloatInStrings(receitModel.tax, baseCurrence)),
+              
+              if (receitModel.miniTax.isNotEmpty) ...[
+                ...receitModel.miniTax.map(
+                  (e) => _summaryRow(e.label, "${e.value}%"),
+                ),
+              ],
+              
+              pw.SizedBox(height: 4),
+              pw.Divider(color: PdfColors.grey400, thickness: 1),
+              pw.SizedBox(height: 4),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text("Total${receitModel.creditSale ? ' (Credit)' : ''}", style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                  pw.Text(CurrenceConverter.getCurrenceFloatInStrings(receitModel.total, baseCurrence), style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                ],
+              ),
+              pw.SizedBox(height: 8),
+              _summaryRow("Paid (${receitModel.payment})", CurrenceConverter.getCurrenceFloatInStrings(receitModel.amount, baseCurrence)),
+              
+              if (!receitModel.creditSale) ...[
+                pw.SizedBox(height: 4),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text("Change", style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: PdfColors.green700)),
+                    pw.Text(CurrenceConverter.getCurrenceFloatInStrings(receitModel.amount - receitModel.total, baseCurrence), style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: PdfColors.green700)),
+                  ],
+                ),
+              ],
+              pw.SizedBox(height: 16),
+              
+              // ── Footer ──
+              pw.Text("Powered by MistPOS", style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500)),
+            ],
+          );
+        },
+      ),
+    );
+    return pdf;
   }
 
-  Widget buildTitle({
-    Widget? title,
-    Widget? subtitle,
-    Color? tileColor,
-    Widget? trailing,
-  }) {
-    return [
-          [title ?? SizedBox(), subtitle ?? SizedBox()]
-              .column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-              )
-              .expanded1,
-          trailing ?? SizedBox(),
-        ]
-        .row()
-        .padding(EdgeInsets.all(8))
-        .decoratedBox(
-          decoration: BoxDecoration(
-            color: tileColor,
-            borderRadius: BorderRadius.circular(10),
-          ),
-        );
+  static pw.Widget _buildInfoBlock(String label, String value, {pw.CrossAxisAlignment crossAxisAlignment = pw.CrossAxisAlignment.start}) {
+    return pw.Column(
+      crossAxisAlignment: crossAxisAlignment,
+      children: [
+        pw.Text(label, style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+        pw.SizedBox(height: 2),
+        pw.Text(value, style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+      ],
+    );
+  }
+
+  static pw.Widget _colHeader(String label, {pw.TextAlign align = pw.TextAlign.left}) {
+    return pw.Text(
+      label,
+      textAlign: align,
+      style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.grey800),
+    );
+  }
+
+  static pw.Widget _summaryRow(String label, String value) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 2),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text(label, style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+          pw.Text(value, style: const pw.TextStyle(fontSize: 10)),
+        ],
+      ),
+    );
   }
 }
