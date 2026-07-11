@@ -24,6 +24,7 @@ class _ScreenCreateAccountState extends State<ScreenCreateAccount> {
   final _passwordController = TextEditingController();
   final _fullNameController = TextEditingController();
   final _businessNameController = TextEditingController();
+  final _referralCodeController = TextEditingController();
   bool _passwordVisible = false;
 
   @override
@@ -33,6 +34,7 @@ class _ScreenCreateAccountState extends State<ScreenCreateAccount> {
     _passwordController.dispose();
     _fullNameController.dispose();
     _businessNameController.dispose();
+    _referralCodeController.dispose();
     super.dispose();
   }
 
@@ -224,6 +226,18 @@ class _ScreenCreateAccountState extends State<ScreenCreateAccount> {
                       ),
                     ),
                   ).animate(delay: 360.ms).fadeIn().slideY(begin: 0.2, end: 0),
+                  const SizedBox(height: 18),
+
+                  // Referral Code
+                  _buildLabel('Referral Code (Optional)'),
+                  const SizedBox(height: 8),
+                  _buildTextField(
+                    controller: _referralCodeController,
+                    hint: 'e.g. MIST-XXXXXX',
+                    icon: Lucide.user,
+                    isDark: isDark,
+                    primary: primary,
+                  ).animate(delay: 380.ms).fadeIn().slideY(begin: 0.2, end: 0),
                   const SizedBox(height: 36),
 
                   // Create Account button
@@ -378,6 +392,9 @@ class _ScreenCreateAccountState extends State<ScreenCreateAccount> {
       fullName: _fullNameController.text,
       password: _passwordController.text,
       company: _businessNameController.text,
+      referralCode: _referralCodeController.text.trim().isEmpty
+          ? null
+          : _referralCodeController.text.trim(),
     );
     _userController.registerUser(user);
   }

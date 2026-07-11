@@ -53,6 +53,7 @@ class MistSubscriptionUtils {
     }
     return null;
   }
+
   static String getPlanDisplayName(String plan) {
     switch (plan) {
       case 'free':
@@ -87,14 +88,9 @@ class MistSubscriptionUtils {
       key: "Stock Adjustments",
       plans: ['enterprise', 'trial', 'pro'],
     ),
-    MistTwinSub(
-      key: "Monthly Reports",
-      plans: ['trial', 'pro', 'enterprise'],
-    ),
-    MistTwinSub(
-      key: "Yearly Reports",
-      plans: ['trial', 'pro', 'enterprise'],
-    ),
+    MistTwinSub(key: "Monthly Reports", plans: ['trial', 'pro', 'enterprise']),
+    MistTwinSub(key: "Sales By Customers", plans: ['trial', 'pro', 'enterprise']),
+    MistTwinSub(key: "Yearly Reports", plans: ['trial', 'pro', 'enterprise']),
     MistTwinSub(
       key: "Inventory History",
       plans: ['trial', 'pro', 'enterprise'],
@@ -102,6 +98,35 @@ class MistSubscriptionUtils {
     MistTwinSub(
       key: "Inventory Valuation",
       plans: ['trial', 'pro', 'enterprise'],
+    ),
+    MistTwinSub(key: "MultiShop Overview", plans: ['enterprise', 'trial']),
+    MistTwinSub(key: "MultiShop Daily Sales", plans: ['enterprise', 'trial']),
+    MistTwinSub(key: "MultiShop Monthly Sales", plans: ['enterprise', 'trial']),
+    MistTwinSub(key: "MultiShop Yearly Sales", plans: ['enterprise', 'trial']),
+    MistTwinSub(
+      key: "MultiShop Gigantic Overview",
+      plans: ['enterprise', 'trial'],
+    ),
+  ];
+
+  static List<MistTwinSub> demoSubs = [
+    MistTwinSub(
+      key: 'Employees',
+      plans: ['basic', 'pro', 'enterprise', 'trial'],
+    ),
+    MistTwinSub(
+      key: "Customers",
+      plans: ['basic', 'pro', 'enterprise', 'trial', 'free'],
+    ),
+    MistTwinSub(key: "Stores", plans: ['basic', 'pro', 'enterprise', 'trial']),
+    MistTwinSub(key: "Transfer Orders", plans: ['pro', 'enterprise', 'trial']),
+    MistTwinSub(key: "Productions", plans: ['enterprise', 'trial']),
+    MistTwinSub(key: "Inventory Counts", plans: ['enterprise', 'trial', 'pro']),
+    MistTwinSub(key: "Suppliers", plans: ['pro', 'enterprise', 'trial']),
+    MistTwinSub(key: "Purchase Orders", plans: ['pro', 'enterprise', 'trial']),
+    MistTwinSub(
+      key: "Stock Adjustments",
+      plans: ['enterprise', 'trial', 'pro'],
     ),
   ];
 }

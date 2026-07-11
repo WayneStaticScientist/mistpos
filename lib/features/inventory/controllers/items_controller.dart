@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:get/get.dart';
 import 'package:mistpos/main.dart';
 import 'package:isar_plus/isar_plus.dart';
@@ -80,7 +82,7 @@ class ItemsController extends GetxController {
   //async categories
   RxBool categoriesSyncing = RxBool(false);
   RxString categoriesSyncingFailed = RxString("");
-  void loadCategoriesAsync() async {
+  Future<void> loadCategoriesAsync() async {
     final isar = IsarStatic.getInstance();
     if (isar == null) {
       return;
@@ -174,8 +176,10 @@ class ItemsController extends GetxController {
 
     final appSettings = AppSettingsModel.fromStorage();
     if (Get.isRegistered<UserController>()) {
-      final currentCompany = Get.find<UserController>().user.value?.company ?? "";
-      if (appSettings.syncedCompanyId.isNotEmpty && appSettings.syncedCompanyId != currentCompany) {
+      final currentCompany =
+          Get.find<UserController>().user.value?.company ?? "";
+      if (appSettings.syncedCompanyId.isNotEmpty &&
+          appSettings.syncedCompanyId != currentCompany) {
         clearAndResyncData();
         return;
       }
@@ -300,7 +304,7 @@ class ItemsController extends GetxController {
       if (response.body['list'] != null) {
         final list = response.body['list'] as List<dynamic>;
         final lv = list.map((e) => ItemReceitModel.fromJson(e)).toList();
-        
+
         await isar.write((isar) async {
           final allExisting = isar.itemReceitModels.where().findAll();
           final existingMap = {for (var e in allExisting) e.hexId: e.id};
@@ -314,7 +318,10 @@ class ItemsController extends GetxController {
         });
 
         if (search.isEmpty && filter.isEmpty) {
-          final r = isar.itemReceitModels.where().sortByCreatedAtDesc().findAll();
+          final r = isar.itemReceitModels
+              .where()
+              .sortByCreatedAtDesc()
+              .findAll();
           receits.assignAll(r);
         } else {
           final unsyncedReceits = isar.itemReceitModels
@@ -596,44 +603,46 @@ class ItemsController extends GetxController {
         Toaster.showError(response.response);
         return null;
       }
+      final isar = IsarStatic.getInstance();
       final mseconds = DateTime.now().millisecondsSinceEpoch;
       if (selectedShift.value != null &&
           mseconds >=
-              selectedShift.value!.openShiftTime.millisecondsSinceEpoch) {
+              selectedShift.value!.openShiftTime.millisecondsSinceEpoch &&
+          isar != null) {
         double price = model.items[index].price * count;
         selectedShift.value!.totalSales =
             selectedShift.value!.totalSales - price;
+
+        await isar.write((isar) async {
+          isar.shiftsModels.put(selectedShift.value!);
+        });
       }
-      final isar = IsarStatic.getInstance();
-      if (isar == null) {
-        Toaster.showError("database not initialized");
-        return null;
-      }
-      await isar.write((isar) async {
-        isar.shiftsModels.put(selectedShift.value!);
-      });
+
       final modelUpdate = ItemReceitModel.fromJson(response.body['update']);
       model.items = modelUpdate.items;
       model.total = modelUpdate.total;
       model.amount = modelUpdate.amount;
+      log("Updated item model: $modelUpdate");
       if (e.count < 0) {
         Toaster.showError("$count should be less than ${e.count}");
         return null;
       }
-      await isar.write((isar) async {
-        isar.itemReceitModels.put(model);
-      });
-      final itemModel = isar.itemModels
-          .where()
-          .hexIdEqualTo(e.itemId)
-          .findFirst();
-      if (itemModel == null) {
-        Toaster.showError("item not found");
-        return null;
+      if (isar != null) {
+        await isar.write((isar) async {
+          isar.itemReceitModels.put(model);
+        });
+        final itemModel = isar.itemModels
+            .where()
+            .hexIdEqualTo(e.itemId)
+            .findFirst();
+        if (itemModel == null) {
+          Toaster.showError("item not found");
+          return null;
+        }
+        loadReceits();
+        return modelUpdate;
       }
-
-      loadReceits();
-      return modelUpdate;
+      return null;
     } catch (e) {
       Toaster.showError("There was error : $e");
       return null;
@@ -1627,22 +1636,20 @@ class ItemsController extends GetxController {
       await isar.write((isar) async {
         isar.itemModels.where().deleteAll();
         isar.itemCategoryModels.where().deleteAll();
-        isar.itemReceitModels.where().deleteAll();
         isar.discountModels.where().deleteAll();
-        isar.shiftsModels.where().deleteAll();
         isar.taxModels.where().deleteAll();
         isar.itemModifiers.where().deleteAll();
         isar.itemSavedItemsModels.where().deleteAll();
       });
     }
-    
+
     final appSettings = AppSettingsModel.fromStorage();
     appSettings.lastItemsSyncTime = 0;
     if (Get.isRegistered<UserController>()) {
-      appSettings.syncedCompanyId = Get.find<UserController>().user.value?.company ?? "";
+      appSettings.syncedCompanyId =
+          Get.find<UserController>().user.value?.company ?? "";
     }
     appSettings.saveToStorage();
-
     loadCategoriesAsync();
     syncCartItemsOnBackground(page: 1);
     loadTaxes();
@@ -1650,6 +1657,5 @@ class ItemsController extends GetxController {
     loadCustomers();
     loadShifts();
     loadMofiers();
-    loadReceits();
   }
 }

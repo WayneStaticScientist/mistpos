@@ -76,6 +76,46 @@ class AutomatedSyncModel {
   }
 }
 
+class ResellerPropsModel {
+  final double percentage;
+  final String code;
+  final String status;
+  final String statusReason;
+
+  ResellerPropsModel({
+    required this.percentage,
+    required this.code,
+    required this.status,
+    required this.statusReason,
+  });
+
+  factory ResellerPropsModel.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return ResellerPropsModel(
+        percentage: 0.0,
+        code: "",
+        status: "Not-a-Reseller",
+        statusReason: "",
+      );
+    }
+    return ResellerPropsModel(
+      percentage: (json['percentage'] as num?)?.toDouble() ?? 0.0,
+      code: json['code'] as String? ?? "",
+      status: json['status'] as String? ?? "Not-a-Reseller",
+      statusReason: json['statusReason'] as String? ?? "",
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'percentage': percentage,
+      'code': code,
+      'status': status,
+      'statusReason': statusReason,
+    };
+  }
+}
+
 class CompanyModel {
   String owner;
   String email;
@@ -92,6 +132,9 @@ class CompanyModel {
   final AutomatedSyncModel weeklyAutomatedSync;
   AiSubscriptionsModel aiSubscriptions;
   List<ReceitExtrasModel> receitExtras;
+  final String? reseller;
+  final ResellerPropsModel resellerProps;
+
   CompanyModel({
     required this.owner,
     required this.email,
@@ -108,6 +151,8 @@ class CompanyModel {
     required this.automatedSync,
     required this.weeklyAutomatedSync,
     required this.aiSubscriptions,
+    this.reseller,
+    required this.resellerProps,
   });
   factory CompanyModel.fromJson(Map<String, dynamic> json) {
     return CompanyModel(
@@ -124,8 +169,8 @@ class CompanyModel {
       hexId: json['_id'] ?? "",
       receitExtras:
           (json['receitExtras'] as List<dynamic>?)
-              ?.map((e) => ReceitExtrasModel.fromJSON(e))
-              .toList() ??
+               ?.map((e) => ReceitExtrasModel.fromJSON(e))
+               .toList() ??
           [],
       name: json['name'] ?? "-",
       verified: json['verified'] ?? false,
@@ -134,6 +179,8 @@ class CompanyModel {
           ? SubscriptionModel.fromJson(json['subscriptionType'])
           : SubscriptionModel(),
       exchangeRates: ExchangeRateModel.fromJson(json['exchangeRates']),
+      reseller: json['reseller'] as String?,
+      resellerProps: ResellerPropsModel.fromJson(json['resellerProps']),
     );
   }
   Map<String, dynamic> toJson() {
@@ -153,6 +200,8 @@ class CompanyModel {
       "subscriptionType": subscriptionType.toJson(),
       'autoApproveAllExpenses': autoApproveAllExpenses,
       "receitExtras": receitExtras.map((e) => e.toJson()).toList(),
+      'reseller': reseller,
+      'resellerProps': resellerProps.toJson(),
     };
   }
 

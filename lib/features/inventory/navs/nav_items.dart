@@ -59,66 +59,92 @@ class _NavItemsState extends State<NavItems> {
         ],
       ),
       body: _navOptions.elementAt(_selectedIndex),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        fixedColor: Get.theme.colorScheme.primary,
-        unselectedItemColor: Get.isDarkMode ? Colors.white70 : Colors.black54,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Iconify(
-              Bx.cart_alt,
-              color: _selectedIndex == 0
-                  ? Get.theme.colorScheme.primary
-                  : Get.isDarkMode
-                  ? Colors.white70
-                  : Colors.black54,
-            ),
-            label: 'Items',
+      bottomNavigationBar: Container(
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        height: 72,
+        decoration: BoxDecoration(
+          color: Get.isDarkMode ? Colors.grey.shade900 : Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: Get.isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
+            width: 1,
           ),
-          BottomNavigationBarItem(
-            icon: Iconify(
-              Bx.category,
-              color: _selectedIndex == 1
-                  ? Get.theme.colorScheme.primary
-                  : Get.isDarkMode
-                  ? Colors.white70
-                  : Colors.black54,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(Get.isDarkMode ? 40 : 15),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
             ),
-            label: 'Categories',
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(0, Bx.cart_alt, 'Items'),
+              _buildNavItem(1, Bx.category, 'Categories'),
+              _buildNavItem(2, Bx.edit_alt, 'Modifiers'),
+              _buildNavItem(3, Bx.tag, 'Discounts'),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Iconify(
-              Bx.edit_alt,
-              color: _selectedIndex == 2
-                  ? Get.theme.colorScheme.primary
-                  : Get.isDarkMode
-                  ? Colors.white70
-                  : Colors.black54,
-            ),
-            label: 'Modifiers',
-          ),
-          BottomNavigationBarItem(
-            icon: Iconify(
-              Bx.tag,
-              color: _selectedIndex == 3
-                  ? Get.theme.colorScheme.primary
-                  : Get.isDarkMode
-                  ? Colors.white70
-                  : Colors.black54,
-            ),
-            label: 'Discounts',
-          ),
-        ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _add,
         elevation: 0,
         child: Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, String iconPath, String label) {
+    final isSelected = _selectedIndex == index;
+    final isDark = Get.isDarkMode;
+    final activeColor = Get.theme.colorScheme.primary;
+    final inactiveColor = isDark ? Colors.grey.shade500 : Colors.grey.shade600;
+
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isSelected 
+                      ? activeColor.withAlpha(25) 
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Iconify(
+                  iconPath,
+                  color: isSelected ? activeColor : inactiveColor,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                  color: isSelected ? activeColor : inactiveColor,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

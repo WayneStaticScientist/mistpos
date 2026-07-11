@@ -23,6 +23,8 @@ class User {
   final List<String> permissions;
   final bool allowOfflinePurchase;
   final List<String> subscriptions;
+  @ignore
+  String? referralCode;
   User({
     this.password,
     this.hexId = '',
@@ -41,6 +43,7 @@ class User {
     this.paynowActivated = false,
     required this.permissions,
     this.allowOfflinePurchase = true,
+    this.referralCode,
   });
   factory User.fromMap(Map<String, dynamic> map) {
     return User(
@@ -74,6 +77,7 @@ class User {
           : (map['subscriptions'] as List<dynamic>)
                 .map((e) => e as String)
                 .toList(),
+      referralCode: map['referralCode'] as String?,
     );
   }
   Map<String, dynamic> toMap() {
@@ -95,6 +99,7 @@ class User {
       "subscriptions": subscriptions,
       'paynowActivated': paynowActivated,
       'allowOfflinePurchase': allowOfflinePurchase,
+      'referralCode': referralCode,
     };
   }
 

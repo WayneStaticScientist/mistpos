@@ -3,6 +3,9 @@ import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/core/utils/toast.dart';
+import 'package:printing/printing.dart';
+import 'package:pdf/pdf.dart';
+import 'package:mistpos/core/utils/pdfdocuments/pdf_purchase_order.dart';
 import 'package:mistpos/core/utils/date_utils.dart';
 import 'package:mistpos/core/themes/app_theme.dart';
 import 'package:iconify_flutter/icons/bx.dart';
@@ -51,6 +54,24 @@ class _ScreenViewPurchaseOrderState extends State<ScreenViewPurchaseOrder> {
     });
   }
 
+  void _printDocument() async {
+    Toaster.showSuccess("Preparing document, please wait...");
+    final baseCurrency = _userController.user.value?.baseCurrence ?? '';
+    try {
+      final pdf = await PdfPurchaseOrder.generate(
+        model: widget.model,
+        supplier: model,
+        baseCurrency: baseCurrency,
+      );
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdf.save(),
+        name: 'Purchase_Order_Report.pdf',
+      );
+    } catch (e) {
+      Toaster.showError("Failed to generate PDF: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,6 +80,11 @@ class _ScreenViewPurchaseOrderState extends State<ScreenViewPurchaseOrder> {
         backgroundColor: Get.theme.colorScheme.primary,
         title: "Purchase Order".text(),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.print, color: Colors.white),
+            onPressed: _printDocument,
+            tooltip: "Print to PDF",
+          ),
           if (widget.model.status.toLowerCase() == "pending") ...[
             MistLoadIconButton(
               label: "Reject",

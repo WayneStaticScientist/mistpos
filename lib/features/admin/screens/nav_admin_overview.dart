@@ -5,13 +5,13 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:mistpos/core/utils/date_utils.dart';
 import 'package:mistpos/core/themes/app_theme.dart';
 import 'package:mistpos/core/utils/currence_converter.dart';
+import 'package:mistpos/data/models/sales_stats_model.dart';
 import 'package:mistpos/features/auth/controllers/user_controller.dart';
 import 'package:mistpos/core/widgets/loaders/small_loader.dart';
 import 'package:mistpos/features/admin/controllers/admin_controller.dart';
 import 'package:printing/printing.dart';
 import 'package:mistpos/core/utils/pdfdocuments/pdf_overview.dart';
 import 'package:mistpos/core/utils/toast.dart';
-import 'package:mistpos/data/models/company_model.dart';
 import 'package:mistpos/features/admin/controllers/goals_tasks_controller.dart';
 import 'package:mistpos/features/admin/screens/screen_goals_tasks.dart';
 
@@ -30,10 +30,24 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
   DateTime? _endDate = DateTime.now();
   DateTime _chartEndDate = DateTime.now();
   String _selectedPeriod = 'daily'; // daily | monthly | yearly
+  String _perfPeriod = 'monthly'; // daily | monthly | yearly
 
   String _formatChartXAxis(String dateStr) {
     if (_selectedPeriod == 'monthly') {
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
       final idx = int.tryParse(dateStr);
       if (idx != null && idx >= 1 && idx <= 12) return months[idx - 1];
     }
@@ -237,6 +251,127 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
               ),
             ]),
             const SizedBox(height: 24),
+
+            // ── KPI Grid Credit Sales ──
+            _buildSectionLabel('Credit Sales Overview'),
+            const SizedBox(height: 12),
+            _buildKpiGrid(context, [
+              _KpiData(
+                'Credit Receipts',
+                (_adminController.statsSales.value?.creditReceiptsCount ?? 0)
+                    .toString(),
+                Icons.receipt_long_outlined,
+                const Color(0xFF8D6E63),
+              ),
+              _KpiData(
+                'Total on Credit',
+                CurrenceConverter.getCurrenceFloatInStrings(
+                  _adminController.statsSales.value?.creditSalesTotal ?? 0,
+                  _userController.user.value?.baseCurrence ?? '',
+                ),
+                Icons.credit_score_outlined,
+                const Color(0xFF5C6BC0),
+              ),
+              _KpiData(
+                'Amount Paid',
+                CurrenceConverter.getCurrenceFloatInStrings(
+                  _adminController.statsSales.value?.creditAmountPaid ?? 0,
+                  _userController.user.value?.baseCurrence ?? '',
+                ),
+                Icons.payments_outlined,
+                const Color(0xFF43A047),
+              ),
+              _KpiData(
+                'Remaining Balance',
+                CurrenceConverter.getCurrenceFloatInStrings(
+                  _adminController.statsSales.value?.creditBalanceRemaining ??
+                      0,
+                  _userController.user.value?.baseCurrence ?? '',
+                ),
+                Icons.account_balance_outlined,
+                const Color(0xFFE53935),
+              ),
+            ]),
+            const SizedBox(height: 24),
+
+            // ── KPI Grid Performance Metrics ──
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                _buildSectionLabel('Performance Metrics'),
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.surface(context),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: const EdgeInsets.all(3),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildPerfPill('Daily', 'daily', primary),
+                      _buildPerfPill('Monthly', 'monthly', primary),
+                      _buildPerfPill('Yearly', 'yearly', primary),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Builder(
+              builder: (context) {
+                final perf = _perfPeriod == 'daily'
+                    ? _adminController.statsSales.value?.dailyPerformance
+                    : _perfPeriod == 'yearly'
+                    ? _adminController.statsSales.value?.yearlyPerformance
+                    : _adminController.statsSales.value?.monthlyPerformance;
+
+                return _buildKpiGrid(context, [
+                  _KpiData(
+                    'Profit Margin',
+                    '${(perf?.profitMargin ?? 0).toStringAsFixed(1)}%',
+                    Icons.percent_outlined,
+                    const Color(0xFF00C896),
+                  ),
+                  _KpiData(
+                    'Exp to Inc Ratio',
+                    '${(perf?.expenseToIncomeRatio ?? 0).toStringAsFixed(1)}%',
+                    Icons.compare_arrows_outlined,
+                    const Color(0xFFFF7043),
+                  ),
+                  _KpiData(
+                    'Burn Rate',
+                    CurrenceConverter.getCurrenceFloatInStrings(
+                      perf?.burnRate ?? 0,
+                      _userController.user.value?.baseCurrence ?? '',
+                    ),
+                    Icons.local_fire_department_outlined,
+                    const Color(0xFFE53935),
+                  ),
+                  _KpiData(
+                    "Cash In",
+                    CurrenceConverter.getCurrenceFloatInStrings(
+                      perf?.cashIn ?? 0,
+                      _userController.user.value?.baseCurrence ?? '',
+                    ),
+                    Icons.download_rounded,
+                    const Color(0xFF42A5F5),
+                  ),
+                  _KpiData(
+                    "Cash Out",
+                    CurrenceConverter.getCurrenceFloatInStrings(
+                      perf?.cashOut ?? 0,
+                      _userController.user.value?.baseCurrence ?? '',
+                    ),
+                    Icons.upload_rounded,
+                    const Color(0xFF6C63FF),
+                  ),
+                ]);
+              },
+            ),
+            const SizedBox(height: 24),
             _buildOverviewPieChart(context, primary),
             const SizedBox(height: 24),
             Obx(() {
@@ -256,6 +391,33 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
             const SizedBox(height: 12),
             _buildGoalsTasksSummaryCard(context, primary),
             const SizedBox(height: 24),
+
+            // ── Top Customers Sections ──
+            if ((_adminController.statsSales.value?.topCustomers ?? [])
+                .isNotEmpty) ...[
+              _buildSectionLabel('Top 10 Customers'),
+              const SizedBox(height: 12),
+              _buildCustomerListSection(
+                context,
+                _adminController.statsSales.value!.topCustomers,
+                primary,
+                Icons.emoji_events_outlined,
+              ),
+              const SizedBox(height: 24),
+            ],
+
+            if ((_adminController.statsSales.value?.topCreditCustomers ?? [])
+                .isNotEmpty) ...[
+              _buildSectionLabel('Top 10 Credit Customers'),
+              const SizedBox(height: 12),
+              _buildCustomerListSection(
+                context,
+                _adminController.statsSales.value!.topCreditCustomers,
+                const Color(0xFFE53935), // Red to indicate credit
+                Icons.credit_score_outlined,
+              ),
+              const SizedBox(height: 24),
+            ],
 
             // ── Charts Section ──
             _buildChartHeader(context, primary),
@@ -430,10 +592,13 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
 
   // ── Chart Header & Tabs ────────────────────────────────────
   Widget _buildChartHeader(BuildContext context, Color primary) {
-    return Row(
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 12,
+      runSpacing: 12,
       children: [
         _buildSectionLabel('Analytics'),
-        const Spacer(),
         // Period selector pills
         Container(
           decoration: BoxDecoration(
@@ -442,6 +607,7 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
           ),
           padding: const EdgeInsets.all(3),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               _buildPill('Daily', 'daily', primary),
               _buildPill('Monthly', 'monthly', primary),
@@ -462,6 +628,33 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
           _chartEndDate = DateTime.now();
         });
         _reload();
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected ? primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? Colors.white : Colors.grey,
+            fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+            fontSize: 12,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPerfPill(String label, String value, Color primary) {
+    final selected = _perfPeriod == value;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _perfPeriod = value;
+        });
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -1039,12 +1232,15 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
           child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
         );
       }
-      
+
       final sales = _adminController.statsSales.value;
       if (sales == null || sales.totalSales == 0) {
-        return _emptyChart('No sales data for pie chart', Icons.pie_chart_outline);
+        return _emptyChart(
+          'No sales data for pie chart',
+          Icons.pie_chart_outline,
+        );
       }
-      
+
       final totalSales = sales.totalSales;
       final costs = sales.totalCost;
       final expenses = sales.totalExpenses;
@@ -1083,13 +1279,57 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
                         centerSpaceRadius: 40,
                         sections: [
                           if (costs > 0)
-                            PieChartSectionData(color: const Color(0xFFFFA726), value: costs, title: '${(costs/totalSales*100).toStringAsFixed(1)}%', radius: 50, titleStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white)),
+                            PieChartSectionData(
+                              color: const Color(0xFFFFA726),
+                              value: costs,
+                              title:
+                                  '${(costs / totalSales * 100).toStringAsFixed(1)}%',
+                              radius: 50,
+                              titleStyle: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                           if (expenses > 0)
-                            PieChartSectionData(color: const Color(0xFFFF4D6A), value: expenses, title: '${(expenses/totalSales*100).toStringAsFixed(1)}%', radius: 50, titleStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white)),
+                            PieChartSectionData(
+                              color: const Color(0xFFFF4D6A),
+                              value: expenses,
+                              title:
+                                  '${(expenses / totalSales * 100).toStringAsFixed(1)}%',
+                              radius: 50,
+                              titleStyle: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                           if (taxes > 0)
-                            PieChartSectionData(color: const Color(0xFFAB47BC), value: taxes, title: '${(taxes/totalSales*100).toStringAsFixed(1)}%', radius: 50, titleStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white)),
+                            PieChartSectionData(
+                              color: const Color(0xFFAB47BC),
+                              value: taxes,
+                              title:
+                                  '${(taxes / totalSales * 100).toStringAsFixed(1)}%',
+                              radius: 50,
+                              titleStyle: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                           if (netProfit > 0)
-                            PieChartSectionData(color: const Color(0xFF00C896), value: netProfit, title: '${(netProfit/totalSales*100).toStringAsFixed(1)}%', radius: 50, titleStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white)),
+                            PieChartSectionData(
+                              color: const Color(0xFF00C896),
+                              value: netProfit,
+                              title:
+                                  '${(netProfit / totalSales * 100).toStringAsFixed(1)}%',
+                              radius: 50,
+                              titleStyle: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -1119,9 +1359,19 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
   Widget _buildIndicator(Color color, String text) {
     return Row(
       children: [
-        Container(width: 12, height: 12, decoration: BoxDecoration(shape: BoxShape.circle, color: color)),
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+        ),
         const SizedBox(width: 8),
-        Text(text, style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodyMedium?.color)),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 12,
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+          ),
+        ),
       ],
     );
   }
@@ -1230,7 +1480,7 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
 
   Widget _buildThisMonthSummaryCard(BuildContext context) {
     final theme = Theme.of(context);
-    final primary = theme.primaryColor;
+    final primary = theme.colorScheme.primary;
     final summary = _adminController.thisMonthSummary.value;
     if (summary == null) return const SizedBox();
 
@@ -1239,9 +1489,7 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
       color: AppTheme.surface(context),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: theme.dividerColor.withOpacity(0.1),
-        ),
+        side: BorderSide(color: theme.dividerColor.withOpacity(0.1)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -1274,12 +1522,54 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
             // KPI List
             Column(
               children: [
-                _buildListKpi('Revenue', CurrenceConverter.getCurrenceFloatInStrings(summary.totalRevenue, _userController.user.value?.baseCurrence ?? ''), const Color(0xFF00C896), theme),
-                _buildListKpi('Gross Profit', CurrenceConverter.getCurrenceFloatInStrings(summary.grossProfit, _userController.user.value?.baseCurrence ?? ''), const Color(0xFF42A5F5), theme),
-                _buildListKpi('Net Profit', CurrenceConverter.getCurrenceFloatInStrings(summary.netProfit, _userController.user.value?.baseCurrence ?? ''), const Color(0xFF6C63FF), theme),
-                _buildListKpi('Expenses', CurrenceConverter.getCurrenceFloatInStrings(summary.totalExpenses, _userController.user.value?.baseCurrence ?? ''), const Color(0xFFFF4D6A), theme),
-                _buildListKpi('Receipts', summary.totalReceipts.toString(), const Color(0xFFFFA726), theme),
-                _buildListKpi('Items Sold', summary.totalItemsSold.toStringAsFixed(0), const Color(0xFF3ECFCF), theme),
+                _buildListKpi(
+                  'Revenue',
+                  CurrenceConverter.getCurrenceFloatInStrings(
+                    summary.totalRevenue,
+                    _userController.user.value?.baseCurrence ?? '',
+                  ),
+                  const Color(0xFF00C896),
+                  theme,
+                ),
+                _buildListKpi(
+                  'Gross Profit',
+                  CurrenceConverter.getCurrenceFloatInStrings(
+                    summary.grossProfit,
+                    _userController.user.value?.baseCurrence ?? '',
+                  ),
+                  const Color(0xFF42A5F5),
+                  theme,
+                ),
+                _buildListKpi(
+                  'Net Profit',
+                  CurrenceConverter.getCurrenceFloatInStrings(
+                    summary.netProfit,
+                    _userController.user.value?.baseCurrence ?? '',
+                  ),
+                  const Color(0xFF6C63FF),
+                  theme,
+                ),
+                _buildListKpi(
+                  'Expenses',
+                  CurrenceConverter.getCurrenceFloatInStrings(
+                    summary.totalExpenses,
+                    _userController.user.value?.baseCurrence ?? '',
+                  ),
+                  const Color(0xFFFF4D6A),
+                  theme,
+                ),
+                _buildListKpi(
+                  'Receipts',
+                  summary.totalReceipts.toString(),
+                  const Color(0xFFFFA726),
+                  theme,
+                ),
+                _buildListKpi(
+                  'Items Sold',
+                  summary.totalItemsSold.toStringAsFixed(0),
+                  const Color(0xFF3ECFCF),
+                  theme,
+                ),
               ],
             ),
             const SizedBox(height: 24),
@@ -1299,7 +1589,10 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
                     ),
                     const SizedBox(height: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF6C63FF).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
@@ -1310,7 +1603,10 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.access_time, color: Color(0xFF6C63FF)),
+                          const Icon(
+                            Icons.access_time,
+                            color: Color(0xFF6C63FF),
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -1338,40 +1634,47 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    ...summary.bestDays.map((day) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  day.date,
-                                  style: theme.textTheme.bodyMedium,
-                                  overflow: TextOverflow.ellipsis,
+                    ...summary.bestDays.map(
+                      (day) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                day.date,
+                                style: theme.textTheme.bodyMedium,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '${day.receitsCount} receipts',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.textTheme.bodySmall?.color
+                                        ?.withOpacity(0.7),
+                                  ),
                                 ),
-                              ),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    '${day.receitsCount} receipts',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
-                                    ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  CurrenceConverter.getCurrenceFloatInStrings(
+                                    day.salesAmount,
+                                    _userController.user.value?.baseCurrence ??
+                                        '',
                                   ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    CurrenceConverter.getCurrenceFloatInStrings(day.salesAmount, _userController.user.value?.baseCurrence ?? ''),
-                                    style: theme.textTheme.titleSmall?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF00C896),
-                                    ),
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF00C896),
                                   ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        )),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -1382,7 +1685,12 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
     );
   }
 
-  Widget _buildListKpi(String title, String value, Color color, ThemeData theme) {
+  Widget _buildListKpi(
+    String title,
+    String value,
+    Color color,
+    ThemeData theme,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
@@ -1480,9 +1788,21 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _buildMiniStat('All Tasks', total.toString(), Colors.blue),
-                        _buildMiniStat('Completed', completed.toString(), Colors.green),
-                        _buildMiniStat('Remaining', remaining.toString(), Colors.orange),
+                        _buildMiniStat(
+                          'All Tasks',
+                          total.toString(),
+                          Colors.blue,
+                        ),
+                        _buildMiniStat(
+                          'Completed',
+                          completed.toString(),
+                          Colors.green,
+                        ),
+                        _buildMiniStat(
+                          'Remaining',
+                          remaining.toString(),
+                          Colors.orange,
+                        ),
                       ],
                     ),
                   ],
@@ -1527,6 +1847,90 @@ class NavAdminOverViewState extends State<NavAdminOverView> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildCustomerListSection(
+    BuildContext context,
+    List<CustomerMetric> customers,
+    Color headerColor,
+    IconData headerIcon,
+  ) {
+    if (customers.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.surface(context),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withOpacity(0.1),
+        ),
+      ),
+      child: Column(
+        children: customers.asMap().entries.map((entry) {
+          final index = entry.key;
+          final customer = entry.value;
+          final isLast = index == customers.length - 1;
+
+          return Column(
+            children: [
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ),
+                leading: CircleAvatar(
+                  backgroundColor: headerColor.withOpacity(0.1),
+                  child: Text(
+                    '${index + 1}',
+                    style: TextStyle(
+                      color: headerColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                title: Text(
+                  customer.fullName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+                subtitle: Text(
+                  '${customer.receiptsCount} Receipts',
+                  style: TextStyle(color: Colors.grey, fontSize: 13),
+                ),
+                trailing: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      CurrenceConverter.getCurrenceFloatInStrings(
+                        customer.totalSpent,
+                        _userController.user.value?.baseCurrence ?? '',
+                      ),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: Colors.green,
+                      ),
+                    ),
+                    Text(
+                      'Total Spent',
+                      style: TextStyle(color: Colors.grey, fontSize: 11),
+                    ),
+                  ],
+                ),
+              ),
+              if (!isLast)
+                Divider(
+                  height: 1,
+                  color: Theme.of(context).dividerColor.withOpacity(0.1),
+                ),
+            ],
+          );
+        }).toList(),
+      ),
     );
   }
 }

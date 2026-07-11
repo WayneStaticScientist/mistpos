@@ -43,10 +43,21 @@ class _SalesAppBarState extends State<SalesAppBar> {
             color: AppTheme.surface(context),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(Icons.menu_rounded, size: 20, color: AppTheme.color(context)),
+          child: Icon(
+            Icons.menu_rounded,
+            size: 20,
+            color: AppTheme.color(context),
+          ),
         ),
       ),
-      title: Text("MistPos", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, letterSpacing: 1.2)),
+      title: Text(
+        "MistPos",
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 24,
+          letterSpacing: 1.2,
+        ),
+      ),
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       actions: [
         Obx(
@@ -65,7 +76,10 @@ class _SalesAppBarState extends State<SalesAppBar> {
                   onPressed: _displayError,
                   icon: Container(
                     padding: EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: Colors.red.withAlpha(30), shape: BoxShape.circle),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withAlpha(30),
+                      shape: BoxShape.circle,
+                    ),
                     child: Iconify(Bx.error, color: Colors.red),
                   ),
                 )
@@ -80,7 +94,9 @@ class _SalesAppBarState extends State<SalesAppBar> {
             icon: Container(
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: selected ? Colors.green.withAlpha(30) : AppTheme.surface(context),
+                color: selected
+                    ? Colors.green.withAlpha(30)
+                    : AppTheme.surface(context),
                 shape: BoxShape.circle,
               ),
               child: Iconify(
@@ -94,7 +110,9 @@ class _SalesAppBarState extends State<SalesAppBar> {
           onPressed: () {
             Get.defaultDialog(
               title: "Force Sync",
-              content: "This will clear your local offline cache and download all items, categories, and settings from the server. Are you sure?".text(textAlign: TextAlign.center),
+              content: "Force reload all items".text(
+                textAlign: TextAlign.center,
+              ),
               actions: [
                 TextButton(
                   onPressed: () => Get.back(),
@@ -104,7 +122,9 @@ class _SalesAppBarState extends State<SalesAppBar> {
                   onPressed: () {
                     Get.back();
                     _itemsListController.clearAndResyncData();
-                    Toaster.showSuccess("Cache cleared. Syncing started in background.");
+                    Toaster.showSuccess(
+                      "Cache cleared. Syncing started in background.",
+                    );
                   },
                   child: const Text("Sync Now"),
                 ),
@@ -125,7 +145,10 @@ class _SalesAppBarState extends State<SalesAppBar> {
             onPressed: () => Get.to(() => ScreenNotifications()),
             icon: Container(
               padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(color: AppTheme.surface(context), shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                color: AppTheme.surface(context),
+                shape: BoxShape.circle,
+              ),
               child: _fireController.notificationSize.value > 0
                   ? Badge.count(
                       count: _fireController.notificationSize.value,

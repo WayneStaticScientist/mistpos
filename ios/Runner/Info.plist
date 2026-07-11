@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Mistpos requires speech recognition to allow voice-activated POS commands.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Mistpos requires microphone access to record voice commands.</string>
 </dict>
 </plist>

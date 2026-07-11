@@ -16,12 +16,14 @@ import 'package:mistpos/data/models/sales_stats_model.dart';
 import 'package:mistpos/data/models/product_stats_model.dart';
 import 'package:mistpos/data/models/average_profit_model.dart';
 import 'package:mistpos/data/models/sales_by_employee_model.dart';
+import 'package:mistpos/data/models/sales_by_category_model.dart';
 import 'package:mistpos/data/models/payment_request_model.dart';
 import 'package:mistpos/data/models/this_month_summary_model.dart';
 import 'package:mistpos/data/models/monthly_report_model.dart';
 import 'package:mistpos/data/models/yearly_report_model.dart';
 import 'package:mistpos/data/models/expense_analytics_model.dart';
 import 'package:mistpos/data/models/product_analytics_model.dart';
+import 'package:mistpos/data/models/sales_by_customer_model.dart';
 
 class AdminController extends GetxController {
   RxBool loading = RxBool(false);
@@ -300,6 +302,41 @@ class AdminController extends GetxController {
       List<dynamic> list = result.body['list'];
       salesByEmployee.value = list
           .map((e) => SalesByEmployeeModel.fromJson(e))
+          .toList();
+    }
+  }
+
+  RxBool loadingSalesByCategory = RxBool(false);
+  RxList<SalesByCategoryModel> salesByCategory = RxList<SalesByCategoryModel>();
+  Future<void> getSalesByCategory(DateTime timeStart, DateTime date) async {
+    if (loadingSalesByCategory.value) return;
+    loadingSalesByCategory.value = true;
+    final cleanStart = DateTime.utc(
+      timeStart.year,
+      timeStart.month,
+      timeStart.day,
+    );
+
+    final cleanEnd = DateTime.utc(
+      date.year,
+      date.month,
+      date.day,
+      23,
+      59,
+      59,
+      999,
+    );
+    final result = await Net.get(
+      "/admin/stats/sales/categories?endDate=${cleanEnd.toIso8601String()}&startDate=${cleanStart.toIso8601String()}",
+    );
+    loadingSalesByCategory.value = false;
+    if (result.hasError) {
+      return;
+    }
+    if (result.body['list'] != null) {
+      List<dynamic> list = result.body['list'];
+      salesByCategory.value = list
+          .map((e) => SalesByCategoryModel.fromJson(e))
           .toList();
     }
   }
@@ -596,6 +633,46 @@ class AdminController extends GetxController {
     if (result.body['pie'] != null) {
       final List<dynamic> pie = result.body['pie'];
       productPieSlices.value = pie.map((e) => ProductPieSlice.fromJson(e)).toList();
+    }
+  }
+
+  // ── SALES BY CUSTOMERS ──
+  RxBool loadingSalesByCustomers = RxBool(false);
+  Rx<SalesByCustomerModel?> salesByCustomerData = Rx<SalesByCustomerModel?>(null);
+
+  Future<void> fetchSalesByCustomers({
+    required DateTime timeStart,
+    required DateTime date,
+    int page = 1,
+  }) async {
+    if (loadingSalesByCustomers.value) return;
+    loadingSalesByCustomers.value = true;
+    final cleanStart = DateTime.utc(
+      timeStart.year,
+      timeStart.month,
+      timeStart.day,
+    );
+
+    final cleanEnd = DateTime.utc(
+      date.year,
+      date.month,
+      date.day,
+      23, // Hour: 11 PM
+      59, // Minute: 59
+      59, // Second: 59
+      999, // Millisecond: 999
+    );
+
+    final result = await Net.get(
+      "/admin/stats/sales/customers?endDate=${cleanEnd.toIso8601String()}&startDate=${cleanStart.toIso8601String()}&page=$page&limit=15",
+    );
+    loadingSalesByCustomers.value = false;
+    if (result.hasError) {
+      Toaster.showError("Failed to load customer sales: ${result.response}");
+      return;
+    }
+    if (result.body != null) {
+      salesByCustomerData.value = SalesByCustomerModel.fromJson(result.body);
     }
   }
 

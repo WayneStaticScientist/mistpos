@@ -2,8 +2,7 @@ name: mistpos
 description: "Inventory App , track sales and reports"
 publish_to: "none"
 
-version: 1.3.0+34
-
+version: 1.4.2+41
 environment:
   sdk: ^3.8.1
 

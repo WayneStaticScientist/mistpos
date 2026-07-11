@@ -24,6 +24,7 @@ import 'package:mistpos/features/settings/screens_gateways/payment_gateway.dart'
 import 'package:mistpos/features/support/screens/sales_help.dart';
 import 'package:mistpos/features/inventory/navs/nav_items.dart';
 import 'package:mistpos/features/support/screens/screen_about.dart';
+import 'package:mistpos/features/support/screens/screen_diagnosis.dart';
 
 class MistMainNavigationView extends StatefulWidget {
   final Function(String value) onTap;
@@ -46,6 +47,7 @@ class MistMainNavigationView extends StatefulWidget {
 class _MistMainNavigationViewState extends State<MistMainNavigationView> {
   final _userController = Get.find<UserController>();
   final _invController = Get.find<InventoryController>();
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
@@ -70,12 +72,40 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
               invController: _invController,
             ),
 
+            // ── Search Field ──
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppTheme.surface(context),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.withAlpha(40)),
+                ),
+                child: TextField(
+                  onChanged: (val) {
+                    setState(() {
+                      _searchQuery = val.toLowerCase();
+                    });
+                  },
+                  style: const TextStyle(fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: 'Search menu...',
+                    hintStyle: TextStyle(color: Colors.grey.withAlpha(150), fontSize: 14),
+                    prefixIcon: Icon(Icons.search, color: primary, size: 20),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
+              ),
+            ),
+
             // ── Scrollable nav items ──
             Expanded(
               child: ListView(
-                padding: EdgeInsets.only(bottom: 24, top: 8),
+                padding: const EdgeInsets.only(bottom: 24, top: 4),
                 children: [
-                  _SectionLabel('Catalogue'),
+                  if (_searchQuery.isNotEmpty) ..._buildSearchResults() else ...[
+                    _SectionLabel('Catalogue'),
                   Obx(() {
                     final isAdmin =
                         _userController.user.value?.role.toLowerCase() ==
@@ -280,6 +310,15 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
                       Get.to(() => const ScreenAbout());
                     },
                   ),
+                  _DrawerItem(
+                    icon: Carbon.activity,
+                    label: 'System Diagnosis',
+                    onTap: () {
+                      Get.back();
+                      Get.to(() => const ScreenDiagnosis());
+                    },
+                  ),
+                  ],
                 ],
               ),
             ),
@@ -287,6 +326,53 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
         ),
       ),
     );
+  }
+
+  List<Widget> _buildSearchResults() {
+    final isAdmin = _userController.user.value?.role.toLowerCase() == 'admin' || _userController.user.value?.role.toLowerCase() == 'manager';
+    final List<Map<String, dynamic>> allItems = [
+      {'icon': Bx.store_alt, 'label': 'Point of Sale', 'onTap': () => widget.onTap('sales'), 'admin': false},
+      {'icon': Bx.receipt, 'label': 'Receipts', 'onTap': () => widget.onTap('receipts'), 'admin': false},
+      {'icon': Carbon.shopping_cart, 'label': 'Items', 'onTap': () => widget.onTap('items'), 'admin': true},
+      {'icon': Carbon.category, 'label': 'Categories', 'onTap': () { Get.back(); Get.to(() => const NavItems(initialIndex: 1)); }, 'admin': true},
+      {'icon': Carbon.tag, 'label': 'Discounts', 'onTap': () { Get.back(); Get.to(() => const NavItems(initialIndex: 3)); }, 'admin': true},
+      {'icon': Carbon.model_builder, 'label': 'Add-ons', 'onTap': () { Get.back(); Get.to(() => const NavItems(initialIndex: 2)); }, 'admin': true},
+      {'icon': Bx.time, 'label': 'Shift', 'onTap': () { Get.back(); Get.to(() => ScreenShiftsScreen()); }, 'admin': false},
+      {'icon': Bx.wallet, 'label': 'Expenses', 'onTap': () => widget.onTap('Expenses'), 'admin': false},
+      {'icon': Bx.devices, 'label': 'Devices', 'onTap': () { Get.back(); Get.to(() => ScreenDevicesSection()); }, 'admin': false},
+      {'icon': Bx.bxl_whatsapp, 'label': 'WhatsApp Integration', 'onTap': () { if (_invController.company.value != null) { Get.back(); Get.to(() => AutomatedSyncScreen(company: _invController.company.value!)); } }, 'admin': false},
+      {'icon': Bx.cog, 'label': 'Settings', 'onTap': () { Get.back(); Get.to(() => ScreenSettingsPage()); }, 'admin': false},
+      {'icon': Bx.calculator, 'label': 'Tax', 'onTap': () { Get.back(); Get.to(() => TaxListScreens()); }, 'admin': true},
+      {'icon': Bx.bar_chart, 'label': 'Dashboard', 'onTap': () { Get.back(); Get.to(() => ScreenDashboard()); }, 'admin': true},
+      {'icon': Bx.network_chart, 'label': 'Online Dashboard', 'onTap': () { Get.back(); Net.lauchDashboardUrl(); }, 'admin': true},
+      {'icon': Bx.analyse, 'label': 'Subscriptions', 'onTap': () { Get.back(); Get.to(() => ScreenSubscription()); }, 'admin': true},
+      {'icon': Bx.bxl_visa, 'label': 'Payment Gateways', 'onTap': () { Get.back(); Get.to(() => ScreenPaymentGetway()); }, 'admin': true},
+      {'icon': Bx.money, 'label': 'Currencies', 'onTap': () { Get.back(); Get.to(() => ScreenCurrency()); }, 'admin': true},
+      {'icon': Carbon.information, 'label': 'Sales Help', 'onTap': () { Get.back(); Get.to(() => SalesHelp()); }, 'admin': false},
+      {'icon': Bx.help_circle, 'label': 'Help & Support', 'onTap': () { Get.back(); Net.launchSupport(); }, 'admin': false},
+      {'icon': Bx.info_circle, 'label': 'About MistPOS', 'onTap': () { Get.back(); Get.to(() => const ScreenAbout()); }, 'admin': false},
+      {'icon': Carbon.activity, 'label': 'System Diagnosis', 'onTap': () { Get.back(); Get.to(() => const ScreenDiagnosis()); }, 'admin': false},
+    ];
+
+    final filtered = allItems.where((item) {
+      if (item['admin'] == true && !isAdmin) return false;
+      return (item['label'] as String).toLowerCase().contains(_searchQuery);
+    }).toList();
+
+    if (filtered.isEmpty) {
+      return [
+        const Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Center(child: Text("No navigation items found.", style: TextStyle(color: Colors.grey))),
+        )
+      ];
+    }
+
+    return filtered.map((item) => _DrawerItem(
+      icon: item['icon'],
+      label: item['label'],
+      onTap: item['onTap'],
+    )).toList();
   }
 }
 

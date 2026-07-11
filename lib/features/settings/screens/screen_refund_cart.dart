@@ -116,7 +116,7 @@ class _ScreenRefundCartState extends State<ScreenRefundCart> {
 
             "Refund".text().textButton(
               onPressed: () {
-                final count = int.tryParse(controller.text);
+                final count = double.tryParse(controller.text);
                 if (count == null) {
                   Toaster.showError("Invalid number");
                   return;
@@ -125,8 +125,9 @@ class _ScreenRefundCartState extends State<ScreenRefundCart> {
                   Toaster.showError("number should be less than ${e.count}");
                   return;
                 }
+                final num countInt = count.toInt();
                 Get.back();
-                _proceedToRefund(index, e, count);
+                _proceedToRefund(index, e, countInt);
               },
             ),
           ],

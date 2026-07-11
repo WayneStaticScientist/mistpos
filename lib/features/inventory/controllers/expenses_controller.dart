@@ -70,9 +70,10 @@ class ExpensesController extends GetxController {
     totalExpenses.value = 0.0;
     fetchingExpenses.value = true;
     fetchingExpensesResponse.value = '';
-    final response = await Net.get(
-      "/expenses?search=$search&endDate=${endDate?.toIso8601String() ?? ''}&startDate=${startDate?.toIso8601String() ?? ''}&category=$category",
-    );
+    String url = "/expenses?search=$search&category=$category";
+    if (startDate != null) url += "&startDate=${startDate.toIso8601String()}";
+    if (endDate != null) url += "&endDate=${endDate.toIso8601String()}";
+    final response = await Net.get(url);
     fetchingExpenses.value = false;
     if (response.hasError) {
       fetchingExpensesResponse.value = response.response;
@@ -101,13 +102,16 @@ class ExpensesController extends GetxController {
     String status = '',
     String search = '',
     String category = '',
+    DateTime? startDate,
+    DateTime? endDate,
   }) async {
     if (fetchingPaginatedExpenses.value) return;
     fetchingPaginatedExpenses.value = true;
     fetchingPaginatedExpensesResponse.value = '';
-    final response = await Net.get(
-      "/expenses-pages?search=$search&page=$page&category=$category&status=$status",
-    );
+    String url = "/expenses-pages?search=$search&page=$page&category=$category&status=$status";
+    if (startDate != null) url += "&startDate=${startDate.toIso8601String()}";
+    if (endDate != null) url += "&endDate=${endDate.toIso8601String()}";
+    final response = await Net.get(url);
     fetchingPaginatedExpenses.value = false;
     if (response.hasError) {
       fetchingPaginatedExpensesResponse.value = response.response;
@@ -115,7 +119,6 @@ class ExpensesController extends GetxController {
       return;
     }
     final list = response.body['list'] as List<dynamic>?;
-    expenses.clear();
     if (list == null) {
       return;
     }

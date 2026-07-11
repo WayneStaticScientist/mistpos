@@ -144,12 +144,11 @@ class _ScreenSubscriptionState extends State<ScreenSubscription> {
                           price: 0.0,
                           buttonLabel: _controller.loadingFreeTrial.value
                               ? "Loading..."
-                              : "Start 30-Day Trial",
+                              : "Start 14-Day Trial",
                           features: [
-                            "30-Day Pro Access",
-                            "All Pro Features",
-                            "Try Risk-Free",
-                            "Ends in 30 Days",
+                            "14-Day Enterprise Access",
+                            "All Enterprise Features",
+                            "Ends in 14 Days",
                           ],
                           onSubscribe: _startFreeTrial,
                         ).visibleIfNot(
@@ -176,10 +175,9 @@ class _ScreenSubscriptionState extends State<ScreenSubscription> {
                       price: 0.0,
                       buttonLabel: "Get Started",
                       features: [
-                        "1 Project",
-                        "500 MB Storage",
                         "Basic Support",
-                        "Access 10 Templates",
+                        "Sell Products",
+                        "View statistics",
                       ],
                     ),
                   ),
@@ -187,9 +185,11 @@ class _ScreenSubscriptionState extends State<ScreenSubscription> {
                     if (p['id'] == 'free') return SizedBox();
 
                     List<String> features = [];
-                   if (p['features'] != null && p['features'] is List) {
-                      features = (p['features'] as List).map((e) => e.toString()).toList();
-                   }
+                    if (p['features'] != null && p['features'] is List) {
+                      features = (p['features'] as List)
+                          .map((e) => e.toString())
+                          .toList();
+                    }
 
                     return Obx(
                       () => SubscriptionCard(

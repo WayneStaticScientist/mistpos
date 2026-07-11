@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
-import 'package:pdf_maker/pdf_maker.dart';
+import 'package:printing/printing.dart';
 import 'package:mistpos/core/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/core/utils/date_utils.dart';
@@ -15,6 +15,7 @@ import 'package:mistpos/data/models/inventory_history_model.dart';
 import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:mistpos/core/widgets/layouts/subscription_alert.dart';
 import 'package:mistpos/core/utils/pdfdocuments/pdf_inventory_history.dart';
+import 'package:intl/intl.dart';
 
 class NavInventoryHistory extends StatefulWidget {
   const NavInventoryHistory({super.key});
@@ -27,8 +28,9 @@ class NavInventoryHistoryState extends State<NavInventoryHistory> {
   final _userController = Get.find<UserController>();
   final _adminController = Get.find<AdminController>();
   final _inventoryController = Get.find<InventoryController>();
-  DateTime _startDate = DateTime.now().subtract(Duration(days: 7));
-  DateTime _endDate = DateTime.now();
+  DateTime? _startDate;
+  DateTime? _endDate;
+
   @override
   void initState() {
     super.initState();
@@ -47,12 +49,13 @@ class NavInventoryHistoryState extends State<NavInventoryHistory> {
           ))) {
         return;
       }
-      _inventoryController.getInventoryHistory(_startDate, _endDate);
+      _inventoryController.getInventoryHistory(_startDate, _endDate, page: 1);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Obx(() {
       if (_inventoryController.company.value == null ||
           MistDateUtils.getDaysDifference(
@@ -68,83 +71,305 @@ class NavInventoryHistoryState extends State<NavInventoryHistory> {
           ))) {
         return SubscriptionAlert();
       }
-      return [
-        14.gapHeight,
-        [
-          Iconify(Bx.calendar, color: AppTheme.color(context)),
-          8.gapWidth,
 
-          "From ${MistDateUtils.getInformalShortDate(_startDate)} - ${(DateUtils.isSameDay(_endDate, DateTime.now()) ? "Today " : MistDateUtils.getInformalShortDate(_endDate))}"
-              .text()
-              .visibleIfNotNull(_startDate),
-        ].row(mainAxisAlignment: MainAxisAlignment.center).onTap(_changeDateRange),
-        "Tap on the date icon to change date ranges".text(
-          style: TextStyle(color: Colors.grey, fontSize: 12),
-        ),
-        Obx(() {
-          if (_inventoryController.loadingInventoryHistory.value) {
-            return MistLoader1().center();
-          }
-          if (_inventoryController.inventoryHistory.isEmpty) {
-            return "No sales today".text().center();
-          }
-          return SingleChildScrollView(
-            child: _makeTable(_inventoryController.inventoryHistory),
-          );
-        }).expanded1,
-      ].column();
-    });
-  }
-
-  Widget _makeTable(RxList<InventoryHistoryModel> historyModel) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Table(
-        columnWidths: const <int, TableColumnWidth>{
-          0: FixedColumnWidth(200.0), // Item
-          1: FixedColumnWidth(100.0),
-          2: FixedColumnWidth(100.0),
-          3: FixedColumnWidth(100.0),
-          4: FixedColumnWidth(80.0),
-          5: FixedColumnWidth(80.0),
-          6: FixedColumnWidth(80.0),
-        },
-        children: [
-          TableRow(
-            decoration: BoxDecoration(
-              color: AppTheme.surface(context),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            children: [
-              Text('Item Name').padding(EdgeInsets.all(10)),
-              Text('Document Type').padding(EdgeInsets.all(10)),
-              Text('Quantity Change').padding(EdgeInsets.all(10)),
-              Text('Date').padding(EdgeInsets.all(10)),
-            ],
-          ),
-          ...historyModel.map((e) {
-            return TableRow(
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header Row: Title and Print Button
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  e.itemName ?? '-',
-                ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
-                Text(
-                  e.documentType ?? "-",
-                ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
-                Text(
-                  e.quantityChange?.toString() ?? "-",
-                ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
-                Text(
-                  e.createdAt != null
-                      ? MistDateUtils.getInformalShortDate(e.createdAt!)
-                      : "",
-                ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Inventory History",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Track stock changes and movements",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDarkMode
+                              ? Colors.grey[400]
+                              : Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: _inventoryController.inventoryHistory.isEmpty
+                      ? null
+                      : printDocument,
+                  icon: Iconify(Bx.printer, color: AppTheme.color(context)),
+                  tooltip: "Print PDF Report",
+                ),
               ],
-            );
-          }),
-        ],
-      ),
-    );
+            ),
+            const SizedBox(height: 16),
+
+            // Date Range Picker Row
+            InkWell(
+              onTap: _changeDateRange,
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.grey[900] : Colors.grey[100],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Iconify(Bx.calendar, color: AppTheme.color(context)),
+                    const SizedBox(width: 8),
+                    Text(
+                      (_startDate == null || _endDate == null)
+                          ? "All Time"
+                          : "From ${MistDateUtils.getInformalShortDate(_startDate!)} - ${(DateUtils.isSameDay(_endDate!, DateTime.now()) ? "Today" : MistDateUtils.getInformalShortDate(_endDate!))}",
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Main Content Area
+            Expanded(
+              child: Obx(() {
+                if (_inventoryController.loadingInventoryHistory.value &&
+                    _inventoryController.inventoryHistoryPage.value == 1) {
+                  return const Center(child: MistLoader1());
+                }
+
+                if (_inventoryController.inventoryHistory.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Iconify(Bx.history, size: 64, color: Colors.grey[400]),
+                        const SizedBox(height: 16),
+                        const Text(
+                          "No inventory history found",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          "Try selecting a different date range",
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                // Group items by date
+                Map<String, List<InventoryHistoryModel>> grouped = {};
+                for (var item in _inventoryController.inventoryHistory) {
+                  if (item.createdAt != null) {
+                    String formattedDate = DateFormat(
+                      'EEEE, d MMMM y',
+                    ).format(item.createdAt!);
+                    grouped.putIfAbsent(formattedDate, () => []).add(item);
+                  }
+                }
+
+                return ListView.builder(
+                  itemCount: grouped.keys.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == grouped.keys.length) {
+                      return Obx(() {
+                        final currentPage =
+                            _inventoryController.inventoryHistoryPage.value;
+                        final totalPages = _inventoryController
+                            .inventoryHistoryTotalPages
+                            .value;
+                        final isLoading =
+                            _inventoryController.loadingInventoryHistory.value;
+
+                        if (currentPage < totalPages) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16.0),
+                            child: isLoading
+                                ? const Center(child: MistLoader1())
+                                : TextButton.icon(
+                                    onPressed: () {
+                                      _inventoryController.getInventoryHistory(
+                                        _startDate,
+                                        _endDate,
+                                        page: currentPage + 1,
+                                      );
+                                    },
+                                    icon: Iconify(
+                                      Bx.chevron_down,
+                                      color: AppTheme.color(context),
+                                    ),
+                                    label: Text(
+                                      "Load More History",
+                                      style: TextStyle(
+                                        color: AppTheme.color(context),
+                                      ),
+                                    ),
+                                  ),
+                          );
+                        }
+                        return const SizedBox(height: 24);
+                      });
+                    }
+
+                    String dateKey = grouped.keys.elementAt(index);
+                    List<InventoryHistoryModel> items = grouped[dateKey]!;
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            top: 16.0,
+                            bottom: 8.0,
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 4,
+                                height: 16,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.color(context),
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                dateKey,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        ...items.map((item) {
+                          final change = item.quantityChange ?? 0.0;
+                          final isPositive = change > 0;
+                          final isZero = change == 0;
+                          final displayChange = isZero
+                              ? "0"
+                              : "${isPositive ? '+' : ''}${change.toStringAsFixed(0)}";
+
+                          Color badgeBg;
+                          Color badgeText;
+                          if (isPositive) {
+                            badgeBg = isDarkMode
+                                ? Colors.green[900]!.withOpacity(0.2)
+                                : Colors.green[100]!;
+                            badgeText = isDarkMode
+                                ? Colors.green[300]!
+                                : Colors.green[800]!;
+                          } else if (isZero) {
+                            badgeBg = isDarkMode
+                                ? Colors.blue[900]!.withOpacity(0.2)
+                                : Colors.blue[100]!;
+                            badgeText = isDarkMode
+                                ? Colors.blue[300]!
+                                : Colors.blue[800]!;
+                          } else {
+                            badgeBg = isDarkMode
+                                ? Colors.red[900]!.withOpacity(0.2)
+                                : Colors.red[100]!;
+                            badgeText = isDarkMode
+                                ? Colors.red[300]!
+                                : Colors.red[800]!;
+                          }
+
+                          return Card(
+                            margin: const EdgeInsets.symmetric(vertical: 6.0),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(
+                                color: isDarkMode
+                                    ? Colors.grey[850]!
+                                    : Colors.grey[200]!,
+                              ),
+                            ),
+                            color: isDarkMode
+                                ? Colors.grey[900]!.withOpacity(0.5)
+                                : Colors.white,
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              title: Text(
+                                item.itemName ?? '-',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              subtitle: Padding(
+                                padding: const EdgeInsets.only(top: 4.0),
+                                child: Text(
+                                  item.documentType ?? '-',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isDarkMode
+                                        ? Colors.grey[400]
+                                        : Colors.grey[600],
+                                  ),
+                                ),
+                              ),
+                              trailing: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: badgeBg,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  displayChange,
+                                  style: TextStyle(
+                                    color: badgeText,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ],
+                    );
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   void _changeDateRange() async {
@@ -152,39 +377,33 @@ class NavInventoryHistoryState extends State<NavInventoryHistory> {
       context: context,
       firstDate: DateTime(2023),
       lastDate: DateTime.now(),
+      initialDateRange: _startDate != null && _endDate != null
+          ? DateTimeRange(start: _startDate!, end: _endDate!)
+          : null,
     );
     if (date == null) return;
     setState(() {
       _endDate = date.end;
       _startDate = date.start;
     });
-    _inventoryController.getInventoryHistory(_startDate, _endDate);
+    _inventoryController.getInventoryHistory(_startDate, _endDate, page: 1);
   }
 
   void printDocument() async {
-    PDFMaker maker = PDFMaker();
     final baseCurrency = _userController.user.value?.baseCurrence ?? '';
-    maker
-        .createPDF(
-          PdfInventoryHistory(
-            endDate: _endDate,
-            startDate: _startDate,
-            baseCurrence: baseCurrency,
-            invHistory: _inventoryController.inventoryHistory,
-          ),
-          setup: PageSetup(
-            context: context,
-            quality: 4.0,
-            scale: 1.0,
-            pageFormat: PageFormat.a4,
-            margins: 40,
-          ),
-        )
-        .then((file) {
-          _adminController.openFile(file);
-        })
-        .catchError((e) {
-          Toaster.showError("Failed to generate PDF: $e");
-        });
+    try {
+      final pdf = await PdfInventoryHistory.generate(
+        endDate: _endDate,
+        startDate: _startDate,
+        baseCurrence: baseCurrency,
+        invHistory: _inventoryController.inventoryHistory,
+      );
+      await Printing.layoutPdf(
+        onLayout: (format) async => pdf.save(),
+        name: 'Inventory_History_Report.pdf',
+      );
+    } catch (e) {
+      Toaster.showError("Failed to generate PDF: $e");
+    }
   }
 }

@@ -25,8 +25,16 @@ final PrinterDeviceModelSchema = IsarGeneratedSchema(
       IsarPropertySchema(name: 'address', type: IsarType.string),
       IsarPropertySchema(name: 'isConnected', type: IsarType.bool),
       IsarPropertySchema(name: 'port', type: IsarType.long),
+      IsarPropertySchema(name: 'role', type: IsarType.string),
     ],
-    indexes: [],
+    indexes: [
+      IsarIndexSchema(
+        name: 'role',
+        properties: ["role"],
+        unique: false,
+        hash: false,
+      ),
+    ],
   ),
   converter: IsarObjectConverter<int, PrinterDeviceModel>(
     serialize: serializePrinterDeviceModel,
@@ -42,6 +50,7 @@ int serializePrinterDeviceModel(IsarWriter writer, PrinterDeviceModel object) {
   IsarCore.writeString(writer, 2, object.address);
   IsarCore.writeBool(writer, 3, value: object.isConnected);
   IsarCore.writeLong(writer, 4, object.port);
+  IsarCore.writeString(writer, 5, object.role);
   return object.id;
 }
 
@@ -62,11 +71,14 @@ PrinterDeviceModel deserializePrinterDeviceModel(IsarReader reader) {
       _port = value;
     }
   }
+  final String _role;
+  _role = IsarCore.readString(reader, 5) ?? 'cashier';
   final object = PrinterDeviceModel(
     name: _name,
     address: _address,
     isConnected: _isConnected,
     port: _port,
+    role: _role,
   );
   object.id = IsarCore.readId(reader);
   return object;
@@ -92,6 +104,8 @@ dynamic deserializePrinterDeviceModelProp(IsarReader reader, int property) {
           return value;
         }
       }
+    case 5:
+      return IsarCore.readString(reader, 5) ?? 'cashier';
     default:
       throw ArgumentError('Unknown property: $property');
   }
@@ -104,6 +118,7 @@ sealed class _PrinterDeviceModelUpdate {
     String? address,
     bool? isConnected,
     int? port,
+    String? role,
   });
 }
 
@@ -119,6 +134,7 @@ class _PrinterDeviceModelUpdateImpl implements _PrinterDeviceModelUpdate {
     Object? address = ignore,
     Object? isConnected = ignore,
     Object? port = ignore,
+    Object? role = ignore,
   }) {
     return collection.updateProperties(
           [id],
@@ -127,6 +143,7 @@ class _PrinterDeviceModelUpdateImpl implements _PrinterDeviceModelUpdate {
             if (address != ignore) 2: address as String?,
             if (isConnected != ignore) 3: isConnected as bool?,
             if (port != ignore) 4: port as int?,
+            if (role != ignore) 5: role as String?,
           },
         ) >
         0;
@@ -140,6 +157,7 @@ sealed class _PrinterDeviceModelUpdateAll {
     String? address,
     bool? isConnected,
     int? port,
+    String? role,
   });
 }
 
@@ -155,12 +173,14 @@ class _PrinterDeviceModelUpdateAllImpl implements _PrinterDeviceModelUpdateAll {
     Object? address = ignore,
     Object? isConnected = ignore,
     Object? port = ignore,
+    Object? role = ignore,
   }) {
     return collection.updateProperties(id, {
       if (name != ignore) 1: name as String?,
       if (address != ignore) 2: address as String?,
       if (isConnected != ignore) 3: isConnected as bool?,
       if (port != ignore) 4: port as int?,
+      if (role != ignore) 5: role as String?,
     });
   }
 }
@@ -173,7 +193,13 @@ extension PrinterDeviceModelUpdate on IsarCollection<int, PrinterDeviceModel> {
 }
 
 sealed class _PrinterDeviceModelQueryUpdate {
-  int call({String? name, String? address, bool? isConnected, int? port});
+  int call({
+    String? name,
+    String? address,
+    bool? isConnected,
+    int? port,
+    String? role,
+  });
 }
 
 class _PrinterDeviceModelQueryUpdateImpl
@@ -189,12 +215,14 @@ class _PrinterDeviceModelQueryUpdateImpl
     Object? address = ignore,
     Object? isConnected = ignore,
     Object? port = ignore,
+    Object? role = ignore,
   }) {
     return query.updateProperties(limit: limit, {
       if (name != ignore) 1: name as String?,
       if (address != ignore) 2: address as String?,
       if (isConnected != ignore) 3: isConnected as bool?,
       if (port != ignore) 4: port as int?,
+      if (role != ignore) 5: role as String?,
     });
   }
 }
@@ -220,6 +248,7 @@ class _PrinterDeviceModelQueryBuilderUpdateImpl
     Object? address = ignore,
     Object? isConnected = ignore,
     Object? port = ignore,
+    Object? role = ignore,
   }) {
     final q = query.build();
     try {
@@ -228,6 +257,7 @@ class _PrinterDeviceModelQueryBuilderUpdateImpl
         if (address != ignore) 2: address as String?,
         if (isConnected != ignore) 3: isConnected as bool?,
         if (port != ignore) 4: port as int?,
+        if (role != ignore) 5: role as String?,
       });
     } finally {
       q.close();
@@ -640,6 +670,147 @@ extension PrinterDeviceModelQueryFilter
       );
     });
   }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
+  roleEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 5, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
+  roleGreaterThan(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 5,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
+  roleGreaterThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 5,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
+  roleLessThan(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 5, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
+  roleLessThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 5,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
+  roleBetween(String lower, String upper, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 5,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
+  roleStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 5,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
+  roleEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 5,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
+  roleContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 5,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
+  roleMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 5,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
+  roleIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const EqualCondition(property: 5, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
+  roleIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const GreaterCondition(property: 5, value: ''),
+      );
+    });
+  }
 }
 
 extension PrinterDeviceModelQueryObject
@@ -716,6 +887,20 @@ extension PrinterDeviceModelQuerySortBy
       return query.addSortBy(4, sort: Sort.desc);
     });
   }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterSortBy>
+  sortByRole({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(5, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterSortBy>
+  sortByRoleDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(5, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
 }
 
 extension PrinterDeviceModelQuerySortThenBy
@@ -789,6 +974,20 @@ extension PrinterDeviceModelQuerySortThenBy
       return query.addSortBy(4, sort: Sort.desc);
     });
   }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterSortBy>
+  thenByRole({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(5, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterSortBy>
+  thenByRoleDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(5, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
 }
 
 extension PrinterDeviceModelQueryWhereDistinct
@@ -818,6 +1017,13 @@ extension PrinterDeviceModelQueryWhereDistinct
   distinctByPort() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(4);
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterDistinct>
+  distinctByRole({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(5, caseSensitive: caseSensitive);
     });
   }
 }
@@ -851,6 +1057,12 @@ extension PrinterDeviceModelQueryProperty1
   QueryBuilder<PrinterDeviceModel, int, QAfterProperty> portProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(4);
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, String, QAfterProperty> roleProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(5);
     });
   }
 }
@@ -888,6 +1100,12 @@ extension PrinterDeviceModelQueryProperty2<R>
       return query.addProperty(4);
     });
   }
+
+  QueryBuilder<PrinterDeviceModel, (R, String), QAfterProperty> roleProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(5);
+    });
+  }
 }
 
 extension PrinterDeviceModelQueryProperty3<R1, R2>
@@ -922,6 +1140,13 @@ extension PrinterDeviceModelQueryProperty3<R1, R2>
   QueryBuilder<PrinterDeviceModel, (R1, R2, int), QOperations> portProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(4);
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, (R1, R2, String), QOperations>
+  roleProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(5);
     });
   }
 }

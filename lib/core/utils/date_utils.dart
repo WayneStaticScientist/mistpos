@@ -128,4 +128,14 @@ class MistDateUtils {
   static String formatSortableDate(DateTime createdAt) {
     return "${createdAt.year}/${createdAt.month.toString().padLeft(2, '0')}/${createdAt.day.toString().padLeft(2, '0')} ${getWeekDayName(createdAt)} ${createdAt.day} ${_getShortMonthName(createdAt.month)}";
   }
+
+  static String formatDayHeader(DateTime dateTime) {
+    return "${getWeekDayName(dateTime)} ${dateTime.day} ${_getMonthName(dateTime.month)}";
+  }
+
+  static String formatTime(DateTime dateTime) {
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    return "$hour:$minute";
+  }
 }

@@ -27,6 +27,8 @@ class MistAdminDashboard extends StatefulWidget {
 }
 
 class _MistAdminDashboardState extends State<MistAdminDashboard> {
+  String _searchQuery = '';
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -194,12 +196,40 @@ class _MistAdminDashboardState extends State<MistAdminDashboard> {
             ),
           ),
 
+          // ── Search Field ──
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Container(
+              decoration: BoxDecoration(
+                color: surfaceColor,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.withAlpha(40)),
+              ),
+              child: TextField(
+                onChanged: (val) {
+                  setState(() {
+                    _searchQuery = val.toLowerCase();
+                  });
+                },
+                style: const TextStyle(fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: 'Search menu...',
+                  hintStyle: TextStyle(color: Colors.grey.withAlpha(150), fontSize: 14),
+                  prefixIcon: Icon(Icons.search, color: primary, size: 20),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ),
+          ),
+
           // ── Scrollable Menu ──
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               children: [
-                _buildSectionHeader('ANALYTICS & REPORTS'),
+                if (_searchQuery.isNotEmpty) ..._buildSearchResults() else ...[
+                  _buildSectionHeader('ANALYTICS & REPORTS'),
                 _buildNavItem("Overview", Carbon.dashboard, Colors.blueAccent),
                 _buildNavItem("Monthly Reports", Carbon.report, Colors.indigoAccent),
                 _buildNavItem("Yearly Reports", Carbon.calendar, Colors.indigoAccent),
@@ -207,14 +237,26 @@ class _MistAdminDashboardState extends State<MistAdminDashboard> {
                 _buildNavItem("Product Analytics", Carbon.analytics, Colors.deepPurple),
                 _buildNavItem("Expenses Overview", Carbon.chart_line_data, Colors.redAccent),
                 _buildNavItem("Sales By Employee", Carbon.user, Colors.purple),
+                _buildNavItem("Sales By Categories", Carbon.category, Colors.deepPurpleAccent),
                 _buildNavItem("Sales By Payments", Carbon.money, Colors.green),
+                _buildNavItem("Sales By Customers", Carbon.user_multiple, Colors.indigo),
                 _buildNavItem("Shifts", Carbon.time_plot, Colors.indigo),
                 _buildNavItem("Shift Logs", Carbon.event_schedule, Colors.teal),
+
+                const SizedBox(height: 16),
+                _buildSectionHeader('MULTISHOP OVERVIEW'),
+                _buildNavItem("MultiShop Overview", Carbon.dashboard, Colors.blueAccent),
+                _buildNavItem("MultiShop Daily Sales", Carbon.sun, Colors.orange),
+                _buildNavItem("MultiShop Monthly Sales", Carbon.report, Colors.indigoAccent),
+                _buildNavItem("MultiShop Yearly Sales", Carbon.calendar, Colors.indigoAccent),
+                _buildNavItem("MultiShop Gigantic Overview", Carbon.chart_scatter, Colors.deepOrangeAccent),
 
                 const SizedBox(height: 16),
                 _buildSectionHeader('SUPPORT & HELP'),
                 _buildNavItem("Mistpos AI", Carbon.bot, Colors.deepPurpleAccent),
                 _buildNavItem("Support Tickets", Carbon.help, Colors.pinkAccent),
+                _buildNavItem("System Diagnosis", Carbon.activity, Colors.green),
+                _buildNavItem("Reseller", Carbon.user_multiple, Colors.indigoAccent),
 
                 const SizedBox(height: 16),
                 _buildSectionHeader('STORE OPERATIONS'),
@@ -279,12 +321,71 @@ class _MistAdminDashboardState extends State<MistAdminDashboard> {
                   Carbon.chart_line,
                   Colors.green,
                 ),
+                ],
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  List<Widget> _buildSearchResults() {
+    final List<Map<String, dynamic>> allItems = [
+      {'label': "Overview", 'icon': Carbon.dashboard, 'color': Colors.blueAccent},
+      {'label': "Monthly Reports", 'icon': Carbon.report, 'color': Colors.indigoAccent},
+      {'label': "Yearly Reports", 'icon': Carbon.calendar, 'color': Colors.indigoAccent},
+      {'label': "Daily Sales", 'icon': Carbon.sun, 'color': Colors.orange},
+      {'label': "Product Analytics", 'icon': Carbon.analytics, 'color': Colors.deepPurple},
+      {'label': "Expenses Overview", 'icon': Carbon.chart_line_data, 'color': Colors.redAccent},
+      {'label': "Sales By Employee", 'icon': Carbon.user, 'color': Colors.purple},
+      {'label': "Sales By Categories", 'icon': Carbon.category, 'color': Colors.deepPurpleAccent},
+      {'label': "Sales By Payments", 'icon': Carbon.money, 'color': Colors.green},
+      {'label': "Sales By Customers", 'icon': Carbon.user_multiple, 'color': Colors.indigo},
+      {'label': "Shifts", 'icon': Carbon.time_plot, 'color': Colors.indigo},
+      {'label': "Shift Logs", 'icon': Carbon.event_schedule, 'color': Colors.teal},
+      {'label': "MultiShop Overview", 'icon': Carbon.dashboard, 'color': Colors.blueAccent},
+      {'label': "MultiShop Daily Sales", 'icon': Carbon.sun, 'color': Colors.orange},
+      {'label': "MultiShop Monthly Sales", 'icon': Carbon.report, 'color': Colors.indigoAccent},
+      {'label': "MultiShop Yearly Sales", 'icon': Carbon.calendar, 'color': Colors.indigoAccent},
+      {'label': "MultiShop Gigantic Overview", 'icon': Carbon.chart_scatter, 'color': Colors.deepOrangeAccent},
+      {'label': "Mistpos AI", 'icon': Carbon.bot, 'color': Colors.deepPurpleAccent},
+      {'label': "Support Tickets", 'icon': Carbon.help, 'color': Colors.pinkAccent},
+      {'label': "System Diagnosis", 'icon': Carbon.activity, 'color': Colors.green},
+      {'label': "Reseller", 'icon': Carbon.user_multiple, 'color': Colors.indigoAccent},
+      {'label': "Receits", 'icon': Carbon.receipt, 'color': Colors.redAccent},
+      {'label': "Customers", 'icon': Carbon.user_multiple, 'color': Colors.cyan},
+      {'label': "Employees", 'icon': Carbon.user_role, 'color': Colors.deepPurple},
+      {'label': "Stores", 'icon': Carbon.store, 'color': Colors.blueGrey},
+      {'label': "Billing History", 'icon': Carbon.wallet, 'color': Colors.green},
+      {'label': "Items", 'icon': Carbon.shopping_cart, 'color': Colors.amber.shade700},
+      {'label': "Bulk Import/Export", 'icon': Carbon.upload, 'color': Colors.teal},
+      {'label': "Categories", 'icon': Carbon.category, 'color': Colors.indigoAccent},
+      {'label': "Modifiers", 'icon': Carbon.add_alt, 'color': Colors.lightBlue},
+      {'label': "Discounts", 'icon': Carbon.percentage, 'color': Colors.pink},
+      {'label': "Expenses", 'icon': Carbon.wallet, 'color': Colors.red},
+      {'label': "Suppliers", 'icon': Carbon.delivery_truck, 'color': Colors.brown},
+      {'label': "Purchase Orders", 'icon': Carbon.shopping_cart_plus, 'color': Colors.deepOrange},
+      {'label': "Transfer Orders", 'icon': Carbon.box, 'color': Colors.blue},
+      {'label': "Productions", 'icon': Carbon.assembly, 'color': Colors.purpleAccent},
+      {'label': "Inventory Counts", 'icon': Carbon.chart_evaluation, 'color': Colors.teal},
+      {'label': "Stock Adjustments", 'icon': Carbon.settings_adjust, 'color': Colors.blueGrey},
+      {'label': "Inventory History", 'icon': Carbon.recently_viewed, 'color': Colors.indigo},
+      {'label': "Inventory Valuation", 'icon': Carbon.chart_line, 'color': Colors.green},
+    ];
+
+    final filtered = allItems.where((item) => (item['label'] as String).toLowerCase().contains(_searchQuery)).toList();
+
+    if (filtered.isEmpty) {
+      return [
+        const Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Center(child: Text("No navigation items found.", style: TextStyle(color: Colors.grey))),
+        )
+      ];
+    }
+
+    return filtered.map((item) => _buildNavItem(item['label'], item['icon'], item['color'])).toList();
   }
 
   Widget _buildSectionHeader(String title) {

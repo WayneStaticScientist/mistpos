@@ -1,97 +1,134 @@
-import 'package:exui/exui.dart';
-import 'package:flutter/material.dart';
-import 'package:mistpos/data/models/user_model.dart';
-import 'package:pdf_maker/pdf_maker.dart';
-import 'package:mistpos/core/themes/app_theme.dart';
+import 'dart:typed_data';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:mistpos/core/utils/date_utils.dart';
-import 'package:iconify_flutter/icons/bx.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/data/models/user_model.dart';
 import 'package:mistpos/data/models/inventory_history_model.dart';
 
-class PdfInventoryHistory extends BlankPage {
-  final DateTime startDate;
-  final DateTime endDate;
-  final List<InventoryHistoryModel> invHistory;
-  final String baseCurrence;
-  const PdfInventoryHistory({
-    super.key,
-    required this.invHistory,
-    required this.baseCurrence,
-    required this.startDate,
-    required this.endDate,
-  });
-
-  @override
-  Widget createPageContent(BuildContext context) {
+class PdfInventoryHistory {
+  static Future<pw.Document> generate({
+    required DateTime? startDate,
+    required DateTime? endDate,
+    required List<InventoryHistoryModel> invHistory,
+    required String baseCurrence,
+  }) async {
+    final pdf = pw.Document();
     final user = User.fromStorage();
-    return [
-      "${user?.companyName}".text(
-        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-      ),
-      "Inventory History".text(
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-      ),
-      14.gapHeight,
-      [
-        Iconify(Bx.calendar, color: AppTheme.color(context)),
-        8.gapWidth,
 
-        "From ${MistDateUtils.getInformalShortDate(startDate)} - ${(DateUtils.isSameDay(endDate, DateTime.now()) ? "Today " : MistDateUtils.getInformalShortDate(endDate))}"
-            .text()
-            .visibleIfNotNull(startDate),
-      ].row(mainAxisAlignment: MainAxisAlignment.center),
-      _makeTable(invHistory),
-    ].column();
+    // Load Logo
+    pw.MemoryImage? logoImage;
+    try {
+      final ByteData data = await rootBundle.load('assets/launcher.png');
+      logoImage = pw.MemoryImage(data.buffer.asUint8List());
+    } catch (e) {
+      // ignore
+    }
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        build: (pw.Context context) {
+          return [
+            // ── Header with Logo ──
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(user?.companyName ?? "Company Name",
+                        style: pw.TextStyle(
+                            fontSize: 24,
+                            fontWeight: pw.FontWeight.bold,
+                            color: PdfColors.blue800)),
+                    pw.SizedBox(height: 4),
+                    pw.Text("Inventory History Report",
+                        style: pw.TextStyle(
+                            fontSize: 18, color: PdfColors.grey700)),
+                  ],
+                ),
+                if (logoImage != null)
+                  pw.Image(logoImage, width: 60, height: 60),
+              ],
+            ),
+            pw.SizedBox(height: 18),
+            pw.Divider(color: PdfColors.grey400),
+            pw.SizedBox(height: 12),
+
+            // ── Date Range ──
+            pw.Row(
+              children: [
+                pw.Text("Report Period: ",
+                    style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold, fontSize: 12)),
+                pw.Text(
+                    (startDate == null || endDate == null)
+                        ? "All Time"
+                        : "${MistDateUtils.getInformalShortDate(startDate)} to ${MistDateUtils.getInformalShortDate(endDate)}",
+                    style: const pw.TextStyle(fontSize: 12)),
+              ],
+            ),
+            pw.SizedBox(height: 24),
+
+            // ── Inventory History Table ──
+            pw.Text("Inventory Logs",
+                style: pw.TextStyle(
+                    fontSize: 14,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.blue800)),
+            pw.SizedBox(height: 8),
+            _buildHistoryTable(invHistory),
+          ];
+        },
+      ),
+    );
+    return pdf;
   }
 
-  Widget _makeTable(List<InventoryHistoryModel> historyModel) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Table(
-        columnWidths: const <int, TableColumnWidth>{
-          0: FixedColumnWidth(200.0), // Item
-          1: FixedColumnWidth(100.0),
-          2: FixedColumnWidth(100.0),
-          3: FixedColumnWidth(100.0),
-          4: FixedColumnWidth(80.0),
-          5: FixedColumnWidth(80.0),
-          6: FixedColumnWidth(80.0),
-        },
-        children: [
-          TableRow(
-            decoration: BoxDecoration(
-              color: Colors.grey.withAlpha(100),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            children: [
-              Text('Item Name').padding(EdgeInsets.all(10)),
-              Text('Document Type').padding(EdgeInsets.all(10)),
-              Text('Quantity Change').padding(EdgeInsets.all(10)),
-              Text('Date').padding(EdgeInsets.all(10)),
-            ],
-          ),
-          ...historyModel.map((e) {
-            return TableRow(
-              children: [
-                Text(
-                  e.itemName ?? '-',
-                ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
-                Text(
-                  e.documentType ?? "-",
-                ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
-                Text(
-                  e.quantityChange?.toString() ?? "-",
-                ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
-                Text(
-                  e.createdAt != null
-                      ? MistDateUtils.getInformalShortDate(e.createdAt!)
-                      : "",
-                ).padding(EdgeInsets.symmetric(horizontal: 2, vertical: 8)),
-              ],
-            );
-          }),
-        ],
-      ),
+  static pw.Widget _buildHistoryTable(List<InventoryHistoryModel> historyModel) {
+    final tableHeaders = [
+      'Item Name',
+      'Document Type',
+      'Qty Change',
+      'Date',
+    ];
+
+    final tableData = historyModel.map((e) {
+      final change = e.quantityChange ?? 0.0;
+      final displayChange = change == 0
+          ? "0"
+          : "${change > 0 ? '+' : ''}${change.toStringAsFixed(0)}";
+      return [
+        e.itemName ?? '-',
+        e.documentType ?? "-",
+        displayChange,
+        e.createdAt != null ? MistDateUtils.getInformalShortDate(e.createdAt!) : "",
+      ];
+    }).toList();
+
+    return pw.TableHelper.fromTextArray(
+      headers: tableHeaders,
+      data: tableData,
+      border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+      headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10, color: PdfColors.black),
+      headerDecoration: const pw.BoxDecoration(color: PdfColors.blue50),
+      cellHeight: 22,
+      cellAlignments: {
+        0: pw.Alignment.centerLeft,
+        1: pw.Alignment.centerLeft,
+        2: pw.Alignment.centerLeft,
+        3: pw.Alignment.centerLeft,
+      },
+      cellStyle: const pw.TextStyle(fontSize: 9),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(2.5),
+        1: const pw.FlexColumnWidth(1.5),
+        2: const pw.FlexColumnWidth(1),
+        3: const pw.FlexColumnWidth(1.2),
+      },
     );
   }
 }

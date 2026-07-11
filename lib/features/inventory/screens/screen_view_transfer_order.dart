@@ -2,6 +2,10 @@ import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/core/themes/app_theme.dart';
+import 'package:printing/printing.dart';
+import 'package:pdf/pdf.dart';
+import 'package:mistpos/core/utils/toast.dart';
+import 'package:mistpos/core/utils/pdfdocuments/pdf_transfer_order.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/data/models/user_model.dart';
 import 'package:data_table_2/data_table_2.dart';
@@ -42,6 +46,22 @@ class _ScreenViewTransferOrderState extends State<ScreenViewTransferOrder> {
     });
   }
 
+  void _printDocument() async {
+    Toaster.showSuccess("Preparing document, please wait...");
+    try {
+      final pdf = await PdfTransferOrder.generate(
+        model: widget.model,
+        sender: sender,
+      );
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdf.save(),
+        name: 'Transfer_Order_Report.pdf',
+      );
+    } catch (e) {
+      Toaster.showError("Failed to generate PDF: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,6 +69,13 @@ class _ScreenViewTransferOrderState extends State<ScreenViewTransferOrder> {
         foregroundColor: Colors.white,
         backgroundColor: Get.theme.colorScheme.primary,
         title: "Transfer Order".text(),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.print, color: Colors.white),
+            onPressed: _printDocument,
+            tooltip: "Print to PDF",
+          ),
+        ],
       ),
       body: ListView(
         padding: EdgeInsets.all(8),

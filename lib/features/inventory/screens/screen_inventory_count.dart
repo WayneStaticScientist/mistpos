@@ -17,6 +17,10 @@ import 'package:mistpos/features/inventory/controllers/items_controller.dart';
 import 'package:mistpos/data/models/inventory_child_count.dart';
 import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:mistpos/core/widgets/buttons/mist_loaded_icon_button.dart';
+import 'package:printing/printing.dart';
+import 'package:pdf/pdf.dart';
+import 'package:mistpos/core/utils/pdfdocuments/pdf_inventory_count.dart';
+import 'package:mistpos/core/utils/date_utils.dart';
 
 class ScreenInventoryCount extends StatefulWidget {
   final InventoryCountModel model;
@@ -33,6 +37,44 @@ class _ScreenInventoryCountState extends State<ScreenInventoryCount> {
   final _inventory = Get.find<InventoryController>();
   final _itemController = Get.find<ItemsController>();
   final _userController = Get.find<UserController>();
+
+  void _printDocument() async {
+    Toaster.showSuccess("Preparing document, please wait...");
+    final baseCurrency = _userController.user.value?.baseCurrence ?? '';
+    
+    final tempModel = InventoryCountModel(
+      id: widget.model.id,
+      notes: widget.model.notes,
+      status: widget.model.status,
+      company: widget.model.company,
+      senderId: widget.model.senderId,
+      totalDifference: _inventory.inventoryCountItems
+          .map((e) => e.difference)
+          .fold(0.0, (val, el) => val + el),
+      countBasedOn: widget.model.countBasedOn,
+      inventoryItems: List<InventoryChildCount>.from(_inventory.inventoryCountItems),
+      totalCostDifference: _inventory.inventoryCountItems
+          .map((e) => e.costDifference)
+          .fold(0.0, (val, el) => val + el),
+      createdAt: widget.model.createdAt,
+      updatedAt: widget.model.updatedAt,
+      label: widget.model.label,
+    );
+
+    try {
+      final pdf = await PdfInventoryCount.generate(
+        model: tempModel,
+        baseCurrency: baseCurrency,
+      );
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdf.save(),
+        name: 'Inventory_Count_Report.pdf',
+      );
+    } catch (e) {
+      Toaster.showError("Failed to generate PDF: $e");
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -72,6 +114,7 @@ class _ScreenInventoryCountState extends State<ScreenInventoryCount> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Get.isDarkMode;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (bool didPop, Object? result) async {
@@ -91,6 +134,11 @@ class _ScreenInventoryCountState extends State<ScreenInventoryCount> {
           backgroundColor: Get.theme.colorScheme.primary,
           foregroundColor: Colors.white,
           actions: [
+            IconButton(
+              icon: const Icon(Icons.print, color: Colors.white),
+              onPressed: _printDocument,
+              tooltip: "Print to PDF",
+            ),
             MistLoadIconButton(
               label: "Complete",
               onPressed: () => _confirmComplete(),
@@ -99,50 +147,71 @@ class _ScreenInventoryCountState extends State<ScreenInventoryCount> {
           ],
         ),
         body: ListView(
-          padding: EdgeInsets.all(5),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
           children: [
-            32.gapHeight,
-            [
-                  "Stock Items".text(),
+            _buildHeaderCard(isDark),
+            20.gapHeight,
+            _buildMetricsGrid(isDark),
+            20.gapHeight,
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Get.theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Get.theme.colorScheme.outline.withValues(alpha: 0.1),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.02),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      "Stock Items".text(
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Obx(() {
+                        final count = _inventory.inventoryCountItems.length;
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Get.theme.colorScheme.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: "$count items".text(
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Get.theme.colorScheme.primary,
+                            ),
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
                   Obx(
                     () => MistLoader1().visibleIf(
                       _inventory.inventoryCountsLoading.value,
                     ),
                   ),
-                  14.gapHeight,
+                  12.gapHeight,
                   Obx(
-                    () =>
-                        "There was error fetching items : ${_inventory.inventoryCountItemsError.value}"
-                            .text(style: TextStyle(color: Colors.red))
-                            .visibleIf(
-                              _inventory.inventoryCountItemsError.isNotEmpty,
-                            ),
-                  ),
-                  ListTile(
-                    title: "Total Cost difference".text(),
-                    leading: Iconify(Bx.dollar, color: AppTheme.color(context)),
-                    trailing:
-                        CurrenceConverter.getCurrenceFloatInStrings(
-                          widget.model.totalCostDifference,
-                          _userController.user.value?.baseCurrence ?? '',
-                        ).text(
-                          style: TextStyle(
-                            color: widget.model.totalCostDifference >= 0
-                                ? Colors.green
-                                : Colors.red,
-                          ),
+                    () => "There was error fetching items : ${_inventory.inventoryCountItemsError.value}"
+                        .text(style: const TextStyle(color: Colors.red))
+                        .visibleIf(
+                          _inventory.inventoryCountItemsError.isNotEmpty,
                         ),
-                  ),
-                  ListTile(
-                    title: "Total Item difference".text(),
-                    leading: Iconify(Bx.dollar, color: AppTheme.color(context)),
-                    trailing: widget.model.totalDifference.toString().text(
-                      style: TextStyle(
-                        color: widget.model.totalDifference >= 0
-                            ? Colors.green
-                            : Colors.red,
-                      ),
-                    ),
                   ),
                   Obx(
                     () => _makeTable().visibleIf(
@@ -150,20 +219,242 @@ class _ScreenInventoryCountState extends State<ScreenInventoryCount> {
                           !_inventory.inventoryCountsLoading.value,
                     ),
                   ),
-                ]
-                .column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                )
-                .padding(EdgeInsets.all(12))
-                .decoratedBox(
-                  decoration: BoxDecoration(
-                    color: Get.theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
+                ],
+              ),
+            ),
           ],
         ).constrained(maxWidth: ScreenSizes.maxWidth).center(),
+      ),
+    );
+  }
+
+  Widget _buildHeaderCard(bool isDark) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Get.theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Get.theme.colorScheme.outline.withValues(alpha: 0.1),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withValues(alpha: isDark ? 0.15 : 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.amber[800]!.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.edit_note_rounded, color: Colors.amber[800]!, size: 16),
+                    6.gapWidth,
+                    "Drafting".text(
+                      style: TextStyle(
+                        color: Colors.amber[800]!,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.inventory_rounded,
+                size: 20,
+                color: Get.theme.colorScheme.primary.withValues(alpha: 0.6),
+              ),
+            ],
+          ),
+          16.gapHeight,
+          widget.model.label.text(
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
+            ),
+          ),
+          16.gapHeight,
+          Divider(
+            color: Get.theme.colorScheme.outline.withValues(alpha: 0.1),
+            height: 1,
+          ),
+          16.gapHeight,
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    "Created".text(
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Get.theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    4.gapHeight,
+                    MistDateUtils.getInformalDate(widget.model.createdAt!).text(
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    "Based On".text(
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Get.theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    4.gapHeight,
+                    widget.model.countBasedOn.toUpperCase().text(
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetricsGrid(bool isDark) {
+    final costDiff = widget.model.totalCostDifference;
+    final costColor = costDiff >= 0 ? Colors.green : Colors.red;
+    final costBgColor = costColor.withValues(alpha: isDark ? 0.12 : 0.06);
+
+    final itemDiff = widget.model.totalDifference;
+    final itemColor = itemDiff >= 0 ? Colors.green : Colors.red;
+    final itemBgColor = itemColor.withValues(alpha: isDark ? 0.12 : 0.06);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double cardWidth = (constraints.maxWidth - 16) / 2;
+        return Row(
+          children: [
+            SizedBox(
+              width: cardWidth,
+              height: 100,
+              child: _buildMetricCard(
+                title: "Cost Difference",
+                value: CurrenceConverter.getCurrenceFloatInStrings(
+                  costDiff,
+                  _userController.user.value?.baseCurrence ?? '',
+                ),
+                icon: Bx.dollar,
+                color: costColor,
+                bgColor: costBgColor,
+              ),
+            ),
+            16.gapWidth,
+            SizedBox(
+              width: cardWidth,
+              height: 100,
+              child: _buildMetricCard(
+                title: "Item Difference",
+                value: itemDiff > 0 ? "+$itemDiff" : "$itemDiff",
+                icon: Bx.adjust,
+                color: itemColor,
+                bgColor: itemBgColor,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildMetricCard({
+    required String title,
+    required String value,
+    required String icon,
+    required Color color,
+    required Color bgColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Get.theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Get.theme.colorScheme.outline.withValues(alpha: 0.1),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: title.text(
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Get.theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              8.gapWidth,
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  shape: BoxShape.circle,
+                ),
+                child: Iconify(icon, color: color, size: 16),
+              ),
+            ],
+          ),
+          value.text(
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -174,6 +465,15 @@ class _ScreenInventoryCountState extends State<ScreenInventoryCount> {
       _isLoading = true;
     });
     widget.model.inventoryItems = _inventory.inventoryCountItems;
+    
+    // Recalculate totals to ensure they are accurately saved to backend
+    widget.model.totalDifference = _inventory.inventoryCountItems
+        .map((e) => e.difference)
+        .fold(0.0, (val, el) => val + el);
+    widget.model.totalCostDifference = _inventory.inventoryCountItems
+        .map((e) => e.costDifference)
+        .fold(0.0, (val, el) => val + el);
+
     final response = await _inventory.updateInventoryCounts(
       widget.model.toJson(),
       widget.model.id,
@@ -186,54 +486,129 @@ class _ScreenInventoryCountState extends State<ScreenInventoryCount> {
       _itemController.syncCartItemsOnBackground(page: 1);
       widget.model.status = "completed";
       Get.back(result: widget.model);
-      Toaster.showSuccess("Inventory Count was complited successfully");
+      Toaster.showSuccess("Inventory Count was completed successfully");
       return;
     }
   }
 
   Widget _makeTable() {
-    return DataTable2(
-      columnSpacing: 12,
-      horizontalMargin: 12,
-      minWidth: ScreenSizes.maxWidth,
+    final isDark = Get.isDarkMode;
+    final rowBgColor = WidgetStateProperty.resolveWith<Color?>((states) {
+      return null;
+    });
 
-      columns: [
-        DataColumn2(label: Text('Item Name'), size: ColumnSize.L), // Has flex
-        DataColumn(label: Text('Expected Stock')),
-        DataColumn(label: Text('Counted')),
-        DataColumn(label: Text('Difference')),
-        DataColumn(label: Text('Cost '), numeric: true),
-        DataColumn(label: Text('Cost Difference'), numeric: true),
-      ],
-      rows: _inventory.inventoryCountItems
-          .map(
-            (e) => DataRow(
-              cells: <DataCell>[
-                DataCell(e.name.text()),
-                DataCell(e.count.toString().text()),
-                DataCell(
-                  e.counted.toString().text().textButton(
-                    onPressed: () => _changeCount(e),
-                  ),
-                ),
-                DataCell((e.difference).toString().text()),
-                DataCell(
-                  CurrenceConverter.getCurrenceFloatInStrings(
-                    e.cost,
-                    _userController.user.value?.baseCurrence ?? '',
-                  ).text(),
-                ),
-                DataCell(
-                  CurrenceConverter.getCurrenceFloatInStrings(
-                    e.costDifference,
-                    _userController.user.value?.baseCurrence ?? '',
-                  ).text(),
-                ),
-              ],
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Get.theme.colorScheme.outline.withValues(alpha: 0.1),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minWidth: ScreenSizes.maxWidth - 64),
+          child: DataTable(
+            columnSpacing: 16,
+            horizontalMargin: 16,
+            headingRowColor: WidgetStateProperty.all(
+              Get.theme.colorScheme.primary.withValues(alpha: 0.06),
             ),
-          )
-          .toList(),
-    ).constrained(maxWidth: ScreenSizes.maxWidth, maxHeight: 10000);
+            dataRowColor: rowBgColor,
+            headingTextStyle: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Get.theme.colorScheme.onSurface,
+              fontSize: 13,
+            ),
+            columns: const [
+              DataColumn(label: Text('Item Name')),
+              DataColumn(label: Text('Expected')),
+              DataColumn(label: Text('Counted')),
+              DataColumn(label: Text('Diff')),
+              DataColumn(label: Text('Cost'), numeric: true),
+              DataColumn(label: Text('Cost Diff'), numeric: true),
+            ],
+            rows: _inventory.inventoryCountItems
+                .map(
+                  (e) {
+                    final diffColor = e.difference == 0
+                        ? Get.theme.colorScheme.onSurface
+                        : (e.difference > 0 ? Colors.green : Colors.red);
+                    
+                    final costDiffColor = e.costDifference == 0
+                        ? Get.theme.colorScheme.onSurface
+                        : (e.costDifference > 0 ? Colors.green : Colors.red);
+
+                    return DataRow(
+                      cells: <DataCell>[
+                        DataCell(
+                          e.name.text(
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        DataCell(e.count.toString().text()),
+                        DataCell(
+                          InkWell(
+                            onTap: () => _changeCount(e),
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Get.theme.colorScheme.primary.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Get.theme.colorScheme.primary.withValues(alpha: 0.15),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  e.counted.toString().text(
+                                    style: TextStyle(
+                                      color: Get.theme.colorScheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  6.gapWidth,
+                                  Icon(
+                                    Icons.edit_outlined,
+                                    size: 14,
+                                    color: Get.theme.colorScheme.primary,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          (e.difference > 0 ? "+${e.difference}" : "${e.difference}").text(
+                            style: TextStyle(color: diffColor, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        DataCell(
+                          CurrenceConverter.getCurrenceFloatInStrings(
+                            e.cost,
+                            _userController.user.value?.baseCurrence ?? '',
+                          ).text(),
+                        ),
+                        DataCell(
+                          CurrenceConverter.getCurrenceFloatInStrings(
+                            e.costDifference,
+                            _userController.user.value?.baseCurrence ?? '',
+                          ).text(
+                            style: TextStyle(color: costDiffColor, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                )
+                .toList(),
+          ),
+        ),
+      ),
+    );
   }
 
   void _changeCount(InventoryChildCount itemInv) {

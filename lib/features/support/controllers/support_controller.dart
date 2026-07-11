@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
-import 'package:mistpos/core/services/api/network_wrapper.dart';
 import 'package:mistpos/core/utils/toast.dart';
-import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
+import 'package:mistpos/core/services/api/network_wrapper.dart';
 
 class SupportController extends GetxController {
   final tickets = [].obs;
@@ -55,7 +54,7 @@ class SupportController extends GetxController {
         await fetchTickets();
         return true;
       } else {
-        Toaster.showError(response.response ?? "Failed to create ticket");
+        Toaster.showError(response.response);
         return false;
       }
     } catch (e) {
@@ -81,7 +80,7 @@ class SupportController extends GetxController {
         await fetchTickets();
         return true;
       } else {
-        Toaster.showError(response.response ?? "Failed to send reply");
+        Toaster.showError(response.response);
         return false;
       }
     } catch (e) {

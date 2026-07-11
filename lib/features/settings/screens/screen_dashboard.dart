@@ -23,10 +23,12 @@ import 'package:mistpos/features/settings/screens/screen_add_store.dart';
 import 'package:mistpos/features/admin/screens/nav_transfer_orders.dart';
 import 'package:mistpos/features/admin/screens/nav_inventory_counts.dart';
 import 'package:mistpos/features/admin/screens/nav_sales_by_payment.dart';
+import 'package:mistpos/features/admin/screens/nav_sales_by_customers.dart';
 import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:mistpos/features/admin/screens/screen_list_customers.dart';
 import 'package:mistpos/features/admin/screens/nav_inventory_history.dart';
 import 'package:mistpos/features/admin/screens/nav_sales_by_employee.dart';
+import 'package:mistpos/features/admin/screens/nav_sales_by_categories.dart';
 import 'package:mistpos/features/admin/screens/nav_billing_history.dart';
 import 'package:mistpos/features/settings/screens/screen_add_employee.dart';
 import 'package:mistpos/features/settings/screens/screen_add_customer.dart';
@@ -55,7 +57,15 @@ import 'package:mistpos/features/settings/screens/screen_edit_modifier.dart';
 import 'package:mistpos/data/models/item_categories_model.dart';
 import 'package:mistpos/data/models/discount_model.dart';
 import 'package:mistpos/data/models/item_modifier_model.dart';
+import 'package:mistpos/data/models/item_modifier_model.dart';
 import 'package:mistpos/features/support/screens/screen_mistpos_ai.dart';
+import 'package:mistpos/features/admin/screens/nav_multishop_overview.dart';
+import 'package:mistpos/features/admin/screens/nav_multishop_daily_sales.dart';
+import 'package:mistpos/features/admin/screens/nav_multishop_monthly_sales.dart';
+import 'package:mistpos/features/admin/screens/nav_multishop_yearly_sales.dart';
+import 'package:mistpos/features/admin/screens/nav_multishop_gigantic.dart';
+import 'package:mistpos/features/support/screens/screen_diagnosis.dart';
+import 'package:mistpos/features/support/screens/screen_reseller.dart';
 
 class ScreenDashboard extends StatefulWidget {
   const ScreenDashboard({super.key});
@@ -71,6 +81,7 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
   final _inventoryController = Get.find<InventoryController>();
   final _adminOverviewKey = GlobalKey<NavAdminOverViewState>();
   final _salesByEmployeeKeys = GlobalKey<NavSalesByEmployeeState>();
+  final _salesByCategoryKeys = GlobalKey<NavSalesByCategoryState>();
   final _salesByPayment = GlobalKey<NavSalesByPaymentState>();
   final _shiftsKey = GlobalKey<NavShiftsViewState>();
   final _navInvHistoryKey = GlobalKey<NavInventoryHistoryState>();
@@ -93,7 +104,9 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     "Monthly Reports": const NavMonthlyReports(),
     "Yearly Reports": const NavYearlyReports(),
     "Sales By Employee": NavSalesByEmployee(key: _salesByEmployeeKeys),
+    "Sales By Categories": NavSalesByCategory(key: _salesByCategoryKeys),
     "Sales By Payments": NavSalesByPayment(key: _salesByPayment),
+    "Sales By Customers": const NavSalesByCustomers(),
     "Shifts": NavShiftsView(key: _shiftsKey),
     "Shift Logs": const NavAllShiftsView(),
     "Transfer Orders": const NavTransferOrders(),
@@ -108,6 +121,13 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     "Support Tickets": ScreenTickets(),
     "Bulk Import/Export": const NavProductImportExport(),
     "Billing History": NavBillingHistory(key: _billingHistoryKey),
+    "MultiShop Overview": const NavMultiShopOverview(),
+    "MultiShop Daily Sales": const NavMultiShopDailySales(),
+    "MultiShop Monthly Sales": const NavMultiShopMonthlySales(),
+    "MultiShop Yearly Sales": const NavMultiShopYearlySales(),
+    "MultiShop Gigantic Overview": const NavMultiShopGigantic(),
+    "System Diagnosis": const ScreenDiagnosis(),
+    "Reseller": const ScreenReseller(),
   };
 
   @override
@@ -125,7 +145,9 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF14161F) : const Color(0xFFF7F8FA),
+      backgroundColor: isDark
+          ? const Color(0xFF14161F)
+          : const Color(0xFFF7F8FA),
       appBar: AppBar(
         title: Text(
           _selectedIndex,
@@ -146,12 +168,18 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Color(0xFF2563EB), Color(0xFF7C3AED)]),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF2563EB), Color(0xFF7C3AED)],
+              ),
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
               onPressed: () => Get.to(() => const ScreenMistposAi()),
-              icon: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
+              icon: const Icon(
+                Icons.auto_awesome_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
               tooltip: "Mistpos AI Assistant",
             ),
           ),
@@ -163,11 +191,7 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
             ),
             child: IconButton(
               onPressed: _printDocument,
-              icon: Iconify(
-                Bx.printer,
-                color: primary,
-                size: 20,
-              ),
+              icon: Iconify(Bx.printer, color: primary, size: 20),
               tooltip: "Export Report",
             ),
           ).visibleIf(
@@ -175,6 +199,7 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
               "Overview",
               "Daily Sales",
               "Sales By Employee",
+              "Sales By Categories",
               "Sales By Payments",
               "Shifts",
               "Inventory History",
@@ -236,24 +261,29 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
       Get.to(() => ScreenAddStockadjustments());
     }
     if (_selectedIndex == 'Categories') {
-      Get.to(() => ScreenEditCategory(
-            itemCategoryModel: ItemCategoryModel(name: ''),
-          ));
+      Get.to(
+        () =>
+            ScreenEditCategory(itemCategoryModel: ItemCategoryModel(name: '')),
+      );
     }
     if (_selectedIndex == 'Discounts') {
-      Get.to(() => ScreenEditDiscount(
-            model: DiscountModel(
-              name: '',
-              value: 0,
-              company: '',
-              percentage: true,
-            ),
-          ));
+      Get.to(
+        () => ScreenEditDiscount(
+          model: DiscountModel(
+            name: '',
+            value: 0,
+            company: '',
+            percentage: true,
+          ),
+        ),
+      );
     }
     if (_selectedIndex == 'Modifiers') {
-      Get.to(() => ScreenEditModifier(
-            modifier: ItemModifier(name: '', list: []),
-          ));
+      Get.to(
+        () => ScreenEditModifier(
+          modifier: ItemModifier(name: '', list: []),
+        ),
+      );
     }
   }
 
@@ -293,6 +323,10 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
       _salesByEmployeeKeys.currentState?.printDocument();
       return;
     }
+    if (_selectedIndex == "Sales By Categories") {
+      _salesByCategoryKeys.currentState?.printDocument();
+      return;
+    }
     if (_selectedIndex == "Sales By Payments") {
       _salesByPayment.currentState?.printDocument();
       return;
@@ -328,16 +362,17 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
     "Stock Adjustments",
   ];
   Widget _getInventorButton(String s) {
-    final visibilityCreteria = _selectedIndex == 'Categories' ||
+    final visibilityCreteria =
+        _selectedIndex == 'Categories' ||
         _selectedIndex == 'Discounts' ||
         _selectedIndex == 'Modifiers' ||
         _selectedIndex == 'Support Tickets' ||
         _selectedIndex == 'Stock Adjustments' ||
-        MistSubscriptionUtils.twinSubs.indexWhere(
-          (element) =>
-              element.key == _selectedIndex && element.plans.contains(s),
-        ) !=
-        -1;
+        MistSubscriptionUtils.demoSubs.indexWhere(
+              (element) =>
+                  element.key == _selectedIndex && element.plans.contains(s),
+            ) !=
+            -1;
 
     return FloatingActionButton(
       onPressed: _add,

@@ -24,6 +24,21 @@ class StatsSalesModel {
   final double totalLossValue;
   final List<Cashier> cashiers;
 
+  // New Credit Metrics
+  final int creditReceiptsCount;
+  final double creditSalesTotal;
+  final double creditAmountPaid;
+  final double creditBalanceRemaining;
+
+  // New Performance Metrics (Nested)
+  final PerformanceMetrics dailyPerformance;
+  final PerformanceMetrics monthlyPerformance;
+  final PerformanceMetrics yearlyPerformance;
+
+  // Top Customers
+  final List<CustomerMetric> topCustomers;
+  final List<CustomerMetric> topCreditCustomers;
+
   StatsSalesModel({
     required this.totalAverageCosts,
     required this.totalTaxs,
@@ -40,6 +55,15 @@ class StatsSalesModel {
     required this.totalDiscounts,
     required this.totalRefunds,
     required this.totalLossValue,
+    required this.creditReceiptsCount,
+    required this.creditSalesTotal,
+    required this.creditAmountPaid,
+    required this.creditBalanceRemaining,
+    required this.dailyPerformance,
+    required this.monthlyPerformance,
+    required this.yearlyPerformance,
+    required this.topCustomers,
+    required this.topCreditCustomers,
   });
 
   factory StatsSalesModel.fromJson(Map<String, dynamic> json) {
@@ -63,6 +87,76 @@ class StatsSalesModel {
                 .map((e) => Cashier.fromJson(e))
                 .toList()
           : [],
+      creditReceiptsCount: json['creditReceiptsCount'] ?? 0,
+      creditSalesTotal: (json['creditSalesTotal'] as num?)?.toDouble() ?? 0.0,
+      creditAmountPaid: (json['creditAmountPaid'] as num?)?.toDouble() ?? 0.0,
+      creditBalanceRemaining: (json['creditBalanceRemaining'] as num?)?.toDouble() ?? 0.0,
+      dailyPerformance: PerformanceMetrics.fromJson(json['performance']?['daily'] ?? {}),
+      monthlyPerformance: PerformanceMetrics.fromJson(json['performance']?['monthly'] ?? {}),
+      yearlyPerformance: PerformanceMetrics.fromJson(json['performance']?['yearly'] ?? {}),
+      topCustomers: (json['topCustomers'] as List<dynamic>?)
+              ?.map((e) => CustomerMetric.fromJson(e))
+              .toList() ??
+          [],
+      topCreditCustomers: (json['topCreditCustomers'] as List<dynamic>?)
+              ?.map((e) => CustomerMetric.fromJson(e))
+              .toList() ??
+          [],
+    );
+  }
+}
+
+class CustomerMetric {
+  final String customerId;
+  final String fullName;
+  final String email;
+  final String phoneNumber;
+  final double totalSpent;
+  final int receiptsCount;
+
+  CustomerMetric({
+    required this.customerId,
+    required this.fullName,
+    required this.email,
+    required this.phoneNumber,
+    required this.totalSpent,
+    required this.receiptsCount,
+  });
+
+  factory CustomerMetric.fromJson(Map<String, dynamic> json) {
+    return CustomerMetric(
+      customerId: json['customerId'] ?? '',
+      fullName: json['fullName'] ?? 'Unknown',
+      email: json['email'] ?? '',
+      phoneNumber: json['phoneNumber'] ?? '',
+      totalSpent: (json['totalSpent'] as num?)?.toDouble() ?? 0.0,
+      receiptsCount: json['receiptsCount'] ?? 0,
+    );
+  }
+}
+
+class PerformanceMetrics {
+  final double profitMargin;
+  final double expenseToIncomeRatio;
+  final double burnRate;
+  final double cashIn;
+  final double cashOut;
+
+  PerformanceMetrics({
+    required this.profitMargin,
+    required this.expenseToIncomeRatio,
+    required this.burnRate,
+    required this.cashIn,
+    required this.cashOut,
+  });
+
+  factory PerformanceMetrics.fromJson(Map<String, dynamic> json) {
+    return PerformanceMetrics(
+      profitMargin: (json['profitMargin'] as num?)?.toDouble() ?? 0.0,
+      expenseToIncomeRatio: (json['expenseToIncomeRatio'] as num?)?.toDouble() ?? 0.0,
+      burnRate: (json['burnRate'] as num?)?.toDouble() ?? 0.0,
+      cashIn: (json['cashIn'] as num?)?.toDouble() ?? 0.0,
+      cashOut: (json['cashOut'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

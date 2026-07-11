@@ -3,6 +3,12 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:mistpos/core/services/api/network_wrapper.dart';
 import 'package:mistpos/data/models/token_model.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:mistpos/main.dart';
+import 'package:isar_plus/isar_plus.dart';
+import 'package:mistpos/data/models/item_receit_model.dart';
+import 'package:mistpos/data/models/shifts_model.dart';
+import 'package:mistpos/features/inventory/controllers/items_controller.dart';
 
 class MistposAiController extends GetxController {
   final RxList<Map<String, dynamic>> messages = <Map<String, dynamic>>[].obs;
@@ -22,7 +28,16 @@ class MistposAiController extends GetxController {
 
     try {
       final token = TokenModel.fromStorage().accessToken;
+      final packageInfo = await PackageInfo.fromPlatform();
       
+      final isar = IsarStatic.getInstance();
+      int unsyncedReceipts = 0;
+      int unsyncedShifts = 0;
+      if (isar != null) {
+        unsyncedReceipts = isar.itemReceitModels.where().syncedEqualTo(false).count();
+        unsyncedShifts = isar.shiftsModels.where().syncedEqualTo(false).count();
+      }
+
       final dio = Dio();
       final response = await dio.post(
         '${Net.baseUrl}/ai/client-chat',
@@ -32,6 +47,9 @@ class MistposAiController extends GetxController {
             "content": m['content']
           }).toList(),
           "clientDate": DateTime.now().toIso8601String(),
+          "mistposAppVersion": packageInfo.version + '+' + packageInfo.buildNumber,
+          "unsyncedReceipts": unsyncedReceipts,
+          "unsyncedShifts": unsyncedShifts,
         },
         options: Options(
           headers: {
@@ -95,9 +113,20 @@ class MistposAiController extends GetxController {
   void _finalizeMessage() {
     isWaiting.value = false;
     if (currentStreamingMessage.value.isNotEmpty) {
+      String finalMsg = currentStreamingMessage.value;
+      
+      if (finalMsg.contains('[SYNC_LOCAL_DATA]')) {
+        finalMsg = finalMsg.replaceAll('[SYNC_LOCAL_DATA]', '').trim();
+        if (Get.isRegistered<ItemsController>()) {
+          final itemsController = Get.find<ItemsController>();
+          itemsController.updateUnsyncedReceits();
+          itemsController.syncAllShifts();
+        }
+      }
+
       messages.add({
         "role": "assistant",
-        "content": currentStreamingMessage.value,
+        "content": finalMsg,
       });
       currentStreamingMessage.value = "";
     }

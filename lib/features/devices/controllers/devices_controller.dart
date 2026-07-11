@@ -16,6 +16,7 @@ import 'package:mistpos/data/models/app_settings_model.dart';
 import 'package:mistpos/data/models/printer_device_model.dart';
 import 'package:pos_universal_printer/pos_universal_printer.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:mistpos/core/utils/printer_role_helper.dart';
 
 class DevicesController extends GetxController {
   RxBool hasPrinterConnections = RxBool(false);
@@ -47,18 +48,15 @@ class DevicesController extends GetxController {
       Toaster.showError("User should be register first");
       return;
     }
-    connectingToDevice.value = true;
-    await printer.registerDevice(
-      PosPrinterRole.cashier,
-      PrinterDevice(
-        id: user.hexId,
-        name: user.fullName,
-        type: PrinterType.tcp,
-        address: ipAddress,
-        port: port,
-      ),
+    // Use the generic registerPrinter method (defaults to 'cashier' role)
+    await registerPrinter(
+      role: 'cashier',
+      name: user.fullName,
+      address: ipAddress,
+      port: port,
+      user: user,
     );
-    connectingToDevice.value = false;
+    // Update connection flag
     cashierConnected.value = printer.isRoleConnected(PosPrinterRole.cashier);
     if (!cashierConnected.value) {
       Toaster.showError(
@@ -93,51 +91,35 @@ class DevicesController extends GetxController {
       Toaster.showError("User should be register first");
       return false;
     }
-    try {
-      connectingToDevice.value = true;
-      await printer.registerDevice(
-        PosPrinterRole.cashier,
-        PrinterDevice(
-          id: user.hexId,
-          name: user.fullName,
-          type: PrinterType.bluetooth,
-          address: macAddress,
-        ),
+    // Use generic registerPrinter (defaults to 'cashier')
+    final success = await registerPrinter(
+      role: 'cashier',
+      name: user.fullName,
+      address: macAddress,
+      port: 0,
+      user: user,
+    );
+    if (!success) {
+      Toaster.showError(
+        "Failed to connect to device , Switch on bluetooth and try again",
       );
-      cashierConnected.value = false;
-      for (int i = 0; i < 10; i++) {
-        if (printer.isRoleConnected(PosPrinterRole.cashier)) {
-          cashierConnected.value = true;
-          break;
-        }
-        await Future.delayed(const Duration(seconds: 1));
-      }
-      connectingToDevice.value = true;
-      if (!cashierConnected.value) {
-        Toaster.showError(
-          "Failed to connect to device , Switch on bluetooth and try again",
-        );
-        connectingToDevice.value = false;
-        return false;
-      }
-      await isar.write((isar) async {
-        isar.printerDeviceModels.put(
-          PrinterDeviceModel(
-            name: name,
-            address: macAddress,
-            isConnected: cashierConnected.value,
-            port: 0,
-          ),
-        );
-      });
-      getConnectedDevices();
-      connectingToDevice.value = false;
-      return true;
-    } catch (e) {
-      connectingToDevice.value = false;
-      Toaster.showError("There was error : $e");
       return false;
     }
+    // Wait for role connection (same logic as before)
+    for (int i = 0; i < 10; i++) {
+      if (printer.isRoleConnected(PosPrinterRole.cashier)) {
+        cashierConnected.value = true;
+        break;
+      }
+      await Future.delayed(const Duration(seconds: 1));
+    }
+    if (!cashierConnected.value) {
+      Toaster.showError(
+        "Failed to connect to device , Switch on bluetooth and try again",
+      );
+      return false;
+    }
+    return true;
   }
 
   void getConnectedDevices() async {
@@ -153,14 +135,36 @@ class DevicesController extends GetxController {
     if (isar == null) {
       return;
     }
-    printer.unregisterDevice(PosPrinterRole.cashier);
+    // Unregister device based on its stored role
+    final role = printerDevic.role;
+    await printer.unregisterDevice(PosRoleHelper.fromString(role));
     await isar.write((isar) async {
-      isar.printerDeviceModels.delete(printerDevic.id);
+      await isar.printerDeviceModels.delete(printerDevic.id);
     });
     Toaster.showError(
       "Printer device disconnected , you might wanna connect from devices",
     );
     getConnectedDevices();
+  }
+
+  Future<bool> registerPrinter({
+    required String role,
+    required String name,
+    required String address,
+    required int port,
+    required User user,
+  }) async {
+    await printer.registerDevice(
+      PosRoleHelper.fromString(role),
+      PrinterDevice(
+        id: address,
+        name: name,
+        type: port == 0 ? PrinterType.bluetooth : PrinterType.tcp,
+        address: address,
+        port: port,
+      ),
+    );
+    return true;
   }
 
   static void printReceitToBackround(
@@ -307,13 +311,12 @@ class DevicesController extends GetxController {
     }
     final model = AppSettingsModel.fromStorage();
     if (model.printToMultiplePrinters) {
-      final devices =
-          isar.printerDeviceModels.where().sortByIsConnected().findAll();
+      final devices = isar.printerDeviceModels.where().findAll();
       for (final device in devices) {
         await printer.registerDevice(
-          PosPrinterRole.cashier,
+          PosRoleHelper.fromString(device.role),
           PrinterDevice(
-            id: device.id.toString(),
+            id: device.address,
             name: device.name,
             type: device.port == 0 ? PrinterType.bluetooth : PrinterType.tcp,
             address: device.address,
@@ -330,7 +333,7 @@ class DevicesController extends GetxController {
         await printer.registerDevice(
           PosPrinterRole.cashier,
           PrinterDevice(
-            id: user.hexId,
+            id: device.address,
             name: user.fullName,
             type: device.port == 0 ? PrinterType.bluetooth : PrinterType.tcp,
             address: device.address,

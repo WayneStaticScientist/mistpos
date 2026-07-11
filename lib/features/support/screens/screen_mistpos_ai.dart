@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:mistpos/core/database/ai_database_helper.dart';
 import 'package:mistpos/core/services/api/network_wrapper.dart';
+import 'package:mistpos/features/support/screens/screen_diagnosis.dart';
 import 'package:mistpos/core/services/api/auth_interceptor.dart';
 import 'package:mistpos/data/models/token_model.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -823,6 +824,7 @@ class _ScreenMistposAiState extends State<ScreenMistposAi> {
       'Generate an inventory valuation report',
       'How do I configure sales taxes and addendums?',
       'What were my recent stock adjustments?',
+      'Send a marketing email offering a discount to VIP customers',
       'Create a support ticket'
     ];
 
@@ -1125,15 +1127,34 @@ class _ScreenMistposAiState extends State<ScreenMistposAi> {
     List<Widget> parsedWidgets = [];
     String remaining = cleanContent;
 
-    while (remaining.contains('```chart')) {
-      int start = remaining.indexOf('```chart');
-      if (start > 0) {
-        parsedWidgets.add(_buildMarkdownChunk(remaining.substring(0, start), isDark));
+    while (remaining.contains('```chart') || remaining.contains('```command')) {
+      int chartIdx = remaining.indexOf('```chart');
+      int cmdIdx = remaining.indexOf('```command');
+      
+      bool isChart = false;
+      int startIdx = -1;
+      
+      if (chartIdx != -1 && cmdIdx != -1) {
+        if (chartIdx < cmdIdx) { isChart = true; startIdx = chartIdx; }
+        else { isChart = false; startIdx = cmdIdx; }
+      } else if (chartIdx != -1) {
+        isChart = true; startIdx = chartIdx;
+      } else {
+        isChart = false; startIdx = cmdIdx;
       }
-      int end = remaining.indexOf('```', start + 8);
+
+      if (startIdx > 0) {
+        parsedWidgets.add(_buildMarkdownChunk(remaining.substring(0, startIdx), isDark));
+      }
+      
+      int end = remaining.indexOf('```', startIdx + (isChart ? 8 : 10));
       if (end != -1) {
-        String chartJson = remaining.substring(start + 8, end).trim();
-        parsedWidgets.add(_buildChartFromJson(chartJson, isDark));
+        String contentStr = remaining.substring(startIdx + (isChart ? 8 : 10), end).trim();
+        if (isChart) {
+          parsedWidgets.add(_buildChartFromJson(contentStr, isDark));
+        } else {
+          parsedWidgets.add(_buildCommandAction(contentStr, isDark));
+        }
         remaining = remaining.substring(end + 3);
       } else {
         break;
@@ -1145,6 +1166,51 @@ class _ScreenMistposAiState extends State<ScreenMistposAi> {
     }
 
     return parsedWidgets;
+  }
+
+  Widget _buildCommandAction(String command, bool isDark) {
+    if (command == "RUN_DIAGNOSIS") {
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E293B) : Colors.blue.withAlpha(20),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.blue.withAlpha(50)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.build_circle_rounded, color: Colors.blue),
+                const SizedBox(width: 8),
+                Text("System Diagnosis Requested", style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: () {
+                Get.to(() => ScreenDiagnosis(
+                  onComplete: (results) {
+                    Get.back();
+                    _sendMessage(results);
+                  },
+                ));
+              },
+              icon: const Icon(Icons.play_arrow_rounded),
+              label: const Text("Launch Diagnosis Tool"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                elevation: 0,
+              ),
+            )
+          ],
+        ),
+      );
+    }
+    return SizedBox.shrink();
   }
 
   Widget _buildMarkdownChunk(String text, bool isDark) {

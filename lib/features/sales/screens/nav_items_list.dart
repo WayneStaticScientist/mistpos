@@ -18,6 +18,7 @@ import 'package:mistpos/core/widgets/loaders/small_loader.dart';
 import 'package:mistpos/features/settings/screens/screen_edit_item.dart';
 import 'package:mistpos/features/settings/screens/screen_subscription.dart';
 import 'package:mistpos/features/inventory/controllers/items_unsaved_controller.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:mistpos/core/widgets/layouts/list_mist_unsaved_list_tile.dart';
 
 class NavItemsList extends StatefulWidget {
@@ -32,12 +33,19 @@ class _NavItemsListState extends State<NavItemsList> {
   late Timer? _debounce;
   final _itemsUnsavedController = Get.find<ItemsUnsavedController>();
   final _searchController = TextEditingController();
+  final RefreshController _refreshController = RefreshController(initialRefresh: false);
+
+  void _onRefresh() async {
+    await _itemsUnsavedController.syncCartItemsOnBackground(page: 1, search: searchKey);
+    _refreshController.refreshCompleted();
+  }
+
   @override
   void initState() {
     super.initState();
     _startDebounce();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _itemsUnsavedController.syncCartItemsOnBackground();
+      _onRefresh();
     });
   }
 
@@ -45,6 +53,7 @@ class _NavItemsListState extends State<NavItemsList> {
   Widget build(BuildContext context) {
     return [
       MistSearchField(controller: _searchController, label: "Search Items"),
+      12.gapHeight,
       Obx(() {
         if (_itemsUnsavedController.syncingItems.value &&
             _itemsUnsavedController.cartItems.isEmpty) {
@@ -53,19 +62,25 @@ class _NavItemsListState extends State<NavItemsList> {
         if (_itemsUnsavedController.cartItems.isEmpty) {
           return _emptyWidget();
         }
-        return ListView.builder(
-          itemBuilder: (context, index) => InkWell(
-            onTap: () => _openEditor(_itemsUnsavedController.cartItems[index]),
-            onLongPress: () =>
-                _openDeleteDialog(_itemsUnsavedController.cartItems[index]),
-            child: ListMistUnsavedListTile(
-              item: _itemsUnsavedController.cartItems[index],
+        return SmartRefresher(
+          controller: _refreshController,
+          header: const WaterDropHeader(),
+          onRefresh: _onRefresh,
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            itemBuilder: (context, index) => InkWell(
+              onTap: () => _openEditor(_itemsUnsavedController.cartItems[index]),
+              onLongPress: () =>
+                  _openDeleteDialog(_itemsUnsavedController.cartItems[index]),
+              child: ListMistUnsavedListTile(
+                item: _itemsUnsavedController.cartItems[index],
+              ),
             ),
+            itemCount: _itemsUnsavedController.cartItems.length,
           ),
-          itemCount: _itemsUnsavedController.cartItems.length,
         );
       }).expanded1,
-    ].column().padding(EdgeInsets.all(9));
+    ].column().padding(const EdgeInsets.all(12));
   }
 
   void _openEditor(ItemUnsavedModel model) {

@@ -6,6 +6,7 @@ import 'package:mistpos/core/services/api/network_wrapper.dart';
 import 'package:mistpos/features/settings/screens/screen_main.dart';
 import 'package:mistpos/core/services/api/auth_interceptor.dart';
 import 'package:mistpos/features/auth/screens/screen_splash.dart';
+import 'package:mistpos/core/services/logs/log_service.dart';
 
 class UserController extends GetxController {
   RxBool loading = RxBool(false);
@@ -52,6 +53,12 @@ class UserController extends GetxController {
     User.saveToStorage(user.value!);
     final token = TokenModel.fromJson(response.body['tokens']);
     token.saveToStorage();
+    
+    LogService.logEvent(
+      actionType: 'LOGIN',
+      description: 'User registered and logged in',
+    );
+    
     Get.offAll(() => ScreenMain());
   }
 
@@ -74,6 +81,12 @@ class UserController extends GetxController {
     User.saveToStorage(user.value!);
     final token = TokenModel.fromJson(response.body['tokens']);
     token.saveToStorage();
+
+    LogService.logEvent(
+      actionType: 'LOGIN',
+      description: 'User logged in',
+    );
+    
     Get.offAll(() => ScreenMain());
   }
 
@@ -129,6 +142,12 @@ class UserController extends GetxController {
       Toaster.showError(response.response);
       return;
     }
+
+    LogService.logEvent(
+      actionType: 'LOGOUT',
+      description: 'User logged out',
+    );
+
     Get.offAll(() => ScreenSplash());
     User.clearStorage();
     TokenModel.clearStorage();

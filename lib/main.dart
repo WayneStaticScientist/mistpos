@@ -23,6 +23,7 @@ import 'package:mistpos/features/auth/screens/screen_splash.dart';
 import 'package:mistpos/data/models/item_unsaved_model.dart';
 import 'package:mistpos/data/models/notification_model.dart';
 import 'package:mistpos/data/models/item_modifier_model.dart';
+import 'package:mistpos/data/models/system_log.dart';
 import 'package:mistpos/features/auth/controllers/user_controller.dart';
 import 'package:mistpos/data/models/printer_device_model.dart';
 import 'package:mistpos/data/models/item_categories_model.dart';
@@ -35,6 +36,7 @@ import 'package:mistpos/core/services/firebase/firebase_controller.dart';
 import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:mistpos/features/inventory/controllers/items_unsaved_controller.dart';
 import 'package:mistpos/core/services/firebase/firebase_bg_notification_handler.dart';
+import 'package:mistpos/core/services/logs/log_service.dart';
 
 class IsarStatic {
   static Isar? isar;
@@ -80,9 +82,16 @@ void main() async {
       initIsarDatabase(IsarStatic.externalDirectory!);
     }
   }
-  await GetStorage.init();
+  try {
+      await GetStorage.init();
+  } catch (e) {
+    //
+  }
   runApp(const MyApp());
   Get.put(ItemsController());
+  
+  // Sync offline logs
+  LogService.syncLogs();
 }
 
 void initIsarDatabase(Directory dir) {
@@ -100,6 +109,7 @@ void initIsarDatabase(Directory dir) {
       ItemCategoryModelSchema,
       PrinterDeviceModelSchema,
       ItemSavedItemsModelSchema,
+      SystemLogSchema,
     ],
     directory: dir.path,
   );

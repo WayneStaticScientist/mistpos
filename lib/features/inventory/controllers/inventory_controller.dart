@@ -520,21 +520,37 @@ class InventoryController extends GetxController {
   RxBool loadingInventoryHistory = RxBool(false);
   RxList<InventoryHistoryModel> inventoryHistory =
       RxList<InventoryHistoryModel>();
-  Future<void> getInventoryHistory(DateTime start, DateTime end) async {
+  RxInt inventoryHistoryPage = RxInt(1);
+  RxInt inventoryHistoryTotalPages = RxInt(1);
+
+  Future<void> getInventoryHistory(DateTime? start, DateTime? end, {int page = 1}) async {
     if (loadingInventoryHistory.value) return;
+    if (page == 1) {
+      inventoryHistory.clear();
+    }
     loadingInventoryHistory.value = true;
-    final result = await Net.get(
-      "/admin/inventory/history?endDate=${end.toIso8601String()}&startDate=${start.toIso8601String()}",
-    );
+    String url = "/admin/inventory/history?page=$page&limit=25";
+    if (start != null) {
+      url += "&startDate=${start.toIso8601String()}";
+    }
+    if (end != null) {
+      url += "&endDate=${end.toIso8601String()}";
+    }
+    final result = await Net.get(url);
     loadingInventoryHistory.value = false;
     if (result.hasError) {
       return;
     }
+    inventoryHistoryPage.value = result.body['currentPage'] ?? 1;
+    inventoryHistoryTotalPages.value = result.body['totalPages'] ?? 1;
     if (result.body['list'] != null) {
       List<dynamic> list = result.body['list'];
-      inventoryHistory.value = list
-          .map((e) => InventoryHistoryModel.fromJson(e))
-          .toList();
+      final items = list.map((e) => InventoryHistoryModel.fromJson(e)).toList();
+      if (page == 1) {
+        inventoryHistory.value = items;
+      } else {
+        inventoryHistory.addAll(items);
+      }
     }
   }
 

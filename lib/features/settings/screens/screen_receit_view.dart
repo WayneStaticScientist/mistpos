@@ -1,5 +1,10 @@
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
+import 'package:mistpos/main.dart';
+import 'package:isar_plus/isar_plus.dart';
+import 'package:mistpos/core/services/api/network_wrapper.dart';
+import 'package:mistpos/data/models/customer_model.dart';
+import 'package:mistpos/features/inventory/controllers/items_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/features/settings/screens/screen_credit_payment.dart';
 import 'package:mistpos/core/utils/toast.dart';
@@ -27,7 +32,40 @@ class ScreenReceitView extends StatefulWidget {
 
 class _ScreenReceitViewState extends State<ScreenReceitView> {
   final _userController = Get.find<UserController>();
-  final _adminController = Get.find<AdminController>();
+
+  CustomerModel? _customer;
+  bool _isLoadingCustomer = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCustomer();
+  }
+
+  Future<void> _fetchCustomer() async {
+    if (widget.receitModel.customerId == null) return;
+    
+    if (Get.isRegistered<ItemsController>()) {
+      try {
+        _customer = Get.find<ItemsController>()
+            .customers
+            .firstWhere((c) => c.hexId == widget.receitModel.customerId);
+      } catch (_) {}
+    }
+    
+    if (_customer == null) {
+      setState(() => _isLoadingCustomer = true);
+      try {
+        final response = await Net.get("/cashier/customer/${widget.receitModel.customerId}");
+        if (!response.hasError && response.body['customer'] != null) {
+          _customer = CustomerModel.fromJson(response.body['customer']);
+        }
+      } catch (_) {}
+      if (mounted) setState(() => _isLoadingCustomer = false);
+    } else {
+      if (mounted) setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,6 +177,19 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                                 _buildInfoBlock("Date", MistDateUtils.getInformalShortDate(widget.receitModel.createdAt), Icons.calendar_today, crossAxisAlignment: CrossAxisAlignment.end),
                               ],
                             ),
+                            if (_customer != null || _isLoadingCustomer) ...[
+                              const SizedBox(height: 16),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  if (_customer != null)
+                                    _buildInfoBlock("Customer", _customer!.fullName, Icons.person)
+                                  else if (_isLoadingCustomer)
+                                    const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                                  const SizedBox(), // Empty spacer to keep layout balanced
+                                ],
+                              ),
+                            ],
                             const SizedBox(height: 24),
                             _buildDashedDivider(isDark),
                             const SizedBox(height: 24),

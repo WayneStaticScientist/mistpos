@@ -24,7 +24,6 @@ class _SalesCategoriesListState extends State<SalesCategoriesList> {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Get.theme.colorScheme.primary;
     return SliverToBoxAdapter(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,12 +120,19 @@ class _SalesCategoriesListState extends State<SalesCategoriesList> {
                   () => Row(
                     mainAxisSize: MainAxisSize.min,
                     children: _itemsListController.categories.map((category) {
+                      Color? catColor;
+                      if (category.color != null) {
+                        try {
+                          catColor = Color(int.parse('${category.color!}'));
+                        } catch (_) {}
+                      }
                       return CardsCategory(
                         onTap: () => widget.changeCategory(category.hexId),
                         category: category.name,
                         isSelected:
                             _itemsListController.selectedCategory.value ==
                             category.hexId,
+                        categoryColor: catColor,
                       );
                     }).toList(),
                   ),

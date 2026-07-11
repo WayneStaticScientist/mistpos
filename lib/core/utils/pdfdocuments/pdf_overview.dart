@@ -82,6 +82,35 @@ class AdminOverviewPdf {
             
             pw.SizedBox(height: 32),
 
+            // ── Credit Sales Overview Table ──
+            pw.Text("Credit Sales Overview", style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.blue800)),
+            pw.SizedBox(height: 8),
+            _buildCreditSalesTable(statsSalesModel, baseCurrence),
+            
+            pw.SizedBox(height: 32),
+
+            // ── Performance Metrics Table ──
+            pw.Text("Performance Overview", style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.blue800)),
+            pw.SizedBox(height: 8),
+            _buildPerformanceTable(statsSalesModel, baseCurrence),
+            
+            pw.SizedBox(height: 32),
+
+            // ── Top Customers Sections ──
+            if ((statsSalesModel?.topCustomers ?? []).isNotEmpty) ...[
+              pw.Text("Top 10 Customers", style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.blue800)),
+              pw.SizedBox(height: 8),
+              _buildCustomerTable(statsSalesModel!.topCustomers, baseCurrence),
+              pw.SizedBox(height: 32),
+            ],
+
+            if ((statsSalesModel?.topCreditCustomers ?? []).isNotEmpty) ...[
+              pw.Text("Top 10 Credit Customers", style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.blue800)),
+              pw.SizedBox(height: 8),
+              _buildCustomerTable(statsSalesModel!.topCreditCustomers, baseCurrence),
+              pw.SizedBox(height: 32),
+            ],
+
             // ── This Month Summary ──
             if (thisMonthSummary != null) ...[
               pw.Text("This Month Summary", style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.blue800)),
@@ -164,6 +193,54 @@ class AdminOverviewPdf {
     );
   }
 
+  static pw.Widget _buildCreditSalesTable(StatsSalesModel? stats, String baseCurrence) {
+    return pw.Table(
+      border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(1.5),
+        1: const pw.FlexColumnWidth(1),
+      },
+      children: [
+        pw.TableRow(
+          decoration: const pw.BoxDecoration(color: PdfColors.blue50),
+          children: [
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text("Credit Metric", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text("Value", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
+          ],
+        ),
+        _salesRow("Credit Receipts Count", stats?.creditReceiptsCount.toString() ?? "0"),
+        _salesRow("Total on Credit", CurrenceConverter.getCurrenceFloatInStrings(stats?.creditSalesTotal ?? 0, baseCurrence)),
+        _salesRow("Amount Paid", CurrenceConverter.getCurrenceFloatInStrings(stats?.creditAmountPaid ?? 0, baseCurrence), color: PdfColors.green800),
+        _salesRow("Remaining Balance", CurrenceConverter.getCurrenceFloatInStrings(stats?.creditBalanceRemaining ?? 0, baseCurrence), color: PdfColors.red800, isBold: true),
+      ],
+    );
+  }
+
+  static pw.Widget _buildPerformanceTable(StatsSalesModel? stats, String baseCurrence) {
+    final perf = stats?.monthlyPerformance;
+    return pw.Table(
+      border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(1.5),
+        1: const pw.FlexColumnWidth(1),
+      },
+      children: [
+        pw.TableRow(
+          decoration: const pw.BoxDecoration(color: PdfColors.blue50),
+          children: [
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text("Monthly Performance Indicator", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text("Value", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
+          ],
+        ),
+        _salesRow("Profit Margin", "${(perf?.profitMargin ?? 0).toStringAsFixed(1)}%", isBold: true),
+        _salesRow("Expense-to-Income Ratio", "${(perf?.expenseToIncomeRatio ?? 0).toStringAsFixed(1)}%"),
+        _salesRow("Daily Burn Rate", CurrenceConverter.getCurrenceFloatInStrings(perf?.burnRate ?? 0, baseCurrence)),
+        _salesRow("Cash In (Revenue)", CurrenceConverter.getCurrenceFloatInStrings(perf?.cashIn ?? 0, baseCurrence), color: PdfColors.green800),
+        _salesRow("Cash Out (Expenses)", CurrenceConverter.getCurrenceFloatInStrings(perf?.cashOut ?? 0, baseCurrence), color: PdfColors.red800),
+      ],
+    );
+  }
+
   static pw.Widget _buildThisMonthSummaryTable(ThisMonthSummaryModel stats, String baseCurrence) {
     return pw.Table(
       border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
@@ -186,6 +263,44 @@ class AdminOverviewPdf {
         _salesRow("Items Sold", stats.totalItemsSold.toString()),
         _salesRow("Receipts Processed", stats.totalReceipts.toString()),
         _salesRow("Peak Sales Time", stats.peakSalesRange),
+      ],
+    );
+  }
+
+  static pw.Widget _buildCustomerTable(List<CustomerMetric> customers, String baseCurrence) {
+    return pw.Table(
+      border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(0.5),
+        1: const pw.FlexColumnWidth(2),
+        2: const pw.FlexColumnWidth(1.5),
+        3: const pw.FlexColumnWidth(1),
+        4: const pw.FlexColumnWidth(1.5),
+      },
+      children: [
+        pw.TableRow(
+          decoration: const pw.BoxDecoration(color: PdfColors.blue50),
+          children: [
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text("#", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text("Customer Name", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text("Contact", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text("Receipts", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
+            pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text("Total Spent", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
+          ],
+        ),
+        ...customers.asMap().entries.map((entry) {
+          final i = entry.key;
+          final c = entry.value;
+          return pw.TableRow(
+            children: [
+              pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text("${i + 1}", style: const pw.TextStyle(fontSize: 11))),
+              pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text(c.fullName, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
+              pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text(c.phoneNumber.isNotEmpty ? c.phoneNumber : c.email, style: const pw.TextStyle(fontSize: 11))),
+              pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text(c.receiptsCount.toString(), style: const pw.TextStyle(fontSize: 11))),
+              pw.Padding(padding: const pw.EdgeInsets.all(10), child: pw.Text(CurrenceConverter.getCurrenceFloatInStrings(c.totalSpent, baseCurrence), style: pw.TextStyle(color: PdfColors.green800, fontWeight: pw.FontWeight.bold, fontSize: 11))),
+            ],
+          );
+        }),
       ],
     );
   }
