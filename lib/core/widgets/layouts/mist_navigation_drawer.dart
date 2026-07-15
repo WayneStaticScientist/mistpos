@@ -112,14 +112,8 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
                             'admin' ||
                         _userController.user.value?.role.toLowerCase() ==
                             'manager';
-                    return ExpansionTile(
-                      title: 'Catalogue'.text(
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      leading: Iconify(Carbon.shopping_catalog, color: primary),
-                      shape:
-                          const RoundedRectangleBorder(), // Remove borders when expanded
-                      childrenPadding: const EdgeInsets.only(left: 16),
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _DrawerItem(
                           icon: Bx.store_alt,

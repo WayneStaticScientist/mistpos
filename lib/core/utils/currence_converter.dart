@@ -5,90 +5,129 @@ import 'package:mistpos/data/models/user_model.dart';
 
 class CurrenceConverter {
   static String getCurrenceInStrings(int amount) {
-    return "\$${(amount / 100).toStringAsFixed(2)}";
+    try {
+      return "\$${(amount / 100).toStringAsFixed(2)}";
+    } catch (_) {
+      return "\$0.00";
+    }
   }
 
   static String getCurrenceFloatInStrings(double amount, String baseCurreny) {
-    GetStorage storage = GetStorage();
-    var jsonData = storage.read("company");
-    final model = AppSettingsModel.fromStorage();
+    try {
+      GetStorage storage = GetStorage();
+      var jsonData = storage.read("company");
+      final model = AppSettingsModel.fromStorage();
 
-    if (jsonData == null) {
-      return "\$${(amount).toStringAsFixed(model.decimalPlaces)}";
+      if (jsonData == null) {
+        return "\$${(amount).toStringAsFixed(model.decimalPlaces)}";
+      }
+      CompanyModel company = CompanyModel.fromJson(jsonData);
+      final rate = company.exchangeRates.rates[baseCurreny];
+      if (rate == null) {
+        return "\$${(amount).toStringAsFixed(model.decimalPlaces)}";
+      }
+      double calculatedAmount = amount * rate;
+      return "${baseCurreny.toUpperCase()}${(calculatedAmount).toStringAsFixed(model.decimalPlaces)}";
+    } catch (e) {
+      print("Error in getCurrenceFloatInStrings: $e");
+      return "\$${amount.toStringAsFixed(2)}";
     }
-    CompanyModel company = CompanyModel.fromJson(jsonData);
-    final rate = company.exchangeRates.rates[baseCurreny];
-    if (rate == null) {
-      return "\$${(amount).toStringAsFixed(model.decimalPlaces)}";
-    }
-    amount = amount * rate;
-    return "${baseCurreny.toUpperCase()}${(amount).toStringAsFixed(model.decimalPlaces)}";
   }
 
   static String getCurrenceFloatk(double amount, String baseCurreny) {
-    if (amount < 1000) return getCurrenceFloatInStrings(amount, baseCurreny);
-    if (amount > 900 && amount < 100000) {
-      return "${getCurrenceFloatInStrings(amount / 1000, baseCurreny)}K";
+    try {
+      if (amount < 1000) return getCurrenceFloatInStrings(amount, baseCurreny);
+      if (amount > 900 && amount < 100000) {
+        return "${getCurrenceFloatInStrings(amount / 1000, baseCurreny)}K";
+      }
+      if (amount > 100000 && amount < 100000000) {
+        return "${getCurrenceFloatInStrings(amount / 1000000, baseCurreny)}M";
+      }
+      return "${getCurrenceFloatInStrings(amount / 1000000000, baseCurreny)}B";
+    } catch (e) {
+      print("Error in getCurrenceFloatk: $e");
+      return "\$${amount.toStringAsFixed(2)}";
     }
-    if (amount > 100000 && amount < 100000000) {
-      return "${getCurrenceFloatInStrings(amount / 1000000, baseCurreny)}M";
-    }
-    return "${getCurrenceFloatInStrings(amount / 1000000000, baseCurreny)}B";
   }
 
   static double prevailingAmount(double amount, String? baseCurreny) {
-    GetStorage storage = GetStorage();
-    final user = User.fromStorage();
-    baseCurreny ??= user?.baseCurrence ?? "";
-    var jsonData = storage.read("company");
-    if (jsonData == null) return amount;
-    CompanyModel company = CompanyModel.fromJson(jsonData);
-    final rate = company.exchangeRates.rates[baseCurreny] ?? 1.0;
-    return amount * rate;
+    try {
+      GetStorage storage = GetStorage();
+      final user = User.fromStorage();
+      baseCurreny ??= user?.baseCurrence ?? "";
+      var jsonData = storage.read("company");
+      if (jsonData == null) return amount;
+      CompanyModel company = CompanyModel.fromJson(jsonData);
+      final rate = company.exchangeRates.rates[baseCurreny] ?? 1.0;
+      return amount * rate;
+    } catch (e) {
+      print("Error in prevailingAmount: $e");
+      return amount;
+    }
   }
 
   static double toBaseAmount(double amount, String baseCurreny) {
-    GetStorage storage = GetStorage();
-    var jsonData = storage.read("company");
-    if (jsonData == null) return amount;
-    CompanyModel company = CompanyModel.fromJson(jsonData);
-    final rate = company.exchangeRates.rates[baseCurreny] ?? 1.0;
-    return amount / rate;
+    try {
+      GetStorage storage = GetStorage();
+      var jsonData = storage.read("company");
+      if (jsonData == null) return amount;
+      CompanyModel company = CompanyModel.fromJson(jsonData);
+      final rate = company.exchangeRates.rates[baseCurreny] ?? 1.0;
+      return amount / rate;
+    } catch (e) {
+      print("Error in toBaseAmount: $e");
+      return amount;
+    }
   }
 
   static String selectedCurrencyInString(double amount) {
-    GetStorage storage = GetStorage();
-    final user = User.fromStorage();
-    final model = AppSettingsModel.fromStorage();
-    final baseCurreny = user?.baseCurrence ?? "";
-    var jsonData = storage.read("company");
-    if (jsonData == null) {
-      return "\$${(amount).toStringAsFixed(model.decimalPlaces)}";
+    try {
+      GetStorage storage = GetStorage();
+      final user = User.fromStorage();
+      final model = AppSettingsModel.fromStorage();
+      final baseCurreny = user?.baseCurrence ?? "";
+      var jsonData = storage.read("company");
+      if (jsonData == null) {
+        return "\$${(amount).toStringAsFixed(model.decimalPlaces)}";
+      }
+      CompanyModel company = CompanyModel.fromJson(jsonData);
+      final rate = company.exchangeRates.rates[baseCurreny] ?? 1.0;
+      return "${baseCurreny.toUpperCase()}${(amount * rate).toStringAsFixed(model.decimalPlaces)}";
+    } catch (e) {
+      print("Error in selectedCurrencyInString: $e");
+      return "\$${amount.toStringAsFixed(2)}";
     }
-    CompanyModel company = CompanyModel.fromJson(jsonData);
-    final rate = company.exchangeRates.rates[baseCurreny] ?? 1.0;
-    return "${baseCurreny.toUpperCase()}${(amount * rate).toStringAsFixed(model.decimalPlaces)}";
   }
 
   static double selectedCurrency(double amount) {
-    GetStorage storage = GetStorage();
-    final user = User.fromStorage();
-    final baseCurreny = user?.baseCurrence ?? "";
-    var jsonData = storage.read("company");
-    if (jsonData == null) return amount;
-    CompanyModel company = CompanyModel.fromJson(jsonData);
-    final rate = company.exchangeRates.rates[baseCurreny] ?? 1.0;
-    return amount * rate;
+    try {
+      GetStorage storage = GetStorage();
+      final user = User.fromStorage();
+      final baseCurreny = user?.baseCurrence ?? "";
+      var jsonData = storage.read("company");
+      if (jsonData == null) return amount;
+      CompanyModel company = CompanyModel.fromJson(jsonData);
+      final rate = company.exchangeRates.rates[baseCurreny] ?? 1.0;
+      return amount * rate;
+    } catch (e) {
+      print("Error in selectedCurrency: $e");
+      return amount;
+    }
   }
 
   static double baseCurrency(double amount) {
-    GetStorage storage = GetStorage();
-    final user = User.fromStorage();
-    final baseCurreny = user?.baseCurrence ?? "";
-    var jsonData = storage.read("company");
-    if (jsonData == null) return amount;
-    CompanyModel company = CompanyModel.fromJson(jsonData);
-    final rate = company.exchangeRates.rates[baseCurreny] ?? 1.0;
-    return amount / rate;
+    try {
+      GetStorage storage = GetStorage();
+      final user = User.fromStorage();
+      final baseCurreny = user?.baseCurrence ?? "";
+      var jsonData = storage.read("company");
+      if (jsonData == null) return amount;
+      CompanyModel company = CompanyModel.fromJson(jsonData);
+      final rate = company.exchangeRates.rates[baseCurreny] ?? 1.0;
+      return amount / rate;
+    } catch (e) {
+      print("Error in baseCurrency: $e");
+      return amount;
+    }
   }
 }

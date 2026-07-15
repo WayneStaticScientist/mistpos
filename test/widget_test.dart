@@ -1,30 +1,36 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:mistpos/main.dart';
+import 'package:get/get.dart';
+import 'package:mistpos/features/settings/screens/screen_cash_payment.dart';
+import 'package:mistpos/features/auth/controllers/user_controller.dart';
+import 'package:mistpos/features/inventory/controllers/items_controller.dart';
+import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
+import 'package:mistpos/features/devices/controllers/devices_controller.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Cash Payment Smoke Test', (WidgetTester tester) async {
+    // Put controllers
+    final user = Get.put(UserController());
+    final items = Get.put(ItemsController());
+    final inv = Get.put(InventoryController());
+    final dev = Get.put(DevicesController());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Force size to desktop
+    tester.binding.window.physicalSizeTestValue = const Size(1200, 900);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    await tester.pumpWidget(
+      GetMaterialApp(
+        home: const ScreenCashPayment(),
+      ),
+    );
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Verify if it finds the summary text
+    final textFinder = find.text("TOTAL AMOUNT TO PAY");
+    expect(textFinder, findsOneWidget);
+
+    print("Elements found successfully!");
   });
 }

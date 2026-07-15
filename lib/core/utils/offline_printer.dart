@@ -1,19 +1,29 @@
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:mistpos/data/models/app_settings_model.dart';
 import 'package:mistpos/data/models/item_receit_model.dart';
 import 'package:mistpos/data/models/tax_model.dart';
 import 'package:mistpos/data/models/user_model.dart';
 import 'package:mistpos/core/utils/currence_converter.dart';
-import 'package:image/image.dart' as img;
-import 'package:pos_universal_printer/pos_universal_printer.dart';
+import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
+import 'package:mistpos/core/utils/esc_pos_builder.dart';
 
 class OfflinePrinter {
-  static void printLogo(AppSettingsModel model, EscPosBuilder b) {
+  /// Prints the receipt logo. The image file is decoded and converted to
+  /// ESC/POS raster bytes before sending, preventing raw file bytes from
+  /// being printed as garbage characters.
+  static Future<void> printLogo(AppSettingsModel model, EscPosBuilder b) async {
     if (model.receitLogoPath.isNotEmpty) {
-      final rasterBytes = getRasterImage(model.receitLogoPath);
-      if (rasterBytes != null) {
+      // Calculate pixel width: each receipt character ≈ 12 dots on 58mm paper
+      final int maxPixelWidth = model.printerRecietLength * 12;
+      final rasterBytes = await _getEscPosRasterImage(
+        model.receitLogoPath,
+        maxWidth: maxPixelWidth,
+      );
+      if (rasterBytes != null && rasterBytes.isNotEmpty) {
         b.feed(1);
         b.raster(rasterBytes);
         b.feed(1);
@@ -112,52 +122,94 @@ class OfflinePrinter {
     b.text('.' * receitWidth);
   }
 
-  static List<int>? getRasterImage(String receitLogoPath) {
+  /// Reads an image file and converts it to ESC/POS raster bytes (GS v 0).
+  /// Decodes PNG/JPEG via dart:ui, converts to monochrome, and builds
+  /// the proper ESC/POS raster command sequence.
+  /// [maxWidth] controls the raster pixel width — derived from receipt char width.
+  static Future<Uint8List?> _getEscPosRasterImage(
+    String imagePath, {
+    int maxWidth = 384,
+  }) async {
     try {
-      final imageBytes = File(receitLogoPath).readAsBytesSync();
-      final decoded = img.decodeImage(imageBytes);
-      if (decoded == null) return null;
-      return _imageToRaster(decoded);
+      final imageBytes = File(imagePath).readAsBytesSync();
+      final raw = Uint8List.fromList(imageBytes);
+
+      // If already ESC/POS raster data (starts with GS v 0), pass through
+      if (raw.length >= 4 &&
+          raw[0] == 0x1D &&
+          raw[1] == 0x76 &&
+          raw[2] == 0x30) {
+        return raw;
+      }
+
+      // Decode PNG/JPEG to pixel data using dart:ui
+      final codec = await ui.instantiateImageCodec(raw);
+      final frame = await codec.getNextFrame();
+      final img = frame.image;
+
+      // Scale to configured receipt width preserving aspect ratio
+      final targetWidth = img.width > maxWidth ? maxWidth : img.width;
+      final scale = targetWidth / img.width;
+      final targetHeight = (img.height * scale).round();
+
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      canvas.scale(scale);
+      canvas.drawImage(img, const ui.Offset(0, 0), ui.Paint());
+      final picture = recorder.endRecording();
+      final resized = await picture.toImage(targetWidth, targetHeight);
+      final byteData =
+          await resized.toByteData(format: ui.ImageByteFormat.rawRgba);
+      if (byteData == null) return null;
+      final pixels = byteData.buffer.asUint8List();
+
+      // Build GS v 0 raster command: monochrome conversion
+      const int threshold = 160;
+      final bytes = <int>[];
+      final widthBytes = (targetWidth + 7) ~/ 8; // Round up to byte boundary
+      final xL = widthBytes % 256;
+      final xH = widthBytes ~/ 256;
+      final yL = targetHeight % 256;
+      final yH = targetHeight ~/ 256;
+      bytes.addAll([0x1D, 0x76, 0x30, 0x00, xL, xH, yL, yH]);
+
+      for (int y = 0; y < targetHeight; y++) {
+        for (int x = 0; x < targetWidth; x += 8) {
+          int b = 0;
+          for (int bit = 0; bit < 8; bit++) {
+            final px = x + bit;
+            bool isDark = false;
+            if (px < targetWidth) {
+              final idx = (y * targetWidth + px) * 4;
+              final r = pixels[idx];
+              final g = pixels[idx + 1];
+              final bl = pixels[idx + 2];
+              final lum = (0.299 * r + 0.587 * g + 0.114 * bl).round();
+              if (lum < threshold) isDark = true;
+            }
+            b <<= 1;
+            if (isDark) b |= 0x01;
+          }
+          bytes.add(b);
+        }
+      }
+
+      return Uint8List.fromList(bytes);
     } catch (_) {
       return null;
     }
   }
 
-  static List<int> _imageToRaster(img.Image image) {
-    img.Image resized = image;
-    if (image.width > 384) {
-      resized = img.copyResize(image, width: 384);
+  /// @deprecated Use _getEscPosRasterImage instead.
+  /// Kept for backward compatibility but returns raw file bytes which
+  /// should NOT be passed directly to raster().
+  static List<int>? getRasterImage(String receitLogoPath) {
+    try {
+      final imageBytes = File(receitLogoPath).readAsBytesSync();
+      return imageBytes;
+    } catch (_) {
+      return null;
     }
-
-    final int widthPx = resized.width;
-    final int heightPx = resized.height;
-    final int widthBytes = (widthPx + 7) ~/ 8;
-
-    final List<int> bytes = [];
-    
-    // GS v 0 command (raster bit image)
-    bytes.addAll([0x1D, 0x76, 0x30, 0x00]); 
-    bytes.add(widthBytes % 256);
-    bytes.add(widthBytes ~/ 256);
-    bytes.add(heightPx % 256);
-    bytes.add(heightPx ~/ 256);
-
-    for (int y = 0; y < heightPx; y++) {
-      for (int x = 0; x < widthBytes; x++) {
-        int byte = 0;
-        for (int b = 0; b < 8; b++) {
-          final int px = x * 8 + b;
-          if (px < widthPx) {
-            final pixel = resized.getPixel(px, y);
-            final luminance = (0.299 * pixel.r + 0.587 * pixel.g + 0.114 * pixel.b);
-            if (luminance < 128 && pixel.a > 0) {
-              byte |= (1 << (7 - b));
-            }
-          }
-        }
-        bytes.add(byte);
-      }
-    }
-    return bytes;
   }
 }
+

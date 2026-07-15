@@ -38,11 +38,13 @@ class _NavItemsState extends State<NavItems> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: widget.scaffoldKey != null
-            ? DrawerButton(
-                onPressed: () => widget.scaffoldKey?.currentState?.openDrawer(),
-              )
+      appBar: MediaQuery.of(context).size.width > 800
+          ? null
+          : AppBar(
+              leading: widget.scaffoldKey != null
+                  ? DrawerButton(
+                      onPressed: () => widget.scaffoldKey?.currentState?.openDrawer(),
+                    )
             : const BackButton(),
         title: Text('Items'),
         backgroundColor: Get.theme.colorScheme.primary,

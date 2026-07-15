@@ -15,8 +15,12 @@ import flutter_local_notifications
 import isar_plus_flutter_libs
 import network_info_plus
 import open_file_mac
+import package_info_plus
 import path_provider_foundation
+import printing
 import screen_retriever_macos
+import share_plus
+import speech_to_text
 import sqflite_darwin
 import webview_flutter_wkwebview
 import window_manager
@@ -32,8 +36,12 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   IsarPlusFlutterLibsPlugin.register(with: registry.registrar(forPlugin: "IsarPlusFlutterLibsPlugin"))
   NetworkInfoPlusPlugin.register(with: registry.registrar(forPlugin: "NetworkInfoPlusPlugin"))
   OpenFilePlugin.register(with: registry.registrar(forPlugin: "OpenFilePlugin"))
+  FPPPackageInfoPlusPlugin.register(with: registry.registrar(forPlugin: "FPPPackageInfoPlusPlugin"))
   PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))
+  PrintingPlugin.register(with: registry.registrar(forPlugin: "PrintingPlugin"))
   ScreenRetrieverMacosPlugin.register(with: registry.registrar(forPlugin: "ScreenRetrieverMacosPlugin"))
+  SharePlusMacosPlugin.register(with: registry.registrar(forPlugin: "SharePlusMacosPlugin"))
+  SpeechToTextPlugin.register(with: registry.registrar(forPlugin: "SpeechToTextPlugin"))
   SqflitePlugin.register(with: registry.registrar(forPlugin: "SqflitePlugin"))
   WebViewFlutterPlugin.register(with: registry.registrar(forPlugin: "WebViewFlutterPlugin"))
   WindowManagerPlugin.register(with: registry.registrar(forPlugin: "WindowManagerPlugin"))

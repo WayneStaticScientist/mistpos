@@ -149,6 +149,19 @@ class _ScreenDashboardState extends State<ScreenDashboard> {
           ? const Color(0xFF14161F)
           : const Color(0xFFF7F8FA),
       appBar: AppBar(
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                onPressed: () => Get.back(),
+              )
+            : (isLargeScreen
+                ? null
+                : Builder(
+                    builder: (context) => IconButton(
+                      icon: const Icon(Icons.menu),
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                    ),
+                  )),
         title: Text(
           _selectedIndex,
           style: TextStyle(

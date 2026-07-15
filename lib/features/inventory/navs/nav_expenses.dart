@@ -323,31 +323,34 @@ class _NavExpensesState extends State<NavExpenses> {
           controller: _scrollController,
           slivers: [
             // ── App Bar ──
-            SliverAppBar(
-              backgroundColor: isDark ? const Color(0xFF1C1F2E) : Colors.white,
-              foregroundColor: isDark ? Colors.white : const Color(0xFF1A1D2E),
-              elevation: 0,
-              pinned: true,
-              leading: IconButton(
-                icon: const Icon(Icons.menu_rounded),
-                onPressed: () => widget.scaffoldKey?.currentState?.openDrawer(),
-              ),
-              title: const Text(
-                'Expenses',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
-              ),
-              actions: [
-                if (_hasFilters)
-                  TextButton.icon(
-                    onPressed: _clearFilters,
-                    icon: const Icon(Icons.close_rounded, size: 16),
-                    label: const Text('Clear', style: TextStyle(fontSize: 12)),
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.redAccent,
+            if (MediaQuery.of(context).size.width > 800)
+              const SliverToBoxAdapter(child: SizedBox.shrink())
+            else
+              SliverAppBar(
+                backgroundColor: isDark ? const Color(0xFF1C1F2E) : Colors.white,
+                foregroundColor: isDark ? Colors.white : const Color(0xFF1A1D2E),
+                elevation: 0,
+                pinned: true,
+                leading: IconButton(
+                  icon: const Icon(Icons.menu_rounded),
+                  onPressed: () => widget.scaffoldKey?.currentState?.openDrawer(),
+                ),
+                title: const Text(
+                  'Expenses',
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+                ),
+                actions: [
+                  if (_hasFilters)
+                    TextButton.icon(
+                      onPressed: _clearFilters,
+                      icon: const Icon(Icons.close_rounded, size: 16),
+                      label: const Text('Clear', style: TextStyle(fontSize: 12)),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.redAccent,
+                      ),
                     ),
-                  ),
-              ],
-            ),
+                ],
+              ),
 
             // ── Summary Banner (Scrolls away) ──
             SliverToBoxAdapter(
@@ -371,13 +374,33 @@ class _NavExpensesState extends State<NavExpenses> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _SearchBar(
-                        controller: _searchController,
-                        isDark: isDark,
-                        primary: primary,
-                        cardBg: cardBg,
-                        onChanged: _onSearchChanged,
-                        inventory: _inventory,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _SearchBar(
+                              controller: _searchController,
+                              isDark: isDark,
+                              primary: primary,
+                              cardBg: cardBg,
+                              onChanged: _onSearchChanged,
+                              inventory: _inventory,
+                            ),
+                          ),
+                          if (MediaQuery.of(context).size.width > 800 && _hasFilters) ...[
+                            const SizedBox(width: 10),
+                            TextButton.icon(
+                              onPressed: _clearFilters,
+                              icon: const Icon(Icons.close_rounded, size: 16),
+                              label: const Text('Clear', style: TextStyle(fontSize: 12)),
+                              style: TextButton.styleFrom(
+                                backgroundColor: isDark ? Colors.red.withAlpha(20) : Colors.red.withAlpha(10),
+                                foregroundColor: Colors.redAccent,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                       const SizedBox(height: 10),
                       _CategoryFilterRow(

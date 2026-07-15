@@ -16,10 +16,12 @@ class CustomTitleBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     if (!GetPlatform.isDesktop) return const SizedBox.shrink();
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       height: preferredSize.height,
       width: double.infinity,
-      color: Theme.of(context).colorScheme.surface,
+      color: isDark ? const Color(0xFF0F1117) : Colors.white,
       child: WindowCaption(
         brightness: Theme.of(context).brightness,
         backgroundColor: Colors.transparent,
@@ -49,11 +51,14 @@ class DesktopWindowWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!GetPlatform.isDesktop) return child;
 
-    return Column(
-      children: [
-        const CustomTitleBar(),
-        Expanded(child: child),
-      ],
+    return Material(
+      color: Colors.transparent,
+      child: Column(
+        children: [
+          const CustomTitleBar(),
+          Expanded(child: child),
+        ],
+      ),
     );
   }
 }

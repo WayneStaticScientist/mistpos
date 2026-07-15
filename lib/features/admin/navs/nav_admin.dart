@@ -22,12 +22,14 @@ class _NavAdminState extends State<NavAdmin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: DrawerButton(
-          onPressed: () => widget.scaffoldKey?.currentState?.openDrawer(),
-        ),
-        centerTitle: true,
-      ),
+      appBar: MediaQuery.of(context).size.width > 800
+          ? null
+          : AppBar(
+              leading: DrawerButton(
+                onPressed: () => widget.scaffoldKey?.currentState?.openDrawer(),
+              ),
+              centerTitle: true,
+            ),
     );
   }
 }

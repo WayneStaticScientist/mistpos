@@ -14,7 +14,7 @@ import 'package:mistpos/features/auth/controllers/user_controller.dart';
 import 'package:mistpos/core/widgets/loaders/small_loader.dart';
 import 'package:mistpos/features/devices/controllers/devices_controller.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:pos_universal_printer/pos_universal_printer.dart';
+import 'package:flutter_pos_printer_platform_image_3/flutter_pos_printer_platform_image_3.dart';
 
 class ScreenBluetoothScan extends StatefulWidget {
   const ScreenBluetoothScan({super.key});
@@ -24,10 +24,11 @@ class ScreenBluetoothScan extends StatefulWidget {
 }
 
 class _ScreenBluetoothScanState extends State<ScreenBluetoothScan> {
-  final PosUniversalPrinter printer = PosUniversalPrinter.instance;
+  final _printerManager = PrinterManager.instance;
   final _devicesController = Get.find<DevicesController>();
   final _userController = Get.find<UserController>();
   bool _isScanning = false;
+  bool _isBle = false; // Toggle for BLE vs Classic
   final List<PrinterDevice> _bluetoothDevices = [];
   StreamSubscription<PrinterDevice>? _scanSubscription;
 
@@ -52,7 +53,7 @@ class _ScreenBluetoothScanState extends State<ScreenBluetoothScan> {
     });
 
     try {
-      final scanStream = printer.scanBluetooth();
+      final scanStream = _printerManager.discovery(type: PrinterType.bluetooth, isBle: _isBle);
       // 1. Fetch System Paired/Known Devices
       // Using the synchronous getter 'systemDevices' as is common in newer versions.
       final List<BluetoothDevice> systemDevices =
@@ -61,8 +62,6 @@ class _ScreenBluetoothScanState extends State<ScreenBluetoothScan> {
       for (var device in systemDevices) {
         // Create a mock PrinterDevice object from the system device
         final pairedDevice = PrinterDevice(
-          id: device.remoteId.str,
-          type: PrinterType.bluetooth,
           name: device.platformName,
           address: device.remoteId.str,
         );
@@ -74,7 +73,7 @@ class _ScreenBluetoothScanState extends State<ScreenBluetoothScan> {
       }
       if (mounted) setState(() {}); // Update UI with paired devices
 
-      // 2. Start Live Scan for Discoverable Devices (via pos_universal_printer)
+      // 2. Start Live Scan for Discoverable Devices
 
       // Start the timeout timer for 10 seconds
       _scanTimeout = Timer(const Duration(seconds: 10), () async {
@@ -89,13 +88,11 @@ class _ScreenBluetoothScanState extends State<ScreenBluetoothScan> {
       _scanSubscription = scanStream.listen(
         (device) {
           // Add newly discovered device if it's not already in the list
-          if (device.type == PrinterType.bluetooth) {
-            if (!_bluetoothDevices.any((d) => d.address == device.address)) {
-              if (mounted) {
-                setState(() {
-                  _bluetoothDevices.add(device);
-                });
-              }
+          if (!_bluetoothDevices.any((d) => d.address == device.address)) {
+            if (mounted) {
+              setState(() {
+                _bluetoothDevices.add(device);
+              });
             }
           }
         },
@@ -144,6 +141,21 @@ class _ScreenBluetoothScanState extends State<ScreenBluetoothScan> {
               icon: CircularProgressIndicator(color: AppTheme.color(context)),
             ).visibleIf(_devicesController.connectingToDevice.value),
           ),
+          // BLE Toggle
+          Row(
+            children: [
+              "BLE".text(style: TextStyle(fontSize: 12)),
+              Switch(
+                value: _isBle,
+                onChanged: (val) {
+                  setState(() {
+                    _isBle = val;
+                  });
+                  _scanBluetoothDevices();
+                },
+              ),
+            ],
+          ).padding(EdgeInsets.only(right: 8)),
         ],
       ),
       body: [
@@ -161,10 +173,11 @@ class _ScreenBluetoothScanState extends State<ScreenBluetoothScan> {
                 try {
                   await _scanSubscription?.cancel();
                   _resetScanningState();
-                  final result = await _devicesController.connectToBluetooth(
+                   final result = await _devicesController.connectToBluetooth(
                     device.name,
                     device.address ?? '',
                     _userController.user.value,
+                    isBle: _isBle,
                   );
                   if (result) {
                     Get.back();

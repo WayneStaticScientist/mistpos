@@ -9,6 +9,7 @@ import 'package:iconify_flutter/icons/bx.dart';
 import 'package:mistpos/core/themes/app_theme.dart';
 import 'package:mistpos/data/models/item_model.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/features/settings/screens/screen_checkout.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:mistpos/core/utils/currence_converter.dart';
 import 'package:mistpos/data/models/app_settings_model.dart';
@@ -82,28 +83,75 @@ class _NavSaleState extends State<NavSale> {
           _scanBarCode(p1);
         }
       },
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth > 700) {
-            return Row(
-              children: [
-                Expanded(child: _buildNormalFlowLayout()),
-                SizedBox(
-                  width: constraints.maxWidth * 0.5,
-                  child: _selectedItemsList(),
+      child: Stack(
+        children: [
+          LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth > 700) {
+                return Row(
+                  children: [
+                    Expanded(child: _buildNormalFlowLayout(isDesktop: true)),
+                    SizedBox(
+                      width: constraints.maxWidth * 0.5,
+                      child: _selectedItemsList(),
+                    ),
+                  ],
+                );
+              }
+              return _buildNormalFlowLayout(isDesktop: false);
+            },
+          ),
+          AnimatedPositioned(
+            duration: Duration(milliseconds: _animationSpeed),
+            curve: Curves.easeOutBack, // Playful premium bounce effect
+            top: _topPosition,
+            left: _leftPosition,
+            child: IgnorePointer(
+              child: AnimatedOpacity(
+                opacity: _animatedOpacity,
+                duration: Duration(milliseconds: _animationSpeed),
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Get.theme.colorScheme.primary,
+                        Get.theme.colorScheme.primary.withAlpha(200),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Get.theme.colorScheme.primary.withAlpha(100),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.shopping_bag_rounded,
+                    color: Colors.white,
+                    size: 26,
+                  ),
                 ),
-              ],
-            );
-          }
-          return _buildNormalFlowLayout();
-        },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Stack _buildNormalFlowLayout() {
+  final GlobalKey _normalFlowKey = GlobalKey();
+
+  Stack _buildNormalFlowLayout({bool isDesktop = false}) {
     final model = AppSettingsModel.fromStorage();
     return Stack(
+      key: _normalFlowKey,
       children: [
         Positioned.fill(
           child: SmartRefresher(
@@ -126,15 +174,18 @@ class _NavSaleState extends State<NavSale> {
               slivers: [
                 /*
                 ==================================================================================
-                    THE APP TOB BAR
+                    THE APP TOP BAR
                 ==================================================================================
                 */
-                SalesAppBar(scaffoldKey: widget.scaffoldKey),
+                if (MediaQuery.of(context).size.width > 800)
+                  const SliverToBoxAdapter(child: SizedBox.shrink())
+                else
+                  SalesAppBar(scaffoldKey: widget.scaffoldKey),
                 /*
-              ==============================================================================
-              THE SAVED ITEMS LISTS
-              ==============================================================================            
-              */
+                ==============================================================================
+                THE SAVED ITEMS LISTS
+                ==============================================================================            
+                */
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
@@ -142,9 +193,7 @@ class _NavSaleState extends State<NavSale> {
                       children: [
                         // Search field
                         Expanded(
-                          child: MistSearchField(
-                            controller: _searchController,
-                          ),
+                          child: MistSearchField(controller: _searchController),
                         ),
                         const SizedBox(width: 10),
                         // Scan button — blended, modern
@@ -180,7 +229,6 @@ class _NavSaleState extends State<NavSale> {
                     ),
                   ),
                 ),
-
 
                 if (!_inSearchMode)
                   Obx(
@@ -223,7 +271,8 @@ class _NavSaleState extends State<NavSale> {
                 Obx(
                   () =>
                       _itemsListController.selectedShift.value == null &&
-                          (_invController.company.value?.shiftBasedSales ?? false)
+                          (_invController.company.value?.shiftBasedSales ??
+                              false)
                       ? _makeShifts()
                       : _buidItemList(),
                 ),
@@ -231,55 +280,19 @@ class _NavSaleState extends State<NavSale> {
             ),
           ),
         ),
-        AnimatedPositioned(
-          duration: Duration(milliseconds: _animationSpeed),
-          curve: Curves.easeIn,
-          top: _topPosition,
-          left: _leftPosition,
-          child: AnimatedOpacity(
-            opacity: _animatedOpacity,
-            duration: Duration(milliseconds: _animationSpeed),
-            child: Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Get.theme.colorScheme.secondary,
-                    Get.theme.colorScheme.secondary.withAlpha(200),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Get.theme.colorScheme.secondary.withAlpha(100),
-                    blurRadius: 15,
-                    offset: Offset(0, 8),
-                  )
-                ],
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Icon(
-                Icons.shopping_bag_outlined, // 🛒 A clear "add to cart" icon
-                color: Colors.white,
-                size: 28,
-              ),
-            ),
-          ),
-        ),
+
         // --- THE TARGET BUTTON (BOTTOM STACK) ---
-        Obx(
-          () => _itemsListController.checkOutItems.isNotEmpty
-              ? Positioned(
-                  bottom: 24,
-                  right: 24,
-                  left: 24,
-                  child: LayoutCashout(bottomBarKey: _bottomBarKey),
-                )
-              : Positioned.fill(child: SizedBox.shrink()),
-        ),
+        if (!isDesktop)
+          Obx(
+            () => _itemsListController.checkOutItems.isNotEmpty
+                ? Positioned(
+                    bottom: 24,
+                    right: 24,
+                    left: 24,
+                    child: LayoutCashout(bottomBarKey: _bottomBarKey),
+                  )
+                : Positioned.fill(child: SizedBox.shrink()),
+          ),
       ],
     );
   }
@@ -324,15 +337,53 @@ class _NavSaleState extends State<NavSale> {
         child: Obx(
           () => [
             Padding(
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Iconify(Bx.shopping_bag, color: Get.theme.colorScheme.primary, size: 28),
-                  12.gapWidth,
-                  Text(
-                    "Current Order",
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  Row(
+                    children: [
+                      Iconify(
+                        Bx.shopping_bag,
+                        color: Get.theme.colorScheme.primary,
+                        size: 28,
+                      ),
+                      12.gapWidth,
+                      const Text(
+                        "Current Order",
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
+                  if (_itemsListController.checkOutItems.isNotEmpty)
+                    IconButton(
+                      tooltip: "Clear All Items",
+                      onPressed: () {
+                        Get.dialog(
+                          AlertDialog(
+                            title: const Text("Clear Cart"),
+                            content: const Text("Are you sure you want to cancel this purchase and clear the cart?"),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Get.back(),
+                                child: const Text("Keep Items"),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  _itemsListController.removeAllSelected();
+                                  Get.back();
+                                },
+                                child: const Text(
+                                  "Clear Cart",
+                                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.delete_sweep_rounded, color: Colors.redAccent, size: 22),
+                    ),
                 ],
               ),
             ),
@@ -343,15 +394,34 @@ class _NavSaleState extends State<NavSale> {
                     final count = e['count'] as num;
                     final model = e['item'] as ItemModel;
                     return ListTile(
-                      contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                      title: Text(model.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 8,
+                      ),
+                      title: Text(
+                        model.name,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       leading: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: Get.theme.colorScheme.primary.withAlpha(25),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text("x$count", style: TextStyle(color: Get.theme.colorScheme.primary, fontWeight: FontWeight.bold, fontSize: 16)),
+                        child: Text(
+                          "x$count",
+                          style: TextStyle(
+                            color: Get.theme.colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
                       onTap: () => Get.to(() => ScreenEditManualCart(map: e)),
                       subtitle: Text(
@@ -361,17 +431,35 @@ class _NavSaleState extends State<NavSale> {
                         ),
                         style: TextStyle(color: Colors.grey),
                       ),
-                      trailing: CurrenceConverter.getCurrenceFloatInStrings(
-                        model.price * count,
-                        _userController.user.value?.baseCurrence ?? '',
-                      ).text(style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CurrenceConverter.getCurrenceFloatInStrings(
+                            model.price * count,
+                            _userController.user.value?.baseCurrence ?? '',
+                          ).text(
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+                            onPressed: () => _itemsListController.removeSelectedItem(e),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        ],
+                      ),
                     );
                   })
                   .toList()
                   .column(),
             ).expanded1,
             Container(
-              padding: EdgeInsets.all(24),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -381,19 +469,126 @@ class _NavSaleState extends State<NavSale> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(24),
+                ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    "Total",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.white),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Total",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                          color: Colors.white,
+                        ),
+                      ),
+                      CurrenceConverter.getCurrenceFloatInStrings(
+                        _itemsListController.totalPrice.value,
+                        _userController.user.value?.baseCurrence ?? '',
+                      ).text(
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 26,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
-                  CurrenceConverter.getCurrenceFloatInStrings(
-                    _itemsListController.totalPrice.value,
-                    _userController.user.value?.baseCurrence ?? '',
-                  ).text(style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28, color: Colors.white)),
+                  const SizedBox(height: 16),
+                  // Tax warning inside the total container
+                  if (_itemsListController.salesTaxes
+                      .where((t) => t.activated)
+                      .isNotEmpty) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(30),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.info_outline,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              '${_itemsListController.salesTaxes.where((t) => t.activated).length} tax(es) will be applied',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  // Premium Checkout Button
+                  InkWell(
+                    onTap: _itemsListController.checkOutItems.isNotEmpty
+                        ? () => Get.to(() => ScreenCheckout())
+                        : null,
+                    borderRadius: BorderRadius.circular(14),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        color: _itemsListController.checkOutItems.isNotEmpty
+                            ? Colors.white
+                            : Colors.white.withAlpha(100),
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: _itemsListController.checkOutItems.isNotEmpty
+                            ? [
+                                BoxShadow(
+                                  color: Colors.black.withAlpha(30),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "PROCEED TO CHECKOUT",
+                            style: TextStyle(
+                              color:
+                                  _itemsListController.checkOutItems.isNotEmpty
+                                  ? Get.theme.colorScheme.primary
+                                  : Get.theme.colorScheme.primary.withAlpha(
+                                      120,
+                                    ),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.arrow_forward_rounded,
+                            color: _itemsListController.checkOutItems.isNotEmpty
+                                ? Get.theme.colorScheme.primary
+                                : Get.theme.colorScheme.primary.withAlpha(120),
+                            size: 18,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -444,29 +639,52 @@ class _NavSaleState extends State<NavSale> {
       return;
     }
     _itemsListController.addSelectedItem(model);
-    final RenderBox? renderBox =
-        _bottomBarKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox == null) return;
-    final Offset bottomBarTopLeft = renderBox.localToGlobal(Offset.zero);
-    final double targetTopPosition = bottomBarTopLeft.dy;
+
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final bool isDesktop = screenWidth > 700;
+
+    double targetX = 50;
+    double targetY = screenHeight - 80;
+
+    if (isDesktop) {
+      // Animate towards the current order list on the right side of the screen
+      targetX = screenWidth - (screenWidth * 0.25);
+      targetY = 150;
+    } else {
+      // Mobile: Try to get the bottom bar position if it exists
+      final RenderBox? renderBox =
+          _bottomBarKey.currentContext?.findRenderObject() as RenderBox?;
+      if (renderBox != null) {
+        final Offset bottomBarTopLeft = renderBox.localToGlobal(Offset.zero);
+        targetX = bottomBarTopLeft.dx + (renderBox.size.width / 2) - 28;
+        targetY = bottomBarTopLeft.dy;
+      } else {
+        // Fallback: bottom-center of the screen where the cashout button will appear
+        targetX = screenWidth / 2 - 28;
+        targetY = screenHeight - 100;
+      }
+    }
 
     final double clickX = details?.globalPosition.dx ?? x;
     final double clickY = details?.globalPosition.dy ?? y;
 
     setState(() {
-      _topPosition = clickY;
-      _leftPosition = clickX;
+      _topPosition = clickY - 28; // Center the 56px circle on click point
+      _leftPosition = clickX - 28;
       _animationSpeed = 0;
-      _animatedOpacity = 1;
+      _animatedOpacity = 1.0;
     });
 
-    Future.delayed(Duration(milliseconds: 50), () {
-      setState(() {
-        _topPosition = targetTopPosition;
-        _leftPosition = 50;
-        _animationSpeed = 400;
-        _animatedOpacity = 0;
-      });
+    // Short delay to allow the framework to capture the start position frame
+    await Future.delayed(const Duration(milliseconds: 20));
+    if (!mounted) return;
+
+    setState(() {
+      _topPosition = targetY;
+      _leftPosition = targetX;
+      _animationSpeed = 600; // Smoother slide animation
+      _animatedOpacity = 0.0;
     });
   }
 

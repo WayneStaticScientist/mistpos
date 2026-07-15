@@ -25,16 +25,10 @@ final PrinterDeviceModelSchema = IsarGeneratedSchema(
       IsarPropertySchema(name: 'address', type: IsarType.string),
       IsarPropertySchema(name: 'isConnected', type: IsarType.bool),
       IsarPropertySchema(name: 'port', type: IsarType.long),
-      IsarPropertySchema(name: 'role', type: IsarType.string),
+      IsarPropertySchema(name: 'isSelectedForMultiPrint', type: IsarType.bool),
+      IsarPropertySchema(name: 'connectionType', type: IsarType.string),
     ],
-    indexes: [
-      IsarIndexSchema(
-        name: 'role',
-        properties: ["role"],
-        unique: false,
-        hash: false,
-      ),
-    ],
+    indexes: [],
   ),
   converter: IsarObjectConverter<int, PrinterDeviceModel>(
     serialize: serializePrinterDeviceModel,
@@ -50,7 +44,8 @@ int serializePrinterDeviceModel(IsarWriter writer, PrinterDeviceModel object) {
   IsarCore.writeString(writer, 2, object.address);
   IsarCore.writeBool(writer, 3, value: object.isConnected);
   IsarCore.writeLong(writer, 4, object.port);
-  IsarCore.writeString(writer, 5, object.role);
+  IsarCore.writeBool(writer, 5, value: object.isSelectedForMultiPrint);
+  IsarCore.writeString(writer, 6, object.connectionType);
   return object.id;
 }
 
@@ -71,14 +66,23 @@ PrinterDeviceModel deserializePrinterDeviceModel(IsarReader reader) {
       _port = value;
     }
   }
-  final String _role;
-  _role = IsarCore.readString(reader, 5) ?? 'cashier';
+  final bool _isSelectedForMultiPrint;
+  {
+    if (IsarCore.readNull(reader, 5)) {
+      _isSelectedForMultiPrint = true;
+    } else {
+      _isSelectedForMultiPrint = IsarCore.readBool(reader, 5);
+    }
+  }
+  final String _connectionType;
+  _connectionType = IsarCore.readString(reader, 6) ?? "bluetooth";
   final object = PrinterDeviceModel(
     name: _name,
     address: _address,
     isConnected: _isConnected,
     port: _port,
-    role: _role,
+    isSelectedForMultiPrint: _isSelectedForMultiPrint,
+    connectionType: _connectionType,
   );
   object.id = IsarCore.readId(reader);
   return object;
@@ -105,7 +109,15 @@ dynamic deserializePrinterDeviceModelProp(IsarReader reader, int property) {
         }
       }
     case 5:
-      return IsarCore.readString(reader, 5) ?? 'cashier';
+      {
+        if (IsarCore.readNull(reader, 5)) {
+          return true;
+        } else {
+          return IsarCore.readBool(reader, 5);
+        }
+      }
+    case 6:
+      return IsarCore.readString(reader, 6) ?? "bluetooth";
     default:
       throw ArgumentError('Unknown property: $property');
   }
@@ -118,7 +130,8 @@ sealed class _PrinterDeviceModelUpdate {
     String? address,
     bool? isConnected,
     int? port,
-    String? role,
+    bool? isSelectedForMultiPrint,
+    String? connectionType,
   });
 }
 
@@ -134,7 +147,8 @@ class _PrinterDeviceModelUpdateImpl implements _PrinterDeviceModelUpdate {
     Object? address = ignore,
     Object? isConnected = ignore,
     Object? port = ignore,
-    Object? role = ignore,
+    Object? isSelectedForMultiPrint = ignore,
+    Object? connectionType = ignore,
   }) {
     return collection.updateProperties(
           [id],
@@ -143,7 +157,9 @@ class _PrinterDeviceModelUpdateImpl implements _PrinterDeviceModelUpdate {
             if (address != ignore) 2: address as String?,
             if (isConnected != ignore) 3: isConnected as bool?,
             if (port != ignore) 4: port as int?,
-            if (role != ignore) 5: role as String?,
+            if (isSelectedForMultiPrint != ignore)
+              5: isSelectedForMultiPrint as bool?,
+            if (connectionType != ignore) 6: connectionType as String?,
           },
         ) >
         0;
@@ -157,7 +173,8 @@ sealed class _PrinterDeviceModelUpdateAll {
     String? address,
     bool? isConnected,
     int? port,
-    String? role,
+    bool? isSelectedForMultiPrint,
+    String? connectionType,
   });
 }
 
@@ -173,14 +190,17 @@ class _PrinterDeviceModelUpdateAllImpl implements _PrinterDeviceModelUpdateAll {
     Object? address = ignore,
     Object? isConnected = ignore,
     Object? port = ignore,
-    Object? role = ignore,
+    Object? isSelectedForMultiPrint = ignore,
+    Object? connectionType = ignore,
   }) {
     return collection.updateProperties(id, {
       if (name != ignore) 1: name as String?,
       if (address != ignore) 2: address as String?,
       if (isConnected != ignore) 3: isConnected as bool?,
       if (port != ignore) 4: port as int?,
-      if (role != ignore) 5: role as String?,
+      if (isSelectedForMultiPrint != ignore)
+        5: isSelectedForMultiPrint as bool?,
+      if (connectionType != ignore) 6: connectionType as String?,
     });
   }
 }
@@ -198,7 +218,8 @@ sealed class _PrinterDeviceModelQueryUpdate {
     String? address,
     bool? isConnected,
     int? port,
-    String? role,
+    bool? isSelectedForMultiPrint,
+    String? connectionType,
   });
 }
 
@@ -215,14 +236,17 @@ class _PrinterDeviceModelQueryUpdateImpl
     Object? address = ignore,
     Object? isConnected = ignore,
     Object? port = ignore,
-    Object? role = ignore,
+    Object? isSelectedForMultiPrint = ignore,
+    Object? connectionType = ignore,
   }) {
     return query.updateProperties(limit: limit, {
       if (name != ignore) 1: name as String?,
       if (address != ignore) 2: address as String?,
       if (isConnected != ignore) 3: isConnected as bool?,
       if (port != ignore) 4: port as int?,
-      if (role != ignore) 5: role as String?,
+      if (isSelectedForMultiPrint != ignore)
+        5: isSelectedForMultiPrint as bool?,
+      if (connectionType != ignore) 6: connectionType as String?,
     });
   }
 }
@@ -248,7 +272,8 @@ class _PrinterDeviceModelQueryBuilderUpdateImpl
     Object? address = ignore,
     Object? isConnected = ignore,
     Object? port = ignore,
-    Object? role = ignore,
+    Object? isSelectedForMultiPrint = ignore,
+    Object? connectionType = ignore,
   }) {
     final q = query.build();
     try {
@@ -257,7 +282,9 @@ class _PrinterDeviceModelQueryBuilderUpdateImpl
         if (address != ignore) 2: address as String?,
         if (isConnected != ignore) 3: isConnected as bool?,
         if (port != ignore) 4: port as int?,
-        if (role != ignore) 5: role as String?,
+        if (isSelectedForMultiPrint != ignore)
+          5: isSelectedForMultiPrint as bool?,
+        if (connectionType != ignore) 6: connectionType as String?,
       });
     } finally {
       q.close();
@@ -672,20 +699,29 @@ extension PrinterDeviceModelQueryFilter
   }
 
   QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
-  roleEqualTo(String value, {bool caseSensitive = true}) {
+  isSelectedForMultiPrintEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        EqualCondition(property: 5, value: value, caseSensitive: caseSensitive),
+        EqualCondition(property: 5, value: value),
       );
     });
   }
 
   QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
-  roleGreaterThan(String value, {bool caseSensitive = true}) {
+  connectionTypeEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 6, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
+  connectionTypeGreaterThan(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(
-          property: 5,
+          property: 6,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -694,11 +730,14 @@ extension PrinterDeviceModelQueryFilter
   }
 
   QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
-  roleGreaterThanOrEqualTo(String value, {bool caseSensitive = true}) {
+  connectionTypeGreaterThanOrEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(
-          property: 5,
+          property: 6,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -707,20 +746,20 @@ extension PrinterDeviceModelQueryFilter
   }
 
   QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
-  roleLessThan(String value, {bool caseSensitive = true}) {
+  connectionTypeLessThan(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessCondition(property: 5, value: value, caseSensitive: caseSensitive),
+        LessCondition(property: 6, value: value, caseSensitive: caseSensitive),
       );
     });
   }
 
   QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
-  roleLessThanOrEqualTo(String value, {bool caseSensitive = true}) {
+  connectionTypeLessThanOrEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(
-          property: 5,
+          property: 6,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -729,11 +768,15 @@ extension PrinterDeviceModelQueryFilter
   }
 
   QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
-  roleBetween(String lower, String upper, {bool caseSensitive = true}) {
+  connectionTypeBetween(
+    String lower,
+    String upper, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
-          property: 5,
+          property: 6,
           lower: lower,
           upper: upper,
           caseSensitive: caseSensitive,
@@ -743,11 +786,11 @@ extension PrinterDeviceModelQueryFilter
   }
 
   QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
-  roleStartsWith(String value, {bool caseSensitive = true}) {
+  connectionTypeStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         StartsWithCondition(
-          property: 5,
+          property: 6,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -756,11 +799,11 @@ extension PrinterDeviceModelQueryFilter
   }
 
   QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
-  roleEndsWith(String value, {bool caseSensitive = true}) {
+  connectionTypeEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EndsWithCondition(
-          property: 5,
+          property: 6,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -769,11 +812,11 @@ extension PrinterDeviceModelQueryFilter
   }
 
   QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
-  roleContains(String value, {bool caseSensitive = true}) {
+  connectionTypeContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         ContainsCondition(
-          property: 5,
+          property: 6,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -782,11 +825,11 @@ extension PrinterDeviceModelQueryFilter
   }
 
   QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
-  roleMatches(String pattern, {bool caseSensitive = true}) {
+  connectionTypeMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         MatchesCondition(
-          property: 5,
+          property: 6,
           wildcard: pattern,
           caseSensitive: caseSensitive,
         ),
@@ -795,19 +838,19 @@ extension PrinterDeviceModelQueryFilter
   }
 
   QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
-  roleIsEmpty() {
+  connectionTypeIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const EqualCondition(property: 5, value: ''),
+        const EqualCondition(property: 6, value: ''),
       );
     });
   }
 
   QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterFilterCondition>
-  roleIsNotEmpty() {
+  connectionTypeIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterCondition(property: 5, value: ''),
+        const GreaterCondition(property: 6, value: ''),
       );
     });
   }
@@ -889,16 +932,30 @@ extension PrinterDeviceModelQuerySortBy
   }
 
   QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterSortBy>
-  sortByRole({bool caseSensitive = true}) {
+  sortByIsSelectedForMultiPrint() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(5, caseSensitive: caseSensitive);
+      return query.addSortBy(5);
     });
   }
 
   QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterSortBy>
-  sortByRoleDesc({bool caseSensitive = true}) {
+  sortByIsSelectedForMultiPrintDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(5, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(5, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterSortBy>
+  sortByConnectionType({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(6, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterSortBy>
+  sortByConnectionTypeDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(6, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 }
@@ -976,16 +1033,30 @@ extension PrinterDeviceModelQuerySortThenBy
   }
 
   QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterSortBy>
-  thenByRole({bool caseSensitive = true}) {
+  thenByIsSelectedForMultiPrint() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(5, caseSensitive: caseSensitive);
+      return query.addSortBy(5);
     });
   }
 
   QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterSortBy>
-  thenByRoleDesc({bool caseSensitive = true}) {
+  thenByIsSelectedForMultiPrintDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(5, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(5, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterSortBy>
+  thenByConnectionType({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(6, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterSortBy>
+  thenByConnectionTypeDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(6, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 }
@@ -1021,9 +1092,16 @@ extension PrinterDeviceModelQueryWhereDistinct
   }
 
   QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterDistinct>
-  distinctByRole({bool caseSensitive = true}) {
+  distinctByIsSelectedForMultiPrint() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(5, caseSensitive: caseSensitive);
+      return query.addDistinctBy(5);
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, PrinterDeviceModel, QAfterDistinct>
+  distinctByConnectionType({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(6, caseSensitive: caseSensitive);
     });
   }
 }
@@ -1060,9 +1138,17 @@ extension PrinterDeviceModelQueryProperty1
     });
   }
 
-  QueryBuilder<PrinterDeviceModel, String, QAfterProperty> roleProperty() {
+  QueryBuilder<PrinterDeviceModel, bool, QAfterProperty>
+  isSelectedForMultiPrintProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(5);
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, String, QAfterProperty>
+  connectionTypeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(6);
     });
   }
 }
@@ -1101,9 +1187,17 @@ extension PrinterDeviceModelQueryProperty2<R>
     });
   }
 
-  QueryBuilder<PrinterDeviceModel, (R, String), QAfterProperty> roleProperty() {
+  QueryBuilder<PrinterDeviceModel, (R, bool), QAfterProperty>
+  isSelectedForMultiPrintProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(5);
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, (R, String), QAfterProperty>
+  connectionTypeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(6);
     });
   }
 }
@@ -1143,10 +1237,17 @@ extension PrinterDeviceModelQueryProperty3<R1, R2>
     });
   }
 
-  QueryBuilder<PrinterDeviceModel, (R1, R2, String), QOperations>
-  roleProperty() {
+  QueryBuilder<PrinterDeviceModel, (R1, R2, bool), QOperations>
+  isSelectedForMultiPrintProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(5);
+    });
+  }
+
+  QueryBuilder<PrinterDeviceModel, (R1, R2, String), QOperations>
+  connectionTypeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(6);
     });
   }
 }

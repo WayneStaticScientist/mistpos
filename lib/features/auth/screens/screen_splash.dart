@@ -54,92 +54,97 @@ class _ScreenSplashState extends State<ScreenSplash> {
           ),
           // Content
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 28),
-              child: Column(
-                children: [
-                  const Spacer(),
-                  // Logo mark
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(22),
-                      boxShadow: [
-                        BoxShadow(
-                          color: primary.withAlpha(100),
-                          blurRadius: 28,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(22),
-                      child: Image.asset(
-                        'assets/launcher.png',
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  )
-                      .animate()
-                      .fadeIn(duration: 500.ms)
-                      .scale(begin: const Offset(0.7, 0.7)),
-                  const SizedBox(height: 24),
-                  // Brand name
-                  Text(
-                    'MistPos',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 38,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -1,
-                    ),
-                  )
-                      .animate(delay: 150.ms)
-                      .fadeIn(duration: 400.ms)
-                      .slideY(begin: 0.3, end: 0),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Your modern point of sale system.\nBuilt for speed. Designed for growth.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white.withAlpha(160),
-                      fontSize: 14,
-                      height: 1.55,
-                    ),
-                  )
-                      .animate(delay: 250.ms)
-                      .fadeIn(duration: 400.ms)
-                      .slideY(begin: 0.3, end: 0),
-                  const SizedBox(height: 48),
-                  // Action buttons
-                  Row(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
+                  child: Column(
                     children: [
-                      Expanded(
-                        child: _AuthButton(
-                          label: 'Sign In',
-                          icon: Bx.log_in,
-                          isPrimary: true,
-                          onTap: () => Get.to(() => const ScreenLogin()),
+                      const Spacer(),
+                      // Logo mark
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(22),
+                          boxShadow: [
+                            BoxShadow(
+                              color: primary.withAlpha(100),
+                              blurRadius: 28,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _AuthButton(
-                          label: 'Create Account',
-                          icon: Bx.user_plus,
-                          isPrimary: false,
-                          onTap: () =>
-                              Get.to(() => const ScreenCreateAccount()),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(22),
+                          child: Image.asset(
+                            'assets/launcher.png',
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                      ),
+                      )
+                          .animate()
+                          .fadeIn(duration: 500.ms)
+                          .scale(begin: const Offset(0.7, 0.7)),
+                      const SizedBox(height: 24),
+                      // Brand name
+                      Text(
+                        'MistPos',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 38,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -1,
+                        ),
+                      )
+                          .animate(delay: 150.ms)
+                          .fadeIn(duration: 400.ms)
+                          .slideY(begin: 0.3, end: 0),
+                      const SizedBox(height: 10),
+                      Text(
+                        'Your modern point of sale system.\nBuilt for speed. Designed for growth.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white.withAlpha(160),
+                          fontSize: 14,
+                          height: 1.55,
+                        ),
+                      )
+                          .animate(delay: 250.ms)
+                          .fadeIn(duration: 400.ms)
+                          .slideY(begin: 0.3, end: 0),
+                      const SizedBox(height: 48),
+                      // Action buttons
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _AuthButton(
+                              label: 'Sign In',
+                              icon: Bx.log_in,
+                              isPrimary: true,
+                              onTap: () => Get.to(() => const ScreenLogin()),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _AuthButton(
+                              label: 'Create Account',
+                              icon: Bx.user_plus,
+                              isPrimary: false,
+                              onTap: () =>
+                                  Get.to(() => const ScreenCreateAccount()),
+                            ),
+                          ),
+                        ],
+                      )
+                          .animate(delay: 350.ms)
+                          .fadeIn(duration: 400.ms)
+                          .slideY(begin: 0.4, end: 0),
+                      const SizedBox(height: 32),
                     ],
-                  )
-                      .animate(delay: 350.ms)
-                      .fadeIn(duration: 400.ms)
-                      .slideY(begin: 0.4, end: 0),
-                  const SizedBox(height: 32),
-                ],
+                  ),
+                ),
               ),
             ),
           ),

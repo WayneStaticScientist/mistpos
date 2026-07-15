@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:io' show Platform;
 
 import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
@@ -79,7 +80,14 @@ class AuthenticationInterceptor extends Interceptor {
 }
 
 Future<String> getDeviceId() async {
-  String? id = await MobileDeviceIdentifier().getDeviceId();
+  String? id;
+  try {
+    if (Platform.isAndroid || Platform.isIOS) {
+      id = await MobileDeviceIdentifier().getDeviceId();
+    }
+  } catch (e) {
+    // Ignore plugin exceptions on unsupported platforms
+  }
   if (id != null && id.trim().isNotEmpty) return id;
   GetStorage box = GetStorage();
   id = box.read('deviceIdapp');

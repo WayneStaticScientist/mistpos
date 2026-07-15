@@ -57,6 +57,12 @@ add_subdirectory("runner")
 # them to the application.
 include(flutter/generated_plugins.cmake)
 
+# Patch to prevent flutter_blue_plus_winrt from crashing on Windows devices without Bluetooth
+file(READ "flutter/generated_plugin_registrant.cc" REGISTRANT_CONTENT)
+string(REGEX REPLACE "#include <flutter_blue_plus_winrt/flutter_blue_plus_plugin\\.h>" "" REGISTRANT_CONTENT "${REGISTRANT_CONTENT}")
+string(REGEX REPLACE "[ \t]*FlutterBluePlusPluginRegisterWithRegistrar\\([^\\)]+\\);" "" REGISTRANT_CONTENT "${REGISTRANT_CONTENT}")
+file(WRITE "flutter/generated_plugin_registrant.cc" "${REGISTRANT_CONTENT}")
+
 
 # === Installation ===
 # Support files are copied into place next to the executable, so that it can

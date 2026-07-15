@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/instance_manager.dart';
+import 'package:get/get.dart';
 import 'package:isar_plus/isar_plus.dart';
 import 'package:mistpos/features/inventory/controllers/expenses_controller.dart';
 import 'package:mistpos/features/admin/controllers/goals_tasks_controller.dart';
@@ -37,6 +38,8 @@ import 'package:mistpos/features/inventory/controllers/inventory_controller.dart
 import 'package:mistpos/features/inventory/controllers/items_unsaved_controller.dart';
 import 'package:mistpos/core/services/firebase/firebase_bg_notification_handler.dart';
 import 'package:mistpos/core/services/logs/log_service.dart';
+import 'package:window_manager/window_manager.dart';
+import 'package:mistpos/widgets/layouts/custom_title_bar.dart';
 
 class IsarStatic {
   static Isar? isar;
@@ -87,6 +90,22 @@ void main() async {
   } catch (e) {
     //
   }
+
+  if (GetPlatform.isDesktop) {
+    await windowManager.ensureInitialized();
+    WindowOptions windowOptions = const WindowOptions(
+      size: Size(1100, 700),
+      center: true,
+      backgroundColor: Colors.transparent,
+      skipTaskbar: false,
+      titleBarStyle: TitleBarStyle.hidden,
+    );
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
+
   runApp(const MyApp());
   Get.put(ItemsController());
   
@@ -142,6 +161,7 @@ class MyApp extends StatelessWidget {
           : model.darkMode
           ? ThemeMode.dark
           : ThemeMode.light,
+      builder: (context, child) => DesktopWindowWrapper(child: child!),
       home: User.fromStorage() == null
           ? const ScreenSplash()
           : const ScreenMain(),

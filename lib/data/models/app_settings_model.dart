@@ -13,9 +13,19 @@ class AppSettingsModel {
   String receitLogoPath;
   bool useGridViewForItems;
   bool hasAlertedAboutFreeVersion = false;
-  bool printToMultiplePrinters = false;
+  /// Printing mode: "single" (one printer) or "multi" (all selected printers)
+  String printingMode;
+  bool enableCashDrawer;
+  /// Trigger mode: "cash" (cash sales only) or "all" (all sales)
+  String cashDrawerTriggerMode;
   int lastItemsSyncTime = 0;
   String syncedCompanyId;
+  
+  bool get printToMultiplePrinters => printingMode == "multi";
+  set printToMultiplePrinters(bool value) {
+    printingMode = value ? "multi" : "single";
+  }
+
   AppSettingsModel({
     required this.externalBarCodeEnabled,
     required this.useSystemDarkMode,
@@ -28,7 +38,9 @@ class AppSettingsModel {
     this.prioritizeShift = true,
     this.useGridViewForItems = false,
     this.hasAlertedAboutFreeVersion = false,
-    this.printToMultiplePrinters = false,
+    this.printingMode = "single",
+    this.enableCashDrawer = false,
+    this.cashDrawerTriggerMode = "all",
     this.lastItemsSyncTime = 0,
     this.syncedCompanyId = "",
   });
@@ -49,7 +61,9 @@ class AppSettingsModel {
         prioritizeShift: json["prioritizeShift"] ?? true,
         useGridViewForItems: json["useGridViewForItems"] ?? false,
         hasAlertedAboutFreeVersion: json["hasAlertedAboutFreeVersion"] ?? false,
-        printToMultiplePrinters: json["printToMultiplePrinters"] ?? false,
+        printingMode: json["printingMode"] ?? "single",
+        enableCashDrawer: json["enableCashDrawer"] ?? false,
+        cashDrawerTriggerMode: json["cashDrawerTriggerMode"] ?? "all",
         lastItemsSyncTime: json["lastItemsSyncTime"] ?? 0,
         syncedCompanyId: json["syncedCompanyId"] ?? "",
       );
@@ -65,13 +79,20 @@ class AppSettingsModel {
     "extras": extras.map((e) => e.toJson()).toList(),
     "externalBarCodeEnabled": externalBarCodeEnabled,
     "hasAlertedAboutFreeVersion": hasAlertedAboutFreeVersion,
-    "printToMultiplePrinters": printToMultiplePrinters,
+    "printingMode": printingMode,
+    "enableCashDrawer": enableCashDrawer,
+    "cashDrawerTriggerMode": cashDrawerTriggerMode,
     "lastItemsSyncTime": lastItemsSyncTime,
     "syncedCompanyId": syncedCompanyId,
   };
   static AppSettingsModel fromStorage() {
     GetStorage box = GetStorage();
     final settings = AppSettingsModel.fromJson(box.read('appSettings') ?? {});
+    bool changed = false;
+    if (settings.extras.any((e) => e.value == "drawer")) {
+      settings.extras.removeWhere((e) => e.value == "drawer");
+      changed = true;
+    }
     if (settings.extras.isEmpty) {
       settings.extras = [
         ReceitExtrasModel(
@@ -138,6 +159,10 @@ class AppSettingsModel {
           type: "system",
         ),
       ];
+      changed = true;
+    }
+    if (changed) {
+      settings.saveToStorage();
     }
     return settings;
   }

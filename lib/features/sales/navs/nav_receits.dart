@@ -23,11 +23,13 @@ class _NavReceitsState extends State<NavReceits> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        surfaceTintColor: Colors.transparent,
-        centerTitle: false,
+      appBar: MediaQuery.of(context).size.width > 800
+          ? null
+          : AppBar(
+              elevation: 0,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              surfaceTintColor: Colors.transparent,
+              centerTitle: false,
         leading: IconButton(
           onPressed: () => widget.scaffoldKey?.currentState?.openDrawer(),
           icon: Container(

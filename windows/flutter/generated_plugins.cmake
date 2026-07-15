@@ -9,7 +9,11 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_pos_printer_platform_image_3
   isar_plus_flutter_libs
   permission_handler_windows
+  printing
   screen_retriever_windows
+  share_plus
+  speech_to_text_windows
+  url_launcher_windows
   window_manager
 )
 

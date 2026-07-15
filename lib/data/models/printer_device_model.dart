@@ -5,22 +5,21 @@ part 'printer_device_model.g.dart';
 
 @collection
 class PrinterDeviceModel {
-  // Isar id
   late int id = IdGen.id;
-
   String name;
   String address;
   bool isConnected;
   int port;
-  // NEW: role that identifies which PosPrinterRole the device belongs to
-  @Index()
-  String role; // e.g. 'cashier', 'customer', 'label'
-
+  /// Whether this printer is selected for multi-point printing
+  bool isSelectedForMultiPrint;
+  /// Connection type: "bluetooth", "network", or "usb"
+  String connectionType;
   PrinterDeviceModel({
     required this.name,
     required this.address,
     this.isConnected = false,
     this.port = 9100,
-    this.role = 'cashier', // default for backward compatibility
+    this.isSelectedForMultiPrint = true,
+    this.connectionType = "bluetooth",
   });
 }

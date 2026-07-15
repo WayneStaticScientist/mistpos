@@ -44,13 +44,13 @@ class _NavCategoryListState extends State<NavCategoryList> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Obx(
-      () => _itemsController.categories.isEmpty
-          ? SmartRefresher(
-              controller: _refreshController,
-              header: const WaterDropHeader(),
-              onRefresh: _onRefresh,
-              child: [
+    return SmartRefresher(
+      controller: _refreshController,
+      header: const WaterDropHeader(),
+      onRefresh: _onRefresh,
+      child: Obx(
+        () => _itemsController.categories.isEmpty
+            ? [
                 Iconify(
                   Carbon.no_ticket,
                   size: 60,
@@ -59,17 +59,12 @@ class _NavCategoryListState extends State<NavCategoryList> {
                 18.gapHeight,
                 "No Categories click new to add one".text(),
               ]
-              .column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-              )
-              .center(),
-            )
-          : SmartRefresher(
-              controller: _refreshController,
-              header: const WaterDropHeader(),
-              onRefresh: _onRefresh,
-              child: ListView.builder(
+                .column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                )
+                .center()
+            : ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 itemBuilder: (context, index) {
                   final item = _itemsController.categories[index];
@@ -153,7 +148,7 @@ class _NavCategoryListState extends State<NavCategoryList> {
                 },
                 itemCount: _itemsController.categories.length,
               ),
-            ),
+      ),
     );
   }
 

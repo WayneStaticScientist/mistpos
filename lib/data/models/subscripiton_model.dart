@@ -13,7 +13,7 @@ class SubscriptionModel {
   });
   factory SubscriptionModel.fromJson(Map<String, dynamic> json) {
     return SubscriptionModel(
-      type: json['type'] ?? "free",
+      type: (json['type'] ?? json['plan'] ?? json['name'] ?? "free").toString().toLowerCase(),
       validUntil: json['validUntil'] != null
           ? DateTime.parse(json['validUntil'])
           : null,

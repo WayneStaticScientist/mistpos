@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:iconify_flutter/icons/bx.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:mistpos/core/utils/toast.dart';
 import 'package:mistpos/core/utils/currence_converter.dart';
 import 'package:mistpos/features/auth/controllers/user_controller.dart';
 import 'package:mistpos/features/inventory/controllers/items_controller.dart';
@@ -157,9 +158,9 @@ class LayoutCashout extends StatelessWidget {
                     child: GestureDetector(
                       onTap: () => Get.to(() => ScreenCheckout()),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 18),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               'Checkout',
@@ -193,6 +194,41 @@ class LayoutCashout extends StatelessWidget {
                       ),
                     ),
                   ),
+                  // Quick Clear Cart/Cancel Purchase button
+                  IconButton(
+                    onPressed: () {
+                      Get.dialog(
+                        AlertDialog(
+                          title: const Text("Clear Cart"),
+                          content: const Text("Are you sure you want to cancel this purchase and clear the cart?"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Get.back(),
+                              child: const Text("Keep Items"),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                itemsController.removeAllSelected();
+                                Get.back();
+                                Toaster.showSuccess("Cart cleared");
+                              },
+                              child: const Text(
+                                "Clear Cart",
+                                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    icon: Iconify(
+                      Bx.trash,
+                      size: 20,
+                      color: Colors.redAccent.withAlpha(200),
+                    ),
+                    tooltip: "Cancel / Clear Cart",
+                  ),
+                  const SizedBox(width: 8),
                 ],
               ),
             ),

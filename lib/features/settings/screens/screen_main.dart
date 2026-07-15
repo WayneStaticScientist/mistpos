@@ -3,6 +3,11 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:exui/exui.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/core/themes/app_theme.dart';
+import 'package:mistpos/core/utils/toast.dart';
 import 'package:mistpos/features/admin/navs/nav_admin.dart';
 import 'package:mistpos/features/inventory/navs/nav_items.dart';
 import 'package:mistpos/features/sales/navs/nav_sales.dart';
@@ -18,6 +23,10 @@ import 'package:mistpos/features/settings/screens/screen_subscription.dart';
 import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:mistpos/features/inventory/controllers/items_unsaved_controller.dart';
 import 'package:mistpos/core/widgets/layouts/mist_navigation_drawer.dart';
+import 'package:mistpos/core/widgets/layouts/mist_navigation_sidebar.dart';
+import 'package:mistpos/features/settings/screens/screen_notifications.dart';
+import 'package:mistpos/features/settings/screens/screens_select_customers.dart';
+import 'package:mistpos/features/settings/screens/screen_view_selected_customer.dart';
 
 class ScreenMain extends StatefulWidget {
   const ScreenMain({super.key});
@@ -35,6 +44,7 @@ class _ScreenMainState extends State<ScreenMain> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _itemsInialized = false;
   String _currentNav = 'sales';
+  bool _isSidebarExtended = false;
 
   late final Map<String, Widget> _pages;
 
@@ -98,25 +108,249 @@ class _ScreenMainState extends State<ScreenMain> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final bool isLargeScreen = screenWidth > 800;
+
     return Scaffold(
       key: _scaffoldKey,
-      // Use IndexedStack so state is preserved when switching sections
-      body: IndexedStack(
-        index: _navIndex,
-        children: _pages.values.toList(),
+      appBar: _buildAppBar(isLargeScreen),
+      body: Row(
+        children: [
+          if (isLargeScreen)
+            MistMainNavigationSidebar(
+              selectedNav: _currentNav,
+              isExtended: _isSidebarExtended,
+              user: _userController.user.value,
+              onTap: (value) {
+                setState(() => _currentNav = value);
+              },
+            ),
+          Expanded(
+            child: IndexedStack(
+              index: _navIndex,
+              children: _pages.values.toList(),
+            ),
+          ),
+        ],
       ),
-      drawer: Obx(
-        () => MistMainNavigationView(
-          scaffoldKey: _scaffoldKey,
-          selectedNav: _currentNav,
-          user: _userController.user.value,
-          onTap: (value) {
-            setState(() => _currentNav = value);
-            Navigator.pop(context);
-          },
+      drawer: isLargeScreen
+          ? null
+          : Obx(
+              () => MistMainNavigationView(
+                scaffoldKey: _scaffoldKey,
+                selectedNav: _currentNav,
+                user: _userController.user.value,
+                onTap: (value) {
+                  setState(() => _currentNav = value);
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+    );
+  }
+
+  AppBar? _buildAppBar(bool isLargeScreen) {
+    if (!isLargeScreen) return null;
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Get current title based on active nav
+    String title = "MistPos";
+    if (_currentNav == 'receipts') title = "Receipts";
+    if (_currentNav == 'items') title = "Items";
+    if (_currentNav == 'Expenses') title = "Expenses";
+    if (_currentNav == 'admin') title = "Admin Console";
+
+    return AppBar(
+      elevation: 0,
+      backgroundColor: isDark ? const Color(0xFF0F1117) : Colors.white,
+      foregroundColor: isDark ? Colors.white : Colors.black87,
+      centerTitle: false,
+      leading: IconButton(
+        onPressed: () {
+          setState(() {
+            _isSidebarExtended = !_isSidebarExtended;
+          });
+        },
+        icon: Icon(
+          _isSidebarExtended ? Icons.menu_open_rounded : Icons.menu_rounded,
+          color: isDark ? Colors.white : Colors.black87,
         ),
       ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 22,
+          color: isDark ? Colors.white : Colors.black87,
+        ),
+      ),
+      actions: _buildAppBarActions(),
     );
+  }
+
+  List<Widget> _buildAppBarActions() {
+    final primary = Get.theme.colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    if (_currentNav == 'sales') {
+      return [
+        Obx(
+          () => (_itemsController.syncingItems.value)
+              ? IconButton(
+                  onPressed: () {},
+                  icon: const CircularProgressIndicator(
+                    strokeWidth: 3,
+                  ).sizedBox(height: 16, width: 16),
+                )
+              : const SizedBox.shrink(),
+        ),
+        Obx(
+          () => (_itemsController.syncingItemsFailed.value.isNotEmpty)
+              ? IconButton(
+                  onPressed: () {
+                    Get.defaultDialog(
+                      title: "Sync Errors",
+                      content: Text(
+                        _itemsController.syncingItemsFailed.value,
+                        textAlign: TextAlign.center,
+                      ),
+                      textConfirm: "OK",
+                      onConfirm: () => Get.back(),
+                    );
+                  },
+                  icon: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withAlpha(30),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Iconify(Bx.error, color: Colors.red),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+        Obx(() {
+          bool selected = _itemsController.selectedCustomer.value != null;
+          return IconButton(
+            onPressed: () => selected
+                ? Get.to(() => ScreenViewSelectedCustomer())
+                : Get.to(() => ScreensListCustomers()),
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: selected
+                    ? Colors.green.withAlpha(30)
+                    : AppTheme.surface(context),
+                shape: BoxShape.circle,
+              ),
+              child: Iconify(
+                selected ? Bx.user_check : Bx.user_plus,
+                color: selected ? Colors.green : AppTheme.color(context),
+              ),
+            ),
+          );
+        }),
+        IconButton(
+          onPressed: () {
+            Get.defaultDialog(
+              title: "Force Sync",
+              content: const Text(
+                "Force reload all items",
+                textAlign: TextAlign.center,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Get.back(),
+                  child: const Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Get.back();
+                    _itemsController.clearAndResyncData();
+                    Toaster.showSuccess(
+                      "Cache cleared. Syncing started in background.",
+                    );
+                  },
+                  child: const Text("Sync Now"),
+                ),
+              ],
+            );
+          },
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppTheme.surface(context),
+              shape: BoxShape.circle,
+            ),
+            child: Iconify(Bx.cloud_download, color: AppTheme.color(context)),
+          ),
+        ),
+        IconButton(
+          onPressed: () => Get.to(() => ScreenNotifications()),
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppTheme.surface(context),
+              shape: BoxShape.circle,
+            ),
+            child: Iconify(Bx.bell, color: AppTheme.color(context)),
+          ),
+        ),
+        const SizedBox(width: 16),
+      ];
+    } else if (_currentNav == 'receipts') {
+      return [
+        Obx(
+          () => _itemsController.updatingUsyncedReceits.value
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      height: 16,
+                      width: 16,
+                      child: CircularProgressIndicator(color: primary, strokeWidth: 2.5),
+                    ),
+                    const SizedBox(width: 6),
+                    const Text('Syncing', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    const SizedBox(width: 12),
+                  ],
+                )
+              : const SizedBox.shrink(),
+        ),
+        Obx(
+          () => _itemsController.receitsLoading.value
+              ? Padding(
+                  padding: const EdgeInsets.only(right: 14),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surface(context),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: SizedBox(
+                      height: 16,
+                      width: 16,
+                      child: CircularProgressIndicator(color: primary, strokeWidth: 2),
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+      ];
+    } else if (_currentNav == 'items') {
+      return [
+        Obx(
+          () => _itemsController.deleting.value
+              ? CircularProgressIndicator(color: Colors.white)
+                    .center()
+                    .sizedBox(width: 16, height: 16)
+                    .padding(const EdgeInsets.symmetric(horizontal: 8))
+              : const SizedBox.shrink(),
+        ),
+      ];
+    }
+    return [];
   }
 
   int get _navIndex {

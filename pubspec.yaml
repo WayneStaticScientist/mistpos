@@ -29,8 +29,8 @@ dependencies:
   fl_chart: ^1.1.1
   flutter_barcode_scanner_plus: ^3.0.8
   data_table_2: ^2.7.2
-  pos_universal_printer: ^0.2.10
-  flutter_blue_plus: ^2.0.0
+  flutter_pos_printer_platform_image_3: ^1.2.4
+  flutter_blue_plus: ^2.3.10
   permission_handler: ^12.0.3
   esc_pos_utils_plus: ^2.0.4
   image_picker: ^1.2.1
@@ -60,15 +60,29 @@ dependencies:
   sqflite: ^2.4.2+1
   sqflite_common_ffi: ^2.4.0+3
   speech_to_text: ^7.4.0
+  window_manager: ^0.4.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^6.0.0
+  msix: ^3.16.1
 
+msix_config:
+  display_name: MistPos
+  publisher_display_name: Openchains Technologies
+  publisher: CN=Openchains Technologies, O=Openchains Technologies, L=Harare, S=Harare, C=ZW
+  identity_name: com.openchains.mistpos
+  msix_version: 1.0.0.0
+  logo_path: assets/launcher.png
+  capabilities: internetClient, location, bluetooth
+  install_certificate: true
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
+  windows:
+    generate: true
+    image_path: "assets/launcher.png"
   image_path: "assets/launcher.png"
   adaptive_icon_foreground: "assets/launcher.png"
   adaptive_icon_background: "#193452"
