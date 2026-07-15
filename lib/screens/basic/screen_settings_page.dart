@@ -3,26 +3,25 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:exui/material.dart';
+import 'package:mistpos/core/themes/app_theme.dart';
+import 'package:mistpos/core/utils/sdk_int.dart';
+import 'package:mistpos/core/utils/toast.dart';
+import 'package:mistpos/core/widgets/inputs/input_form.dart';
+import 'package:mistpos/core/widgets/loaders/small_loader.dart';
+import 'package:mistpos/data/models/app_settings_model.dart';
+import 'package:mistpos/features/admin/controllers/admin_controller.dart';
+import 'package:mistpos/features/auth/controllers/user_controller.dart';
+import 'package:mistpos/features/auth/screens/screen_user_profile.dart';
+import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
+import 'package:mistpos/features/settings/screens/modern_layout.dart';
+import 'package:mistpos/features/settings/screens/screen_receit_designer.dart';
+import 'package:mistpos/features/settings/screens_gateways/automated_screen.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/material.dart';
-import 'package:mistpos/utils/toast.dart';
-import 'package:mistpos/utils/sdk_int.dart';
 import 'package:iconify_flutter/icons/bx.dart';
-import 'package:mistpos/themes/app_theme.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:mistpos/widgets/inputs/input_form.dart';
-import 'package:mistpos/models/app_settings_model.dart';
-import 'package:mistpos/screens/basic/modern_layout.dart';
-import 'package:mistpos/controllers/admin_controller.dart';
-import 'package:mistpos/controllers/user_controller.dart';
-import 'package:mistpos/widgets/loaders/small_loader.dart';
-import 'package:mistpos/controllers/inventory_controller.dart';
-import 'package:mistpos/screens/auth/screen_user_profile.dart';
-import 'package:mistpos/screens/gateways/automated_screen.dart';
-import 'package:mistpos/screens/basic/screen_receit_designer.dart';
-import 'package:mistpos/screens/basic/screen_receipt_logo_crop.dart';
 
 class ScreenSettingsPage extends StatefulWidget {
   const ScreenSettingsPage({super.key});
@@ -116,12 +115,12 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
           ),
           24.gapColumn,
           MistMordernLayout(
-            label: "Receits",
+            label: "Receipts",
             children: [
               ListTile(
                 onTap: () => _changeSize(model.printerRecietLength),
                 contentPadding: EdgeInsets.all(0),
-                title: Text("Printer Receit Length"),
+                title: Text("Printer Receipt Length"),
                 subtitle: "${model.printerRecietLength} units".text(
                   style: TextStyle(color: Colors.grey, fontSize: 12),
                 ),
@@ -143,8 +142,8 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                   },
                 ),
                 leading: Iconify(Bx.qr_scan, color: AppTheme.color(context)),
-                title: "Print Receit Qr Code".text(),
-                subtitle: "enable qrcode scanning of receits".text(
+                title: "Print Receipt Qr Code".text(),
+                subtitle: "enable qrcode scanning of receipts".text(
                   style: TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ),
@@ -176,41 +175,6 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                 _user.user.value?.role == 'admin' ||
                     _user.user.value?.role == 'manager',
               ),
-              ListTile(
-                contentPadding: EdgeInsets.all(0),
-                onTap: () {
-                  model.enableCashDrawer = !model.enableCashDrawer;
-                  model.saveToStorage();
-                  setState(() {});
-                },
-                trailing: Switch(
-                  value: model.enableCashDrawer,
-                  onChanged: (c) {
-                    model.enableCashDrawer = c;
-                    model.saveToStorage();
-                    setState(() {});
-                  },
-                ),
-                leading: Iconify(Bx.archive, color: AppTheme.color(context)),
-                title: "Enable Cash Drawer".text(),
-                subtitle: "Kick drawer open when printing receipts".text(
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-              ),
-              ListTile(
-                onTap: () =>
-                    _changeCashDrawerTriggerMode(model.cashDrawerTriggerMode),
-                contentPadding: EdgeInsets.all(0),
-                title: const Text("Cash Drawer Trigger"),
-                subtitle:
-                    (model.cashDrawerTriggerMode == "cash"
-                            ? "Cash Sales Only"
-                            : "All Sales / Receipts")
-                        .text(
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
-                        ),
-                leading: Iconify(Bx.cog, color: AppTheme.color(context)),
-              ).visibleIf(model.enableCashDrawer),
             ],
           ),
           24.gapColumn,
@@ -502,7 +466,7 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
     final model = AppSettingsModel.fromStorage();
     final sizeController = TextEditingController(text: size.toString());
     Get.defaultDialog(
-      title: "Printer Receit Length",
+      title: "Printer Receipt Length",
       content: MistFormInput(
         label: "size",
         controller: sizeController,
@@ -567,44 +531,6 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
     );
   }
 
-  void _changeCashDrawerTriggerMode(String currentMode) {
-    final model = AppSettingsModel.fromStorage();
-    Get.defaultDialog(
-      title: "Cash Drawer Trigger",
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          RadioListTile<String>(
-            title: const Text("All Sales / Receipts"),
-            value: "all",
-            groupValue: currentMode,
-            onChanged: (val) {
-              if (val != null) {
-                model.cashDrawerTriggerMode = val;
-                model.saveToStorage();
-                Get.back();
-                setState(() {});
-              }
-            },
-          ),
-          RadioListTile<String>(
-            title: const Text("Cash Sales Only"),
-            value: "cash",
-            groupValue: currentMode,
-            onChanged: (val) {
-              if (val != null) {
-                model.cashDrawerTriggerMode = val;
-                model.saveToStorage();
-                Get.back();
-                setState(() {});
-              }
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
   void _pickImage() async {
     try {
       final ImagePicker picker = ImagePicker();
@@ -616,21 +542,9 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
       final String fileName = 'receit_logo.jpg';
       final String localPath = p.join(appDocPath, fileName);
       final File localImage = await File(image.path).copy(localPath);
-
-      // Navigate to cropping screen so user can fit the logo to receipt width
-      final result = await Get.to(
-        () => ScreenReceiptLogoCrop(
-          imagePath: localImage.path,
-          receiptCharWidth: model.printerRecietLength,
-        ),
-      );
-
-      if (result == true) {
-        model.receitLogoPath = localImage.path;
-        model.saveToStorage();
-        setState(() {});
-        Toaster.showSuccess("Logo saved and cropped for receipt");
-      }
+      model.receitLogoPath = localImage.path;
+      model.saveToStorage();
+      setState(() {});
     } catch (e) {
       Toaster.showError("Error : $e");
     }

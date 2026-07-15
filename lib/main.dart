@@ -1,43 +1,42 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/instance_manager.dart';
 import 'package:isar_plus/isar_plus.dart';
-import 'package:mistpos/controllers/expenses_controller.dart';
-import 'package:mistpos/models/gateway.dart';
+import 'package:mistpos/features/inventory/controllers/expenses_controller.dart';
+import 'package:mistpos/features/admin/controllers/goals_tasks_controller.dart';
+import 'package:mistpos/data/models/gateway.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:mistpos/models/tax_model.dart';
-import 'package:mistpos/themes/app_theme.dart';
-import 'package:mistpos/models/user_model.dart';
-import 'package:mistpos/models/item_model.dart';
+import 'package:mistpos/data/models/tax_model.dart';
+import 'package:mistpos/core/themes/app_theme.dart';
+import 'package:mistpos/data/models/user_model.dart';
+import 'package:mistpos/data/models/item_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:mistpos/models/shifts_model.dart';
-import 'package:mistpos/models/discount_model.dart';
-import 'package:mistpos/models/item_receit_model.dart';
-import 'package:mistpos/screens/basic/screen_main.dart';
-
-import 'package:mistpos/models/app_settings_model.dart';
-import 'package:mistpos/screens/auth/screen_splash.dart';
-import 'package:mistpos/models/item_unsaved_model.dart';
-import 'package:mistpos/models/notification_model.dart';
-import 'package:mistpos/models/item_modifier_model.dart';
-import 'package:mistpos/controllers/user_controller.dart';
-import 'package:mistpos/models/printer_device_model.dart';
-import 'package:mistpos/models/item_categories_model.dart';
-import 'package:mistpos/controllers/items_controller.dart';
-import 'package:mistpos/controllers/admin_controller.dart';
-import 'package:mistpos/models/item_saved_items_model.dart';
+import 'package:mistpos/data/models/shifts_model.dart';
+import 'package:mistpos/data/models/discount_model.dart';
+import 'package:mistpos/data/models/item_receit_model.dart';
+import 'package:mistpos/features/settings/screens/screen_main.dart';
+import 'package:get/get_navigation/get_navigation.dart';
+import 'package:mistpos/data/models/app_settings_model.dart';
+import 'package:mistpos/features/auth/screens/screen_splash.dart';
+import 'package:mistpos/data/models/item_unsaved_model.dart';
+import 'package:mistpos/data/models/notification_model.dart';
+import 'package:mistpos/data/models/item_modifier_model.dart';
+import 'package:mistpos/data/models/system_log.dart';
+import 'package:mistpos/features/auth/controllers/user_controller.dart';
+import 'package:mistpos/data/models/printer_device_model.dart';
+import 'package:mistpos/data/models/item_categories_model.dart';
+import 'package:mistpos/features/inventory/controllers/items_controller.dart';
+import 'package:mistpos/features/admin/controllers/admin_controller.dart';
+import 'package:mistpos/data/models/item_saved_items_model.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:mistpos/controllers/devices_controller.dart';
-import 'package:mistpos/controllers/firebase_controller.dart';
-import 'package:mistpos/controllers/inventory_controller.dart';
-import 'package:mistpos/controllers/items_unsaved_controller.dart';
-import 'package:mistpos/firebase-messanging/firebase_bg_notification_handler.dart';
-import 'package:window_manager/window_manager.dart';
-import 'package:mistpos/widgets/layouts/custom_title_bar.dart';
-
-import 'dart:ui';
+import 'package:mistpos/features/devices/controllers/devices_controller.dart';
+import 'package:mistpos/core/services/firebase/firebase_controller.dart';
+import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
+import 'package:mistpos/features/inventory/controllers/items_unsaved_controller.dart';
+import 'package:mistpos/core/services/firebase/firebase_bg_notification_handler.dart';
+import 'package:mistpos/core/services/logs/log_service.dart';
 
 class IsarStatic {
   static Isar? isar;
@@ -59,43 +58,18 @@ class IdGen {
   }
 }
 
-void _logError(dynamic error, StackTrace? stackTrace) async {
-  try {
-    final dir = IsarStatic.externalDirectory;
-    if (dir != null) {
-      final logFile = File('${dir.path}/mistpos_crash_log.txt');
-      final now = DateTime.now().toIso8601String();
-      final logMessage = '[$now] ERROR: $error\nSTACK TRACE:\n$stackTrace\n\n==================================================\n\n';
-      await logFile.writeAsString(logMessage, mode: FileMode.append);
-    }
-  } catch (e) {
-    debugPrint('Failed to write crash log: $e');
-  }
-}
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   IsarStatic.externalDirectory = await getApplicationDocumentsDirectory();
-  
-  // Catch Flutter framework errors
-  FlutterError.onError = (FlutterErrorDetails details) {
-    FlutterError.presentError(details);
-    _logError(details.exception, details.stack);
-  };
-
-  // Catch asynchronous errors outside of Flutter framework
-  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
-    _logError(error, stack);
-    return false;
-  };
-
   final path = "${IsarStatic.externalDirectory!.path}/default.isar";
   try {
+    await Firebase.initializeApp();
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  } catch (e) {
+    //
+  }
+  try {
     initIsarDatabase(IsarStatic.externalDirectory!);
-    if (!GetPlatform.isDesktop) {
-      await Firebase.initializeApp();
-      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    }
   } catch (e) {
     if (e.toString().contains('deserialize') ||
         e.toString().contains('Schema')) {
@@ -108,25 +82,16 @@ void main() async {
       initIsarDatabase(IsarStatic.externalDirectory!);
     }
   }
-  await GetStorage.init();
-
-  if (GetPlatform.isDesktop) {
-    await windowManager.ensureInitialized();
-    WindowOptions windowOptions = const WindowOptions(
-      size: Size(1100, 700),
-      center: true,
-      backgroundColor: Colors.transparent,
-      skipTaskbar: false,
-      titleBarStyle: TitleBarStyle.hidden,
-    );
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
+  try {
+      await GetStorage.init();
+  } catch (e) {
+    //
   }
-
   runApp(const MyApp());
   Get.put(ItemsController());
+  
+  // Sync offline logs
+  LogService.syncLogs();
 }
 
 void initIsarDatabase(Directory dir) {
@@ -144,6 +109,7 @@ void initIsarDatabase(Directory dir) {
       ItemCategoryModelSchema,
       PrinterDeviceModelSchema,
       ItemSavedItemsModelSchema,
+      SystemLogSchema,
     ],
     directory: dir.path,
   );
@@ -166,6 +132,7 @@ class MyApp extends StatelessWidget {
         Get.put(ItemsUnsavedController());
         Get.put(FirebaseController());
         Get.put(ExpensesController());
+        Get.put(GoalsTasksController());
       }),
 
       theme: AppTheme.lightTheme,
@@ -175,18 +142,21 @@ class MyApp extends StatelessWidget {
           : model.darkMode
           ? ThemeMode.dark
           : ThemeMode.light,
-      home: DesktopWindowWrapper(
-        child: User.fromStorage() == null
-            ? const ScreenSplash()
-            : const ScreenMain(),
-      ),
+      home: User.fromStorage() == null
+          ? const ScreenSplash()
+          : const ScreenMain(),
     );
   }
 }
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    //
+    return;
+  }
   await GetStorage.init();
   addMessage(message);
 }

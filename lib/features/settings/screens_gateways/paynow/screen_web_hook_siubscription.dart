@@ -1,0 +1,103 @@
+import 'package:get/get.dart';
+import 'package:exui/exui.dart';
+import 'package:flutter/material.dart';
+import 'package:mistpos/core/utils/toast.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:mistpos/core/widgets/loaders/small_loader.dart';
+import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
+
+class ScreenWebHookSubscription extends StatefulWidget {
+  final double amount;
+  final String pollUrl;
+  final String subKey;
+  final String returnUrl;
+  final String webHookUrl;
+  final String paymentInfo;
+  const ScreenWebHookSubscription({
+    super.key,
+    required this.amount,
+    required this.pollUrl,
+    required this.subKey,
+    required this.returnUrl,
+    required this.webHookUrl,
+    required this.paymentInfo,
+  });
+
+  @override
+  State<ScreenWebHookSubscription> createState() =>
+      _ScreenWebHookSubscriptionState();
+}
+
+class _ScreenWebHookSubscriptionState extends State<ScreenWebHookSubscription> {
+  final _inventoryController = Get.find<InventoryController>();
+  late WebViewController _controller;
+  bool _loading = true;
+  @override
+  void initState() {
+    super.initState();
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {},
+          onPageStarted: (String url) {
+            setState(() {
+              _loading = true;
+            });
+          },
+          onPageFinished: (String url) {
+            setState(() {
+              _loading = false;
+            });
+          },
+          onHttpError: (HttpResponseError error) {},
+          onWebResourceError: (WebResourceError error) {},
+          onNavigationRequest: (NavigationRequest request) {
+            if (request.url.toLowerCase().trim().startsWith(
+              widget.returnUrl.toLowerCase().trim(),
+            )) {
+              _processReceit(widget.returnUrl);
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
+        ),
+      );
+    WidgetsBinding.instance.addPostFrameCallback((e) {
+      _controller.loadRequest(Uri.parse(widget.webHookUrl));
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Subscribe")),
+      body: Stack(
+        children: [
+          Positioned.fill(child: WebViewWidget(controller: _controller)),
+          if (_loading)
+            MistLoader1().center().decoratedBox(
+              decoration: BoxDecoration(color: Colors.black.withAlpha(50)),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _processReceit(String id) async {
+    setState(() {
+      _loading = true;
+    });
+    int lastIndex = id.lastIndexOf("/");
+    if (lastIndex < 0 || lastIndex >= id.length) {
+      Toaster.showError("invalid id reported");
+      return;
+    }
+    String replace = id.substring(lastIndex + 1);
+    final respone = await _inventoryController.poll(replace);
+    if (respone) {
+      Get.back();
+      Toaster.showSuccess("payment succesfully");
+    }
+  }
+}
