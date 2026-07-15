@@ -24,8 +24,7 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("FileSelectorWindows"));
   FirebaseCorePluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FirebaseCorePluginCApi"));
-  FlutterBluePlusPluginRegisterWithRegistrar(
-      registry->GetRegistrarForPlugin("FlutterBluePlusPlugin"));
+
   FlutterPosPrinterPlatformPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FlutterPosPrinterPlatformPlugin"));
   IsarPlusFlutterLibsPluginRegisterWithRegistrar(
