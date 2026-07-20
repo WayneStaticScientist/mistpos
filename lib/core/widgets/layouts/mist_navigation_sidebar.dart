@@ -10,6 +10,7 @@ import 'package:mistpos/features/inventory/controllers/inventory_controller.dart
 import 'package:mistpos/features/settings/screens/screen_devices_section.dart';
 import 'package:mistpos/features/settings/screens/screen_settings_page.dart';
 import 'package:mistpos/features/settings/screens/screen_shifts_screen.dart';
+import 'package:mistpos/features/settings/screens_currency/screen_currency.dart';
 import 'package:mistpos/features/settings/screens_gateways/automated_screen.dart';
 
 class MistMainNavigationSidebar extends StatelessWidget {
@@ -29,7 +30,6 @@ class MistMainNavigationSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
 
     final userController = Get.find<UserController>();
     final invController = Get.find<InventoryController>();
@@ -91,7 +91,7 @@ class MistMainNavigationSidebar extends StatelessWidget {
                 if (isAdmin) ...[
                   _SidebarItem(
                     icon: Bx.bar_chart,
-                    label: 'Admin Console',
+                    label: 'Dashboard',
                     isSelected: selectedNav == 'admin',
                     isExtended: isExtended,
                     onTap: () => onTap('admin'),
@@ -109,6 +109,13 @@ class MistMainNavigationSidebar extends StatelessWidget {
                   isSelected: false,
                   isExtended: isExtended,
                   onTap: () => Get.to(() => ScreenShiftsScreen()),
+                ),
+                _SidebarItem(
+                  icon: Bx.money_withdraw,
+                  label: 'Currency',
+                  isSelected: false,
+                  isExtended: isExtended,
+                  onTap: () => Get.to(() => ScreenCurrency()),
                 ),
                 _SidebarItem(
                   icon: Bx.devices,
@@ -165,7 +172,6 @@ class _SidebarItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final itemWidget = Container(
       margin: const EdgeInsets.symmetric(vertical: 4),

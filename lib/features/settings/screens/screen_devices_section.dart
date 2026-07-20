@@ -32,7 +32,7 @@ class _ScreenDevicesSectionState extends State<ScreenDevicesSection> {
                   onTap: () => Get.to(() => ScreenConnectedPrinters()),
                   leading: Iconify(Bx.printer, color: AppTheme.color(context)),
                   title: "Printers".text(),
-                  subtitle: "bluetooth , wifi , ethernet printers".text(
+                  subtitle: "bluetooth , wifi , ethernet , usb printers".text(
                     style: TextStyle(color: Colors.grey, fontSize: 12),
                   ),
                 ),

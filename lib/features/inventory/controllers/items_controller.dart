@@ -1282,6 +1282,7 @@ class ItemsController extends GetxController {
 
       final itemReceitModel = ItemReceitModel(
         hexId: "",
+        currency: user.baseCurrence,
         cashier: "admin",
         label: Labeller.generateRecietNumber(
           fullName: user.fullName,

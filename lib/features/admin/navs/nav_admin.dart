@@ -1,35 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:mistpos/features/settings/screens/screen_dashboard.dart';
 
-import 'package:mistpos/features/admin/controllers/admin_controller.dart';
-
-class NavAdmin extends StatefulWidget {
+class NavAdmin extends StatelessWidget {
   final GlobalKey<ScaffoldState>? scaffoldKey;
   const NavAdmin({super.key, this.scaffoldKey});
 
   @override
-  State<NavAdmin> createState() => _NavAdminState();
-}
-
-class _NavAdminState extends State<NavAdmin> {
-  final _adminController = Get.find<AdminController>();
-  @override
-  void initState() {
-    super.initState();
-    _adminController.getAdminStats();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: MediaQuery.of(context).size.width > 800
-          ? null
-          : AppBar(
-              leading: DrawerButton(
-                onPressed: () => widget.scaffoldKey?.currentState?.openDrawer(),
-              ),
-              centerTitle: true,
-            ),
-    );
+    return const ScreenDashboard();
   }
 }

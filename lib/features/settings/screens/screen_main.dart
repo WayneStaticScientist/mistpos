@@ -159,7 +159,7 @@ class _ScreenMainState extends State<ScreenMain> {
     if (_currentNav == 'receipts') title = "Receipts";
     if (_currentNav == 'items') title = "Items";
     if (_currentNav == 'Expenses') title = "Expenses";
-    if (_currentNav == 'admin') title = "Admin Console";
+    if (_currentNav == 'admin') title = "Dashboard";
 
     return AppBar(
       elevation: 0,
@@ -191,7 +191,6 @@ class _ScreenMainState extends State<ScreenMain> {
 
   List<Widget> _buildAppBarActions() {
     final primary = Get.theme.colorScheme.primary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (_currentNav == 'sales') {
       return [
@@ -309,10 +308,16 @@ class _ScreenMainState extends State<ScreenMain> {
                     SizedBox(
                       height: 16,
                       width: 16,
-                      child: CircularProgressIndicator(color: primary, strokeWidth: 2.5),
+                      child: CircularProgressIndicator(
+                        color: primary,
+                        strokeWidth: 2.5,
+                      ),
                     ),
                     const SizedBox(width: 6),
-                    const Text('Syncing', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    const Text(
+                      'Syncing',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
                     const SizedBox(width: 12),
                   ],
                 )
@@ -331,7 +336,10 @@ class _ScreenMainState extends State<ScreenMain> {
                     child: SizedBox(
                       height: 16,
                       width: 16,
-                      child: CircularProgressIndicator(color: primary, strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        color: primary,
+                        strokeWidth: 2,
+                      ),
                     ),
                   ),
                 )
@@ -410,7 +418,10 @@ class _ScreenMainState extends State<ScreenMain> {
       final hasNotified2Days = storage.read('notified_2_days') ?? false;
       if (!hasNotified2Days) {
         storage.write('notified_2_days', true);
-        storage.write('notified_5_days', true); // Skip 5 days warning if already at 2 days
+        storage.write(
+          'notified_5_days',
+          true,
+        ); // Skip 5 days warning if already at 2 days
         Get.defaultDialog(
           title: "Subscription Expiry Notice",
           middleText:
@@ -464,10 +475,12 @@ class _NewFeaturesWalkthroughDialog extends StatefulWidget {
   const _NewFeaturesWalkthroughDialog({required this.onDismiss});
 
   @override
-  State<_NewFeaturesWalkthroughDialog> createState() => _NewFeaturesWalkthroughDialogState();
+  State<_NewFeaturesWalkthroughDialog> createState() =>
+      _NewFeaturesWalkthroughDialogState();
 }
 
-class _NewFeaturesWalkthroughDialogState extends State<_NewFeaturesWalkthroughDialog> {
+class _NewFeaturesWalkthroughDialogState
+    extends State<_NewFeaturesWalkthroughDialog> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
@@ -479,13 +492,15 @@ class _NewFeaturesWalkthroughDialogState extends State<_NewFeaturesWalkthroughDi
       const _WalkthroughPage(
         imagePath: 'assets/tutorials/ai.png',
         title: 'Meet MistPOS AI!',
-        description: 'Your intelligent operational partner. Ask business questions, plot interactive sales graphs, bulk edit products, predict sales and revenue trends, and get personalized advice to grow your business.',
+        description:
+            'Your intelligent operational partner. Ask business questions, plot interactive sales graphs, bulk edit products, predict sales and revenue trends, and get personalized advice to grow your business.',
         color: Color(0xFF7C3AED),
       ),
       const _WalkthroughPage(
         imagePath: 'assets/tutorials/ticket.png',
         title: 'Support & Suggestions',
-        description: 'Have an issue or want to request a feature? Submit a support ticket directly from the app. Our team will review and respond to you within 24 hours to help keep your operations smooth.',
+        description:
+            'Have an issue or want to request a feature? Submit a support ticket directly from the app. Our team will review and respond to you within 24 hours to help keep your operations smooth.',
         color: Color(0xFF2563EB),
       ),
     ];
@@ -546,11 +561,17 @@ class _NewFeaturesWalkthroughDialogState extends State<_NewFeaturesWalkthroughDi
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 14,
+                      ),
                     ),
                     child: Text(
                       _currentPage == pages.length - 1 ? 'Get Started' : 'Next',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ],
@@ -598,7 +619,11 @@ class _WalkthroughPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Center(
-                      child: Icon(Icons.broken_image_outlined, color: color, size: 48),
+                      child: Icon(
+                        Icons.broken_image_outlined,
+                        color: color,
+                        size: 48,
+                      ),
                     ),
                   );
                 },

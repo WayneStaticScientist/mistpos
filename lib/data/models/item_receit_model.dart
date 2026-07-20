@@ -21,6 +21,8 @@ class ItemReceitModel {
   String hexId = "";
   String? customerId;
   String label;
+  String currency =
+      ''; //currency in which this receipt was based purchased [it just for data analytics as receipts are all converted to base currency]
   List<MiniTax> miniTax;
   List<ItemReceitItem> items = [];
   List<EmbeddedDiscountModel> discounts = [];
@@ -39,11 +41,13 @@ class ItemReceitModel {
     this.label = "",
     this.synced = false,
     this.creditSale = false,
+    this.currency = '',
     this.currentAmountPayed = 0.0,
     this.discounts = const [],
   });
   Map<String, dynamic> toJson() {
     return {
+      'currency': currency,
       "creditSale": creditSale,
       "customerId": customerId,
       "cashier": cashier,
@@ -66,6 +70,7 @@ class ItemReceitModel {
 
   factory ItemReceitModel.fromJson(Map<String, dynamic> data) {
     return ItemReceitModel(
+      currency: data['currency'] ?? '',
       creditSale: data['creditSale'] ?? false,
       customerId: data['customerId'],
       items: data['items'] != null
@@ -84,7 +89,8 @@ class ItemReceitModel {
       hexId: data['_id'],
       total: (data['total'] as num?)?.toDouble() ?? 0.0,
       amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
-      currentAmountPayed: (data['currentAmountPayed'] as num?)?.toDouble() ?? 0.0,
+      currentAmountPayed:
+          (data['currentAmountPayed'] as num?)?.toDouble() ?? 0.0,
       change: (data['change'] as num?)?.toDouble() ?? 0.0,
       cashier: data['cashier'],
       payment: data['payment'],

@@ -9,6 +9,7 @@ import 'package:mistpos/features/devices/controllers/devices_controller.dart';
 import 'package:mistpos/features/auth/controllers/user_controller.dart';
 import 'package:mistpos/data/models/printer_device_model.dart';
 import 'package:mistpos/features/settings/screens/screen_bluetooth_scan.dart';
+import 'package:mistpos/features/settings/screens/screen_usb_scan.dart';
 import 'package:mistpos/core/themes/app_theme.dart';
 import 'package:mistpos/core/widgets/buttons/card_buttons.dart';
 import 'package:mistpos/core/widgets/inputs/input_form.dart';
@@ -132,6 +133,12 @@ class _ScreenConnectedPrintersState extends State<ScreenConnectedPrinters>
           icon: Iconify(Bx.bluetooth, color: AppTheme.color(context)),
           label: "BlueTooth",
           color: Get.theme.colorScheme.secondary.withAlpha(50),
+        ).expanded1,
+        CardButtons(
+          onTap: () => {Get.back(), Get.to(() => ScreenUsbScan())},
+          icon: Icon(Icons.usb, color: AppTheme.color(context), size: 28),
+          label: "USB Printer",
+          color: Get.theme.colorScheme.primary.withAlpha(50),
         ).expanded1,
       ].row().padding(EdgeInsets.only(top: 18)).safeArea(),
       backgroundColor: Get.theme.colorScheme.surface,
