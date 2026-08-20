@@ -90,7 +90,10 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
                   style: const TextStyle(fontSize: 14),
                   decoration: InputDecoration(
                     hintText: 'Search menu...',
-                    hintStyle: TextStyle(color: Colors.grey.withAlpha(150), fontSize: 14),
+                    hintStyle: TextStyle(
+                      color: Colors.grey.withAlpha(150),
+                      fontSize: 14,
+                    ),
                     prefixIcon: Icon(Icons.search, color: primary, size: 20),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(vertical: 14),
@@ -104,220 +107,218 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
               child: ListView(
                 padding: const EdgeInsets.only(bottom: 24, top: 4),
                 children: [
-                  if (_searchQuery.isNotEmpty) ..._buildSearchResults() else ...[
+                  if (_searchQuery.isNotEmpty)
+                    ..._buildSearchResults()
+                  else ...[
                     _SectionLabel('Catalogue'),
-                  Obx(() {
-                    final isAdmin =
-                        _userController.user.value?.role.toLowerCase() ==
-                            'admin' ||
-                        _userController.user.value?.role.toLowerCase() ==
-                            'manager';
-                    return ExpansionTile(
-                      title: 'Catalogue'.text(
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      leading: Iconify(Carbon.shopping_catalog, color: primary),
-                      shape:
-                          const RoundedRectangleBorder(), // Remove borders when expanded
-                      childrenPadding: const EdgeInsets.only(left: 16),
-                      children: [
-                        _DrawerItem(
-                          icon: Bx.store_alt,
-                          label: 'Point of Sale',
-                          onTap: () {
-                            widget.onTap('sales'); // Navigate back to sales
-                          },
-                        ),
-                        _DrawerItem(
-                          icon: Bx.receipt,
-                          label: 'Receipts',
-                          onTap: () {
-                            widget.onTap(
-                              'receipts',
-                            ); // Using IndexedStack value
-                          },
-                        ),
-                        _DrawerItem(
-                          icon: Carbon.shopping_cart,
-                          label: 'Items',
-                          onTap: () {
-                            widget.onTap('items'); // Using IndexedStack value
-                          },
-                        ).visibleIf(isAdmin),
-                        _DrawerItem(
-                          icon: Carbon.category,
-                          label: 'Categories',
-                          onTap: () {
-                            Get.back();
-                            Get.to(() => const NavItems(initialIndex: 1));
-                          },
-                        ).visibleIf(isAdmin),
-                        _DrawerItem(
-                          icon: Carbon.tag,
-                          label: 'Discounts',
-                          onTap: () {
-                            Get.back();
-                            Get.to(() => const NavItems(initialIndex: 3));
-                          },
-                        ).visibleIf(isAdmin),
-                        _DrawerItem(
-                          icon: Carbon.model_builder,
-                          label: 'Add-ons',
-                          onTap: () {
-                            Get.back();
-                            Get.to(() => const NavItems(initialIndex: 2));
-                          },
-                        ).visibleIf(isAdmin),
-                      ],
-                    );
-                  }),
-                  _SectionDivider(),
-                  _SectionLabel('Quick Access'),
-                  _DrawerItem(
-                    icon: Bx.time,
-                    label: 'Shift',
-                    onTap: () {
-                      Get.back();
-                      Get.to(() => ScreenShiftsScreen());
-                    },
-                  ),
-                  _DrawerItem(
-                    icon: Bx.wallet,
-                    label: 'Expenses',
-                    onTap: () {
-                      widget.onTap('Expenses');
-                    },
-                  ),
-                  _DrawerItem(
-                    icon: Bx.devices,
-                    label: 'Devices',
-                    onTap: () {
-                      Get.back();
-                      Get.to(() => ScreenDevicesSection());
-                    },
-                  ),
-                  _DrawerItem(
-                    icon: Bx.bxl_whatsapp,
-                    label: 'WhatsApp Integration',
-                    onTap: () {
-                      if (_invController.company.value == null) return;
-                      Get.back();
-                      Get.to(
-                        () => AutomatedSyncScreen(
-                          company: _invController.company.value!,
-                        ),
+                    Obx(() {
+                      final isAdmin =
+                          _userController.user.value?.role.toLowerCase() ==
+                              'admin' ||
+                          _userController.user.value?.role.toLowerCase() ==
+                              'manager';
+                      return ListView(
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        children: [
+                          _DrawerItem(
+                            icon: Bx.store_alt,
+                            label: 'Point of Sale',
+                            onTap: () {
+                              widget.onTap('sales'); // Navigate back to sales
+                            },
+                          ),
+                          _DrawerItem(
+                            icon: Bx.receipt,
+                            label: 'Receipts',
+                            onTap: () {
+                              widget.onTap(
+                                'receipts',
+                              ); // Using IndexedStack value
+                            },
+                          ),
+                          _DrawerItem(
+                            icon: Carbon.shopping_cart,
+                            label: 'Items',
+                            onTap: () {
+                              widget.onTap('items'); // Using IndexedStack value
+                            },
+                          ).visibleIf(isAdmin),
+                          _DrawerItem(
+                            icon: Carbon.category,
+                            label: 'Categories',
+                            onTap: () {
+                              Get.back();
+                              Get.to(() => const NavItems(initialIndex: 1));
+                            },
+                          ).visibleIf(isAdmin),
+                          _DrawerItem(
+                            icon: Carbon.tag,
+                            label: 'Discounts',
+                            onTap: () {
+                              Get.back();
+                              Get.to(() => const NavItems(initialIndex: 3));
+                            },
+                          ).visibleIf(isAdmin),
+                          _DrawerItem(
+                            icon: Carbon.model_builder,
+                            label: 'Add-ons',
+                            onTap: () {
+                              Get.back();
+                              Get.to(() => const NavItems(initialIndex: 2));
+                            },
+                          ).visibleIf(isAdmin),
+                        ],
                       );
-                    },
-                  ),
-                  _DrawerItem(
-                    icon: Bx.cog,
-                    label: 'Settings',
-                    onTap: () {
-                      Get.back();
-                      Get.to(() => ScreenSettingsPage());
-                    },
-                  ),
+                    }),
+                    _SectionDivider(),
+                    _SectionLabel('Quick Access'),
+                    _DrawerItem(
+                      icon: Bx.time,
+                      label: 'Shift',
+                      onTap: () {
+                        Get.back();
+                        Get.to(() => ScreenShiftsScreen());
+                      },
+                    ),
+                    _DrawerItem(
+                      icon: Bx.wallet,
+                      label: 'Expenses',
+                      onTap: () {
+                        widget.onTap('Expenses');
+                      },
+                    ),
+                    _DrawerItem(
+                      icon: Bx.money,
+                      label: 'Currencies',
+                      onTap: () {
+                        Get.back();
+                        Get.to(() => ScreenCurrency());
+                      },
+                    ),
+                    _DrawerItem(
+                      icon: Bx.devices,
+                      label: 'Devices',
+                      onTap: () {
+                        Get.back();
+                        Get.to(() => ScreenDevicesSection());
+                      },
+                    ),
+                    _DrawerItem(
+                      icon: Bx.bxl_whatsapp,
+                      label: 'WhatsApp Integration',
+                      onTap: () {
+                        if (_invController.company.value == null) return;
+                        Get.back();
+                        Get.to(
+                          () => AutomatedSyncScreen(
+                            company: _invController.company.value!,
+                          ),
+                        );
+                      },
+                    ),
 
-                  Obx(() {
-                    final isAdmin =
-                        _userController.user.value?.role.toLowerCase() ==
-                            'admin' ||
-                        _userController.user.value?.role.toLowerCase() ==
-                            'manager';
-                    if (!isAdmin) return SizedBox.shrink();
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _SectionDivider(),
-                        _SectionLabel('Finance & Reports'),
-                        _DrawerItem(
-                          icon: Bx.calculator,
-                          label: 'Tax',
-                          onTap: () {
-                            Get.back();
-                            Get.to(() => TaxListScreens());
-                          },
-                        ),
-                        _DrawerItem(
-                          icon: Bx.bar_chart,
-                          label: 'Dashboard',
-                          onTap: () {
-                            Get.back();
-                            Get.to(() => ScreenDashboard());
-                          },
-                        ),
-                        _DrawerItem(
-                          icon: Bx.network_chart,
-                          label: 'Online Dashboard',
-                          onTap: () {
-                            Get.back();
-                            Net.lauchDashboardUrl();
-                          },
-                        ),
-                        _SectionDivider(),
-                        _SectionLabel('Billing'),
-                        _DrawerItem(
-                          icon: Bx.analyse,
-                          label: 'Subscriptions',
-                          onTap: () {
-                            Get.back();
-                            Get.to(() => ScreenSubscription());
-                          },
-                        ),
-                        _DrawerItem(
-                          icon: Bx.bxl_visa,
-                          label: 'Payment Gateways',
-                          onTap: () {
-                            Get.back();
-                            Get.to(() => ScreenPaymentGetway());
-                          },
-                        ),
-                        _DrawerItem(
-                          icon: Bx.money,
-                          label: 'Currencies',
-                          onTap: () {
-                            Get.back();
-                            Get.to(() => ScreenCurrency());
-                          },
-                        ),
-                      ],
-                    );
-                  }),
+                    _DrawerItem(
+                      icon: Bx.cog,
+                      label: 'Settings',
+                      onTap: () {
+                        Get.back();
+                        Get.to(() => ScreenSettingsPage());
+                      },
+                    ),
 
-                  _SectionDivider(),
-                  _SectionLabel('Help'),
-                  _DrawerItem(
-                    icon: Carbon.information,
-                    label: 'Sales Help',
-                    onTap: () {
-                      Get.back();
-                      Get.to(() => SalesHelp());
-                    },
-                  ),
-                  _DrawerItem(
-                    icon: Bx.help_circle,
-                    label: 'Help & Support',
-                    onTap: () {
-                      Get.back();
-                      Net.launchSupport();
-                    },
-                  ),
-                  _DrawerItem(
-                    icon: Bx.info_circle,
-                    label: 'About MistPOS',
-                    onTap: () {
-                      Get.back();
-                      Get.to(() => const ScreenAbout());
-                    },
-                  ),
-                  _DrawerItem(
-                    icon: Carbon.activity,
-                    label: 'System Diagnosis',
-                    onTap: () {
-                      Get.back();
-                      Get.to(() => const ScreenDiagnosis());
-                    },
-                  ),
+                    Obx(() {
+                      final isAdmin =
+                          _userController.user.value?.role.toLowerCase() ==
+                              'admin' ||
+                          _userController.user.value?.role.toLowerCase() ==
+                              'manager';
+                      if (!isAdmin) return SizedBox.shrink();
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _SectionDivider(),
+                          _SectionLabel('Finance & Reports'),
+                          _DrawerItem(
+                            icon: Bx.calculator,
+                            label: 'Tax',
+                            onTap: () {
+                              Get.back();
+                              Get.to(() => TaxListScreens());
+                            },
+                          ),
+                          _DrawerItem(
+                            icon: Bx.bar_chart,
+                            label: 'Dashboard',
+                            onTap: () {
+                              Get.back();
+                              Get.to(() => ScreenDashboard());
+                            },
+                          ),
+                          _DrawerItem(
+                            icon: Bx.network_chart,
+                            label: 'Online Dashboard',
+                            onTap: () {
+                              Get.back();
+                              Net.lauchDashboardUrl();
+                            },
+                          ),
+                          _SectionDivider(),
+                          _SectionLabel('Billing'),
+                          _DrawerItem(
+                            icon: Bx.analyse,
+                            label: 'Subscriptions',
+                            onTap: () {
+                              Get.back();
+                              Get.to(() => ScreenSubscription());
+                            },
+                          ),
+                          _DrawerItem(
+                            icon: Bx.bxl_visa,
+                            label: 'Payment Gateways',
+                            onTap: () {
+                              Get.back();
+                              Get.to(() => ScreenPaymentGetway());
+                            },
+                          ),
+                        ],
+                      );
+                    }),
+
+                    _SectionDivider(),
+                    _SectionLabel('Help'),
+                    _DrawerItem(
+                      icon: Carbon.information,
+                      label: 'Sales Help',
+                      onTap: () {
+                        Get.back();
+                        Get.to(() => SalesHelp());
+                      },
+                    ),
+                    _DrawerItem(
+                      icon: Bx.help_circle,
+                      label: 'Help & Support',
+                      onTap: () {
+                        Get.back();
+                        Net.launchSupport();
+                      },
+                    ),
+                    _DrawerItem(
+                      icon: Bx.info_circle,
+                      label: 'About MistPOS',
+                      onTap: () {
+                        Get.back();
+                        Get.to(() => const ScreenAbout());
+                      },
+                    ),
+                    _DrawerItem(
+                      icon: Carbon.activity,
+                      label: 'System Diagnosis',
+                      onTap: () {
+                        Get.back();
+                        Get.to(() => const ScreenDiagnosis());
+                      },
+                    ),
                   ],
                 ],
               ),
@@ -329,29 +330,191 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
   }
 
   List<Widget> _buildSearchResults() {
-    final isAdmin = _userController.user.value?.role.toLowerCase() == 'admin' || _userController.user.value?.role.toLowerCase() == 'manager';
+    final isAdmin =
+        _userController.user.value?.role.toLowerCase() == 'admin' ||
+        _userController.user.value?.role.toLowerCase() == 'manager';
     final List<Map<String, dynamic>> allItems = [
-      {'icon': Bx.store_alt, 'label': 'Point of Sale', 'onTap': () => widget.onTap('sales'), 'admin': false},
-      {'icon': Bx.receipt, 'label': 'Receipts', 'onTap': () => widget.onTap('receipts'), 'admin': false},
-      {'icon': Carbon.shopping_cart, 'label': 'Items', 'onTap': () => widget.onTap('items'), 'admin': true},
-      {'icon': Carbon.category, 'label': 'Categories', 'onTap': () { Get.back(); Get.to(() => const NavItems(initialIndex: 1)); }, 'admin': true},
-      {'icon': Carbon.tag, 'label': 'Discounts', 'onTap': () { Get.back(); Get.to(() => const NavItems(initialIndex: 3)); }, 'admin': true},
-      {'icon': Carbon.model_builder, 'label': 'Add-ons', 'onTap': () { Get.back(); Get.to(() => const NavItems(initialIndex: 2)); }, 'admin': true},
-      {'icon': Bx.time, 'label': 'Shift', 'onTap': () { Get.back(); Get.to(() => ScreenShiftsScreen()); }, 'admin': false},
-      {'icon': Bx.wallet, 'label': 'Expenses', 'onTap': () => widget.onTap('Expenses'), 'admin': false},
-      {'icon': Bx.devices, 'label': 'Devices', 'onTap': () { Get.back(); Get.to(() => ScreenDevicesSection()); }, 'admin': false},
-      {'icon': Bx.bxl_whatsapp, 'label': 'WhatsApp Integration', 'onTap': () { if (_invController.company.value != null) { Get.back(); Get.to(() => AutomatedSyncScreen(company: _invController.company.value!)); } }, 'admin': false},
-      {'icon': Bx.cog, 'label': 'Settings', 'onTap': () { Get.back(); Get.to(() => ScreenSettingsPage()); }, 'admin': false},
-      {'icon': Bx.calculator, 'label': 'Tax', 'onTap': () { Get.back(); Get.to(() => TaxListScreens()); }, 'admin': true},
-      {'icon': Bx.bar_chart, 'label': 'Dashboard', 'onTap': () { Get.back(); Get.to(() => ScreenDashboard()); }, 'admin': true},
-      {'icon': Bx.network_chart, 'label': 'Online Dashboard', 'onTap': () { Get.back(); Net.lauchDashboardUrl(); }, 'admin': true},
-      {'icon': Bx.analyse, 'label': 'Subscriptions', 'onTap': () { Get.back(); Get.to(() => ScreenSubscription()); }, 'admin': true},
-      {'icon': Bx.bxl_visa, 'label': 'Payment Gateways', 'onTap': () { Get.back(); Get.to(() => ScreenPaymentGetway()); }, 'admin': true},
-      {'icon': Bx.money, 'label': 'Currencies', 'onTap': () { Get.back(); Get.to(() => ScreenCurrency()); }, 'admin': true},
-      {'icon': Carbon.information, 'label': 'Sales Help', 'onTap': () { Get.back(); Get.to(() => SalesHelp()); }, 'admin': false},
-      {'icon': Bx.help_circle, 'label': 'Help & Support', 'onTap': () { Get.back(); Net.launchSupport(); }, 'admin': false},
-      {'icon': Bx.info_circle, 'label': 'About MistPOS', 'onTap': () { Get.back(); Get.to(() => const ScreenAbout()); }, 'admin': false},
-      {'icon': Carbon.activity, 'label': 'System Diagnosis', 'onTap': () { Get.back(); Get.to(() => const ScreenDiagnosis()); }, 'admin': false},
+      {
+        'icon': Bx.store_alt,
+        'label': 'Point of Sale',
+        'onTap': () => widget.onTap('sales'),
+        'admin': false,
+      },
+      {
+        'icon': Bx.receipt,
+        'label': 'Receipts',
+        'onTap': () => widget.onTap('receipts'),
+        'admin': false,
+      },
+      {
+        'icon': Carbon.shopping_cart,
+        'label': 'Items',
+        'onTap': () => widget.onTap('items'),
+        'admin': true,
+      },
+      {
+        'icon': Carbon.category,
+        'label': 'Categories',
+        'onTap': () {
+          Get.back();
+          Get.to(() => const NavItems(initialIndex: 1));
+        },
+        'admin': true,
+      },
+      {
+        'icon': Carbon.tag,
+        'label': 'Discounts',
+        'onTap': () {
+          Get.back();
+          Get.to(() => const NavItems(initialIndex: 3));
+        },
+        'admin': true,
+      },
+      {
+        'icon': Carbon.model_builder,
+        'label': 'Add-ons',
+        'onTap': () {
+          Get.back();
+          Get.to(() => const NavItems(initialIndex: 2));
+        },
+        'admin': true,
+      },
+      {
+        'icon': Bx.time,
+        'label': 'Shift',
+        'onTap': () {
+          Get.back();
+          Get.to(() => ScreenShiftsScreen());
+        },
+        'admin': false,
+      },
+      {
+        'icon': Bx.wallet,
+        'label': 'Expenses',
+        'onTap': () => widget.onTap('Expenses'),
+        'admin': false,
+      },
+      {
+        'icon': Bx.devices,
+        'label': 'Devices',
+        'onTap': () {
+          Get.back();
+          Get.to(() => ScreenDevicesSection());
+        },
+        'admin': false,
+      },
+      {
+        'icon': Bx.bxl_whatsapp,
+        'label': 'WhatsApp Integration',
+        'onTap': () {
+          if (_invController.company.value != null) {
+            Get.back();
+            Get.to(
+              () => AutomatedSyncScreen(company: _invController.company.value!),
+            );
+          }
+        },
+        'admin': false,
+      },
+      {
+        'icon': Bx.cog,
+        'label': 'Settings',
+        'onTap': () {
+          Get.back();
+          Get.to(() => ScreenSettingsPage());
+        },
+        'admin': false,
+      },
+      {
+        'icon': Bx.calculator,
+        'label': 'Tax',
+        'onTap': () {
+          Get.back();
+          Get.to(() => TaxListScreens());
+        },
+        'admin': true,
+      },
+      {
+        'icon': Bx.bar_chart,
+        'label': 'Dashboard',
+        'onTap': () {
+          Get.back();
+          Get.to(() => ScreenDashboard());
+        },
+        'admin': true,
+      },
+      {
+        'icon': Bx.network_chart,
+        'label': 'Online Dashboard',
+        'onTap': () {
+          Get.back();
+          Net.lauchDashboardUrl();
+        },
+        'admin': true,
+      },
+      {
+        'icon': Bx.analyse,
+        'label': 'Subscriptions',
+        'onTap': () {
+          Get.back();
+          Get.to(() => ScreenSubscription());
+        },
+        'admin': true,
+      },
+      {
+        'icon': Bx.bxl_visa,
+        'label': 'Payment Gateways',
+        'onTap': () {
+          Get.back();
+          Get.to(() => ScreenPaymentGetway());
+        },
+        'admin': true,
+      },
+      {
+        'icon': Bx.money,
+        'label': 'Currencies',
+        'onTap': () {
+          Get.back();
+          Get.to(() => ScreenCurrency());
+        },
+        'admin': true,
+      },
+      {
+        'icon': Carbon.information,
+        'label': 'Sales Help',
+        'onTap': () {
+          Get.back();
+          Get.to(() => SalesHelp());
+        },
+        'admin': false,
+      },
+      {
+        'icon': Bx.help_circle,
+        'label': 'Help & Support',
+        'onTap': () {
+          Get.back();
+          Net.launchSupport();
+        },
+        'admin': false,
+      },
+      {
+        'icon': Bx.info_circle,
+        'label': 'About MistPOS',
+        'onTap': () {
+          Get.back();
+          Get.to(() => const ScreenAbout());
+        },
+        'admin': false,
+      },
+      {
+        'icon': Carbon.activity,
+        'label': 'System Diagnosis',
+        'onTap': () {
+          Get.back();
+          Get.to(() => const ScreenDiagnosis());
+        },
+        'admin': false,
+      },
     ];
 
     final filtered = allItems.where((item) {
@@ -363,16 +526,25 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
       return [
         const Padding(
           padding: EdgeInsets.all(24.0),
-          child: Center(child: Text("No navigation items found.", style: TextStyle(color: Colors.grey))),
-        )
+          child: Center(
+            child: Text(
+              "No navigation items found.",
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+        ),
       ];
     }
 
-    return filtered.map((item) => _DrawerItem(
-      icon: item['icon'],
-      label: item['label'],
-      onTap: item['onTap'],
-    )).toList();
+    return filtered
+        .map(
+          (item) => _DrawerItem(
+            icon: item['icon'],
+            label: item['label'],
+            onTap: item['onTap'],
+          ),
+        )
+        .toList();
   }
 }
 
@@ -556,7 +728,9 @@ class _DrawerHeader extends StatelessWidget {
                     SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        company!.subscriptionType.validUntil!.isAfter(DateTime.now())
+                        company!.subscriptionType.validUntil!.isAfter(
+                              DateTime.now(),
+                            )
                             ? 'Expires: ${DateFormat('yyyy-MM-dd HH:mm').format(company.subscriptionType.validUntil!.toLocal())}\n(${MistDateUtils.getDifferenxeInApproximate(company.subscriptionType.validUntil!)})'
                             : 'Expired: ${DateFormat('yyyy-MM-dd HH:mm').format(company.subscriptionType.validUntil!.toLocal())}',
                         style: TextStyle(

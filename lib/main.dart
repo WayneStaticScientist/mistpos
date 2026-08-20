@@ -63,6 +63,7 @@ void main() async {
   IsarStatic.externalDirectory = await getApplicationDocumentsDirectory();
   final path = "${IsarStatic.externalDirectory!.path}/default.isar";
   try {
+    
     await Firebase.initializeApp();
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   } catch (e) {

@@ -1,7 +1,7 @@
 class DialySaleModel {
   String productName; // Rename the product name field
   String productId; // Include the product ID
-  int totalCount;
+  double totalCount;
   double totalSales; // Round sales to 2 decimal places
   double totalCosts;
   DialySaleModel({
@@ -25,7 +25,7 @@ class DialySaleModel {
     return DialySaleModel(
       productName: json['productName'] ?? '',
       productId: json['productId'] ?? '',
-      totalCount: json['totalCount'] ?? 0,
+      totalCount: (json['totalCount'] as num?)?.toDouble() ?? 0.0,
       totalSales: (json['totalSales'] as num?)?.toDouble() ?? 0.0,
       totalCosts: (json['totalCosts'] as num?)?.toDouble() ?? 0.0,
     );

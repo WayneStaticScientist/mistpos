@@ -19,6 +19,7 @@ class ItemReceitModel {
   bool synced = false;
   DateTime createdAt;
   String hexId = "";
+  String currency = "";
   String? customerId;
   String label;
   List<MiniTax> miniTax;
@@ -36,6 +37,8 @@ class ItemReceitModel {
     this.miniTax = const [],
     this.tax = 0,
     this.customerId,
+    this.currency =
+        "", //currence is just way to record on which currency did the receipt was sold , althought the value will be converted to base USD currency in background , this helps us to keep track
     this.label = "",
     this.synced = false,
     this.creditSale = false,
@@ -44,6 +47,7 @@ class ItemReceitModel {
   });
   Map<String, dynamic> toJson() {
     return {
+      "currency": currency,
       "creditSale": creditSale,
       "customerId": customerId,
       "cashier": cashier,
@@ -66,6 +70,7 @@ class ItemReceitModel {
 
   factory ItemReceitModel.fromJson(Map<String, dynamic> data) {
     return ItemReceitModel(
+      currency: data['currency'] ?? '',
       creditSale: data['creditSale'] ?? false,
       customerId: data['customerId'],
       items: data['items'] != null
@@ -84,7 +89,8 @@ class ItemReceitModel {
       hexId: data['_id'],
       total: (data['total'] as num?)?.toDouble() ?? 0.0,
       amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
-      currentAmountPayed: (data['currentAmountPayed'] as num?)?.toDouble() ?? 0.0,
+      currentAmountPayed:
+          (data['currentAmountPayed'] as num?)?.toDouble() ?? 0.0,
       change: (data['change'] as num?)?.toDouble() ?? 0.0,
       cashier: data['cashier'],
       payment: data['payment'],
