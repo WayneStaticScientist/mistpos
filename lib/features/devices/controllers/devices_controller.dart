@@ -119,6 +119,17 @@ class DevicesController extends GetxController {
       );
       return false;
     }
+    await isar.write((isar) async {
+      isar.printerDeviceModels.put(
+        PrinterDeviceModel(
+          name: name,
+          address: macAddress,
+          isConnected: true,
+          port: 0,
+        ),
+      );
+    });
+    getConnectedDevices();
     return true;
   }
 
@@ -167,12 +178,12 @@ class DevicesController extends GetxController {
     return true;
   }
 
-  static void printReceitToBackround(
+  static Future<void> printReceitToBackround(
     ItemReceitModel itemReceitModel,
     User user,
     CustomerModel? customer,
     List<TaxModel> salesTaxes,
-  ) {
+  ) async {
     final printer = PosUniversalPrinter.instance;
     final b = EscPosBuilder();
     final model = AppSettingsModel.fromStorage();
@@ -300,7 +311,64 @@ class DevicesController extends GetxController {
     // --- SEPARATOR and ITEM HEADER (Manually Aligned) ---
 
     b.cut();
-    printer.printEscPos(PosPrinterRole.cashier, b);
+
+    try {
+      final isar = IsarStatic.getInstance();
+      if (isar != null) {
+        if (model.printToMultiplePrinters) {
+          final devices = isar.printerDeviceModels.where().findAll();
+          for (final device in devices) {
+            try {
+              final role = PosRoleHelper.fromString(device.role);
+              await printer.registerDevice(
+                role,
+                PrinterDevice(
+                  id: device.address,
+                  name: device.name,
+                  type: device.port == 0
+                      ? PrinterType.bluetooth
+                      : PrinterType.tcp,
+                  address: device.address,
+                  port: device.port,
+                ),
+              );
+              await Future.delayed(const Duration(milliseconds: 500));
+              printer.printEscPos(role, b);
+            } catch (e) {
+              print("Failed to print to multiple printer: $e");
+            }
+          }
+        } else {
+          final device = isar.printerDeviceModels
+              .where()
+              .sortByIsConnectedDesc()
+              .findFirst();
+          if (device != null) {
+            final role = PosRoleHelper.fromString(device.role);
+            await printer.registerDevice(
+              role,
+              PrinterDevice(
+                id: device.address,
+                name: device.name,
+                type: device.port == 0
+                    ? PrinterType.bluetooth
+                    : PrinterType.tcp,
+                address: device.address,
+                port: device.port,
+              ),
+            );
+            await Future.delayed(const Duration(milliseconds: 500));
+            printer.printEscPos(role, b);
+          } else {
+            printer.printEscPos(PosPrinterRole.cashier, b);
+          }
+        }
+      } else {
+        printer.printEscPos(PosPrinterRole.cashier, b);
+      }
+    } catch (e) {
+      print("Failed to print: $e");
+    }
   }
 
   void connectLastDevice() async {
@@ -344,7 +412,7 @@ class DevicesController extends GetxController {
     }
   }
 
-  static void printShift(ShiftsModel shift, User user) {
+  static Future<void> printShift(ShiftsModel shift, User user) async {
     final printer = PosUniversalPrinter.instance;
     final b = EscPosBuilder();
     final model = AppSettingsModel.fromStorage();
@@ -528,7 +596,63 @@ class DevicesController extends GetxController {
     }
     b.feed(1);
     b.cut();
-    printer.printEscPos(PosPrinterRole.cashier, b);
+    try {
+      final isar = IsarStatic.getInstance();
+      if (isar != null) {
+        if (model.printToMultiplePrinters) {
+          final devices = isar.printerDeviceModels.where().findAll();
+          for (final device in devices) {
+            try {
+              final role = PosRoleHelper.fromString(device.role);
+              await printer.registerDevice(
+                role,
+                PrinterDevice(
+                  id: device.address,
+                  name: device.name,
+                  type: device.port == 0
+                      ? PrinterType.bluetooth
+                      : PrinterType.tcp,
+                  address: device.address,
+                  port: device.port,
+                ),
+              );
+              await Future.delayed(const Duration(milliseconds: 500));
+              printer.printEscPos(role, b);
+            } catch (e) {
+              print("Failed to print shift to multiple printer: $e");
+            }
+          }
+        } else {
+          final device = isar.printerDeviceModels
+              .where()
+              .sortByIsConnectedDesc()
+              .findFirst();
+          if (device != null) {
+            final role = PosRoleHelper.fromString(device.role);
+            await printer.registerDevice(
+              role,
+              PrinterDevice(
+                id: device.address,
+                name: device.name,
+                type: device.port == 0
+                    ? PrinterType.bluetooth
+                    : PrinterType.tcp,
+                address: device.address,
+                port: device.port,
+              ),
+            );
+            await Future.delayed(const Duration(milliseconds: 500));
+            printer.printEscPos(role, b);
+          } else {
+            printer.printEscPos(PosPrinterRole.cashier, b);
+          }
+        }
+      } else {
+        printer.printEscPos(PosPrinterRole.cashier, b);
+      }
+    } catch (e) {
+      print("Failed to print shift: $e");
+    }
   }
 
   static String sanitizeInput(
