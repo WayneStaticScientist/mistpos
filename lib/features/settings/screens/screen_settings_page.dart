@@ -418,6 +418,40 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                         () => _adminController.companyLoading.value
                             ? CircularProgressIndicator()
                             : Switch(
+                                value: _invController.company.value?.zimraQrFiscilization ?? false,
+                                onChanged: (c) {
+                                  _updateCompanyModel(
+                                    _invController.company.value?.showSalesCount ?? false,
+                                    enableCreditSale: _invController.company.value?.enableCreditSale ?? true,
+                                    autoApproveAllExpenses: _invController.company.value?.autoApproveAllExpenses ?? false,
+                                    shiftBasedSales: _invController.company.value?.shiftBasedSales ?? false,
+                                    qrFiscilization: c,
+                                  );
+                                },
+                              ),
+                      ),
+                      onTap: () => _updateCompanyModel(
+                        _invController.company.value?.showSalesCount ?? false,
+                        enableCreditSale: _invController.company.value?.enableCreditSale ?? true,
+                        autoApproveAllExpenses: _invController.company.value?.autoApproveAllExpenses ?? false,
+                        shiftBasedSales: _invController.company.value?.shiftBasedSales ?? false,
+                        qrFiscilization: !(_invController.company.value?.zimraQrFiscilization ?? false),
+                      ),
+                      contentPadding: EdgeInsets.all(0),
+                      title: "QR Fiscalization".text(),
+                      subtitle: "Show QR code on receipt printing for ZIMRA fiscalization check".text(
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
+                      leading: Iconify(
+                        Bx.qr_scan,
+                        color: AppTheme.color(context),
+                      ),
+                    ),
+                    ListTile(
+                      trailing: Obx(
+                        () => _adminController.companyLoading.value
+                            ? CircularProgressIndicator()
+                            : Switch(
                                 value:
                                     _invController
                                         .company
@@ -707,6 +741,7 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
     required bool enableCreditSale,
     required bool autoApproveAllExpenses,
     required bool shiftBasedSales,
+    bool? qrFiscilization,
   }) async {
     final company = _invController.company.value;
     if (company == null) {
@@ -717,6 +752,9 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
     company.enableCreditSale = enableCreditSale;
     company.autoApproveAllExpenses = autoApproveAllExpenses;
     company.shiftBasedSales = shiftBasedSales;
+    if (qrFiscilization != null) {
+      company.zimraQrFiscilization = qrFiscilization;
+    }
     final response = await _adminController.updateCompany(
       company.toJson(),
       company.hexId,

@@ -15,6 +15,7 @@ import 'package:mistpos/core/widgets/inputs/search_field.dart';
 import 'package:mistpos/features/auth/controllers/user_controller.dart';
 import 'package:mistpos/features/inventory/controllers/items_controller.dart';
 import 'package:mistpos/features/settings/screens/screen_receit_view.dart';
+import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 
 class ReceitsLayoutView extends StatefulWidget {
   const ReceitsLayoutView({super.key});
@@ -29,6 +30,7 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
   final _searchController = TextEditingController();
   final _userController = Get.find<UserController>();
   final _itemsListController = Get.find<ItemsController>();
+  final _inventoryController = Get.find<InventoryController>();
 
   String _searchKey = "";
   String _filterStatus = "All"; // "All" or "Credit"
@@ -237,15 +239,18 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
   }
 
   Widget _buildItem(ItemReceitModel receit) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.grey.withAlpha((255 * 0.3).toInt()), // 30% opacity
+        color: AppTheme.surface(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: receit.creditSale
-              ? Colors.red.withAlpha(30)
-              : Colors.transparent,
+              ? Colors.redAccent.withAlpha(50)
+              : isDark
+                  ? Colors.white.withAlpha(10)
+                  : Colors.grey.withAlpha(25),
           width: 1,
         ),
       ),
@@ -330,6 +335,49 @@ class _ReceitsLayoutViewState extends State<ReceitsLayoutView> {
                             ),
                           ),
                           const SizedBox(width: 8),
+                          if (_inventoryController.company.value?.zimraCertificate != null) ...[
+                            if (receit.fiscalized)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.tealAccent.withAlpha(30),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Text(
+                                  "FISCALIZED",
+                                  style: TextStyle(
+                                    color: Colors.tealAccent,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                              )
+                            else
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.redAccent.withAlpha(30),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Text(
+                                  "UNFISCALIZED",
+                                  style: TextStyle(
+                                    color: Colors.redAccent,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(width: 6),
+                          ],
                           if (receit.creditSale)
                             Container(
                               padding: const EdgeInsets.symmetric(

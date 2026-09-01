@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Precision;
 import 'package:mistpos/main.dart';
 import 'package:isar_plus/isar_plus.dart';
 import 'package:mistpos/core/utils/toast.dart';
@@ -26,6 +26,7 @@ import 'package:mistpos/features/devices/controllers/devices_controller.dart';
 import 'package:mistpos/data/models/embedded_discount_model.dart';
 import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:mistpos/features/auth/controllers/user_controller.dart';
+import 'package:mistpos/core/utils/extensions.dart';
 
 class ItemsController extends GetxController {
   RxDouble totalPrice = RxDouble(0);
@@ -533,32 +534,34 @@ class ItemsController extends GetxController {
             ? price * (1 - discount / 100)
             : price - discount;
       }
-      return prev + price;
+      return (prev + price).toPrecision;
     });
     final totalDiscounts = selectedDiscounts.fold(0.0, (prev, data) {
-      return prev +
-          (!data.percentage
-              ? data.value
-              : totalPrice.value * (data.value / 100));
+      return (prev +
+              (!data.percentage
+                  ? data.value
+                  : totalPrice.value * (data.value / 100)))
+          .toPrecision;
     });
-    totalPrice.value -= totalDiscounts;
+    totalPrice.value = (totalPrice.value - totalDiscounts).toPrecision;
     final totalTax = salesTaxes.fold(0.0, (prev, data) {
       if (data.activated == false) {
         return prev;
       }
       if (data.selectedIds.isNotEmpty) {
         final totalPriceAdded = checkOutItems.fold(0.0, (prv, cv) {
+          final count = cv['count'] as num? ?? 0;
           final model = cv['item'] as ItemModel;
           if (data.selectedIds.contains(model.hexId)) {
-            return prv + (model.price * data.value) / 100;
+            return (prv + (model.price * count * data.value) / 100).toPrecision;
           }
           return prv;
         });
-        return prev + totalPriceAdded;
+        return (prev + totalPriceAdded).toPrecision;
       }
-      return prev + (totalPrice.value * data.value) / 100;
+      return (prev + (totalPrice.value * data.value) / 100).toPrecision;
     });
-    totalPrice.value += totalTax;
+    totalPrice.value = (totalPrice.value + totalTax).toPrecision;
   }
 
   ItemSavedModel _getModel(Map<String, dynamic> e) {
@@ -1308,6 +1311,29 @@ class ItemsController extends GetxController {
         customerId: selectedCustomer.value?.hexId,
         items: checkOutItems.map((e) {
           final model = e['item'] as ItemModel;
+          final count = (e['count'] as num?)?.toDouble() ?? 0.0;
+
+          double itemTaxAmount = 0.0;
+          double itemTaxPercentage = 0.0;
+          String? itemTaxName;
+
+          for (final tax in salesTaxes) {
+            if (tax.activated == false) continue;
+            if (tax.selectedIds.isNotEmpty &&
+                !tax.selectedIds.contains(model.hexId))
+              continue;
+
+            itemTaxPercentage = tax.value;
+            itemTaxName = tax.label;
+            double priceBase =
+                (model.wholesaleActivated && count >= model.miniItems)
+                ? model.wholesalePrice
+                : (model.price + (e['qouted'] as double? ?? 0.0));
+            itemTaxAmount =
+                (itemTaxAmount + (priceBase * count * tax.value) / 100)
+                    .toPrecision;
+          }
+
           final receit = ItemReceitItem()
             ..name = model.name
             ..baseId = model.id
@@ -1323,10 +1349,13 @@ class ItemsController extends GetxController {
                 : (model.price + e['qouted'] as double? ?? 0.0)
             ..discount = (e['discount'] as num?)?.toDouble() ?? 0.0
             ..percentageDiscount = e['percentageDiscount'] as bool? ?? true
-            ..count = (e['count'] as num?)?.toDouble() ?? 0;
+            ..count = count
+            ..taxAmount = itemTaxAmount
+            ..taxPercentage = itemTaxPercentage
+            ..taxName = itemTaxName;
           return receit;
         }).toList(),
-        change: payedAmount - totalPrice.value,
+        change: (payedAmount - totalPrice.value).toPrecision,
         createdAt: DateTime.now(),
         total: totalPrice.value,
       );

@@ -1,10 +1,9 @@
 import 'package:get/get.dart';
-import 'package:exui/exui.dart';
-import 'package:mistpos/main.dart';
-import 'package:isar_plus/isar_plus.dart';
 import 'package:mistpos/core/services/api/network_wrapper.dart';
 import 'package:mistpos/data/models/customer_model.dart';
+import 'package:mistpos/data/models/company_model.dart';
 import 'package:mistpos/features/inventory/controllers/items_controller.dart';
+import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/features/settings/screens/screen_credit_payment.dart';
 import 'package:mistpos/core/utils/toast.dart';
@@ -21,7 +20,9 @@ import 'package:mistpos/features/admin/controllers/admin_controller.dart';
 import 'package:mistpos/core/utils/pdfdocuments/pdf_receit.dart';
 import 'package:mistpos/features/devices/controllers/devices_controller.dart';
 import 'package:mistpos/features/settings/screens/screen_refund_cart.dart';
+import 'package:mistpos/core/utils/zimra_helper.dart';
 import 'package:mistpos/core/utils/date_utils.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class ScreenReceitView extends StatefulWidget {
   final ItemReceitModel receitModel;
@@ -34,29 +35,36 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
   final _userController = Get.find<UserController>();
 
   CustomerModel? _customer;
+  CompanyModel? _company;
   bool _isLoadingCustomer = false;
+  bool _isFiscalizing = false;
 
   @override
   void initState() {
     super.initState();
     _fetchCustomer();
+    try {
+      _company = Get.find<InventoryController>().company.value;
+    } catch (_) {}
   }
 
   Future<void> _fetchCustomer() async {
     if (widget.receitModel.customerId == null) return;
-    
+
     if (Get.isRegistered<ItemsController>()) {
       try {
-        _customer = Get.find<ItemsController>()
-            .customers
-            .firstWhere((c) => c.hexId == widget.receitModel.customerId);
+        _customer = Get.find<ItemsController>().customers.firstWhere(
+          (c) => c.hexId == widget.receitModel.customerId,
+        );
       } catch (_) {}
     }
-    
+
     if (_customer == null) {
       setState(() => _isLoadingCustomer = true);
       try {
-        final response = await Net.get("/cashier/customer/${widget.receitModel.customerId}");
+        final response = await Net.get(
+          "/cashier/customer/${widget.receitModel.customerId}",
+        );
         if (!response.hasError && response.body['customer'] != null) {
           _customer = CustomerModel.fromJson(response.body['customer']);
         }
@@ -74,7 +82,10 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Receipt #${widget.receitModel.label}", style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          "Receipt #${widget.receitModel.label}",
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
         elevation: 0,
         actions: [
@@ -95,15 +106,14 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                 // Main Receipt Card
                 Container(
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1E1E2C) : Colors.white,
+                    color: AppTheme.surface(context),
                     borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(isDark ? 80 : 15),
-                        blurRadius: 30,
-                        offset: const Offset(0, 15),
-                      ),
-                    ],
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white.withAlpha(10)
+                          : Colors.grey.withAlpha(25),
+                      width: 1,
+                    ),
                   ),
                   child: Column(
                     children: [
@@ -112,13 +122,18 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
                           color: primary.withAlpha(15),
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(24),
+                          ),
                         ),
                         child: Column(
                           children: [
                             if (!widget.receitModel.synced)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
                                 margin: const EdgeInsets.only(bottom: 16),
                                 decoration: BoxDecoration(
                                   color: Colors.red.withAlpha(40),
@@ -127,16 +142,65 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                                 child: const Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.cloud_off, color: Colors.red, size: 14),
+                                    Icon(
+                                      Icons.cloud_off,
+                                      color: Colors.red,
+                                      size: 14,
+                                    ),
                                     SizedBox(width: 6),
-                                    Text("Not Synced", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12)),
+                                    Text(
+                                      "Not Synced",
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            if (widget.receitModel.fiscalized)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                margin: const EdgeInsets.only(bottom: 16),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withAlpha(40),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.verified,
+                                      color: Colors.green,
+                                      size: 14,
+                                    ),
+                                    SizedBox(width: 6),
+                                    Text(
+                                      "ZIMRA Fiscalized",
+                                      style: TextStyle(
+                                        color: Colors.green,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
                             Container(
                               padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(color: primary.withAlpha(30), shape: BoxShape.circle),
-                              child: Iconify(Bx.receipt, color: primary, size: 36),
+                              decoration: BoxDecoration(
+                                color: primary.withAlpha(30),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Iconify(
+                                Bx.receipt,
+                                color: primary,
+                                size: 36,
+                              ),
                             ),
                             const SizedBox(height: 16),
                             Text(
@@ -147,15 +211,21 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                               style: TextStyle(
                                 fontSize: 40,
                                 fontWeight: FontWeight.w900,
-                                color: widget.receitModel.creditSale ? Colors.red.shade400 : AppTheme.color(context),
+                                color: widget.receitModel.creditSale
+                                    ? Colors.red.shade400
+                                    : AppTheme.color(context),
                                 height: 1.1,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              widget.receitModel.creditSale ? "CREDIT INVOICE" : "PAID IN FULL",
+                              widget.receitModel.creditSale
+                                  ? "CREDIT INVOICE"
+                                  : "PAID IN FULL",
                               style: TextStyle(
-                                color: widget.receitModel.creditSale ? Colors.red.shade400 : Colors.green,
+                                color: widget.receitModel.creditSale
+                                    ? Colors.red.shade400
+                                    : Colors.green,
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 1.5,
@@ -164,7 +234,7 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                           ],
                         ),
                       ),
-                      
+
                       // Metadata Section
                       Padding(
                         padding: const EdgeInsets.all(24),
@@ -173,19 +243,60 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                _buildInfoBlock("Cashier", widget.receitModel.cashier, Icons.person_outline),
-                                _buildInfoBlock("Date", MistDateUtils.getInformalShortDate(widget.receitModel.createdAt), Icons.calendar_today, crossAxisAlignment: CrossAxisAlignment.end),
+                                _buildInfoBlock(
+                                  "Cashier",
+                                  widget.receitModel.cashier,
+                                  Icons.person_outline,
+                                ),
+                                _buildInfoBlock(
+                                  "Date",
+                                  MistDateUtils.getInformalShortDate(
+                                    widget.receitModel.createdAt,
+                                  ),
+                                  Icons.calendar_today,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                ),
                               ],
                             ),
-                            if (_customer != null || _isLoadingCustomer) ...[
+                            if (widget.receitModel.fiscalized) ...[
                               const SizedBox(height: 16),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
+                                  _buildInfoBlock(
+                                    "Receipt Counter",
+                                    "${widget.receitModel.zimraFiscalDayNo ?? ""}/${widget.receitModel.zimraReceiptGlobalNo ?? ""}",
+                                    Icons.receipt_long_outlined,
+                                  ),
+                                  _buildInfoBlock(
+                                    "Fiscal Device Id",
+                                    "${widget.receitModel.zimraDeviceId ?? ""}",
+                                    Icons.devices_outlined,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                  ),
+                                ],
+                              ),
+                            ],
+                            if (_customer != null || _isLoadingCustomer) ...[
+                              const SizedBox(height: 16),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
                                   if (_customer != null)
-                                    _buildInfoBlock("Customer", _customer!.fullName, Icons.person)
+                                    _buildInfoBlock(
+                                      "Customer",
+                                      _customer!.fullName,
+                                      Icons.person,
+                                    )
                                   else if (_isLoadingCustomer)
-                                    const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                                    const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
                                   const SizedBox(), // Empty spacer to keep layout balanced
                                 ],
                               ),
@@ -196,10 +307,13 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
 
                             // Items List
                             ...widget.receitModel.items.map((e) {
-                              double totalPrice = (e.price + e.addenum) * e.count;
-                              if (e.discountId != null && e.discountId!.isNotEmpty) {
+                              double totalPrice =
+                                  (e.price + e.addenum) * e.count;
+                              if (e.discountId != null &&
+                                  e.discountId!.isNotEmpty) {
                                 if (e.percentageDiscount) {
-                                  totalPrice = totalPrice * (1 - e.discount / 100);
+                                  totalPrice =
+                                      totalPrice * (1 - e.discount / 100);
                                 } else {
                                   totalPrice = totalPrice - e.discount;
                                 }
@@ -211,20 +325,32 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                                   children: [
                                     if (e.refunded)
                                       const Padding(
-                                        padding: EdgeInsets.only(right: 12, top: 2),
-                                        child: Iconify(Bx.refresh, color: Colors.red, size: 18),
+                                        padding: EdgeInsets.only(
+                                          right: 12,
+                                          top: 2,
+                                        ),
+                                        child: Iconify(
+                                          Bx.refresh,
+                                          color: Colors.red,
+                                          size: 18,
+                                        ),
                                       ),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             e.name,
                                             style: TextStyle(
                                               fontWeight: FontWeight.w600,
                                               fontSize: 16,
-                                              decoration: e.refunded ? TextDecoration.lineThrough : null,
-                                              color: e.refunded ? Colors.red.shade400 : AppTheme.color(context),
+                                              decoration: e.refunded
+                                                  ? TextDecoration.lineThrough
+                                                  : null,
+                                              color: e.refunded
+                                                  ? Colors.red.shade400
+                                                  : AppTheme.color(context),
                                             ),
                                           ),
                                           const SizedBox(height: 4),
@@ -232,31 +358,67 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                                             children: [
                                               Text(
                                                 "${e.count} x ${CurrenceConverter.getCurrenceFloatInStrings(e.price + e.addenum, _userController.user.value?.baseCurrence ?? '')}",
-                                                style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                                                style: TextStyle(
+                                                  color: Colors.grey.shade500,
+                                                  fontSize: 14,
+                                                ),
                                               ),
                                               if (e.refunded)
                                                 Text(
                                                   "  (Ref: ${e.originalCount} -> ${e.count})",
-                                                  style: TextStyle(color: Colors.red.shade300, fontSize: 13),
+                                                  style: TextStyle(
+                                                    color: Colors.red.shade300,
+                                                    fontSize: 13,
+                                                  ),
                                                 ),
                                             ],
                                           ),
-                                          if (e.discountId != null && e.discountId!.isNotEmpty)
+                                          if (e.discountId != null &&
+                                              e.discountId!.isNotEmpty)
                                             Container(
-                                              margin: const EdgeInsets.only(top: 4),
-                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                              decoration: BoxDecoration(color: Colors.orange.withAlpha(30), borderRadius: BorderRadius.circular(4)),
+                                              margin: const EdgeInsets.only(
+                                                top: 4,
+                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 6,
+                                                    vertical: 2,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.orange.withAlpha(
+                                                  30,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ),
                                               child: Text(
-                                                e.percentageDiscount ? "Discount: ${e.discount}% off" : "Discount: \$${CurrenceConverter.getCurrenceFloatInStrings(e.discount, _userController.user.value?.baseCurrence ?? '')}",
-                                                style: TextStyle(color: Colors.orange.shade700, fontSize: 12, fontWeight: FontWeight.bold),
+                                                e.percentageDiscount
+                                                    ? "Discount: ${e.discount}% off"
+                                                    : "Discount: \$${CurrenceConverter.getCurrenceFloatInStrings(e.discount, _userController.user.value?.baseCurrence ?? '')}",
+                                                style: TextStyle(
+                                                  color: Colors.orange.shade700,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
                                             ),
                                         ],
                                       ),
                                     ),
                                     Text(
-                                      CurrenceConverter.getCurrenceFloatInStrings(totalPrice, _userController.user.value?.baseCurrence ?? ''),
-                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.color(context)),
+                                      CurrenceConverter.getCurrenceFloatInStrings(
+                                        totalPrice,
+                                        _userController
+                                                .user
+                                                .value
+                                                ?.baseCurrence ??
+                                            '',
+                                      ),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: AppTheme.color(context),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -272,20 +434,27 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                               ...widget.receitModel.discounts.map(
                                 (e) => _buildSummaryRow(
                                   e.name ?? "Discount",
-                                  (e.percentageDiscount == true) ? "-${e.discount}%" : "-\$${CurrenceConverter.getCurrenceFloatInStrings(e.discount ?? 0, _userController.user.value?.baseCurrence ?? '')}",
+                                  (e.percentageDiscount == true)
+                                      ? "-${e.discount}%"
+                                      : "-\$${CurrenceConverter.getCurrenceFloatInStrings(e.discount ?? 0, _userController.user.value?.baseCurrence ?? '')}",
                                   accentColor: Colors.orange.shade600,
                                 ),
                               ),
                               const SizedBox(height: 8),
                             ],
                             if (widget.receitModel.miniTax.isNotEmpty) ...[
-                              ...widget.receitModel.miniTax.map((e) => _buildSummaryRow(e.label, "${e.value}%")),
+                              ...widget.receitModel.miniTax.map(
+                                (e) => _buildSummaryRow(e.label, "${e.value}%"),
+                              ),
                               const SizedBox(height: 8),
                             ],
 
                             _buildSummaryRow(
                               "Total",
-                              CurrenceConverter.getCurrenceFloatInStrings(widget.receitModel.total, _userController.user.value?.baseCurrence ?? ''),
+                              CurrenceConverter.getCurrenceFloatInStrings(
+                                widget.receitModel.total,
+                                _userController.user.value?.baseCurrence ?? '',
+                              ),
                               isBold: true,
                               isLarge: true,
                             ),
@@ -295,23 +464,49 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                             Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: widget.receitModel.creditSale ? Colors.red.withAlpha(15) : Colors.green.withAlpha(15),
+                                color: widget.receitModel.creditSale
+                                    ? Colors.red.withAlpha(15)
+                                    : Colors.green.withAlpha(15),
                                 borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: widget.receitModel.creditSale ? Colors.red.withAlpha(30) : Colors.green.withAlpha(30)),
+                                border: Border.all(
+                                  color: widget.receitModel.creditSale
+                                      ? Colors.red.withAlpha(30)
+                                      : Colors.green.withAlpha(30),
+                                ),
                               ),
                               child: Column(
                                 children: [
                                   if (widget.receitModel.creditSale) ...[
                                     _buildSummaryRow(
                                       "Paid via Deposits",
-                                      CurrenceConverter.getCurrenceFloatInStrings(widget.receitModel.currentAmountPayed, _userController.user.value?.baseCurrence ?? ''),
+                                      CurrenceConverter.getCurrenceFloatInStrings(
+                                        widget.receitModel.currentAmountPayed,
+                                        _userController
+                                                .user
+                                                .value
+                                                ?.baseCurrence ??
+                                            '',
+                                      ),
                                     ),
-                                    const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider(height: 1)),
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 8,
+                                      ),
+                                      child: Divider(height: 1),
+                                    ),
                                     _buildSummaryRow(
                                       "Remaining Balance",
                                       CurrenceConverter.getCurrenceFloatInStrings(
-                                        (widget.receitModel.total - widget.receitModel.currentAmountPayed).clamp(0.0, double.infinity),
-                                        _userController.user.value?.baseCurrence ?? '',
+                                        (widget.receitModel.total -
+                                                widget
+                                                    .receitModel
+                                                    .currentAmountPayed)
+                                            .clamp(0.0, double.infinity),
+                                        _userController
+                                                .user
+                                                .value
+                                                ?.baseCurrence ??
+                                            '',
                                       ),
                                       isBold: true,
                                       isLarge: true,
@@ -320,51 +515,186 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                                   ] else ...[
                                     _buildSummaryRow(
                                       "Amount Tendered",
-                                      CurrenceConverter.getCurrenceFloatInStrings(widget.receitModel.amount, _userController.user.value?.baseCurrence ?? ''),
+                                      CurrenceConverter.getCurrenceFloatInStrings(
+                                        widget.receitModel.amount,
+                                        _userController
+                                                .user
+                                                .value
+                                                ?.baseCurrence ??
+                                            '',
+                                      ),
                                     ),
-                                    const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider(height: 1)),
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 8,
+                                      ),
+                                      child: Divider(height: 1),
+                                    ),
                                     _buildSummaryRow(
                                       "Change Given",
                                       CurrenceConverter.getCurrenceFloatInStrings(
-                                        (widget.receitModel.amount - widget.receitModel.total).clamp(0.0, double.infinity),
-                                        _userController.user.value?.baseCurrence ?? '',
+                                        (widget.receitModel.amount -
+                                                widget.receitModel.total)
+                                            .clamp(0.0, double.infinity),
+                                        _userController
+                                                .user
+                                                .value
+                                                ?.baseCurrence ??
+                                            '',
                                       ),
                                       isBold: true,
                                       isLarge: true,
                                       accentColor: Colors.green.shade600,
                                     ),
-                                  ]
+                                  ],
                                 ],
                               ),
                             ),
-                            
+
+                            if (_company?.zimraQrFiscilization == true &&
+                                widget.receitModel.fiscalized) ...[
+                              const SizedBox(height: 24),
+                              _buildDashedDivider(isDark),
+                              const SizedBox(height: 24),
+                              Center(
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: QrImageView(
+                                        data: ZimraHelper.generateQrUrl(
+                                          widget.receitModel,
+                                          isTest:
+                                              Get.find<InventoryController>()
+                                                  .company
+                                                  .value
+                                                  ?.zimraIsTest ??
+                                              true,
+                                        ),
+                                        version: QrVersions.auto,
+                                        size: 150.0,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    if (widget.receitModel.zimraSignature !=
+                                        null)
+                                      Text(
+                                        "Verification code:\n${ZimraHelper.extractVerificationCode(widget.receitModel.zimraSignature!)}",
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: AppTheme.color(context),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      "You can verify this receipt manually at\n${ZimraHelper.manualZimraUrl}",
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey.shade500,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+
                             const SizedBox(height: 24),
-                            
+
                             // Bottom Action Buttons
+                            if (widget.receitModel.synced &&
+                                !widget.receitModel.fiscalized &&
+                                _company != null &&
+                                _company!.zimraCertificate != null)
+                              SizedBox(
+                                width: double.infinity,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 12.0),
+                                  child: ElevatedButton.icon(
+                                    onPressed: _isFiscalizing
+                                        ? null
+                                        : _fiscalizeReceipt,
+                                    icon: _isFiscalizing
+                                        ? const SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              color: Colors.white,
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.cloud_upload_rounded,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                    label: Text(
+                                      _isFiscalizing
+                                          ? "Submitting..."
+                                          : "Submit to ZIMRA",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      backgroundColor: Colors.green.shade700,
+                                      foregroundColor: Colors.white,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             if (!widget.receitModel.creditSale)
                               SizedBox(
                                 width: double.infinity,
                                 child: OutlinedButton.icon(
                                   onPressed: () async {
                                     final result = await Get.to(
-                                      () => ScreenRefundCart(receitModel: widget.receitModel),
+                                      () => ScreenRefundCart(
+                                        receitModel: widget.receitModel,
+                                      ),
                                       arguments: widget.receitModel,
                                     );
                                     if (result != null) {
                                       setState(() {
                                         widget.receitModel.items = result.items;
                                         widget.receitModel.total = result.total;
-                                        widget.receitModel.amount = result.amount;
+                                        widget.receitModel.amount =
+                                            result.amount;
                                       });
                                     }
                                   },
-                                  icon: const Iconify(Bx.recycle, color: Colors.red, size: 18),
+                                  icon: const Iconify(
+                                    Bx.recycle,
+                                    color: Colors.red,
+                                    size: 18,
+                                  ),
                                   label: const Text("Process Refund"),
                                   style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
                                     foregroundColor: Colors.red,
-                                    side: BorderSide(color: Colors.red.withAlpha(50)),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                    side: BorderSide(
+                                      color: Colors.red.withAlpha(50),
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -374,25 +704,43 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                                 child: ElevatedButton.icon(
                                   onPressed: () async {
                                     final result = await Get.to(
-                                      () => ScreenCreditPayment(receitModel: widget.receitModel),
+                                      () => ScreenCreditPayment(
+                                        receitModel: widget.receitModel,
+                                      ),
                                       arguments: widget.receitModel,
                                     );
                                     if (result != null) {
                                       setState(() {
-                                        widget.receitModel.creditSale = result.creditSale;
+                                        widget.receitModel.creditSale =
+                                            result.creditSale;
                                         widget.receitModel.total = result.total;
-                                        widget.receitModel.currentAmountPayed = result.currentAmountPayed;
+                                        widget.receitModel.currentAmountPayed =
+                                            result.currentAmountPayed;
                                       });
                                     }
                                   },
-                                  icon: const Iconify(Bx.coin, color: Colors.white, size: 20),
-                                  label: const Text("Make Payment", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                  icon: const Iconify(
+                                    Bx.coin,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                  label: const Text(
+                                    "Make Payment",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                   style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
                                     backgroundColor: primary,
                                     foregroundColor: Colors.white,
                                     elevation: 0,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -410,7 +758,12 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
     );
   }
 
-  Widget _buildInfoBlock(String label, String value, IconData icon, {CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start}) {
+  Widget _buildInfoBlock(
+    String label,
+    String value,
+    IconData icon, {
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
+  }) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -421,9 +774,23 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
         Column(
           crossAxisAlignment: crossAxisAlignment,
           children: [
-            Text(label, style: TextStyle(fontSize: 12, color: Colors.grey.shade500, fontWeight: FontWeight.w600)),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade500,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(height: 2),
-            Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.color(context))),
+            Text(
+              value,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: AppTheme.color(context),
+              ),
+            ),
           ],
         ),
         if (crossAxisAlignment == CrossAxisAlignment.end) ...[
@@ -434,7 +801,13 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
     );
   }
 
-  Widget _buildSummaryRow(String label, String value, {bool isBold = false, bool isLarge = false, Color? accentColor}) {
+  Widget _buildSummaryRow(
+    String label,
+    String value, {
+    bool isBold = false,
+    bool isLarge = false,
+    Color? accentColor,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -477,7 +850,9 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
               height: dashHeight,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withAlpha(30) : Colors.black.withAlpha(20),
+                  color: isDark
+                      ? Colors.white.withAlpha(30)
+                      : Colors.black.withAlpha(20),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -506,18 +881,39 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
     );
     final baseCurrency = _userController.user.value?.baseCurrence ?? '';
     try {
-      final pdf = await PdfReceit.generate(
-        widget.receitModel,
-        baseCurrency,
-        _userController.user.value,
-      );
-      
       await Printing.layoutPdf(
-        onLayout: (format) async => pdf.save(),
+        onLayout: (format) async {
+          final pdf = await PdfReceit.generate(
+            widget.receitModel,
+            baseCurrency,
+            _userController.user.value,
+            format: format,
+          );
+          return pdf.save();
+        },
         name: 'Receipt_${widget.receitModel.label}',
       );
     } catch (e) {
       Toaster.showError("Failed to generate PDF: $e");
+    }
+  }
+
+  void _fiscalizeReceipt() async {
+    setState(() => _isFiscalizing = true);
+    final response = await Net.post(
+      "/cashier/fiscalize-receipt",
+      data: {"receiptId": widget.receitModel.hexId},
+    );
+    setState(() => _isFiscalizing = false);
+
+    if (!response.hasError) {
+      Toaster.showSuccess("Receipt fiscalized successfully");
+      setState(() {
+        widget.receitModel.fiscalized = true;
+      });
+      Get.find<ItemsController>().updateUnsyncedReceits();
+    } else {
+      Toaster.showError("Failed to fiscalize: ${response.response}");
     }
   }
 }

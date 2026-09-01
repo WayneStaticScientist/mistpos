@@ -21,6 +21,7 @@ import 'package:mistpos/features/settings/screens/tax_list_screens.dart';
 import 'package:mistpos/features/settings/screens_currency/screen_currency.dart';
 import 'package:mistpos/features/settings/screens_gateways/automated_screen.dart';
 import 'package:mistpos/features/settings/screens_gateways/payment_gateway.dart';
+import 'package:mistpos/features/settings/screens_zimra/screen_zimra_services.dart';
 import 'package:mistpos/features/support/screens/sales_help.dart';
 import 'package:mistpos/features/inventory/navs/nav_items.dart';
 import 'package:mistpos/features/support/screens/screen_about.dart';
@@ -281,6 +282,14 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
                               Get.to(() => ScreenPaymentGetway());
                             },
                           ),
+                          _DrawerItem(
+                            icon: Bx.receipt,
+                            label: 'Zimra Fiscalization',
+                            onTap: () {
+                              Get.back();
+                              Get.to(() => const ScreenZimraServices());
+                            },
+                          ),
                         ],
                       );
                     }),
@@ -476,6 +485,15 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
         'onTap': () {
           Get.back();
           Get.to(() => ScreenCurrency());
+        },
+        'admin': true,
+      },
+      {
+        'icon': Bx.receipt,
+        'label': 'Zimra Fiscalization',
+        'onTap': () {
+          Get.back();
+          Get.to(() => const ScreenZimraServices());
         },
         'admin': true,
       },

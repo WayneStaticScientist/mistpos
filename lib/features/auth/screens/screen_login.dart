@@ -179,6 +179,23 @@ class _ScreenLoginState extends State<ScreenLogin> {
                   ).animate(delay: 300.ms).fadeIn(),
                   const SizedBox(height: 32),
 
+                  Obx(() {
+                    if (_userController.authError.value.isNotEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Text(
+                          _userController.authError.value,
+                          style: const TextStyle(
+                            color: Colors.redAccent,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ).animate().fadeIn().slideY(begin: -0.2, end: 0),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  }),
+
                   // Login button
                   Obx(() => _PrimaryButton(
                         label: 'Sign In',

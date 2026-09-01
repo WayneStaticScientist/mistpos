@@ -25,6 +25,12 @@ class ItemReceitModel {
   List<MiniTax> miniTax;
   List<ItemReceitItem> items = [];
   List<EmbeddedDiscountModel> discounts = [];
+  bool fiscalized = false;
+  String? zimraReceiptId;
+  String? zimraSignature;
+  int? zimraReceiptGlobalNo;
+  int? zimraDeviceId;
+  int? zimraFiscalDayNo;
   ItemReceitModel({
     required this.items,
     required this.total,
@@ -44,6 +50,12 @@ class ItemReceitModel {
     this.creditSale = false,
     this.currentAmountPayed = 0.0,
     this.discounts = const [],
+    this.fiscalized = false,
+    this.zimraReceiptId,
+    this.zimraSignature,
+    this.zimraReceiptGlobalNo,
+    this.zimraDeviceId,
+    this.zimraFiscalDayNo,
   });
   Map<String, dynamic> toJson() {
     return {
@@ -65,6 +77,12 @@ class ItemReceitModel {
           .map<Map<String, dynamic>>((e) => e.toJson())
           .toList(),
       "items": items.map<Map<String, dynamic>>((e) => e.toJson()).toList(),
+      "fiscalized": fiscalized,
+      "zimraReceiptId": zimraReceiptId,
+      "zimraSignature": zimraSignature,
+      "zimraReceiptGlobalNo": zimraReceiptGlobalNo,
+      "zimraDeviceId": zimraDeviceId,
+      "zimraFiscalDayNo": zimraFiscalDayNo,
     };
   }
 
@@ -100,6 +118,12 @@ class ItemReceitModel {
                 .toList()
           : [],
       createdAt: DateTime.tryParse(data['createdAt']) ?? DateTime.now(),
+      fiscalized: data['fiscalized'] ?? false,
+      zimraReceiptId: data['zimraReceiptId'],
+      zimraSignature: data['zimraSignature'],
+      zimraReceiptGlobalNo: data['zimraReceiptGlobalNo'],
+      zimraDeviceId: data['zimraDeviceId'],
+      zimraFiscalDayNo: data['zimraFiscalDayNo'],
     );
   }
 }

@@ -105,9 +105,26 @@ class OfflinePrinter {
     final totalLine =
         padRight('TOTAL DUE:', receitWidth - totalDueStr.length) + totalDueStr;
     b.text(totalLine, bold: true);
-    final change =
-        padRight('CHANGE:', receitWidth - changeStr.length) + changeStr;
-    b.text(change, bold: true);
+
+    if (itemReceitModel.creditSale) {
+      final depositsStr = CurrenceConverter.getCurrenceFloatInStrings(
+        itemReceitModel.currentAmountPayed,
+        user.baseCurrence,
+      );
+      final remainingStr = CurrenceConverter.getCurrenceFloatInStrings(
+        (itemReceitModel.total - itemReceitModel.currentAmountPayed).clamp(0.0, double.infinity),
+        user.baseCurrence,
+      );
+      b.text(padRight('DEPOSITS:', receitWidth - depositsStr.length) + depositsStr);
+      b.text(padRight('REMAINING BAL:', receitWidth - remainingStr.length) + remainingStr, bold: true);
+    } else {
+      final paidStr = CurrenceConverter.getCurrenceFloatInStrings(
+        itemReceitModel.amount,
+        user.baseCurrence,
+      );
+      b.text(padRight('PAID (${itemReceitModel.payment}):', receitWidth - paidStr.length) + paidStr);
+      b.text(padRight('CHANGE:', receitWidth - changeStr.length) + changeStr, bold: true);
+    }
     b.feed(2);
     b.text('.' * receitWidth);
   }

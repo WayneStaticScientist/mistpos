@@ -134,6 +134,22 @@ class CompanyModel {
   List<ReceitExtrasModel> receitExtras;
   final String? reseller;
   final ResellerPropsModel resellerProps;
+  
+  // Zimra integration fields
+  int? zimraDeviceId;
+  String? zimraDeviceSerialNo;
+  String? zimraActivationKey;
+  String? zimraCertificate;
+  DateTime? zimraCertificateValidTill;
+  bool? zimraIsTest;
+  int? zimraFiscalDayNo;
+  String? zimraFiscalDayStatus;
+  DateTime? zimraLastFiscalDayOpened;
+  int? zimraReceiptGlobalNo;
+  int? zimraReceiptCounter;
+  bool? zimraAutoOpenFiscalDay;
+  bool? zimraAllowOfflineReceipts;
+  bool? zimraQrFiscilization;
 
   CompanyModel({
     required this.owner,
@@ -153,6 +169,20 @@ class CompanyModel {
     required this.aiSubscriptions,
     this.reseller,
     required this.resellerProps,
+    this.zimraDeviceId,
+    this.zimraDeviceSerialNo,
+    this.zimraActivationKey,
+    this.zimraCertificate,
+    this.zimraCertificateValidTill,
+    this.zimraIsTest,
+    this.zimraFiscalDayNo,
+    this.zimraFiscalDayStatus,
+    this.zimraLastFiscalDayOpened,
+    this.zimraReceiptGlobalNo,
+    this.zimraReceiptCounter,
+    this.zimraAutoOpenFiscalDay,
+    this.zimraAllowOfflineReceipts,
+    this.zimraQrFiscilization,
   });
   factory CompanyModel.fromJson(Map<String, dynamic> json) {
     return CompanyModel(
@@ -181,6 +211,24 @@ class CompanyModel {
       exchangeRates: ExchangeRateModel.fromJson(json['exchangeRates']),
       reseller: json['reseller'] as String?,
       resellerProps: ResellerPropsModel.fromJson(json['resellerProps']),
+      zimraDeviceId: json['zimra'] != null ? json['zimra']['deviceId'] as int? : json['zimraDeviceId'] as int?,
+      zimraDeviceSerialNo: json['zimra'] != null ? json['zimra']['deviceSerialNo'] as String? : json['zimraDeviceSerialNo'] as String?,
+      zimraActivationKey: json['zimra'] != null ? json['zimra']['activationKey'] as String? : json['zimraActivationKey'] as String?,
+      zimraCertificate: json['zimra'] != null ? json['zimra']['certificate'] as String? : json['zimraCertificate'] as String?,
+      zimraCertificateValidTill: json['zimra'] != null
+          ? (json['zimra']['certificateValidTill'] != null ? DateTime.parse(json['zimra']['certificateValidTill']) : null)
+          : (json['zimraCertificateValidTill'] != null ? DateTime.parse(json['zimraCertificateValidTill']) : null),
+      zimraIsTest: json['zimra'] != null ? (json['zimra']['isTest'] as bool? ?? true) : (json['zimraIsTest'] as bool? ?? true),
+      zimraFiscalDayNo: json['zimra'] != null ? json['zimra']['fiscalDayNo'] as int? : json['zimraFiscalDayNo'] as int?,
+      zimraFiscalDayStatus: json['zimra'] != null ? json['zimra']['fiscalDayStatus'] as String? : json['zimraFiscalDayStatus'] as String?,
+      zimraLastFiscalDayOpened: json['zimra'] != null
+          ? (json['zimra']['lastFiscalDayOpened'] != null ? DateTime.parse(json['zimra']['lastFiscalDayOpened']) : null)
+          : (json['zimraLastFiscalDayOpened'] != null ? DateTime.parse(json['zimraLastFiscalDayOpened']) : null),
+      zimraReceiptGlobalNo: json['zimra'] != null ? json['zimra']['receiptGlobalNo'] as int? : json['zimraReceiptGlobalNo'] as int?,
+      zimraReceiptCounter: json['zimra'] != null ? json['zimra']['receiptCounter'] as int? : json['zimraReceiptCounter'] as int?,
+      zimraAutoOpenFiscalDay: json['zimra'] != null ? (json['zimra']['autoOpenFiscalDay'] as bool? ?? false) : (json['zimraAutoOpenFiscalDay'] as bool? ?? false),
+      zimraAllowOfflineReceipts: json['zimra'] != null ? (json['zimra']['allowOfflineReceipts'] as bool? ?? false) : (json['zimraAllowOfflineReceipts'] as bool? ?? false),
+      zimraQrFiscilization: json['zimra'] != null ? (json['zimra']['qrFiscilization'] as bool? ?? false) : (json['zimraQrFiscilization'] as bool? ?? false),
     );
   }
   Map<String, dynamic> toJson() {
@@ -202,6 +250,20 @@ class CompanyModel {
       "receitExtras": receitExtras.map((e) => e.toJson()).toList(),
       'reseller': reseller,
       'resellerProps': resellerProps.toJson(),
+      'zimraDeviceId': zimraDeviceId,
+      'zimraDeviceSerialNo': zimraDeviceSerialNo,
+      'zimraActivationKey': zimraActivationKey,
+      'zimraCertificate': zimraCertificate,
+      'zimraCertificateValidTill': zimraCertificateValidTill?.toIso8601String(),
+      'zimraIsTest': zimraIsTest,
+      'zimraFiscalDayNo': zimraFiscalDayNo,
+      'zimraFiscalDayStatus': zimraFiscalDayStatus,
+      'zimraLastFiscalDayOpened': zimraLastFiscalDayOpened?.toIso8601String(),
+      'zimraReceiptGlobalNo': zimraReceiptGlobalNo,
+      'zimraReceiptCounter': zimraReceiptCounter,
+      'zimraAutoOpenFiscalDay': zimraAutoOpenFiscalDay,
+      'zimraAllowOfflineReceipts': zimraAllowOfflineReceipts,
+      'zimraQrFiscilization': zimraQrFiscilization,
     };
   }
 

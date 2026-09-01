@@ -17,6 +17,9 @@ import 'package:mistpos/data/models/printer_device_model.dart';
 import 'package:pos_universal_printer/pos_universal_printer.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:mistpos/core/utils/printer_role_helper.dart';
+import 'package:mistpos/core/utils/zimra_helper.dart';
+import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
+import 'package:get/get.dart';
 
 class DevicesController extends GetxController {
   RxBool hasPrinterConnections = RxBool(false);
@@ -65,14 +68,25 @@ class DevicesController extends GetxController {
       return;
     }
     await isar.write((isar) async {
-      isar.printerDeviceModels.put(
-        PrinterDeviceModel(
-          name: ipAddress,
-          address: ipAddress,
-          isConnected: cashierConnected.value,
-          port: port,
-        ),
-      );
+      final existingDevice = isar.printerDeviceModels
+          .where() //its where not filter!!!!!!!!!!!
+          .addressEqualTo(ipAddress)
+          .findFirst();
+      if (existingDevice != null) {
+        existingDevice.isConnected = cashierConnected.value;
+        existingDevice.port = port;
+        existingDevice.name = ipAddress;
+        isar.printerDeviceModels.put(existingDevice);
+      } else {
+        isar.printerDeviceModels.put(
+          PrinterDeviceModel(
+            name: ipAddress,
+            address: ipAddress,
+            isConnected: cashierConnected.value,
+            port: port,
+          ),
+        );
+      }
     });
     getConnectedDevices();
   }
@@ -120,14 +134,25 @@ class DevicesController extends GetxController {
       return false;
     }
     await isar.write((isar) async {
-      isar.printerDeviceModels.put(
-        PrinterDeviceModel(
-          name: name,
-          address: macAddress,
-          isConnected: true,
-          port: 0,
-        ),
-      );
+      final existingDevice = isar.printerDeviceModels
+          .where() //its where not filter!!!!!!!!!!!!!!
+          .addressEqualTo(macAddress)
+          .findFirst();
+      if (existingDevice != null) {
+        existingDevice.isConnected = cashierConnected.value;
+        existingDevice.port = 0;
+        existingDevice.name = name;
+        isar.printerDeviceModels.put(existingDevice);
+      } else {
+        isar.printerDeviceModels.put(
+          PrinterDeviceModel(
+            name: name,
+            address: macAddress,
+            isConnected: cashierConnected.value,
+            port: 0,
+          ),
+        );
+      }
     });
     getConnectedDevices();
     return true;
@@ -226,6 +251,16 @@ class DevicesController extends GetxController {
       if (row.value == "fiscal" && row.type == "system") {
         b.feed(1);
         b.text('*** FISCAL RECEIPT ***', align: PosAlign.center, bold: true);
+        if (itemReceitModel.fiscalized) {
+          b.text(
+            'Receipt counter: ${itemReceitModel.zimraFiscalDayNo ?? ""}/${itemReceitModel.zimraReceiptGlobalNo ?? ""}',
+            align: PosAlign.center,
+          );
+          b.text(
+            'Fiscal Device Id: ${itemReceitModel.zimraDeviceId ?? ""}',
+            align: PosAlign.center,
+          );
+        }
         b.feed(1);
         b.text('.' * receitWidth);
         continue;
@@ -257,7 +292,48 @@ class DevicesController extends GetxController {
         if (enableQrCode) {
           b.feed(1);
           b.text("--- QR CODE ---", align: PosAlign.center, bold: true);
-          b.qrCode(itemReceitModel.label);
+
+          bool printZimraQr = false;
+          if (Get.isRegistered<InventoryController>()) {
+            final company = Get.find<InventoryController>().company.value;
+            if (company?.zimraQrFiscilization == true &&
+                itemReceitModel.fiscalized) {
+              printZimraQr = true;
+            }
+          }
+
+          if (printZimraQr) {
+            b.qrCode(
+              ZimraHelper.generateQrUrl(
+                itemReceitModel,
+                isTest:
+                    Get.find<InventoryController>()
+                        .company
+                        .value
+                        ?.zimraIsTest ??
+                    true,
+              ),
+            );
+            if (itemReceitModel.zimraSignature != null) {
+              b.feed(1);
+              b.text("Verification code:", align: PosAlign.center);
+              b.text(
+                ZimraHelper.extractVerificationCode(
+                  itemReceitModel.zimraSignature!,
+                ),
+                align: PosAlign.center,
+              );
+            }
+            b.feed(1);
+            b.text(
+              "You can verify this receipt manually at",
+              align: PosAlign.center,
+            );
+            b.text(ZimraHelper.manualZimraUrl, align: PosAlign.center);
+          } else {
+            b.qrCode(itemReceitModel.label);
+          }
+
           b.feed(1);
         }
         continue;
@@ -317,9 +393,17 @@ class DevicesController extends GetxController {
       if (isar != null) {
         if (model.printToMultiplePrinters) {
           final devices = isar.printerDeviceModels.where().findAll();
+          final printedAddresses = <String>{};
+
           for (final device in devices) {
+            if (printedAddresses.contains(device.address)) continue;
+
             try {
               final role = PosRoleHelper.fromString(device.role);
+              await printer.unregisterDevice(
+                role,
+              ); // Clear previous registration for this role
+
               await printer.registerDevice(
                 role,
                 PrinterDevice(
@@ -332,10 +416,12 @@ class DevicesController extends GetxController {
                   port: device.port,
                 ),
               );
+
               await Future.delayed(const Duration(milliseconds: 500));
               printer.printEscPos(role, b);
+              printedAddresses.add(device.address);
             } catch (e) {
-              print("Failed to print to multiple printer: $e");
+              print("Failed to print to device ${device.name}: $e");
             }
           }
         } else {
@@ -601,9 +687,17 @@ class DevicesController extends GetxController {
       if (isar != null) {
         if (model.printToMultiplePrinters) {
           final devices = isar.printerDeviceModels.where().findAll();
+          final printedAddresses = <String>{};
+
           for (final device in devices) {
+            if (printedAddresses.contains(device.address)) continue;
+
             try {
               final role = PosRoleHelper.fromString(device.role);
+              await printer.unregisterDevice(
+                role,
+              ); // Clear previous registration for this role
+
               await printer.registerDevice(
                 role,
                 PrinterDevice(
@@ -616,10 +710,12 @@ class DevicesController extends GetxController {
                   port: device.port,
                 ),
               );
+
               await Future.delayed(const Duration(milliseconds: 500));
               printer.printEscPos(role, b);
+              printedAddresses.add(device.address);
             } catch (e) {
-              print("Failed to print shift to multiple printer: $e");
+              print("Failed to print to device ${device.name}: $e");
             }
           }
         } else {

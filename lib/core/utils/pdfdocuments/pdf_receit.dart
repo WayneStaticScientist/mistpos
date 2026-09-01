@@ -1,7 +1,9 @@
 import 'package:flutter/services.dart';
+import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:get/get.dart';
+import 'package:mistpos/core/utils/zimra_helper.dart';
 import 'package:mistpos/core/utils/date_utils.dart';
 import 'package:mistpos/core/services/api/network_wrapper.dart';
 import 'package:mistpos/data/models/item_receit_model.dart';
@@ -16,23 +18,26 @@ class PdfReceit {
   static Future<pw.Document> generate(
     ItemReceitModel receitModel,
     String baseCurrence,
-    User? user,
-  ) async {
+    User? user, {
+    PdfPageFormat format = PdfPageFormat.roll80,
+  }) async {
     final pdf = pw.Document();
 
     CustomerModel? customer;
     if (receitModel.customerId != null) {
       if (Get.isRegistered<ItemsController>()) {
         try {
-          customer = Get.find<ItemsController>()
-              .customers
-              .firstWhere((c) => c.hexId == receitModel.customerId);
+          customer = Get.find<ItemsController>().customers.firstWhere(
+            (c) => c.hexId == receitModel.customerId,
+          );
         } catch (_) {}
       }
-      
+
       if (customer == null) {
         try {
-          final response = await Net.get("/cashier/customer/${receitModel.customerId}");
+          final response = await Net.get(
+            "/cashier/customer/${receitModel.customerId}",
+          );
           if (!response.hasError && response.body['customer'] != null) {
             customer = CustomerModel.fromJson(response.body['customer']);
           }
@@ -57,33 +62,42 @@ class PdfReceit {
       // Ignored if logo not found
     }
 
+    final isRoll = format.width < 300;
+    final pageFormat = isRoll ? format.copyWith(height: pageHeight) : format;
+
     pdf.addPage(
       pw.Page(
-        pageFormat: PdfPageFormat.roll80.copyWith(height: pageHeight),
-        margin: const pw.EdgeInsets.all(16),
+        pageFormat: pageFormat,
+        margin: pw.EdgeInsets.all(isRoll ? 16 : 32),
         build: (pw.Context context) {
           return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
             children: [
-              // ── App Logo & Company Header ──
-              if (logoImage != null) pw.Image(logoImage, height: 60, width: 60),
-              pw.SizedBox(height: 8),
-              pw.Text(
-                user?.companyName ?? "Company Name",
-                style: pw.TextStyle(
-                  fontSize: 20,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-                textAlign: pw.TextAlign.center,
-              ),
-              pw.SizedBox(height: 4),
-              pw.Text(
-                "Thank you for your business",
-                style: const pw.TextStyle(
-                  fontSize: 10,
-                  color: PdfColors.grey700,
-                ),
-                textAlign: pw.TextAlign.center,
+              // ── App Logo & Company Header (Centered) ──
+              pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.center,
+                children: [
+                  if (logoImage != null)
+                    pw.Image(logoImage, height: 60, width: 60),
+                  pw.SizedBox(height: 8),
+                  pw.Text(
+                    user?.companyName ?? "Company Name",
+                    style: pw.TextStyle(
+                      fontSize: 20,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                    textAlign: pw.TextAlign.center,
+                  ),
+                  pw.SizedBox(height: 4),
+                  pw.Text(
+                    "Thank you for your business",
+                    style: const pw.TextStyle(
+                      fontSize: 10,
+                      color: PdfColors.grey700,
+                    ),
+                    textAlign: pw.TextAlign.center,
+                  ),
+                ],
               ),
               pw.SizedBox(height: 12),
               pw.Divider(color: PdfColors.grey400, thickness: 1),
@@ -92,8 +106,12 @@ class PdfReceit {
               // ── Receipt Details ──
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  _buildInfoBlock("Receipt No", receitModel.label),
+                  pw.Expanded(
+                    child: _buildInfoBlock("Receipt No", receitModel.label),
+                  ),
+                  pw.SizedBox(width: 12),
                   _buildInfoBlock(
                     "Date",
                     MistDateUtils.getInformalShortDate(receitModel.createdAt),
@@ -104,8 +122,12 @@ class PdfReceit {
               pw.SizedBox(height: 8),
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  _buildInfoBlock("Cashier", receitModel.cashier),
+                  pw.Expanded(
+                    child: _buildInfoBlock("Cashier", receitModel.cashier),
+                  ),
+                  pw.SizedBox(width: 12),
                   _buildInfoBlock(
                     "Terminal",
                     "pos 1",
@@ -113,13 +135,37 @@ class PdfReceit {
                   ),
                 ],
               ),
+              if (receitModel.fiscalized) ...[
+                pw.SizedBox(height: 8),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Expanded(
+                      child: _buildInfoBlock(
+                        "Receipt counter",
+                        "${receitModel.zimraFiscalDayNo ?? ""}/${receitModel.zimraReceiptGlobalNo ?? ""}",
+                      ),
+                    ),
+                    pw.SizedBox(width: 12),
+                    _buildInfoBlock(
+                      "Fiscal Device Id",
+                      "${receitModel.zimraDeviceId ?? ""}",
+                      crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    ),
+                  ],
+                ),
+              ],
               if (customer != null) ...[
                 pw.SizedBox(height: 8),
                 pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    _buildInfoBlock("Customer", customer.fullName),
-                    pw.SizedBox(), // Keep it aligned to left
+                    pw.Expanded(
+                      child: _buildInfoBlock("Customer", customer.fullName),
+                    ),
+                    pw.SizedBox(width: 12),
                   ],
                 ),
               ],
@@ -326,15 +372,48 @@ class PdfReceit {
                 ],
               ),
               pw.SizedBox(height: 8),
-              _summaryRow(
-                "Paid (${receitModel.payment})",
-                CurrenceConverter.getCurrenceFloatInStrings(
-                  receitModel.amount,
-                  baseCurrence,
+              if (receitModel.creditSale) ...[
+                _summaryRow(
+                  "Paid via Deposits",
+                  CurrenceConverter.getCurrenceFloatInStrings(
+                    receitModel.currentAmountPayed,
+                    baseCurrence,
+                  ),
                 ),
-              ),
-
-              if (!receitModel.creditSale) ...[
+                pw.SizedBox(height: 4),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text(
+                      "Remaining Balance",
+                      style: pw.TextStyle(
+                        fontSize: 12,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.red700,
+                      ),
+                    ),
+                    pw.Text(
+                      CurrenceConverter.getCurrenceFloatInStrings(
+                        (receitModel.total - receitModel.currentAmountPayed)
+                            .clamp(0.0, double.infinity),
+                        baseCurrence,
+                      ),
+                      style: pw.TextStyle(
+                        fontSize: 12,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.red700,
+                      ),
+                    ),
+                  ],
+                ),
+              ] else ...[
+                _summaryRow(
+                  "Paid (${receitModel.payment})",
+                  CurrenceConverter.getCurrenceFloatInStrings(
+                    receitModel.amount,
+                    baseCurrence,
+                  ),
+                ),
                 pw.SizedBox(height: 4),
                 pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -349,7 +428,10 @@ class PdfReceit {
                     ),
                     pw.Text(
                       CurrenceConverter.getCurrenceFloatInStrings(
-                        receitModel.amount - receitModel.total,
+                        (receitModel.amount - receitModel.total).clamp(
+                          0.0,
+                          double.infinity,
+                        ),
                         baseCurrence,
                       ),
                       style: pw.TextStyle(
@@ -362,6 +444,50 @@ class PdfReceit {
                 ),
               ],
               pw.SizedBox(height: 16),
+
+              if (Get.isRegistered<InventoryController>() &&
+                  (Get.find<InventoryController>()
+                          .company
+                          .value
+                          ?.zimraQrFiscilization ??
+                      false)) ...[
+                pw.Center(
+                  child: pw.BarcodeWidget(
+                    barcode: pw.Barcode.qrCode(),
+                    data: ZimraHelper.generateQrUrl(
+                      receitModel,
+                      isTest:
+                          Get.find<InventoryController>()
+                              .company
+                              .value
+                              ?.zimraIsTest ??
+                          true,
+                    ),
+                    width: 60,
+                    height: 60,
+                  ),
+                ),
+                pw.SizedBox(height: 4),
+                if (receitModel.zimraSignature != null)
+                  pw.Text(
+                    "Verification code:\n${ZimraHelper.extractVerificationCode(receitModel.zimraSignature!)}",
+                    style: const pw.TextStyle(
+                      fontSize: 8,
+                      color: PdfColors.black,
+                    ),
+                    textAlign: pw.TextAlign.center,
+                  ),
+                pw.SizedBox(height: 4),
+                pw.Text(
+                  "You can verify this receipt manually at\n${ZimraHelper.manualZimraUrl}",
+                  style: const pw.TextStyle(
+                    fontSize: 8,
+                    color: PdfColors.grey700,
+                  ),
+                  textAlign: pw.TextAlign.center,
+                ),
+                pw.SizedBox(height: 16),
+              ],
 
               // ── Footer ──
               pw.Text(

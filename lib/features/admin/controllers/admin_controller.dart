@@ -233,6 +233,34 @@ class AdminController extends GetxController {
     return true;
   }
 
+  Future<Map<String, dynamic>?> testZimraConnection(Map<String, dynamic> data, String id) async {
+    if (companyLoading.value) return null;
+    companyLoading.value = true;
+    final result = await Net.post("/admin/company/$id/zimra/test-connection", data: data);
+    companyLoading.value = false;
+    
+    if (result.hasError) {
+      Toaster.showError(result.response);
+      return null;
+    }
+
+    return result.body;
+  }
+
+  Future<Map<String, dynamic>?> testZimraDiagnostic(Map<String, dynamic> data, String id) async {
+    if (companyLoading.value) return null;
+    companyLoading.value = true;
+    final result = await Net.post("/admin/company/$id/zimra/diagnostic", data: data);
+    companyLoading.value = false;
+    
+    if (result.hasError) {
+      Toaster.showError(result.response);
+      return null;
+    }
+
+    return result.body;
+  }
+
   RxBool loadingDailySales = RxBool(false);
   Rx<DailySalesSummary?> dailySalesSummary = Rx<DailySalesSummary?>(null);
   Future<void> getDailySales(DateTime date, DateTime timeStart) async {

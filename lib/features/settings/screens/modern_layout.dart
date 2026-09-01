@@ -1,5 +1,5 @@
 import 'package:exui/exui.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:mistpos/core/themes/app_theme.dart';
 
 class MistMordernLayout extends StatelessWidget {
@@ -11,24 +11,58 @@ class MistMordernLayout extends StatelessWidget {
     required this.children,
   });
 
+  static Widget get divider => Builder(
+        builder: (context) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          return Divider(
+            height: 1,
+            thickness: 1,
+            indent: 16,
+            endIndent: 16,
+            color: isDark
+                ? Colors.white.withAlpha(10)
+                : Colors.black.withAlpha(10),
+          );
+        },
+      );
+
   @override
   Widget build(BuildContext context) {
-    return [
-          label.text(
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 10),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.8,
+              color: Colors.grey.shade500,
+            ),
           ),
-          ...children,
-        ]
-        .column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-        )
-        .padding(EdgeInsets.all(12))
-        .decoratedBox(
+        ),
+        Container(
           decoration: BoxDecoration(
             color: AppTheme.surface(context),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withAlpha(10)
+                  : Colors.black.withAlpha(10),
+              width: 1,
+            ),
           ),
-        );
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: children,
+          ),
+        ),
+      ],
+    );
   }
 }

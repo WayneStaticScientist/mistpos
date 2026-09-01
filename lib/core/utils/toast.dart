@@ -28,4 +28,16 @@ class Toaster {
       snackPosition: SnackPosition.BOTTOM,
     );
   }
+
+  static void showInfo(String message) {
+    Get.snackbar(
+      'Info',
+      message,
+      icon: Iconify(Bx.info_circle, color: Colors.white),
+      duration: const Duration(seconds: 1),
+      backgroundColor: Colors.blue,
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+    );
+  }
 }
