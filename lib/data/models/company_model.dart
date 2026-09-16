@@ -150,6 +150,10 @@ class CompanyModel {
   bool? zimraAutoOpenFiscalDay;
   bool? zimraAllowOfflineReceipts;
   bool? zimraQrFiscilization;
+  bool? zimraHasSubscription;
+  DateTime? zimraSubscriptionValidUntil;
+  bool? zimraSubscriptionNotified7Days;
+  bool? zimraSubscriptionNotified3Days;
 
   CompanyModel({
     required this.owner,
@@ -183,6 +187,10 @@ class CompanyModel {
     this.zimraAutoOpenFiscalDay,
     this.zimraAllowOfflineReceipts,
     this.zimraQrFiscilization,
+    this.zimraHasSubscription,
+    this.zimraSubscriptionValidUntil,
+    this.zimraSubscriptionNotified7Days,
+    this.zimraSubscriptionNotified3Days,
   });
   factory CompanyModel.fromJson(Map<String, dynamic> json) {
     return CompanyModel(
@@ -229,6 +237,12 @@ class CompanyModel {
       zimraAutoOpenFiscalDay: json['zimra'] != null ? (json['zimra']['autoOpenFiscalDay'] as bool? ?? false) : (json['zimraAutoOpenFiscalDay'] as bool? ?? false),
       zimraAllowOfflineReceipts: json['zimra'] != null ? (json['zimra']['allowOfflineReceipts'] as bool? ?? false) : (json['zimraAllowOfflineReceipts'] as bool? ?? false),
       zimraQrFiscilization: json['zimra'] != null ? (json['zimra']['qrFiscilization'] as bool? ?? false) : (json['zimraQrFiscilization'] as bool? ?? false),
+      zimraHasSubscription: json['zimra'] != null && json['zimra']['subscription'] != null ? (json['zimra']['subscription']['hasSubscription'] as bool? ?? false) : (json['zimraHasSubscription'] as bool? ?? false),
+      zimraSubscriptionValidUntil: json['zimra'] != null && json['zimra']['subscription'] != null
+          ? (json['zimra']['subscription']['validUntil'] != null ? DateTime.parse(json['zimra']['subscription']['validUntil']) : null)
+          : (json['zimraSubscriptionValidUntil'] != null ? DateTime.parse(json['zimraSubscriptionValidUntil']) : null),
+      zimraSubscriptionNotified7Days: json['zimra'] != null && json['zimra']['subscription'] != null ? (json['zimra']['subscription']['notified7Days'] as bool? ?? false) : (json['zimraSubscriptionNotified7Days'] as bool? ?? false),
+      zimraSubscriptionNotified3Days: json['zimra'] != null && json['zimra']['subscription'] != null ? (json['zimra']['subscription']['notified3Days'] as bool? ?? false) : (json['zimraSubscriptionNotified3Days'] as bool? ?? false),
     );
   }
   Map<String, dynamic> toJson() {
@@ -264,6 +278,10 @@ class CompanyModel {
       'zimraAutoOpenFiscalDay': zimraAutoOpenFiscalDay,
       'zimraAllowOfflineReceipts': zimraAllowOfflineReceipts,
       'zimraQrFiscilization': zimraQrFiscilization,
+      'zimraHasSubscription': zimraHasSubscription,
+      'zimraSubscriptionValidUntil': zimraSubscriptionValidUntil?.toIso8601String(),
+      'zimraSubscriptionNotified7Days': zimraSubscriptionNotified7Days,
+      'zimraSubscriptionNotified3Days': zimraSubscriptionNotified3Days,
     };
   }
 

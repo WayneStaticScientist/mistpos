@@ -29,12 +29,8 @@ class ZimraHelper {
     if (signature.isEmpty) return "0000000000000000";
     try {
       final decodedBytes = base64Decode(signature);
-      // ZIMRA expects the MD5 hash of the signature's lowercase hexadecimal string representation
-      final hexString = decodedBytes
-          .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
-          .join()
-          .toLowerCase();
-      final md5Hash = md5.convert(utf8.encode(hexString)).toString().toUpperCase();
+      // ZIMRA expects the MD5 hash of the RAW signature bytes, formatted as a hex string
+      final md5Hash = md5.convert(decodedBytes).toString().toUpperCase();
       return md5Hash.substring(0, 16);
     } catch (e) {
       return "0000000000000000";

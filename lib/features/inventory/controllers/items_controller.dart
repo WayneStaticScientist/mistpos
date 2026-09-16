@@ -568,10 +568,10 @@ class ItemsController extends GetxController {
     final model = e['item'] as ItemModel;
     final sm = ItemSavedModel()
       ..dataMap = _compileList(e['dataMap'] as Map<String, bool>? ?? {})
-      ..count = e['count']
-      ..cost = e['cost'] as double? ?? 0.0
-      ..addenum = e['addenum'] as double? ?? 0.0
-      ..qouted = e['qouted'] as double? ?? 0.0
+      ..count = (e['count'] as num?)?.toDouble() ?? 0.0
+      ..cost = (e['cost'] as num?)?.toDouble() ?? 0.0
+      ..addenum = (e['addenum'] as num?)?.toDouble() ?? 0.0
+      ..qouted = (e['qouted'] as num?)?.toDouble() ?? 0.0
       ..baseId = model.id;
     return sm;
   }

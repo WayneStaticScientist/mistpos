@@ -3,14 +3,15 @@ import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mistpos/core/responsive/screen_sizes.dart';
+import 'package:mistpos/core/services/api/url_services.dart';
 import 'package:mistpos/data/models/company_model.dart';
 import 'package:mistpos/features/settings/screens/modern_layout.dart';
 import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:mistpos/core/widgets/loaders/small_loader.dart';
 import 'package:mistpos/core/widgets/buttons/mist_form_button.dart';
 import 'package:mistpos/core/utils/toast.dart';
-import 'package:mistpos/core/services/api/url_services.dart';
 import 'package:mistpos/core/services/api/network_wrapper.dart';
+import 'package:mistpos/features/settings/screens_gateways/paynow/screen_subscription_payment.dart';
 import 'package:mistpos/features/admin/controllers/admin_controller.dart';
 import 'package:mistpos/features/settings/screens_zimra/screen_setup_complete.dart';
 
@@ -52,10 +53,38 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
         final company = _inventoryController.company.value!;
         final isRegistered = company.zimraCertificate != null;
         final isTest = company.zimraIsTest ?? true;
-        final statusColor = isRegistered ? const Color(0xFF00C48C) : const Color(0xFFFF6B35);
-        final statusBgColor = isRegistered
-            ? const Color(0xFF00C48C).withAlpha(isDark ? 25 : 18)
-            : const Color(0xFFFF6B35).withAlpha(isDark ? 25 : 18);
+        final validUntil = company.zimraSubscriptionValidUntil;
+        final hasSub =
+            company.zimraHasSubscription == true &&
+            validUntil != null &&
+            validUntil.isAfter(DateTime.now());
+
+        final Color statusColor;
+        final Color statusBgColor;
+        final String statusTitle;
+        final String statusSubtitle;
+        final IconData statusIcon;
+
+        if (!isRegistered) {
+          statusColor = const Color(0xFFFF6B35);
+          statusBgColor = const Color(0xFFFF6B35).withAlpha(isDark ? 25 : 18);
+          statusTitle = "Setup Required";
+          statusSubtitle = "Register your virtual fiscal device";
+          statusIcon = Icons.warning_amber_rounded;
+        } else if (!hasSub) {
+          statusColor = Colors.amber.shade700;
+          statusBgColor = Colors.amber.withAlpha(isDark ? 30 : 18);
+          statusTitle = "Subscription Required";
+          statusSubtitle = "Receipts won't be fiscalized until you subscribe";
+          statusIcon = Icons.warning_amber_rounded;
+        } else {
+          statusColor = const Color(0xFF00C48C);
+          statusBgColor = const Color(0xFF00C48C).withAlpha(isDark ? 25 : 18);
+          statusTitle = "Active & Compliant";
+          statusSubtitle =
+              "Connected to ZIMRA FDMS · ${isTest ? 'Sandbox' : 'Production'}";
+          statusIcon = Icons.verified_user_rounded;
+        }
 
         return ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -66,10 +95,7 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
               decoration: BoxDecoration(
                 color: statusBgColor,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: statusColor.withAlpha(60),
-                  width: 1,
-                ),
+                border: Border.all(color: statusColor.withAlpha(60), width: 1),
               ),
               child: Row(
                 children: [
@@ -81,7 +107,7 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      isRegistered ? Icons.verified_user_rounded : Icons.warning_amber_rounded,
+                      statusIcon,
                       color: statusColor,
                       size: 22,
                     ),
@@ -92,7 +118,7 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          isRegistered ? "Active & Compliant" : "Setup Required",
+                          statusTitle,
                           style: TextStyle(
                             color: statusColor,
                             fontSize: 16,
@@ -102,9 +128,7 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          isRegistered
-                              ? "Connected to ZIMRA FDMS · ${isTest ? 'Sandbox' : 'Production'}"
-                              : "Register your virtual fiscal device",
+                          statusSubtitle,
                           style: TextStyle(
                             color: statusColor.withAlpha(180),
                             fontSize: 13,
@@ -116,10 +140,75 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                 ],
               ),
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 20),
+
+            if (isRegistered && !hasSub) ...[
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withAlpha(isDark ? 30 : 18),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.amber.shade700.withAlpha(90),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      color: Colors.amber.shade700,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        "Your receipts won't be fiscalized until you subscribe to a ZIMRA plan.",
+                        style: TextStyle(
+                          color: isDark
+                              ? Colors.amber.shade200
+                              : Colors.amber.shade900,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () => _showSubscribeDialog(context, company),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber.shade700,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: const Text(
+                        "Subscribe",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
 
             if (isRegistered) ...[
               _buildFiscalDayCard(context, company, isDark),
+              const SizedBox(height: 20),
+              _buildZimraSubscriptionCard(context, company, isDark),
               const SizedBox(height: 20),
             ],
 
@@ -135,7 +224,8 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                   subtitle: isRegistered
                       ? "Device ID: #${company.zimraDeviceId ?? 'N/A'}"
                       : "Set up Device ID, Serial & Key",
-                  onTap: () => Get.to(() => ScreenZimraRegistration(company: company)),
+                  onTap: () =>
+                      Get.to(() => ScreenZimraRegistration(company: company)),
                 ),
                 MistMordernLayout.divider,
                 _buildMenuTile(
@@ -145,28 +235,36 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                   title: "Environment Mode",
                   subtitle: "Switch between Sandbox and Production",
                   trailing: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: isTest
                           ? Colors.amber.withAlpha(isDark ? 30 : 18)
                           : Colors.green.withAlpha(isDark ? 30 : 18),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: isTest ? Colors.amber.shade600 : Colors.green.shade600,
+                        color: isTest
+                            ? Colors.amber.shade600
+                            : Colors.green.shade600,
                         width: 1,
                       ),
                     ),
                     child: Text(
                       isTest ? "SANDBOX" : "LIVE",
                       style: TextStyle(
-                        color: isTest ? Colors.amber.shade600 : Colors.green.shade600,
+                        color: isTest
+                            ? Colors.amber.shade600
+                            : Colors.green.shade600,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.8,
                       ),
                     ),
                   ),
-                  onTap: () => Get.to(() => ScreenZimraEnvironment(company: company)),
+                  onTap: () =>
+                      Get.to(() => ScreenZimraEnvironment(company: company)),
                 ),
                 MistMordernLayout.divider,
                 _buildMenuTile(
@@ -175,7 +273,8 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                   iconColor: Colors.teal,
                   title: "Connectivity Diagnostics",
                   subtitle: "Run diagnostic connection and handshake tests",
-                  onTap: () => Get.to(() => ScreenZimraConnectivity(company: company)),
+                  onTap: () =>
+                      Get.to(() => ScreenZimraConnectivity(company: company)),
                 ),
                 MistMordernLayout.divider,
                 _buildMenuTile(
@@ -184,7 +283,8 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                   iconColor: Colors.blueGrey,
                   title: "ZIMRA Preferences",
                   subtitle: "Auto Fiscal Day, Offline Receipts, etc.",
-                  onTap: () => Get.to(() => ScreenZimraPreferences(company: company)),
+                  onTap: () =>
+                      Get.to(() => ScreenZimraPreferences(company: company)),
                 ),
                 MistMordernLayout.divider,
                 _buildMenuTile(
@@ -201,6 +301,209 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
           ],
         ).constrained(maxWidth: ScreenSizes.maxWidth).center();
       }),
+    );
+  }
+
+  Widget _buildZimraSubscriptionCard(
+    BuildContext context,
+    CompanyModel company,
+    bool isDark,
+  ) {
+    final validUntil = company.zimraSubscriptionValidUntil;
+    final hasSub =
+        company.zimraHasSubscription == true &&
+        validUntil != null &&
+        validUntil.isAfter(DateTime.now());
+
+    final statusColor = hasSub ? Colors.green : Colors.red;
+
+    return MistMordernLayout(
+      label: "FISCALIZATION SUBSCRIPTION",
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: statusColor.withAlpha(isDark ? 30 : 18),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  hasSub ? Icons.check_circle_outline : Icons.cancel_outlined,
+                  color: statusColor,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      hasSub ? "Active" : "Expired / Not Subscribed",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: statusColor,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      validUntil != null
+                          ? "Valid until ${DateFormat('dd MMM yyyy').format(validUntil)}"
+                          : "No active subscription",
+                      style: TextStyle(
+                        color: Colors.grey.shade500,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              OutlinedButton(
+                onPressed: () => _showSubscribeDialog(context, company),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.blue,
+                  side: const BorderSide(color: Colors.blue, width: 1),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  hasSub ? "Extend" : "Subscribe",
+                  style: const TextStyle(fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (!hasSub) ...[
+          MistMordernLayout.divider,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.info_outline_rounded,
+                  color: Colors.amber.shade700,
+                  size: 16,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    "Your receipts will not be fiscalized until you subscribe.",
+                    style: TextStyle(
+                      color: isDark
+                          ? Colors.amber.shade200
+                          : Colors.amber.shade900,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  void _showSubscribeDialog(BuildContext context, CompanyModel company) async {
+    int months = 1;
+    double pricePerMonth = 5.0; // Default or fallback
+
+    // Optionally fetch price from backend
+    final res = await Net.get("/subscriptions/zimra-price");
+    if (!res.hasError && res.body != null && res.body['price'] != null) {
+      pricePerMonth = (res.body['price'] as num).toDouble();
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text("ZIMRA Subscription"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Price per month: \$${pricePerMonth.toStringAsFixed(2)}",
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Text("Months: "),
+                      IconButton(
+                        icon: const Icon(Icons.remove_circle_outline),
+                        onPressed: () {
+                          if (months > 1) setState(() => months--);
+                        },
+                      ),
+                      Text(
+                        "$months",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add_circle_outline),
+                        onPressed: () {
+                          setState(() => months++);
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Total: \$${(months * pricePerMonth).toStringAsFixed(2)}",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Get.to(
+                      () => ScreenSubscriptionPayment(
+                        title: "ZIMRA Fiscalization ($months Months)",
+                        subKey: "zimra",
+                        amount: months * pricePerMonth,
+                        durationMonths: months,
+                        type: "zimra",
+                      ),
+                    );
+                  },
+                  child: const Text("Proceed to Payment"),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
@@ -254,7 +557,11 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                     color: Colors.teal.withAlpha(isDark ? 30 : 18),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.play_circle_outline_rounded, color: Colors.teal, size: 20),
+                  child: const Icon(
+                    Icons.play_circle_outline_rounded,
+                    color: Colors.teal,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -263,12 +570,18 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                     children: [
                       const Text(
                         "Open Fiscal Day",
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         "Start ZIMRA fiscal recording for today.",
-                        style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
@@ -279,8 +592,13 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.teal,
                     side: const BorderSide(color: Colors.teal, width: 1),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -302,7 +620,11 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                     color: Colors.red.withAlpha(isDark ? 30 : 18),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.power_settings_new_rounded, color: Colors.red, size: 20),
+                  child: const Icon(
+                    Icons.power_settings_new_rounded,
+                    color: Colors.red,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -311,12 +633,18 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                     children: [
                       const Text(
                         "Close Fiscal Day",
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         "End the fiscal day when done issuing receipts.",
-                        style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
@@ -327,12 +655,20 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.red,
                     side: const BorderSide(color: Colors.red, width: 1),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: const Text("Close Day", style: TextStyle(fontSize: 13)),
+                  child: const Text(
+                    "Close Day",
+                    style: TextStyle(fontSize: 13),
+                  ),
                 ),
               ],
             ),
@@ -344,11 +680,15 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
   void _openFiscalDay(company) async {
     final response = await Net.post("/cashier/open-fiscal-day");
     if (!response.hasError) {
-      final msg = response.body?['message'] ?? "Fiscal day opened successfully.";
+      final msg =
+          response.body?['message'] ?? "Fiscal day opened successfully.";
       Toaster.showSuccess(msg);
       _inventoryController.loadCompany();
     } else {
-      final errMsg = response.body?['error'] ?? response.body?['message'] ?? 'Unknown error';
+      final errMsg =
+          response.body?['error'] ??
+          response.body?['message'] ??
+          'Unknown error';
       Toaster.showError("Open day failed: $errMsg");
     }
   }
@@ -356,14 +696,19 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
   void _closeFiscalDay(company) async {
     final response = await Net.post("/cashier/close-fiscal-day");
     if (!response.hasError) {
-      final msg = response.body?['message'] ?? "Fiscal day closed successfully.";
+      final msg =
+          response.body?['message'] ?? "Fiscal day closed successfully.";
       Toaster.showSuccess(msg);
       _inventoryController.loadCompany();
     } else {
-      final errMsg = response.body?['error'] ?? response.body?['message'] ?? 'Unknown error';
+      final errMsg =
+          response.body?['error'] ??
+          response.body?['message'] ??
+          'Unknown error';
       Toaster.showError("Close day failed: $errMsg");
     }
   }
+
   Widget _buildMenuTile({
     required BuildContext context,
     required IconData icon,
@@ -398,7 +743,10 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -409,7 +757,12 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
               ),
             ),
             const SizedBox(width: 8),
-            trailing ?? Icon(Icons.chevron_right_rounded, size: 18, color: Colors.grey.shade500),
+            trailing ??
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 18,
+                  color: Colors.grey.shade500,
+                ),
           ],
         ),
       ),
@@ -444,7 +797,6 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
       ),
     );
   }
-
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1167,7 +1519,10 @@ class _ScreenZimraHelpState extends State<ScreenZimraHelp>
           controller: _tabController,
           indicatorSize: TabBarIndicatorSize.label,
           indicatorWeight: 2.5,
-          labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
           unselectedLabelStyle: const TextStyle(fontSize: 13),
           tabs: const [
             Tab(text: "Device Setup"),
@@ -1242,12 +1597,16 @@ class _ScreenZimraHelpState extends State<ScreenZimraHelp>
                     ),
                     const SizedBox(height: 20),
                     OutlinedButton.icon(
-                      onPressed: () => UrlLauncherService.launchUrl("https://mytaxselfservice.zimra.co.zw/"),
+                      onPressed: () => UrlLauncherService.launchUrl(
+                        "https://mytaxselfservice.zimra.co.zw/",
+                      ),
                       icon: const Icon(Icons.open_in_new_rounded, size: 16),
                       label: const Text("Open TaRMS Portal"),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size.fromHeight(48),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ],
@@ -1278,7 +1637,8 @@ class _ScreenZimraHelpState extends State<ScreenZimraHelp>
                       icon: Icons.wb_sunny_rounded,
                       color: Colors.amber,
                       title: "Opening a Fiscal Day",
-                      body: "MistPOS can open the fiscal day automatically when you process your first receipt of the day (if Auto Open is enabled in Preferences). You may also open it manually via this screen.",
+                      body:
+                          "MistPOS can open the fiscal day automatically when you process your first receipt of the day (if Auto Open is enabled in Preferences). You may also open it manually via this screen.",
                       isDark: isDark,
                     ),
                     const SizedBox(height: 12),
@@ -1308,7 +1668,8 @@ class _ScreenZimraHelpState extends State<ScreenZimraHelp>
                       icon: Icons.nights_stay_rounded,
                       color: Colors.indigo,
                       title: "Closing the Fiscal Day",
-                      body: "You MUST close the fiscal day before midnight each day. Closing sends a summary of all receipts to ZIMRA for the day. Failure to close prevents the next day from opening.",
+                      body:
+                          "You MUST close the fiscal day before midnight each day. Closing sends a summary of all receipts to ZIMRA for the day. Failure to close prevents the next day from opening.",
                       isDark: isDark,
                     ),
                     const SizedBox(height: 12),
@@ -1356,7 +1717,12 @@ class _ScreenZimraHelpState extends State<ScreenZimraHelp>
     );
   }
 
-  Widget _buildSectionHeader(String title, String subtitle, IconData icon, Color color) {
+  Widget _buildSectionHeader(
+    String title,
+    String subtitle,
+    IconData icon,
+    Color color,
+  ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1373,9 +1739,22 @@ class _ScreenZimraHelpState extends State<ScreenZimraHelp>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 17,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text(subtitle, style: TextStyle(color: Colors.grey.shade500, fontSize: 12.5, height: 1.4)),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  color: Colors.grey.shade500,
+                  fontSize: 12.5,
+                  height: 1.4,
+                ),
+              ),
             ],
           ),
         ),
@@ -1406,9 +1785,23 @@ class _ScreenZimraHelpState extends State<ScreenZimraHelp>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: color)),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: color,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(body, style: TextStyle(color: Colors.grey.shade500, fontSize: 12, height: 1.4)),
+                Text(
+                  body,
+                  style: TextStyle(
+                    color: Colors.grey.shade500,
+                    fontSize: 12,
+                    height: 1.4,
+                  ),
+                ),
               ],
             ),
           ),
@@ -1428,12 +1821,20 @@ class _ScreenZimraHelpState extends State<ScreenZimraHelp>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 18),
+          const Icon(
+            Icons.warning_amber_rounded,
+            color: Colors.redAccent,
+            size: 18,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               message,
-              style: TextStyle(color: Colors.grey.shade400, fontSize: 12, height: 1.4),
+              style: TextStyle(
+                color: Colors.grey.shade400,
+                fontSize: 12,
+                height: 1.4,
+              ),
             ),
           ),
         ],
@@ -1488,12 +1889,19 @@ class _ScreenZimraHelpState extends State<ScreenZimraHelp>
                   const SizedBox(height: 6),
                   Text(
                     title,
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13.5,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     description,
-                    style: TextStyle(color: Colors.grey.shade500, fontSize: 12.5, height: 1.45),
+                    style: TextStyle(
+                      color: Colors.grey.shade500,
+                      fontSize: 12.5,
+                      height: 1.45,
+                    ),
                   ),
                 ],
               ),
@@ -1504,7 +1912,6 @@ class _ScreenZimraHelpState extends State<ScreenZimraHelp>
     );
   }
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PREFERENCES SCREEN

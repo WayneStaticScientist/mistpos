@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
@@ -44,14 +45,46 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
   String _selectedPaymentMethod = "Cash";
   final List<Map<String, dynamic>> _paymentMethods = [
     {"name": "Cash", "color": Colors.green.shade600, "icon": Icons.payments},
-    {"name": "EcoCash", "color": const Color(0xFF0078C1), "icon": Icons.phone_android},
-    {"name": "InBucks", "color": Colors.teal.shade600, "icon": Icons.phone_iphone},
-    {"name": "OneMoney", "color": Colors.orange.shade800, "icon": Icons.mobile_friendly},
-    {"name": "Telecash", "color": Colors.red.shade600, "icon": Icons.send_to_mobile},
-    {"name": "ZimSwitch", "color": const Color(0xFF1B3A68), "icon": Icons.credit_card},
-    {"name": "Visa", "color": const Color(0xFF1A1F71), "icon": Icons.credit_card},
-    {"name": "MasterCard", "color": const Color(0xFFEB001B), "icon": Icons.credit_card},
-    {"name": "Bank Transfer", "color": Colors.deepPurple, "icon": Icons.account_balance},
+    {
+      "name": "EcoCash",
+      "color": const Color(0xFF0078C1),
+      "icon": Icons.phone_android,
+    },
+    {
+      "name": "InBucks",
+      "color": Colors.teal.shade600,
+      "icon": Icons.phone_iphone,
+    },
+    {
+      "name": "OneMoney",
+      "color": Colors.orange.shade800,
+      "icon": Icons.mobile_friendly,
+    },
+    {
+      "name": "Telecash",
+      "color": Colors.red.shade600,
+      "icon": Icons.send_to_mobile,
+    },
+    {
+      "name": "ZimSwitch",
+      "color": const Color(0xFF1B3A68),
+      "icon": Icons.credit_card,
+    },
+    {
+      "name": "Visa",
+      "color": const Color(0xFF1A1F71),
+      "icon": Icons.credit_card,
+    },
+    {
+      "name": "MasterCard",
+      "color": const Color(0xFFEB001B),
+      "icon": Icons.credit_card,
+    },
+    {
+      "name": "Bank Transfer",
+      "color": Colors.deepPurple,
+      "icon": Icons.account_balance,
+    },
   ];
 
   @override
@@ -70,15 +103,20 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF8F9FA),
+      backgroundColor: isDark
+          ? const Color(0xFF121212)
+          : const Color(0xFFF8F9FA),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         title: "Checkout".text(
-          style: const TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.5),
+          style: const TextStyle(
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
+          ),
         ),
         actions: [
           IconButton(
@@ -168,14 +206,16 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        "PAYMENT METHOD".text(
-          style: TextStyle(
-            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.5,
-          ),
-        ).padding(const EdgeInsets.only(left: 8, bottom: 16)),
+        "PAYMENT METHOD"
+            .text(
+              style: TextStyle(
+                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.5,
+              ),
+            )
+            .padding(const EdgeInsets.only(left: 8, bottom: 16)),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -192,7 +232,7 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
             final color = method['color'] as Color;
             final icon = method['icon'] as IconData;
             final isSelected = _selectedPaymentMethod == name;
-            
+
             return GestureDetector(
               onTap: () {
                 setState(() {
@@ -202,33 +242,45 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
                       _itemsListController.totalPrice.value,
                       _userController.user.value?.baseCurrence ?? '',
                     ).toString();
-                    _debounceCache = ""; 
+                    _debounceCache = "";
                   }
                 });
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 decoration: BoxDecoration(
-                  color: isSelected ? color.withAlpha(20) : (isDark ? const Color(0xFF1E1E1E) : Colors.white),
+                  color: isSelected
+                      ? color.withAlpha(20)
+                      : (isDark ? const Color(0xFF1E1E1E) : Colors.white),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: isSelected ? color : (isDark ? Colors.grey.shade800 : Colors.grey.shade300),
+                    color: isSelected
+                        ? color
+                        : (isDark
+                              ? Colors.grey.shade800
+                              : Colors.grey.shade300),
                     width: isSelected ? 2 : 1,
                   ),
-                  boxShadow: isSelected ? [
-                    BoxShadow(
-                      color: color.withAlpha(40),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    )
-                  ] : [],
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: color.withAlpha(40),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ]
+                      : [],
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
                       icon,
-                      color: isSelected ? color : (isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+                      color: isSelected
+                          ? color
+                          : (isDark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade600),
                       size: 28,
                     ),
                     8.gapHeight,
@@ -236,9 +288,15 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
                       name,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: isSelected ? color : (isDark ? Colors.grey.shade300 : Colors.grey.shade700),
+                        color: isSelected
+                            ? color
+                            : (isDark
+                                  ? Colors.grey.shade300
+                                  : Colors.grey.shade700),
                         fontSize: 12,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.w500,
                       ),
                     ),
                   ],
@@ -255,20 +313,24 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        "AMOUNT TENDERED".text(
-          style: TextStyle(
-            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.5,
-          ),
-        ).padding(const EdgeInsets.only(left: 8, bottom: 12)),
+        "AMOUNT TENDERED"
+            .text(
+              style: TextStyle(
+                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.5,
+              ),
+            )
+            .padding(const EdgeInsets.only(left: 8, bottom: 12)),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: isDark ? Colors.grey.shade800 : Colors.grey.shade300),
+            border: Border.all(
+              color: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
+            ),
             boxShadow: [
               if (!isDark)
                 BoxShadow(
@@ -292,7 +354,9 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
               Expanded(
                 child: TextFormField(
                   controller: _amountController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -382,7 +446,7 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
   /// Modern dual-button action bar
   Widget _buildBottomActions() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Container(
       padding: const EdgeInsets.only(left: 24, right: 24, bottom: 32, top: 20),
       decoration: BoxDecoration(
@@ -408,7 +472,11 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
               ),
               child: OutlinedButton.icon(
                 onPressed: _payOnCredit,
-                icon: Icon(Icons.assignment_ind_outlined, color: Colors.orange.shade700, size: 20),
+                icon: Icon(
+                  Icons.assignment_ind_outlined,
+                  color: Colors.orange.shade700,
+                  size: 20,
+                ),
                 label: const Text(
                   "Credit",
                   style: TextStyle(
@@ -436,13 +504,12 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: change >= 0.0 ? [
-                    Get.theme.colorScheme.primary,
-                    Get.theme.colorScheme.primary.withAlpha(200),
-                  ] : [
-                    Colors.grey.shade600,
-                    Colors.grey.shade500,
-                  ],
+                  colors: change >= 0.0
+                      ? [
+                          Get.theme.colorScheme.primary,
+                          Get.theme.colorScheme.primary.withAlpha(200),
+                        ]
+                      : [Colors.grey.shade600, Colors.grey.shade500],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -467,7 +534,11 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
                           strokeWidth: 2.5,
                         ),
                       )
-                    : const Icon(Icons.check_circle_outline, color: Colors.white, size: 22),
+                    : const Icon(
+                        Icons.check_circle_outline,
+                        color: Colors.white,
+                        size: 22,
+                      ),
                 label: const Text(
                   "CONFIRM PAYMENT",
                   style: TextStyle(
@@ -573,6 +644,7 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
       Get.back();
       Toaster.showSuccess("Payment saved as draft");
     } catch (e) {
+      log("Failed to save : $e");
       if (mounted) setState(() => _loading = false);
       Toaster.showError("Failed to save: $e");
     }

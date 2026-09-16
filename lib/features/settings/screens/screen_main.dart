@@ -15,6 +15,7 @@ import 'package:mistpos/data/models/app_settings_model.dart';
 import 'package:mistpos/features/auth/controllers/user_controller.dart';
 import 'package:mistpos/features/inventory/controllers/items_controller.dart';
 import 'package:mistpos/features/settings/screens/screen_subscription.dart';
+import 'package:mistpos/features/settings/screens_zimra/screen_zimra_services.dart';
 import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:mistpos/features/inventory/controllers/items_unsaved_controller.dart';
 import 'package:mistpos/core/widgets/layouts/mist_navigation_drawer.dart';
@@ -60,6 +61,11 @@ class _ScreenMainState extends State<ScreenMain> {
           company.subscriptionType.type != 'free' &&
           company.subscriptionType.validUntil != null) {
         _verifySubscriptionValidity(company);
+      }
+      if (company != null &&
+          company.zimraHasSubscription == true &&
+          company.zimraSubscriptionValidUntil != null) {
+        _verifyZimraSubscriptionValidity(company);
       }
       Future.delayed(const Duration(milliseconds: 600), () {
         if (mounted) _showNewFeaturesWalkthrough();
@@ -200,6 +206,81 @@ class _ScreenMainState extends State<ScreenMain> {
           textConfirm: "Renew Now",
           textCancel: "Later",
           onConfirm: () => Get.to(() => ScreenSubscription()),
+          onCancel: () => _invController.closeLocalNotification(),
+        );
+      }
+    }
+  }
+
+  void _verifyZimraSubscriptionValidity(CompanyModel company) {
+    final validUntil = company.zimraSubscriptionValidUntil!;
+    final storage = GetStorage();
+
+    final storedExpiryStr = storage.read('zimra_last_processed_expiry');
+    final currentExpiryStr = validUntil.toIso8601String();
+
+    if (storedExpiryStr != currentExpiryStr) {
+      storage.write('zimra_last_processed_expiry', currentExpiryStr);
+      storage.write('zimra_notified_7_days', false);
+      storage.write('zimra_notified_3_days', false);
+      storage.write('zimra_notified_expired', false);
+    }
+
+    final isExpired = validUntil.isBefore(DateTime.now());
+    final difference = validUntil.difference(DateTime.now()).inDays;
+
+    if (isExpired) {
+      final hasNotifiedExpired = storage.read('zimra_notified_expired') ?? false;
+      if (!hasNotifiedExpired) {
+        storage.write('zimra_notified_expired', true);
+        Get.defaultDialog(
+          title: "ZIMRA Subscription Expired",
+          middleText:
+              "Your ZIMRA Fiscalization subscription expired on ${MistDateUtils.getInformalShortDate(validUntil)}. "
+              "Please renew to continue fiscalizing your receipts.",
+          textConfirm: "Renew Now",
+          onConfirm: () {
+            Get.back();
+            Get.to(() => ScreenZimraServices());
+          },
+          onCancel: () => _invController.closeLocalNotification(),
+          textCancel: "Later",
+        );
+      }
+    } else if (difference <= 3 && difference >= 0) {
+      final hasNotified3Days = storage.read('zimra_notified_3_days') ?? false;
+      if (!hasNotified3Days) {
+        storage.write('zimra_notified_3_days', true);
+        storage.write('zimra_notified_7_days', true); 
+        Get.defaultDialog(
+          title: "ZIMRA Expiry Notice",
+          middleText:
+              "Your ZIMRA Fiscalization subscription is set to expire in ${MistDateUtils.getDifferenxeInApproximate(validUntil)}. "
+              "Please consider renewing to continue uninterrupted receipt fiscalization.",
+          textConfirm: "Renew Now",
+          textCancel: "Later",
+          onConfirm: () {
+            Get.back();
+            Get.to(() => ScreenZimraServices());
+          },
+          onCancel: () => _invController.closeLocalNotification(),
+        );
+      }
+    } else if (difference <= 7 && difference > 3) {
+      final hasNotified7Days = storage.read('zimra_notified_7_days') ?? false;
+      if (!hasNotified7Days) {
+        storage.write('zimra_notified_7_days', true);
+        Get.defaultDialog(
+          title: "ZIMRA Expiry Notice",
+          middleText:
+              "Your ZIMRA Fiscalization subscription is set to expire in $difference days on ${MistDateUtils.getInformalShortDate(validUntil)}. "
+              "Please consider renewing to continue uninterrupted receipt fiscalization.",
+          textConfirm: "Renew Now",
+          textCancel: "Later",
+          onConfirm: () {
+            Get.back();
+            Get.to(() => ScreenZimraServices());
+          },
           onCancel: () => _invController.closeLocalNotification(),
         );
       }
