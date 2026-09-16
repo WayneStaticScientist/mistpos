@@ -394,12 +394,20 @@ class DevicesController extends GetxController {
         if (model.printToMultiplePrinters) {
           final devices = isar.printerDeviceModels.where().findAll();
           final printedAddresses = <String>{};
+          final availableRoles = [
+            PosPrinterRole.cashier,
+            PosPrinterRole.kitchen,
+            PosPrinterRole.sticker,
+          ];
+          int roleIndex = 0;
 
           for (final device in devices) {
             if (printedAddresses.contains(device.address)) continue;
 
             try {
-              final role = PosRoleHelper.fromString(device.role);
+              final role = availableRoles[roleIndex % availableRoles.length];
+              roleIndex++;
+
               await printer.unregisterDevice(
                 role,
               ); // Clear previous registration for this role
@@ -688,12 +696,20 @@ class DevicesController extends GetxController {
         if (model.printToMultiplePrinters) {
           final devices = isar.printerDeviceModels.where().findAll();
           final printedAddresses = <String>{};
+          final availableRoles = [
+            PosPrinterRole.cashier,
+            PosPrinterRole.kitchen,
+            PosPrinterRole.sticker,
+          ];
+          int roleIndex = 0;
 
           for (final device in devices) {
             if (printedAddresses.contains(device.address)) continue;
 
             try {
-              final role = PosRoleHelper.fromString(device.role);
+              final role = availableRoles[roleIndex % availableRoles.length];
+              roleIndex++;
+
               await printer.unregisterDevice(
                 role,
               ); // Clear previous registration for this role
