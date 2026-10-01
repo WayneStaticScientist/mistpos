@@ -3,6 +3,7 @@ import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/core/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/data/models/company_model.dart';
 import 'package:mistpos/data/models/tax_model.dart';
 import 'package:mistpos/core/responsive/screen_sizes.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
@@ -98,6 +99,20 @@ class _ScreenEditTaxState extends State<ScreenEditTax> {
                       },
                     ),
                   ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text("VAT inclusive for this tax"),
+                    subtitle: Text(
+                      "When on, item prices already include this rate. When off, this rate is added at checkout.",
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                    leading: Checkbox(
+                      value: widget.tax.pricesIncludeTax,
+                      onChanged: (v) => setState(() {
+                        widget.tax.pricesIncludeTax = v ?? false;
+                      }),
+                    ),
+                  ),
                   14.gapHeight,
                   MistFormInput(
                     validateString: "Tax Value is required",
@@ -109,6 +124,8 @@ class _ScreenEditTaxState extends State<ScreenEditTax> {
                     underLineColor: Colors.grey.withAlpha(200),
                     controller: _itemValueController,
                   ),
+                  14.gapHeight,
+                  _buildZimraRateChips(),
                   14.gapHeight,
                 ]
                 .column(
@@ -179,6 +196,41 @@ class _ScreenEditTaxState extends State<ScreenEditTax> {
           ],
         ),
       ).constrained(maxWidth: ScreenSizes.maxWidth).center(),
+    );
+  }
+
+  Widget _buildZimraRateChips() {
+    final company = _invenController.company.value ??
+        CompanyModel.fromStorage();
+    final rates = company?.zimraApplicableTaxes ?? [];
+    if (rates.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "ZIMRA device rates (tap to set percentage)",
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+        ),
+        8.gapHeight,
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: rates.map((t) {
+            final label = t.taxName?.trim().isNotEmpty == true
+                ? t.taxName!
+                : (t.taxPercent != null ? "${t.taxPercent}%" : "Exempt");
+            return ActionChip(
+              label: Text(label, style: const TextStyle(fontSize: 12)),
+              onPressed: t.taxPercent == null
+                  ? null
+                  : () {
+                      _itemValueController.text = t.taxPercent!.toString();
+                      setState(() {});
+                    },
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 

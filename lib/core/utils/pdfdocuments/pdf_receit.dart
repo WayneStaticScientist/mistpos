@@ -13,6 +13,7 @@ import 'package:isar_plus/isar_plus.dart';
 import 'package:mistpos/data/models/customer_model.dart';
 import 'package:mistpos/features/inventory/controllers/items_controller.dart';
 import 'package:mistpos/core/utils/currence_converter.dart';
+import 'package:mistpos/core/utils/zimra_receipt_type.dart';
 
 class PdfReceit {
   static Future<pw.Document> generate(
@@ -101,7 +102,16 @@ class PdfReceit {
               ),
               pw.SizedBox(height: 12),
               pw.Divider(color: PdfColors.grey400, thickness: 1),
-              pw.SizedBox(height: 12),
+              pw.SizedBox(height: 8),
+              pw.Text(
+                ZimraReceiptDisplay.printHeader(receitModel),
+                style: pw.TextStyle(
+                  fontSize: 11,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+                textAlign: pw.TextAlign.center,
+              ),
+              pw.SizedBox(height: 8),
 
               // ── Receipt Details ──
               pw.Row(
@@ -445,7 +455,8 @@ class PdfReceit {
               ],
               pw.SizedBox(height: 16),
 
-              if (Get.isRegistered<InventoryController>() &&
+              if (receitModel.fiscalized &&
+                  Get.isRegistered<InventoryController>() &&
                   (Get.find<InventoryController>()
                           .company
                           .value
@@ -462,6 +473,10 @@ class PdfReceit {
                               .value
                               ?.zimraIsTest ??
                           true,
+                      qrUrlFromConfig: Get.find<InventoryController>()
+                          .company
+                          .value
+                          ?.zimraQrUrl,
                     ),
                     width: 60,
                     height: 60,

@@ -135,19 +135,51 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildTotalSummaryCard(isDark),
-            24.gapHeight,
-            _buildPaymentMethodsCard(isDark),
-            24.gapHeight,
-            _buildTenderedCard(isDark),
-            12.gapHeight,
-            _buildBalanceDisplay(),
-            40.gapHeight,
-          ],
-        ).padding(const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildTotalSummaryCard(isDark),
+                24.gapHeight,
+                _buildPaymentMethodsCard(isDark),
+                24.gapHeight,
+                _buildTenderedCard(isDark),
+                12.gapHeight,
+                _buildBalanceDisplay(),
+                40.gapHeight,
+              ],
+            ).padding(const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
+          ),
+          Obx(() {
+            if (!_itemsListController.receitsLoading.value) {
+              return const SizedBox.shrink();
+            }
+            return Container(
+              color: Colors.black54,
+              alignment: Alignment.center,
+              child: Card(
+                margin: const EdgeInsets.all(32),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const CircularProgressIndicator(),
+                      16.gapHeight,
+                      "Processing sale on server…".text(textAlign: TextAlign.center),
+                      8.gapHeight,
+                      "Waiting for server receipt and ZIMRA SubmitReceipt".text(
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ],
       ),
       bottomNavigationBar: _buildBottomActions(),
     );
@@ -702,7 +734,13 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
 
     if (state) {
       Get.back();
-      Toaster.showSuccess("Payment successful");
+      final online =
+          _invController.company.value?.enableOnlineSales ?? false;
+      Toaster.showSuccess(
+        online
+            ? "Payment successful — server receipt ready"
+            : "Payment successful",
+      );
     }
   }
 }

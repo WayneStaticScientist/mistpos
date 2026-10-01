@@ -9,9 +9,11 @@ import 'package:mistpos/data/models/user_model.dart';
 import 'package:mistpos/data/models/shifts_model.dart';
 import 'package:mistpos/core/utils/offline_printer.dart';
 import 'package:mistpos/data/models/customer_model.dart';
+import 'package:mistpos/data/models/company_model.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:mistpos/core/utils/currence_converter.dart';
 import 'package:mistpos/data/models/item_receit_model.dart';
+import 'package:mistpos/core/utils/zimra_receipt_type.dart';
 import 'package:mistpos/data/models/app_settings_model.dart';
 import 'package:mistpos/data/models/printer_device_model.dart';
 import 'package:pos_universal_printer/pos_universal_printer.dart';
@@ -250,7 +252,11 @@ class DevicesController extends GetxController {
       }
       if (row.value == "fiscal" && row.type == "system") {
         b.feed(1);
-        b.text('*** FISCAL RECEIPT ***', align: PosAlign.center, bold: true);
+        b.text(
+          ZimraReceiptDisplay.printHeader(itemReceitModel),
+          align: PosAlign.center,
+          bold: true,
+        );
         if (itemReceitModel.fiscalized) {
           b.text(
             'Receipt counter: ${itemReceitModel.zimraFiscalDayNo ?? ""}/${itemReceitModel.zimraReceiptGlobalNo ?? ""}',
@@ -289,20 +295,22 @@ class DevicesController extends GetxController {
         continue;
       }
       if (row.value == "qrcode" && row.type == "system") {
-        if (enableQrCode) {
-          b.feed(1);
-          b.text("--- QR CODE ---", align: PosAlign.center, bold: true);
+        CompanyModel? companyForQr;
+        if (Get.isRegistered<InventoryController>()) {
+          companyForQr = Get.find<InventoryController>().company.value;
+        }
+        final zimraQrOnReceipt =
+            companyForQr?.zimraQrFiscilization == true &&
+            itemReceitModel.fiscalized;
+        if (!enableQrCode && !zimraQrOnReceipt) {
+          continue;
+        }
+        b.feed(1);
+        b.text("--- QR CODE ---", align: PosAlign.center, bold: true);
 
-          bool printZimraQr = false;
-          if (Get.isRegistered<InventoryController>()) {
-            final company = Get.find<InventoryController>().company.value;
-            if (company?.zimraQrFiscilization == true &&
-                itemReceitModel.fiscalized) {
-              printZimraQr = true;
-            }
-          }
+        final printZimraQr = zimraQrOnReceipt;
 
-          if (printZimraQr) {
+        if (printZimraQr) {
             b.qrCode(
               ZimraHelper.generateQrUrl(
                 itemReceitModel,
@@ -312,6 +320,7 @@ class DevicesController extends GetxController {
                         .value
                         ?.zimraIsTest ??
                     true,
+                qrUrlFromConfig: companyForQr?.zimraQrUrl,
               ),
             );
             if (itemReceitModel.zimraSignature != null) {
@@ -330,12 +339,11 @@ class DevicesController extends GetxController {
               align: PosAlign.center,
             );
             b.text(ZimraHelper.manualZimraUrl, align: PosAlign.center);
-          } else {
-            b.qrCode(itemReceitModel.label);
-          }
-
-          b.feed(1);
+        } else {
+          b.qrCode(itemReceitModel.label);
         }
+
+        b.feed(1);
         continue;
       }
       if (row.value == "label" && row.type == "system") {

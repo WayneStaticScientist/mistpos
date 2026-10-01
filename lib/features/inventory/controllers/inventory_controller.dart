@@ -478,7 +478,7 @@ class InventoryController extends GetxController {
   RxBool loadingCompany = RxBool(false);
   RxString companyError = RxString("");
   Rx<CompanyModel?> company = Rx<CompanyModel?>(null);
-  void loadCompany() async {
+  Future<void> loadCompany() async {
     GetStorage storage = GetStorage();
     company.value = CompanyModel.fromStorage();
     companyError.value = "";

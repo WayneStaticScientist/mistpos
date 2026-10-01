@@ -59,7 +59,18 @@ class MistMordernLayout extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
-            children: children,
+            children: [
+              for (var i = 0; i < children.length; i++) ...[
+                if (i > 0) divider,
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
+                  child: children[i],
+                ),
+              ],
+            ],
           ),
         ),
       ],

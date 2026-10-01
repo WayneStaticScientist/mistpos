@@ -116,12 +116,52 @@ class ResellerPropsModel {
   }
 }
 
+DateTime? _parseMongoDate(dynamic value) {
+  if (value == null) return null;
+  if (value is String) return DateTime.tryParse(value);
+  if (value is Map) {
+    final inner = value[r'$date'];
+    if (inner is String) return DateTime.tryParse(inner);
+    if (inner is num) {
+      return DateTime.fromMillisecondsSinceEpoch(inner.toInt(), isUtc: true);
+    }
+  }
+  return null;
+}
+
+class ZimraApplicableTaxModel {
+  final String? taxName;
+  final double? taxPercent;
+  final int? taxID;
+
+  const ZimraApplicableTaxModel({
+    this.taxName,
+    this.taxPercent,
+    this.taxID,
+  });
+
+  factory ZimraApplicableTaxModel.fromJson(Map<String, dynamic> json) {
+    return ZimraApplicableTaxModel(
+      taxName: json['taxName'] as String?,
+      taxPercent: (json['taxPercent'] as num?)?.toDouble(),
+      taxID: json['taxID'] as int?,
+    );
+  }
+}
+
 class CompanyModel {
   String owner;
   String email;
   String name;
   bool enableCreditSale;
   bool shiftBasedSales;
+  bool enableOnlineSales;
+  bool onlineSalesStrictStock;
+  bool onlineSalesSyncBeforeCheckout;
+  bool onlineSalesWaitForFiscalization;
+  /// Shelf prices include VAT; checkout total does not add tax on top.
+  bool pricesIncludeTax;
+  List<ZimraApplicableTaxModel> zimraApplicableTaxes;
   bool verified;
   bool showSalesCount;
   ExchangeRateModel exchangeRates;
@@ -144,12 +184,14 @@ class CompanyModel {
   bool? zimraIsTest;
   int? zimraFiscalDayNo;
   String? zimraFiscalDayStatus;
+  String? zimraFiscalDayClosingErrorCode;
   DateTime? zimraLastFiscalDayOpened;
   int? zimraReceiptGlobalNo;
   int? zimraReceiptCounter;
   bool? zimraAutoOpenFiscalDay;
   bool? zimraAllowOfflineReceipts;
   bool? zimraQrFiscilization;
+  String? zimraQrUrl;
   bool? zimraHasSubscription;
   DateTime? zimraSubscriptionValidUntil;
   bool? zimraSubscriptionNotified7Days;
@@ -167,6 +209,12 @@ class CompanyModel {
     required this.subscriptionType,
     required this.enableCreditSale,
     this.shiftBasedSales = false,
+    this.enableOnlineSales = false,
+    this.onlineSalesStrictStock = true,
+    this.onlineSalesSyncBeforeCheckout = true,
+    this.onlineSalesWaitForFiscalization = true,
+    this.pricesIncludeTax = false,
+    this.zimraApplicableTaxes = const [],
     this.autoApproveAllExpenses = false,
     required this.automatedSync,
     required this.weeklyAutomatedSync,
@@ -181,12 +229,14 @@ class CompanyModel {
     this.zimraIsTest,
     this.zimraFiscalDayNo,
     this.zimraFiscalDayStatus,
+    this.zimraFiscalDayClosingErrorCode,
     this.zimraLastFiscalDayOpened,
     this.zimraReceiptGlobalNo,
     this.zimraReceiptCounter,
     this.zimraAutoOpenFiscalDay,
     this.zimraAllowOfflineReceipts,
     this.zimraQrFiscilization,
+    this.zimraQrUrl,
     this.zimraHasSubscription,
     this.zimraSubscriptionValidUntil,
     this.zimraSubscriptionNotified7Days,
@@ -202,6 +252,21 @@ class CompanyModel {
       autoApproveAllExpenses: json['autoApproveAllExpenses'] ?? false,
       enableCreditSale: json['enableCreditSale'] ?? true,
       shiftBasedSales: json['shiftBasedSales'] ?? false,
+      enableOnlineSales: json['enableOnlineSales'] ?? false,
+      onlineSalesStrictStock: json['onlineSalesStrictStock'] ?? true,
+      onlineSalesSyncBeforeCheckout:
+          json['onlineSalesSyncBeforeCheckout'] ?? true,
+      onlineSalesWaitForFiscalization:
+          json['onlineSalesWaitForFiscalization'] ?? true,
+      pricesIncludeTax: json['pricesIncludeTax'] ?? false,
+      zimraApplicableTaxes: json['zimra'] != null &&
+              json['zimra']['applicableTaxes'] is List
+          ? (json['zimra']['applicableTaxes'] as List<dynamic>)
+              .map((e) => ZimraApplicableTaxModel.fromJson(
+                    e as Map<String, dynamic>,
+                  ))
+              .toList()
+          : const [],
       owner: json['owner'],
       email: json['email'],
       hexId: json['_id'] ?? "",
@@ -229,6 +294,9 @@ class CompanyModel {
       zimraIsTest: json['zimra'] != null ? (json['zimra']['isTest'] as bool? ?? true) : (json['zimraIsTest'] as bool? ?? true),
       zimraFiscalDayNo: json['zimra'] != null ? json['zimra']['fiscalDayNo'] as int? : json['zimraFiscalDayNo'] as int?,
       zimraFiscalDayStatus: json['zimra'] != null ? json['zimra']['fiscalDayStatus'] as String? : json['zimraFiscalDayStatus'] as String?,
+      zimraFiscalDayClosingErrorCode: json['zimra'] != null
+          ? json['zimra']['fiscalDayClosingErrorCode'] as String?
+          : json['zimraFiscalDayClosingErrorCode'] as String?,
       zimraLastFiscalDayOpened: json['zimra'] != null
           ? (json['zimra']['lastFiscalDayOpened'] != null ? DateTime.parse(json['zimra']['lastFiscalDayOpened']) : null)
           : (json['zimraLastFiscalDayOpened'] != null ? DateTime.parse(json['zimraLastFiscalDayOpened']) : null),
@@ -237,10 +305,14 @@ class CompanyModel {
       zimraAutoOpenFiscalDay: json['zimra'] != null ? (json['zimra']['autoOpenFiscalDay'] as bool? ?? false) : (json['zimraAutoOpenFiscalDay'] as bool? ?? false),
       zimraAllowOfflineReceipts: json['zimra'] != null ? (json['zimra']['allowOfflineReceipts'] as bool? ?? false) : (json['zimraAllowOfflineReceipts'] as bool? ?? false),
       zimraQrFiscilization: json['zimra'] != null ? (json['zimra']['qrFiscilization'] as bool? ?? false) : (json['zimraQrFiscilization'] as bool? ?? false),
+      zimraQrUrl: json['zimra'] != null
+          ? json['zimra']['qrUrl'] as String?
+          : json['zimraQrUrl'] as String?,
       zimraHasSubscription: json['zimra'] != null && json['zimra']['subscription'] != null ? (json['zimra']['subscription']['hasSubscription'] as bool? ?? false) : (json['zimraHasSubscription'] as bool? ?? false),
-      zimraSubscriptionValidUntil: json['zimra'] != null && json['zimra']['subscription'] != null
-          ? (json['zimra']['subscription']['validUntil'] != null ? DateTime.parse(json['zimra']['subscription']['validUntil']) : null)
-          : (json['zimraSubscriptionValidUntil'] != null ? DateTime.parse(json['zimraSubscriptionValidUntil']) : null),
+      zimraSubscriptionValidUntil: json['zimra'] != null &&
+              json['zimra']['subscription'] != null
+          ? _parseMongoDate(json['zimra']['subscription']['validUntil'])
+          : _parseMongoDate(json['zimraSubscriptionValidUntil']),
       zimraSubscriptionNotified7Days: json['zimra'] != null && json['zimra']['subscription'] != null ? (json['zimra']['subscription']['notified7Days'] as bool? ?? false) : (json['zimraSubscriptionNotified7Days'] as bool? ?? false),
       zimraSubscriptionNotified3Days: json['zimra'] != null && json['zimra']['subscription'] != null ? (json['zimra']['subscription']['notified3Days'] as bool? ?? false) : (json['zimraSubscriptionNotified3Days'] as bool? ?? false),
     );
@@ -258,6 +330,11 @@ class CompanyModel {
       "showSalesCount": showSalesCount,
       'enableCreditSale': enableCreditSale,
       'shiftBasedSales': shiftBasedSales,
+      'enableOnlineSales': enableOnlineSales,
+      'onlineSalesStrictStock': onlineSalesStrictStock,
+      'onlineSalesSyncBeforeCheckout': onlineSalesSyncBeforeCheckout,
+      'onlineSalesWaitForFiscalization': onlineSalesWaitForFiscalization,
+      'pricesIncludeTax': pricesIncludeTax,
       "exchangeRates": exchangeRates.toJson(),
       "subscriptionType": subscriptionType.toJson(),
       'autoApproveAllExpenses': autoApproveAllExpenses,
@@ -272,6 +349,7 @@ class CompanyModel {
       'zimraIsTest': zimraIsTest,
       'zimraFiscalDayNo': zimraFiscalDayNo,
       'zimraFiscalDayStatus': zimraFiscalDayStatus,
+      'zimraFiscalDayClosingErrorCode': zimraFiscalDayClosingErrorCode,
       'zimraLastFiscalDayOpened': zimraLastFiscalDayOpened?.toIso8601String(),
       'zimraReceiptGlobalNo': zimraReceiptGlobalNo,
       'zimraReceiptCounter': zimraReceiptCounter,
@@ -283,6 +361,17 @@ class CompanyModel {
       'zimraSubscriptionNotified7Days': zimraSubscriptionNotified7Days,
       'zimraSubscriptionNotified3Days': zimraSubscriptionNotified3Days,
     };
+  }
+
+  /// FDMS day still active (sales allowed; close may need retry).
+  bool get isZimraFiscalDayOpen =>
+      zimraFiscalDayStatus == 'FiscalDayOpened' ||
+      zimraFiscalDayStatus == 'FiscalDayCloseFailed';
+
+  /// ZIMRA billing active when [zimraSubscriptionValidUntil] is in the future.
+  bool get isZimraSubscriptionActive {
+    final until = zimraSubscriptionValidUntil;
+    return until != null && until.isAfter(DateTime.now());
   }
 
   void saveToStorage() {

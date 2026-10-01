@@ -18,6 +18,7 @@ import 'package:mistpos/data/models/item_receit_item.dart';
 import 'package:mistpos/data/models/app_settings_model.dart';
 import 'package:mistpos/core/services/api/network_wrapper.dart';
 import 'package:mistpos/data/models/item_receit_model.dart';
+import 'package:mistpos/core/utils/receipt_list_sort.dart';
 import 'package:mistpos/data/models/item_modifier_model.dart';
 import 'package:mistpos/data/models/item_categories_model.dart';
 import 'package:mistpos/core/utils/labeller.dart' show Labeller;
@@ -27,9 +28,14 @@ import 'package:mistpos/data/models/embedded_discount_model.dart';
 import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:mistpos/features/auth/controllers/user_controller.dart';
 import 'package:mistpos/core/utils/extensions.dart';
+import 'package:mistpos/core/utils/sales_tax_calculator.dart';
 
 class ItemsController extends GetxController {
   RxDouble totalPrice = RxDouble(0);
+  /// VAT amount for current cart (inclusive or exclusive mode).
+  RxDouble checkoutTaxAmount = RxDouble(0);
+  /// Line subtotal after discounts, before tax (same base as [SalesTaxCalculator]).
+  RxDouble checkoutSubtotal = RxDouble(0);
   RxString selectedCategory = ''.obs;
   RxBool printReceitOfShift = RxBool(false);
   RxList<TaxModel> salesTaxes = <TaxModel>[].obs;
@@ -323,17 +329,17 @@ class ItemsController extends GetxController {
               .where()
               .sortByCreatedAtDesc()
               .findAll();
-          receits.assignAll(r);
+          receits.assignAll(ReceiptListSort.orderForDisplay(r));
         } else {
           final unsyncedReceits = isar.itemReceitModels
               .where()
               .syncedEqualTo(false)
               .findAll();
           if (page == 1) {
-            receits.assignAll(lv);
+            receits.assignAll(ReceiptListSort.orderForDisplay(lv));
             receits.addAll(unsyncedReceits);
           } else {
-            receits.addAll(lv);
+            receits.addAll(ReceiptListSort.orderForDisplay(lv));
           }
         }
       }
@@ -544,24 +550,15 @@ class ItemsController extends GetxController {
           .toPrecision;
     });
     totalPrice.value = (totalPrice.value - totalDiscounts).toPrecision;
-    final totalTax = salesTaxes.fold(0.0, (prev, data) {
-      if (data.activated == false) {
-        return prev;
-      }
-      if (data.selectedIds.isNotEmpty) {
-        final totalPriceAdded = checkOutItems.fold(0.0, (prv, cv) {
-          final count = cv['count'] as num? ?? 0;
-          final model = cv['item'] as ItemModel;
-          if (data.selectedIds.contains(model.hexId)) {
-            return (prv + (model.price * count * data.value) / 100).toPrecision;
-          }
-          return prv;
-        });
-        return (prev + totalPriceAdded).toPrecision;
-      }
-      return (prev + (totalPrice.value * data.value) / 100).toPrecision;
-    });
-    totalPrice.value = (totalPrice.value + totalTax).toPrecision;
+    final subtotal = totalPrice.value;
+    checkoutSubtotal.value = subtotal;
+    final resolved = SalesTaxCalculator.resolveCheckout(
+      checkOutItems: checkOutItems,
+      taxes: salesTaxes,
+      subtotalAfterDiscounts: subtotal,
+    );
+    checkoutTaxAmount.value = resolved.totalTaxAmount.toPrecision;
+    totalPrice.value = resolved.customerTotal.toPrecision;
   }
 
   ItemSavedModel _getModel(Map<String, dynamic> e) {
@@ -626,6 +623,22 @@ class ItemsController extends GetxController {
       model.total = modelUpdate.total;
       model.amount = modelUpdate.amount;
       log("Updated item model: $modelUpdate");
+
+      final cnJson = response.body['creditNote'];
+      if (cnJson is Map) {
+        final creditNote = ItemReceitModel.fromJson(
+          Map<String, dynamic>.from(cnJson),
+        );
+        if (isar != null) {
+          await isar.write((isar) async {
+            isar.itemReceitModels.put(creditNote);
+          });
+        }
+        receits.insert(0, creditNote);
+        Toaster.showInfo(
+          "Credit note ${creditNote.label} created — fiscalization queued.",
+        );
+      }
       if (e.count < 0) {
         Toaster.showError("$count should be less than ${e.count}");
         return null;
@@ -1094,9 +1107,202 @@ class ItemsController extends GetxController {
       Toaster.showError("something went wrong");
       return;
     }
-    e['count'] += increment;
+    final newCount = (e['count'] as num).toDouble() + increment;
+    if (increment > 0) {
+      final stockErr = await _stockErrorForSale(model, newCount);
+      if (stockErr != null) {
+        Toaster.showError(stockErr);
+        return;
+      }
+    }
+    e['count'] = newCount;
     checkOutItems[indexOfSelected] = e;
     _calculatedTotalPrice();
+  }
+
+  CompanyModel? get _company =>
+      Get.find<InventoryController>().company.value;
+
+  bool get onlineSalesEnabled => _company?.enableOnlineSales ?? false;
+
+  bool get onlineSalesStrictStockEnabled =>
+      onlineSalesEnabled && (_company?.onlineSalesStrictStock ?? true);
+
+  ItemModel _freshCatalogItem(ItemModel model) {
+    final isar = IsarStatic.getInstance();
+    if (isar == null) return model;
+    final byId = isar.itemModels.get(model.id);
+    if (byId != null) return byId;
+    if (model.hexId.isNotEmpty) {
+      final byHex = isar.itemModels
+          .where()
+          .hexIdEqualTo(model.hexId)
+          .findFirst();
+      if (byHex != null) return byHex;
+    }
+    return model;
+  }
+
+  bool _requiresStrictStockCheck(ItemModel model) {
+    return ItemModel.parseTrackStock(model.trackStock);
+  }
+
+  bool _isCatalogStockTracked(ItemModel model) {
+    if (_requiresStrictStockCheck(model)) return true;
+    return _requiresStrictStockCheck(_freshCatalogItem(model));
+  }
+
+  Future<void> _refreshCartItemsStockFromServer() async {
+    if (!onlineSalesStrictStockEnabled || checkOutItems.isEmpty) return;
+    final ids = checkOutItems
+        .map((e) => e['item'] as ItemModel)
+        .where(_isCatalogStockTracked)
+        .map((m) => m.hexId)
+        .where((id) => id.isNotEmpty)
+        .toSet()
+        .toList();
+    if (ids.isEmpty) return;
+
+    final response = await Net.post(
+      "/cashier/products/range",
+      data: {"filter": "", "ids": ids},
+    );
+    if (response.hasError) return;
+
+    final list = response.body?['list'] as List<dynamic>? ?? [];
+    final isar = IsarStatic.getInstance();
+    if (isar == null) return;
+
+    await isar.write((isar) async {
+      for (final raw in list) {
+        if (raw is! Map<String, dynamic>) continue;
+        final model = ItemModel.fromJson(raw);
+        final existing = isar.itemModels
+            .where()
+            .hexIdEqualTo(model.hexId)
+            .findFirst();
+        if (existing != null) {
+          model.id = existing.id;
+        }
+        isar.itemModels.put(model);
+      }
+    });
+    _refreshCheckoutItemsFromCatalog();
+  }
+
+  void _refreshCheckoutItemsFromCatalog() {
+    for (var i = 0; i < checkOutItems.length; i++) {
+      final line = checkOutItems[i];
+      final model = line['item'] as ItemModel;
+      line['item'] = _freshCatalogItem(model);
+      checkOutItems[i] = line;
+    }
+  }
+
+  Future<ItemModel> _catalogItemForStockRules(ItemModel model) async {
+    if (!onlineSalesStrictStockEnabled || model.hexId.isEmpty) {
+      return _freshCatalogItem(model);
+    }
+    if (!_isCatalogStockTracked(model)) {
+      return _freshCatalogItem(model);
+    }
+    final response = await Net.post(
+      "/cashier/products/range",
+      data: {"filter": "", "ids": [model.hexId]},
+    );
+    if (response.hasError) {
+      return _freshCatalogItem(model);
+    }
+    final list = response.body?['list'] as List<dynamic>? ?? [];
+    if (list.isEmpty) return _freshCatalogItem(model);
+    final raw = list.first;
+    if (raw is! Map<String, dynamic>) return _freshCatalogItem(model);
+    final serverItem = ItemModel.fromJson(raw);
+    final isar = IsarStatic.getInstance();
+    if (isar != null) {
+      await isar.write((isar) async {
+        final existing = isar.itemModels
+            .where()
+            .hexIdEqualTo(serverItem.hexId)
+            .findFirst();
+        if (existing != null) {
+          serverItem.id = existing.id;
+        }
+        isar.itemModels.put(serverItem);
+      });
+    }
+    return serverItem;
+  }
+
+  String? _stockErrorForItem(ItemModel live, double requestedCount) {
+    if (!onlineSalesStrictStockEnabled) return null;
+    if (!_requiresStrictStockCheck(live)) return null;
+    final available = live.stockQuantity;
+    if (requestedCount <= available) return null;
+    if (available <= 0) {
+      return "${live.name} is out of stock (online sales)";
+    }
+    return "${live.name}: only ${available.toStringAsFixed(available == available.roundToDouble() ? 0 : 2)} available";
+  }
+
+  Future<String?> _stockErrorForSale(ItemModel model, double requestedCount) async {
+    if (!onlineSalesStrictStockEnabled) return null;
+    if (!_isCatalogStockTracked(model)) return null;
+    final live = await _catalogItemForStockRules(model);
+    return _stockErrorForItem(live, requestedCount);
+  }
+
+  String? validateCartStockForOnlineSales() {
+    if (!onlineSalesStrictStockEnabled) return null;
+    _refreshCheckoutItemsFromCatalog();
+    for (final line in checkOutItems) {
+      final model = line['item'] as ItemModel;
+      if (!_isCatalogStockTracked(model)) continue;
+      final count = (line['count'] as num?)?.toDouble() ?? 0;
+      final err = _stockErrorForItem(model, count);
+      if (err != null) return err;
+    }
+    return null;
+  }
+
+  Future<bool> _probeServerReachable() async {
+    final response = await Net.get("/cashier/products?limit=1");
+    return !response.hasError;
+  }
+
+  Future<ItemReceitModel?> _purchaseOnServer(ItemReceitModel draft) async {
+    final response = await Net.post(
+      "/cashier/purchase",
+      data: draft.toJson(),
+    );
+    if (response.hasError) {
+      if (response.statusCode == 503) {
+        Toaster.showError(
+          response.response.isNotEmpty
+              ? response.response
+              : "ZIMRA fiscalization failed. The sale was not recorded — please retry.",
+        );
+        return null;
+      }
+      final rejects = response.body?['rejects'];
+      if (rejects is List && rejects.isNotEmpty) {
+        final first = rejects.first;
+        if (first is Map && first['rejectedReason'] != null) {
+          Toaster.showError("${first['rejectedReason']}");
+        } else {
+          Toaster.showError(response.response);
+        }
+      } else {
+        Toaster.showError(response.response);
+      }
+      return null;
+    }
+    final update = response.body?['update'];
+    if (update == null) {
+      Toaster.showError("Server did not return a receipt");
+      return null;
+    }
+    return ItemReceitModel.fromJson(update as Map<String, dynamic>);
   }
 
   Future<void> removeAllSelected() async {
@@ -1143,6 +1349,23 @@ class ItemsController extends GetxController {
       }
       return false;
     });
+    if (dataFound == -1) {
+      final stockErr = await _stockErrorForSale(model, count < 0 ? 1 : count);
+      if (stockErr != null) {
+        Toaster.showError(stockErr);
+        return;
+      }
+    } else {
+      final existing = checkOutItems[dataFound];
+      final nextCount = count < 0
+          ? (existing['count'] as num).toDouble() + 1
+          : count.toDouble();
+      final stockErr = await _stockErrorForSale(model, nextCount);
+      if (stockErr != null) {
+        Toaster.showError(stockErr);
+        return;
+      }
+    }
     if (dataFound == -1) {
       checkOutItems.add({
         'id': model.id,
@@ -1320,18 +1543,14 @@ class ItemsController extends GetxController {
           for (final tax in salesTaxes) {
             if (tax.activated == false) continue;
             if (tax.selectedIds.isNotEmpty &&
-                !tax.selectedIds.contains(model.hexId))
+                !tax.selectedIds.contains(model.hexId)) {
               continue;
-
+            }
             itemTaxPercentage = tax.value;
             itemTaxName = tax.label;
-            double priceBase =
-                (model.wholesaleActivated && count >= model.miniItems)
-                ? model.wholesalePrice
-                : (model.price + (e['qouted'] as double? ?? 0.0));
-            itemTaxAmount =
-                (itemTaxAmount + (priceBase * count * tax.value) / 100)
-                    .toPrecision;
+            itemTaxAmount = (itemTaxAmount +
+                    SalesTaxCalculator.lineTaxForRow(cartRow: e, tax: tax))
+                .toPrecision;
           }
 
           final receit = ItemReceitItem()
@@ -1359,24 +1578,49 @@ class ItemsController extends GetxController {
         createdAt: DateTime.now(),
         total: totalPrice.value,
       );
-      final totalTax = salesTaxes.fold(0.0, (prev, data) {
-        if (data.selectedIds.isNotEmpty) {
-          final totalPriceAdded = checkOutItems.fold(0.0, (prv, cv) {
-            final model = cv['item'] as ItemModel;
-            if (data.selectedIds.contains(model.hexId)) {
-              return prv + (model.price * data.value) / 100;
-            }
-            return prv;
-          });
-          return prev + totalPriceAdded;
+      final totalTax = SalesTaxCalculator.resolveCheckout(
+        checkOutItems: checkOutItems,
+        taxes: salesTaxes,
+        subtotalAfterDiscounts: checkoutSubtotal.value,
+      ).totalTaxAmount;
+      itemReceitModel.tax =
+          SalesTaxCalculator.primaryTaxRatePercent(salesTaxes);
+      itemReceitModel.taxAmount = totalTax.toPrecision;
+      final company = Get.find<InventoryController>().company.value;
+      final useOnlineCheckout = company?.enableOnlineSales ?? false;
+      ItemReceitModel receiptToStore = itemReceitModel;
+
+      if (useOnlineCheckout) {
+        if (company?.onlineSalesSyncBeforeCheckout != false) {
+          await syncCartItemsOnBackground(page: 1);
         }
-        return prev + (totalPrice.value * data.value) / 100;
-      });
-      itemReceitModel.tax = totalTax;
+        await _refreshCartItemsStockFromServer();
+        _refreshCheckoutItemsFromCatalog();
+        final stockErr = validateCartStockForOnlineSales();
+        if (stockErr != null) {
+          Toaster.showError(stockErr);
+          return false;
+        }
+        if (!await _probeServerReachable()) {
+          Toaster.showError(
+            "Online sales requires an active internet connection",
+          );
+          return false;
+        }
+        receitsLoading.value = true;
+        var serverReceipt = await _purchaseOnServer(itemReceitModel);
+        receitsLoading.value = false;
+        if (serverReceipt == null) {
+          return false;
+        }
+        serverReceipt.synced = true;
+        receiptToStore = serverReceipt;
+      }
+
       int newReceitId = -1;
       await isar.write((isar) async {
-        isar.itemReceitModels.put(itemReceitModel);
-        newReceitId = itemReceitModel.id;
+        isar.itemReceitModels.put(receiptToStore);
+        newReceitId = receiptToStore.id;
       });
       if (selectedShift.value != null) {
         selectedShift.value!.totalSales += totalPrice.value;
@@ -1388,14 +1632,26 @@ class ItemsController extends GetxController {
       }
       user.receitsCount++;
       User.saveToStorage(user);
-      updateReceitsInBackground(newReceitId, itemReceitModel);
-      if (printReceits) {
-        DevicesController.printReceitToBackround(
-          itemReceitModel,
-          user,
-          selectedCustomer.value,
-          salesTaxes,
-        );
+      if (!useOnlineCheckout) {
+        updateReceitsInBackground(newReceitId, receiptToStore);
+        if (printReceits) {
+          DevicesController.printReceitToBackround(
+            receiptToStore,
+            user,
+            selectedCustomer.value,
+            salesTaxes,
+          );
+        }
+      } else {
+        if (printReceits) {
+          DevicesController.printReceitToBackround(
+            receiptToStore,
+            user,
+            selectedCustomer.value,
+            salesTaxes,
+          );
+        }
+        syncCartItemsOnBackground();
       }
       salesTaxes.clear();
       discounts.clear();
@@ -1403,6 +1659,7 @@ class ItemsController extends GetxController {
       selectedCustomer.value = null;
       totalPrice.value = 0;
       loadReceitsStatic();
+      loadReceits();
       return true;
     } catch (e) {
       Toaster.showError("There was error : $e");

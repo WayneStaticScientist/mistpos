@@ -5,6 +5,13 @@ import 'package:mistpos/data/models/item_receit_item.dart';
 import 'package:mistpos/data/models/embedded_discount_model.dart';
 part 'item_receit_model.g.dart';
 
+String _receiptMongoId(dynamic id) {
+  if (id == null) return '';
+  if (id is String) return id;
+  if (id is Map && id[r'$oid'] != null) return id[r'$oid'].toString();
+  return id.toString();
+}
+
 @collection
 class ItemReceitModel {
   late int id = IdGen.id;
@@ -13,6 +20,7 @@ class ItemReceitModel {
   final double change;
   bool creditSale = false;
   double tax;
+  double taxAmount;
   double amount;
   double currentAmountPayed;
   double total;
@@ -31,6 +39,13 @@ class ItemReceitModel {
   int? zimraReceiptGlobalNo;
   int? zimraDeviceId;
   int? zimraFiscalDayNo;
+  /// ddMMyyyy (Harare) — same day as FDMS receiptDate for QR §11.
+  String? zimraReceiptDateQr;
+  String? zimraQrCodeUrl;
+  /// ZIMRA FDMS: FiscalInvoice | CreditNote | DebitNote
+  String receiptType;
+  /// Mongo id of credited/debited fiscal invoice (credit/debit notes).
+  String? originalReceiptId;
   ItemReceitModel({
     required this.items,
     required this.total,
@@ -42,6 +57,7 @@ class ItemReceitModel {
     required this.createdAt,
     this.miniTax = const [],
     this.tax = 0,
+    this.taxAmount = 0,
     this.customerId,
     this.currency =
         "", //currence is just way to record on which currency did the receipt was sold , althought the value will be converted to base USD currency in background , this helps us to keep track
@@ -56,6 +72,10 @@ class ItemReceitModel {
     this.zimraReceiptGlobalNo,
     this.zimraDeviceId,
     this.zimraFiscalDayNo,
+    this.zimraReceiptDateQr,
+    this.zimraQrCodeUrl,
+    this.receiptType = 'FiscalInvoice',
+    this.originalReceiptId,
   });
   Map<String, dynamic> toJson() {
     return {
@@ -71,6 +91,7 @@ class ItemReceitModel {
       "synced": synced,
       "label": label,
       "tax": tax,
+      "taxAmount": taxAmount,
       'miniTax': miniTax.map((e) => e.toJson()).toList(),
       "createdAt": createdAt.toIso8601String(),
       "discounts": discounts
@@ -83,6 +104,10 @@ class ItemReceitModel {
       "zimraReceiptGlobalNo": zimraReceiptGlobalNo,
       "zimraDeviceId": zimraDeviceId,
       "zimraFiscalDayNo": zimraFiscalDayNo,
+      "zimraReceiptDateQr": zimraReceiptDateQr,
+      "zimraQrCodeUrl": zimraQrCodeUrl,
+      "receiptType": receiptType,
+      "originalReceiptId": originalReceiptId,
     };
   }
 
@@ -103,8 +128,9 @@ class ItemReceitModel {
                 .toList()
           : [],
       tax: (data['tax'] as num?)?.toDouble() ?? 0.0,
+      taxAmount: (data['taxAmount'] as num?)?.toDouble() ?? 0.0,
       synced: data['synced'] ?? false,
-      hexId: data['_id'],
+      hexId: _receiptMongoId(data['_id']),
       total: (data['total'] as num?)?.toDouble() ?? 0.0,
       amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
       currentAmountPayed:
@@ -124,6 +150,39 @@ class ItemReceitModel {
       zimraReceiptGlobalNo: data['zimraReceiptGlobalNo'],
       zimraDeviceId: data['zimraDeviceId'],
       zimraFiscalDayNo: data['zimraFiscalDayNo'],
+      zimraReceiptDateQr: data['zimraReceiptDateQr']?.toString(),
+      zimraQrCodeUrl: data['zimraQrCodeUrl']?.toString(),
+      receiptType: data['receiptType']?.toString() ?? 'FiscalInvoice',
+      originalReceiptId: data['originalReceiptId']?.toString(),
     );
+  }
+
+  /// Updates ZIMRA fields from a server receipt payload (e.g. after fiscalize).
+  void applyZimraFiscalizationFrom(Map<String, dynamic> data) {
+    if (data['fiscalized'] != null) {
+      fiscalized = data['fiscalized'] as bool;
+    } else {
+      fiscalized = true;
+    }
+    zimraReceiptId = data['zimraReceiptId']?.toString();
+    zimraSignature = data['zimraSignature']?.toString();
+    final globalNo = data['zimraReceiptGlobalNo'];
+    zimraReceiptGlobalNo = globalNo is num ? globalNo.toInt() : null;
+    final deviceId = data['zimraDeviceId'];
+    zimraDeviceId = deviceId is num ? deviceId.toInt() : null;
+    final dayNo = data['zimraFiscalDayNo'];
+    zimraFiscalDayNo = dayNo is num ? dayNo.toInt() : null;
+    if (data['zimraReceiptDateQr'] != null) {
+      zimraReceiptDateQr = data['zimraReceiptDateQr'].toString();
+    }
+    if (data['zimraQrCodeUrl'] != null) {
+      zimraQrCodeUrl = data['zimraQrCodeUrl'].toString();
+    }
+    if (data['receiptType'] != null) {
+      receiptType = data['receiptType'].toString();
+    }
+    if (data['originalReceiptId'] != null) {
+      originalReceiptId = data['originalReceiptId'].toString();
+    }
   }
 }

@@ -85,6 +85,26 @@ class ItemModel {
     };
   }
 
+  static bool parseTrackStock(dynamic value) {
+    if (value == null) return false;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final normalized = value.toLowerCase().trim();
+      if (normalized == 'true' ||
+          normalized == '1' ||
+          normalized == 'yes') {
+        return true;
+      }
+      if (normalized == 'false' ||
+          normalized == '0' ||
+          normalized == 'no') {
+        return false;
+      }
+    }
+    return false;
+  }
+
   factory ItemModel.fromJson(Map<String, dynamic> json) {
     return ItemModel(
       hexId: json["_id"] ?? "",
@@ -115,7 +135,7 @@ class ItemModel {
           ?.map((e) => e.toString())
           .toList(),
       cost: (json["cost"] as num?)?.toDouble() ?? 0.0,
-      trackStock: json["trackStock"] as bool? ?? false,
+      trackStock: parseTrackStock(json["trackStock"]),
       price: (json["price"] as num?)?.toDouble() ?? 0.0,
       syncOnline: json["syncOnline"] as bool? ?? false,
     );

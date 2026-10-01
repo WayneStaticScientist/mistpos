@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import 'package:mistpos/core/services/api/network_wrapper.dart';
 import 'package:mistpos/features/settings/screens_gateways/paynow/screen_subscription_payment.dart';
 import 'package:mistpos/features/admin/controllers/admin_controller.dart';
 import 'package:mistpos/features/settings/screens_zimra/screen_setup_complete.dart';
+import 'package:mistpos/features/settings/screens_zimra/screen_zimra_production_guide.dart';
 
 class ScreenZimraServices extends StatefulWidget {
   const ScreenZimraServices({super.key});
@@ -24,6 +26,14 @@ class ScreenZimraServices extends StatefulWidget {
 
 class _ScreenZimraServicesState extends State<ScreenZimraServices> {
   final _inventoryController = Get.find<InventoryController>();
+  bool _fiscalDayClosing = false;
+  bool _fiscalDaySyncing = false;
+  bool _fiscalDayPreviewLoading = false;
+
+  static final _closeFiscalDayOptions = Options(
+    receiveTimeout: const Duration(seconds: 120),
+    sendTimeout: const Duration(seconds: 30),
+  );
 
   @override
   void initState() {
@@ -53,11 +63,8 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
         final company = _inventoryController.company.value!;
         final isRegistered = company.zimraCertificate != null;
         final isTest = company.zimraIsTest ?? true;
+        final hasSub = company.isZimraSubscriptionActive;
         final validUntil = company.zimraSubscriptionValidUntil;
-        final hasSub =
-            company.zimraHasSubscription == true &&
-            validUntil != null &&
-            validUntil.isAfter(DateTime.now());
 
         final Color statusColor;
         final Color statusBgColor;
@@ -269,6 +276,16 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                 MistMordernLayout.divider,
                 _buildMenuTile(
                   context: context,
+                  icon: Icons.verified_user_outlined,
+                  iconColor: Colors.green.shade700,
+                  title: "Go live (production device)",
+                  subtitle:
+                      "Steps to register a live ZIMRA device after portal approval",
+                  onTap: () => Get.to(() => const ScreenZimraProductionGuide()),
+                ),
+                MistMordernLayout.divider,
+                _buildMenuTile(
+                  context: context,
                   icon: Icons.sensors_rounded,
                   iconColor: Colors.teal,
                   title: "Connectivity Diagnostics",
@@ -310,10 +327,7 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
     bool isDark,
   ) {
     final validUntil = company.zimraSubscriptionValidUntil;
-    final hasSub =
-        company.zimraHasSubscription == true &&
-        validUntil != null &&
-        validUntil.isAfter(DateTime.now());
+    final hasSub = company.isZimraSubscriptionActive;
 
     final statusColor = hasSub ? Colors.green : Colors.red;
 
@@ -507,10 +521,17 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
     );
   }
 
-  Widget _buildFiscalDayCard(BuildContext context, company, bool isDark) {
-    final isOpen = company.zimraFiscalDayStatus == "FiscalDayOpened";
-    final statusColor = isOpen ? Colors.tealAccent : Colors.grey.shade500;
+  Widget _buildFiscalDayCard(BuildContext context, CompanyModel company, bool isDark) {
+    final isOpen = company.isZimraFiscalDayOpen;
+    final closeFailed =
+        company.zimraFiscalDayStatus == "FiscalDayCloseFailed";
+    final statusColor = closeFailed
+        ? Colors.orangeAccent
+        : isOpen
+        ? Colors.tealAccent
+        : Colors.grey.shade500;
     final fiscalDayNo = company.zimraFiscalDayNo;
+    final closeErr = company.zimraFiscalDayClosingErrorCode;
 
     return MistMordernLayout(
       label: "FISCAL DAY",
@@ -529,20 +550,131 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                isOpen
-                    ? "Day #${fiscalDayNo ?? '-'} is open"
-                    : "No fiscal day is open",
-                style: TextStyle(
-                  color: statusColor,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: Text(
+                  !isOpen
+                      ? "No fiscal day is open"
+                      : closeFailed
+                      ? "Day #${fiscalDayNo ?? '-'} open — close failed${closeErr != null ? ' ($closeErr)' : ''}"
+                      : "Day #${fiscalDayNo ?? '-'} is open",
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
           ),
         ),
+        if (_fiscalDayClosing) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.tealAccent.shade400,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    "Closing with ZIMRA… this can take up to 90 seconds.",
+                    style: TextStyle(
+                      color: Colors.grey.shade400,
+                      fontSize: 11,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+        if (closeFailed && !_fiscalDayClosing) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Text(
+              closeErr == "ReceiptsWithValidationErrors"
+                  ? "ZIMRA blocked close: one or more receipts on this day failed FDMS validation (common on long-open sandbox days). Sync, then retry Close Day. If it persists, use a fresh sandbox device or ask ZIMRA test support to reset the device day."
+                  : "ZIMRA still has this day open. Retry Close Day (do not use Open Day until close succeeds).",
+              style: TextStyle(
+                color: Colors.orange.shade200,
+                fontSize: 11,
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
         const SizedBox(height: 12),
+        MistMordernLayout.divider,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  "If MistPOS and ZIMRA disagree, sync from FDMS before open/close.",
+                  style: TextStyle(
+                    color: Colors.grey.shade500,
+                    fontSize: 11,
+                    height: 1.35,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: (_fiscalDaySyncing || _fiscalDayClosing)
+                    ? null
+                    : () => _syncFiscalDayStatus(company),
+                child: _fiscalDaySyncing
+                    ? SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      )
+                    : const Text("Sync", style: TextStyle(fontSize: 12)),
+              ),
+            ],
+          ),
+        ),
+        if (isOpen || closeFailed) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: (_fiscalDayPreviewLoading ||
+                        _fiscalDayClosing ||
+                        _fiscalDaySyncing)
+                    ? null
+                    : () => _showFiscalDayClosePreview(context),
+                icon: _fiscalDayPreviewLoading
+                    ? SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      )
+                    : const Icon(Icons.receipt_long_outlined, size: 16),
+                label: const Text(
+                  "Close report (debug)",
+                  style: TextStyle(fontSize: 12),
+                ),
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(height: 8),
         MistMordernLayout.divider,
         // Open button (shown when day is closed)
         if (!isOpen)
@@ -651,7 +783,9 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                 ),
                 const SizedBox(width: 10),
                 OutlinedButton(
-                  onPressed: () => _confirmCloseFiscalDay(context, company),
+                  onPressed: (_fiscalDayClosing || _fiscalDaySyncing)
+                      ? null
+                      : () => _confirmCloseFiscalDay(context, company),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.red,
                     side: const BorderSide(color: Colors.red, width: 1),
@@ -665,16 +799,275 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: const Text(
-                    "Close Day",
-                    style: TextStyle(fontSize: 13),
-                  ),
+                  child: _fiscalDayClosing
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.red,
+                          ),
+                        )
+                      : const Text(
+                          "Close Day",
+                          style: TextStyle(fontSize: 13),
+                        ),
                 ),
               ],
             ),
           ),
       ],
     );
+  }
+
+  Future<void> _showFiscalDayClosePreview(BuildContext context) async {
+    setState(() => _fiscalDayPreviewLoading = true);
+    final response = await Net.get("/cashier/fiscal-day-close-preview");
+    if (!mounted) return;
+    setState(() => _fiscalDayPreviewLoading = false);
+
+    if (response.hasError) {
+      Toaster.showError(
+        response.body?['error']?.toString() ??
+            response.response ??
+            "Could not load close report",
+      );
+      return;
+    }
+
+    final body = response.body;
+    if (body is! Map) return;
+    final companyJson = body['company'];
+    if (companyJson is Map) {
+      _inventoryController.company.value = CompanyModel.fromJson(
+        Map<String, dynamic>.from(companyJson),
+      );
+      _inventoryController.company.value?.saveToStorage();
+      _inventoryController.company.refresh();
+    }
+
+    if (!context.mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) {
+        final included = (body['includedInClose'] as List?) ?? [];
+        final excluded = (body['excludedFromClose'] as List?) ?? [];
+        final totals = body['totals'];
+        final guidance = (body['merchantGuidance'] as List?)?.cast<String>() ??
+            [];
+        final hint = body['hint']?.toString() ?? '';
+        final errCode = body['fiscalDayClosingErrorCode']?.toString();
+        final dayNo = body['fiscalDayNo']?.toString() ?? '?';
+        final deviceId = body['deviceId']?.toString() ?? '?';
+
+        Widget receiptTile(Map item, {String? subtitle, Color? subtitleColor}) {
+          final label = item['label']?.toString() ?? item['id']?.toString();
+          final globalNo = item['zimraReceiptGlobalNo'];
+          final total = item['total'];
+          final currency = item['currency']?.toString() ?? '';
+          final warnings = (item['warnings'] as List?)?.cast<String>() ?? [];
+          return ListTile(
+            dense: true,
+            title: Text(
+              label ?? 'Receipt',
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (subtitle != null)
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: subtitleColor ?? Colors.grey,
+                    ),
+                  ),
+                Text(
+                  'Global #$globalNo · $currency ${total ?? ''} · device ${item['zimraDeviceId'] ?? '—'} · day ${item['zimraFiscalDayNo'] ?? '—'}',
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                ),
+                for (final w in warnings)
+                  Text(
+                    w,
+                    style: TextStyle(fontSize: 10, color: Colors.amber.shade700),
+                  ),
+              ],
+            ),
+          );
+        }
+
+        final sheetHeight = MediaQuery.sizeOf(ctx).height * 0.75;
+        return SizedBox(
+          height: sheetHeight,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            children: [
+                Text(
+                  "Close day report (device $deviceId · day #$dayNo)",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                if (errCode != null && errCode.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    "Last FDMS close error: $errCode",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.orange.shade800,
+                    ),
+                  ),
+                ],
+                if (totals is Map) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    "Sent on Close Day: ${totals['includedCount']} · Other fiscalized (excluded): ${totals['excludedCount']} · Legacy missing device: ${totals['missingDeviceCount'] ?? 0}",
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                  ),
+                ],
+                if (guidance.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.blueGrey.withAlpha(28),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "What you can do",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        for (var i = 0; i < guidance.length; i++)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 6),
+                            child: Text(
+                              "${i + 1}. ${guidance[i]}",
+                              style: TextStyle(
+                                fontSize: 11,
+                                height: 1.35,
+                                color: Colors.grey.shade800,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                const Text(
+                  "Included in Close Day (this device)",
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                ),
+                if (included.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      "None — close would fail with “no receipts”.",
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  )
+                else
+                  ...included.map((e) => receiptTile(
+                        Map<String, dynamic>.from(e as Map),
+                      )),
+                const SizedBox(height: 16),
+                const Text(
+                  "Excluded (still fiscalized in MistPOS)",
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                ),
+                if (excluded.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      "No excluded fiscalized receipts for this company.",
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  )
+                else
+                  ...excluded.map((e) {
+                    final m = Map<String, dynamic>.from(e as Map);
+                    return receiptTile(
+                      m,
+                      subtitle: m['excludeReason']?.toString(),
+                      subtitleColor: Colors.red.shade700,
+                    );
+                  }),
+                if (hint.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    hint,
+                    style: TextStyle(
+                      fontSize: 11,
+                      height: 1.35,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+        );
+      },
+    );
+  }
+
+  void _applyCompanyFromResponse(Map<String, dynamic>? body) {
+    final companyJson = body?['company'];
+    if (companyJson is Map) {
+      _inventoryController.company.value = CompanyModel.fromJson(
+        Map<String, dynamic>.from(companyJson),
+      );
+      _inventoryController.company.value?.saveToStorage();
+      _inventoryController.company.refresh();
+    } else {
+      _inventoryController.loadCompany();
+    }
+  }
+
+  void _syncFiscalDayStatus(company) async {
+    if (_fiscalDaySyncing) return;
+    setState(() => _fiscalDaySyncing = true);
+    try {
+      await _syncFiscalDayStatusImpl(company);
+    } finally {
+      if (mounted) setState(() => _fiscalDaySyncing = false);
+    }
+  }
+
+  Future<void> _syncFiscalDayStatusImpl(company) async {
+    final response = await Net.post("/cashier/sync-fiscal-day-status");
+    if (!mounted) return;
+    if (!response.hasError) {
+      final companyJson = response.body?['company'];
+      if (companyJson is Map) {
+        _inventoryController.company.value = CompanyModel.fromJson(
+          Map<String, dynamic>.from(companyJson),
+        );
+        _inventoryController.company.value?.saveToStorage();
+        _inventoryController.company.refresh();
+      } else {
+        await _inventoryController.loadCompany();
+      }
+      Toaster.showSuccess(
+        response.body?['message']?.toString() ??
+            "Fiscal day status synced from ZIMRA.",
+      );
+      if (mounted) setState(() {});
+    } else {
+      Toaster.showError(
+        response.body?['error']?.toString() ?? response.response,
+      );
+    }
   }
 
   void _openFiscalDay(company) async {
@@ -694,18 +1087,47 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
   }
 
   void _closeFiscalDay(company) async {
-    final response = await Net.post("/cashier/close-fiscal-day");
+    if (_fiscalDayClosing) return;
+    setState(() => _fiscalDayClosing = true);
+    Toaster.showInfo("Sending close to ZIMRA… please wait (up to ~90s).");
+    try {
+      await _closeFiscalDayImpl(company);
+    } finally {
+      if (mounted) setState(() => _fiscalDayClosing = false);
+    }
+  }
+
+  Future<void> _closeFiscalDayImpl(company) async {
+    final response = await Net.post(
+      "/cashier/close-fiscal-day",
+      options: _closeFiscalDayOptions,
+    );
+    if (!mounted) return;
     if (!response.hasError) {
+      _applyCompanyFromResponse(
+        response.body is Map<String, dynamic>
+            ? response.body as Map<String, dynamic>
+            : null,
+      );
       final msg =
           response.body?['message'] ?? "Fiscal day closed successfully.";
       Toaster.showSuccess(msg);
-      _inventoryController.loadCompany();
+      if (mounted) setState(() {});
     } else {
+      if (response.body is Map) {
+        _applyCompanyFromResponse(
+          Map<String, dynamic>.from(response.body as Map),
+        );
+      } else {
+        await _inventoryController.loadCompany();
+      }
       final errMsg =
           response.body?['error'] ??
+          response.response ??
           response.body?['message'] ??
           'Unknown error';
       Toaster.showError("Close day failed: $errMsg");
+      if (mounted) setState(() {});
     }
   }
 
@@ -856,6 +1278,7 @@ class _ScreenZimraRegistrationState extends State<ScreenZimraRegistration> {
       "deviceId": deviceId,
       "deviceSerialNo": _serialNoController.text,
       "activationKey": _activationKeyController.text,
+      "isTest": widget.company.zimraIsTest ?? true,
     }, widget.company.hexId);
 
     if (response == null) {
@@ -895,16 +1318,37 @@ class _ScreenZimraRegistrationState extends State<ScreenZimraRegistration> {
     setState(() => _isLoading = false);
 
     if (updateSuccess) {
-      widget.company.zimraDeviceId = deviceId;
-      widget.company.zimraDeviceSerialNo = _serialNoController.text;
-      widget.company.zimraActivationKey = _activationKeyController.text;
-      widget.company.zimraCertificate = certificate;
-      widget.company.zimraCertificateValidTill = validTill;
+      await Get.find<InventoryController>().loadCompany();
+      final synced = Get.find<InventoryController>().company.value;
+      if (synced != null) {
+        widget.company.zimraDeviceId = synced.zimraDeviceId ?? deviceId;
+        widget.company.zimraDeviceSerialNo =
+            synced.zimraDeviceSerialNo ?? _serialNoController.text;
+        widget.company.zimraActivationKey =
+            synced.zimraActivationKey ?? _activationKeyController.text;
+        widget.company.zimraCertificate =
+            synced.zimraCertificate ?? certificate;
+        widget.company.zimraCertificateValidTill =
+            synced.zimraCertificateValidTill ?? validTill;
+        widget.company.zimraIsTest = synced.zimraIsTest;
+      } else {
+        widget.company.zimraDeviceId = deviceId;
+        widget.company.zimraDeviceSerialNo = _serialNoController.text;
+        widget.company.zimraActivationKey = _activationKeyController.text;
+        widget.company.zimraCertificate = certificate;
+        widget.company.zimraCertificateValidTill = validTill;
+      }
       widget.company.saveToStorage();
-
-      Get.find<InventoryController>().loadCompany(); // refresh dashboard
       Get.off(() => ScreenZimraSetupComplete(company: widget.company));
-      Toaster.showSuccess("Device registered and paired successfully");
+      final mtlsOk = response["mtlsVerified"] == true;
+      if (mtlsOk) {
+        Toaster.showSuccess("Device registered and paired successfully");
+      } else {
+        Toaster.showInfo(
+          response["warning"]?.toString() ??
+              "Registered with ZIMRA; run Connectivity Diagnostics to confirm mTLS.",
+        );
+      }
     }
   }
 
@@ -1218,6 +1662,7 @@ class ScreenZimraConnectivity extends StatefulWidget {
 
 class _ScreenZimraConnectivityState extends State<ScreenZimraConnectivity> {
   final _adminController = Get.find<AdminController>();
+  final _inventoryController = Get.find<InventoryController>();
   bool _isRunningDiagnostics = false;
 
   // Diagnostic checklist states: 0 = idle, 1 = loading, 2 = success, 3 = failed
@@ -1247,7 +1692,9 @@ class _ScreenZimraConnectivityState extends State<ScreenZimraConnectivity> {
 
     // 3. Test mTLS authentication with ZIMRA API
     setState(() => _mtlsStatus = 1);
-    if (widget.company.zimraDeviceId == null) {
+    await _inventoryController.loadCompany();
+    final company = _inventoryController.company.value ?? widget.company;
+    if (company.zimraDeviceId == null) {
       setState(() {
         _mtlsStatus = 3;
         _certStatus = 3;
@@ -1260,10 +1707,8 @@ class _ScreenZimraConnectivityState extends State<ScreenZimraConnectivity> {
     }
 
     final response = await _adminController.testZimraDiagnostic({
-      "deviceId": widget.company.zimraDeviceId,
-      "deviceSerialNo": widget.company.zimraDeviceSerialNo ?? "",
-      "activationKey": widget.company.zimraActivationKey ?? "",
-    }, widget.company.hexId);
+      "isTest": company.zimraIsTest ?? true,
+    }, company.hexId);
 
     if (response == null) {
       setState(() {

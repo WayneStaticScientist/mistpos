@@ -21,7 +21,10 @@ import 'package:mistpos/core/utils/pdfdocuments/pdf_receit.dart';
 import 'package:mistpos/features/devices/controllers/devices_controller.dart';
 import 'package:mistpos/features/settings/screens/screen_refund_cart.dart';
 import 'package:mistpos/core/utils/zimra_helper.dart';
+import 'package:mistpos/core/utils/zimra_receipt_type.dart';
+import 'package:isar_plus/isar_plus.dart';
 import 'package:mistpos/core/utils/date_utils.dart';
+import 'package:mistpos/main.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class ScreenReceitView extends StatefulWidget {
@@ -38,14 +41,103 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
   CompanyModel? _company;
   bool _isLoadingCustomer = false;
   bool _isFiscalizing = false;
+  bool _isLoadingOriginal = false;
 
   @override
   void initState() {
     super.initState();
     _fetchCustomer();
+    _refreshCompanyFromServer();
+    if (widget.receitModel.hexId.isNotEmpty) {
+      _hydrateReceiptFromServer();
+      if (!widget.receitModel.fiscalized) {
+        _pollUntilFiscalized();
+      }
+    }
+  }
+
+  String? get _zimraQrUrlFromCompany =>
+      _effectiveCompany?.zimraQrUrl ??
+      Get.find<InventoryController>().company.value?.zimraQrUrl;
+
+  Future<void> _pollUntilFiscalized() async {
+    for (var i = 0; i < 30; i++) {
+      if (!mounted || widget.receitModel.fiscalized) return;
+      await Future<void>.delayed(const Duration(seconds: 2));
+      await _hydrateReceiptFromServer();
+    }
+  }
+
+  Future<void> _hydrateReceiptFromServer() async {
+    final id = widget.receitModel.hexId.trim();
+    if (id.isEmpty) return;
+    final response = await Net.get("/cashier/receit/$id");
+    if (!mounted || response.hasError) return;
+    final raw = response.body?['receipt'];
+    if (raw is! Map) return;
+    final fresh = ItemReceitModel.fromJson(Map<String, dynamic>.from(raw));
+    setState(() {
+      widget.receitModel.receiptType = fresh.receiptType;
+      widget.receitModel.originalReceiptId = fresh.originalReceiptId;
+      widget.receitModel.fiscalized = fresh.fiscalized;
+      widget.receitModel.zimraReceiptId = fresh.zimraReceiptId;
+      widget.receitModel.zimraSignature = fresh.zimraSignature;
+      widget.receitModel.zimraDeviceId = fresh.zimraDeviceId;
+      widget.receitModel.zimraReceiptGlobalNo = fresh.zimraReceiptGlobalNo;
+      widget.receitModel.zimraFiscalDayNo = fresh.zimraFiscalDayNo;
+      widget.receitModel.zimraReceiptDateQr = fresh.zimraReceiptDateQr;
+      widget.receitModel.zimraQrCodeUrl = fresh.zimraQrCodeUrl;
+    });
+  }
+
+  String? _parentInvoiceLabelFromAdjustment() {
+    final label = widget.receitModel.label.trim();
+    if (label.startsWith('CN-') || label.startsWith('DN-')) {
+      return label.substring(3);
+    }
+    return null;
+  }
+
+  Future<ItemReceitModel?> _fetchReceiptByLabel(String label) async {
+    final response = await Net.get(
+      "/cashier/receit/by-label?label=${Uri.encodeComponent(label)}",
+    );
+    if (response.hasError || response.body?['receipt'] is! Map) {
+      return null;
+    }
+    return ItemReceitModel.fromJson(
+      Map<String, dynamic>.from(response.body['receipt'] as Map),
+    );
+  }
+
+  CompanyModel? get _effectiveCompany {
+    if (_company != null) return _company;
+    if (Get.isRegistered<InventoryController>()) {
+      return Get.find<InventoryController>().company.value;
+    }
+    return CompanyModel.fromStorage();
+  }
+
+  bool _isZimraDeviceRegistered(CompanyModel? company) {
+    if (company == null) return false;
+    final cert = company.zimraCertificate;
+    return (cert != null && cert.isNotEmpty) || company.zimraDeviceId != null;
+  }
+
+  Future<void> _refreshCompanyFromServer() async {
     try {
-      _company = Get.find<InventoryController>().company.value;
-    } catch (_) {}
+      final inv = Get.find<InventoryController>();
+      await inv.loadCompany();
+      if (mounted) {
+        setState(() {
+          _company = inv.company.value;
+        });
+      }
+    } catch (_) {
+      try {
+        _company = Get.find<InventoryController>().company.value;
+      } catch (_) {}
+    }
   }
 
   Future<void> _fetchCustomer() async {
@@ -79,11 +171,18 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
+    final company = _effectiveCompany;
+    final hasServerReceiptId = widget.receitModel.hexId.trim().isNotEmpty;
+    final showZimraSubmit = !widget.receitModel.fiscalized &&
+        _isZimraDeviceRegistered(company) &&
+        (widget.receitModel.synced || hasServerReceiptId);
+    final zimraKind = ZimraReceiptDisplay.kindOf(widget.receitModel);
+    final docColor = ZimraReceiptDisplay.accentColor(zimraKind);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Receipt #${widget.receitModel.label}",
+          ZimraReceiptDisplay.appBarTitle(widget.receitModel),
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -159,6 +258,62 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                                   ],
                                 ),
                               ),
+                            if (ZimraReceiptDisplay.isAdjustment(
+                              widget.receitModel,
+                            )) ...[
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                margin: const EdgeInsets.only(bottom: 8),
+                                decoration: BoxDecoration(
+                                  color: docColor.withAlpha(40),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.description_outlined,
+                                        color: docColor, size: 14),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      ZimraReceiptDisplay.documentTitle(
+                                        widget.receitModel,
+                                      ).toUpperCase(),
+                                      style: TextStyle(
+                                        color: docColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                        letterSpacing: 0.8,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                  padding:
+                                      const EdgeInsets.only(bottom: 12),
+                                  child: FilledButton.tonalIcon(
+                                    onPressed: _isLoadingOriginal
+                                        ? null
+                                        : _openOriginalInvoice,
+                                    icon: _isLoadingOriginal
+                                        ? const SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : const Icon(Icons.receipt_long,
+                                            size: 18),
+                                    label: const Text(
+                                      "View original fiscal invoice",
+                                    ),
+                                  ),
+                                ),
+                            ],
                             if (widget.receitModel.fiscalized)
                               Container(
                                 padding: const EdgeInsets.symmetric(
@@ -219,11 +374,23 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              widget.receitModel.creditSale
+                              ZimraReceiptDisplay.isCreditNote(
+                                    widget.receitModel,
+                                  )
+                                  ? "REFUND (CREDIT NOTE)"
+                                  : ZimraReceiptDisplay.isDebitNote(
+                                      widget.receitModel,
+                                    )
+                                  ? "ADDITIONAL CHARGE (DEBIT NOTE)"
+                                  : widget.receitModel.creditSale
                                   ? "CREDIT INVOICE"
                                   : "PAID IN FULL",
                               style: TextStyle(
-                                color: widget.receitModel.creditSale
+                                color: ZimraReceiptDisplay.isAdjustment(
+                                      widget.receitModel,
+                                    )
+                                    ? docColor
+                                    : widget.receitModel.creditSale
                                     ? Colors.red.shade400
                                     : Colors.green,
                                 fontSize: 14,
@@ -264,15 +431,27 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   _buildInfoBlock(
+                                    "Document type",
+                                    ZimraReceiptDisplay.documentTitle(
+                                      widget.receitModel,
+                                    ),
+                                    Icons.article_outlined,
+                                  ),
+                                  _buildInfoBlock(
                                     "Receipt Counter",
                                     "${widget.receitModel.zimraFiscalDayNo ?? ""}/${widget.receitModel.zimraReceiptGlobalNo ?? ""}",
                                     Icons.receipt_long_outlined,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
                                   ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
                                   _buildInfoBlock(
                                     "Fiscal Device Id",
                                     "${widget.receitModel.zimraDeviceId ?? ""}",
                                     Icons.devices_outlined,
-                                    crossAxisAlignment: CrossAxisAlignment.end,
                                   ),
                                 ],
                               ),
@@ -551,8 +730,12 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                               ),
                             ),
 
-                            if (_company?.zimraQrFiscilization == true &&
-                                widget.receitModel.fiscalized) ...[
+                            if (company?.zimraQrFiscilization == true &&
+                                widget.receitModel.fiscalized &&
+                                widget.receitModel.zimraReceiptGlobalNo !=
+                                    null &&
+                                (widget.receitModel.zimraSignature?.isNotEmpty ??
+                                    false)) ...[
                               const SizedBox(height: 24),
                               _buildDashedDivider(isDark),
                               const SizedBox(height: 24),
@@ -574,6 +757,7 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                                                   .value
                                                   ?.zimraIsTest ??
                                               true,
+                                          qrUrlFromConfig: _zimraQrUrlFromCompany,
                                         ),
                                         version: QrVersions.auto,
                                         size: 150.0,
@@ -609,10 +793,21 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                             const SizedBox(height: 24),
 
                             // Bottom Action Buttons
-                            if (widget.receitModel.synced &&
-                                !widget.receitModel.fiscalized &&
-                                _company != null &&
-                                _company!.zimraCertificate != null)
+                            if (showZimraSubmit &&
+                                company != null &&
+                                !company.isZimraSubscriptionActive)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 10.0),
+                                child: Text(
+                                  "If submit fails, refresh company in Settings → ZIMRA and confirm fiscalization subscription is active.",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade600,
+                                    height: 1.3,
+                                  ),
+                                ),
+                              ),
+                            if (showZimraSubmit)
                               SizedBox(
                                 width: double.infinity,
                                 child: Padding(
@@ -658,7 +853,10 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                                   ),
                                 ),
                               ),
-                            if (!widget.receitModel.creditSale)
+                            if (!widget.receitModel.creditSale &&
+                                !ZimraReceiptDisplay.isAdjustment(
+                                  widget.receitModel,
+                                ))
                               SizedBox(
                                 width: double.infinity,
                                 child: OutlinedButton.icon(
@@ -694,6 +892,35 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
                                     ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            if (widget.receitModel.fiscalized &&
+                                !ZimraReceiptDisplay.isAdjustment(
+                                  widget.receitModel,
+                                ) &&
+                                !widget.receitModel.creditSale)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 12),
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  child: OutlinedButton.icon(
+                                    onPressed: _showDebitNoteDialog,
+                                    icon: Icon(Icons.add_circle_outline,
+                                        color: Colors.indigo.shade700, size: 18),
+                                    label: const Text("Issue debit note (ZIMRA)"),
+                                    style: OutlinedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      foregroundColor: Colors.indigo.shade700,
+                                      side: BorderSide(
+                                        color: Colors.indigo.withAlpha(80),
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -863,6 +1090,170 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
     );
   }
 
+  Future<void> _openOriginalInvoice() async {
+    setState(() => _isLoadingOriginal = true);
+    ItemReceitModel? original;
+    try {
+      var id = widget.receitModel.originalReceiptId?.trim();
+      final isar = IsarStatic.getInstance();
+
+      if (id != null && id.isNotEmpty) {
+        if (isar != null) {
+          original =
+              isar.itemReceitModels.where().hexIdEqualTo(id).findFirst();
+        }
+        if (original == null && Get.isRegistered<ItemsController>()) {
+          for (final r in Get.find<ItemsController>().receits) {
+            if (r.hexId == id) {
+              original = r;
+              break;
+            }
+          }
+        }
+        if (original == null) {
+          final response = await Net.get("/cashier/receit/$id");
+          if (!response.hasError && response.body?['receipt'] is Map) {
+            original = ItemReceitModel.fromJson(
+              Map<String, dynamic>.from(response.body['receipt'] as Map),
+            );
+          } else if (response.hasError) {
+            Toaster.showError(
+              response.body?['error']?.toString() ?? response.response,
+            );
+          }
+        }
+      }
+
+      if (original == null) {
+        final parentLabel = _parentInvoiceLabelFromAdjustment();
+        if (parentLabel != null && parentLabel.isNotEmpty) {
+          original = await _fetchReceiptByLabel(parentLabel);
+        }
+      }
+
+      if (original != null && isar != null) {
+        await isar.write((isar) async {
+          isar.itemReceitModels.put(original!);
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _isLoadingOriginal = false);
+    }
+
+    if (original == null) {
+      Toaster.showError(
+        "Could not find the original invoice. Pull to refresh Sales, then try again.",
+      );
+      return;
+    }
+    if (!mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ScreenReceitView(receitModel: original!),
+      ),
+    );
+  }
+
+  Future<void> _showDebitNoteDialog() async {
+    if (widget.receitModel.hexId.isEmpty) {
+      Toaster.showError("Sync this receipt before issuing a debit note.");
+      return;
+    }
+    final amountController = TextEditingController();
+    final noteController = TextEditingController(
+      text: "Additional charge",
+    );
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Issue debit note"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "Use when you must charge extra on an already fiscalized invoice (ZIMRA debit note).",
+              style: TextStyle(fontSize: 12),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: amountController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                labelText: "Amount",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: noteController,
+              decoration: const InputDecoration(
+                labelText: "Description",
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text("Cancel"),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text("Create"),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final amount = double.tryParse(amountController.text.trim());
+    if (amount == null || amount <= 0) {
+      Toaster.showError("Enter a valid amount greater than zero.");
+      return;
+    }
+
+    final response = await Net.post(
+      "/cashier/debit-note",
+      data: {
+        "receiptId": widget.receitModel.hexId,
+        "amount": amount,
+        "note": noteController.text.trim(),
+      },
+    );
+    if (response.hasError) {
+      Toaster.showError(
+        response.body?['error']?.toString() ?? response.response,
+      );
+      return;
+    }
+    final dn = response.body?['debitNote'];
+    if (dn is Map && Get.isRegistered<ItemsController>()) {
+      final dnModel = ItemReceitModel.fromJson(
+        Map<String, dynamic>.from(dn),
+      );
+      final isar = IsarStatic.getInstance();
+      if (isar != null) {
+        await isar.write((isar) async {
+          isar.itemReceitModels.put(dnModel);
+        });
+      }
+      Get.find<ItemsController>().receits.insert(0, dnModel);
+      if (!mounted) return;
+      await Navigator.push(
+        context,
+        MaterialPageRoute<void>(
+          builder: (_) => ScreenReceitView(receitModel: dnModel),
+        ),
+      );
+      return;
+    }
+    Toaster.showSuccess(
+      response.body?['message']?.toString() ??
+          "Debit note created.",
+    );
+  }
+
   void _printReceit() async {
     DevicesController.printReceitToBackround(
       widget.receitModel,
@@ -900,17 +1291,48 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
 
   void _fiscalizeReceipt() async {
     setState(() => _isFiscalizing = true);
+    await _refreshCompanyFromServer();
+    final company = _effectiveCompany;
+    if (company != null && !company.isZimraSubscriptionActive) {
+      setState(() => _isFiscalizing = false);
+      Toaster.showError(
+        "ZIMRA fiscalization subscription is not active on the server. Open Settings → ZIMRA Fiscalization, subscribe or refresh, then try again.",
+      );
+      return;
+    }
+    final receiptId = widget.receitModel.hexId.trim();
+    if (receiptId.isEmpty) {
+      setState(() => _isFiscalizing = false);
+      Toaster.showError(
+        "This receipt has no server ID yet. Sync or complete checkout online first.",
+      );
+      return;
+    }
     final response = await Net.post(
       "/cashier/fiscalize-receipt",
-      data: {"receiptId": widget.receitModel.hexId},
+      data: {"receiptId": receiptId},
     );
     setState(() => _isFiscalizing = false);
 
     if (!response.hasError) {
       Toaster.showSuccess("Receipt fiscalized successfully");
-      setState(() {
-        widget.receitModel.fiscalized = true;
-      });
+      final receiptPayload = response.body?['receipt'];
+      if (receiptPayload is Map) {
+        widget.receitModel.applyZimraFiscalizationFrom(
+          Map<String, dynamic>.from(receiptPayload),
+        );
+        final isar = IsarStatic.getInstance();
+        if (isar != null) {
+          await isar.write((isar) async {
+            isar.itemReceitModels.put(widget.receitModel);
+          });
+        }
+      } else {
+        setState(() {
+          widget.receitModel.fiscalized = true;
+        });
+      }
+      if (mounted) setState(() {});
       Get.find<ItemsController>().updateUnsyncedReceits();
     } else {
       Toaster.showError("Failed to fiscalize: ${response.response}");

@@ -62,9 +62,7 @@ class _ScreenMainState extends State<ScreenMain> {
           company.subscriptionType.validUntil != null) {
         _verifySubscriptionValidity(company);
       }
-      if (company != null &&
-          company.zimraHasSubscription == true &&
-          company.zimraSubscriptionValidUntil != null) {
+      if (company != null && company.isZimraSubscriptionActive) {
         _verifyZimraSubscriptionValidity(company);
       }
       Future.delayed(const Duration(milliseconds: 600), () {

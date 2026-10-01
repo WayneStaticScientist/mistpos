@@ -22,6 +22,7 @@ import 'package:mistpos/core/widgets/loaders/small_loader.dart';
 import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:mistpos/features/auth/screens/screen_user_profile.dart';
 import 'package:mistpos/features/settings/screens/screen_receit_designer.dart';
+import 'package:mistpos/features/settings/screens/screen_online_sales_settings.dart';
 import 'package:mistpos/features/inventory/controllers/items_controller.dart';
 
 class ScreenSettingsPage extends StatefulWidget {
@@ -39,11 +40,26 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
   Widget build(BuildContext context) {
     final model = AppSettingsModel.fromStorage();
     return Scaffold(
-      appBar: AppBar(title: Text("Settings")),
-      body: ListView(
-        padding: EdgeInsets.all(8),
-        children: [
-          24.gapColumn,
+      appBar: AppBar(
+        title: const Text("Settings"),
+        scrolledUnderElevation: 0,
+      ),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final horizontalPad = constraints.maxWidth >= 600 ? 20.0 : 12.0;
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 960),
+                child: ListView(
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPad,
+                    8,
+                    horizontalPad,
+                    28,
+                  ),
+                  children: [
+          16.gapColumn,
           MistMordernLayout(
             label: "User",
             children: [
@@ -566,6 +582,32 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                       leading: Iconify(Bx.time, color: AppTheme.color(context)),
                     ),
                     ListTile(
+                      onTap: () => Get.to(() => const ScreenOnlineSalesSettings()),
+                      contentPadding: EdgeInsets.zero,
+                      title: "Online sales".text(),
+                      subtitle: Obx(
+                        () {
+                          final on =
+                              _invController.company.value?.enableOnlineSales ??
+                                  false;
+                          return (on
+                                  ? "Active — server-first checkout & stock rules"
+                                  : "Off — standard offline POS")
+                              .text(
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          );
+                        },
+                      ),
+                      trailing: Iconify(
+                        Bx.chevron_right,
+                        color: Colors.grey.shade500,
+                      ),
+                      leading: Iconify(
+                        Bx.cloud,
+                        color: AppTheme.color(context),
+                      ),
+                    ),
+                    ListTile(
                       subtitle: "send daily reports to whatsapp".text(
                         style: TextStyle(color: Colors.grey, fontSize: 12),
                       ),
@@ -613,6 +655,11 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
             ],
           ),
         ],
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -760,9 +807,6 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
       company.hexId,
     );
     if (response) {
-      _invController.company.value = company;
-      _invController.company.refresh();
-      company.saveToStorage();
       Toaster.showSuccess('status updated ');
     }
   }

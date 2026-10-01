@@ -8,6 +8,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:mistpos/data/models/user_model.dart';
 import 'package:mistpos/data/models/employee_model.dart';
 import 'package:mistpos/data/models/company_model.dart';
+import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:mistpos/data/models/dialy_sale_model.dart';
 import 'package:mistpos/data/models/sales_by_payment.dart';
 import 'package:mistpos/core/services/api/network_wrapper.dart';
@@ -227,6 +228,18 @@ class AdminController extends GetxController {
     if (result.hasError) {
       Toaster.showError(result.response);
       return false;
+    }
+
+    if (result.body != null && result.body['update'] != null) {
+      final updated = CompanyModel.fromJson(
+        result.body['update'] as Map<String, dynamic>,
+      );
+      if (Get.isRegistered<InventoryController>()) {
+        final inv = Get.find<InventoryController>();
+        inv.company.value = updated;
+        inv.company.refresh();
+        updated.saveToStorage();
+      }
     }
 
     loadCompanies();

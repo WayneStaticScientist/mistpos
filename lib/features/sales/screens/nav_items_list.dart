@@ -20,6 +20,8 @@ import 'package:mistpos/features/settings/screens/screen_subscription.dart';
 import 'package:mistpos/features/inventory/controllers/items_unsaved_controller.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:mistpos/core/widgets/layouts/list_mist_unsaved_list_tile.dart';
+import 'package:mistpos/core/utils/permissions.dart';
+import 'package:mistpos/features/auth/controllers/user_controller.dart';
 
 class NavItemsList extends StatefulWidget {
   const NavItemsList({super.key});
@@ -32,6 +34,7 @@ class _NavItemsListState extends State<NavItemsList> {
   String searchKey = "";
   late Timer? _debounce;
   final _itemsUnsavedController = Get.find<ItemsUnsavedController>();
+  final _userController = Get.find<UserController>();
   final _searchController = TextEditingController();
   final RefreshController _refreshController = RefreshController(initialRefresh: false);
 
@@ -69,9 +72,18 @@ class _NavItemsListState extends State<NavItemsList> {
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 4),
             itemBuilder: (context, index) => InkWell(
-              onTap: () => _openEditor(_itemsUnsavedController.cartItems[index]),
-              onLongPress: () =>
-                  _openDeleteDialog(_itemsUnsavedController.cartItems[index]),
+              onTap: UserPermissions.canEditOrDeleteProduct(
+                    _userController.user.value,
+                  )
+                  ? () => _openEditor(_itemsUnsavedController.cartItems[index])
+                  : null,
+              onLongPress: UserPermissions.canEditOrDeleteProduct(
+                    _userController.user.value,
+                  )
+                  ? () => _openDeleteDialog(
+                      _itemsUnsavedController.cartItems[index],
+                    )
+                  : null,
               child: ListMistUnsavedListTile(
                 item: _itemsUnsavedController.cartItems[index],
               ),
