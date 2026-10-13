@@ -288,6 +288,7 @@ class ItemsController extends GetxController {
   RxInt receitsPage = RxInt(1);
   RxInt receitsTotalPages = RxInt(2);
   RxBool receitsLoading = RxBool(false);
+  RxBool checkoutInProgress = RxBool(false);
   RxString receitsHasError = RxString("");
   Future<void> loadReceits({
     int page = 1,
@@ -314,11 +315,22 @@ class ItemsController extends GetxController {
 
         await isar.write((isar) async {
           final allExisting = isar.itemReceitModels.where().findAll();
-          final existingMap = {for (var e in allExisting) e.hexId: e.id};
+          final existingByHexId = {
+            for (var e in allExisting)
+              if (e.hexId.isNotEmpty) e.hexId: e.id,
+          };
+          final existingByClientSaleId = {
+            for (var e in allExisting)
+              if (e.clientSaleId.isNotEmpty) e.clientSaleId: e.id,
+          };
 
           for (var model in lv) {
-            if (existingMap.containsKey(model.hexId)) {
-              model.id = existingMap[model.hexId]!;
+            if (model.hexId.isNotEmpty &&
+                existingByHexId.containsKey(model.hexId)) {
+              model.id = existingByHexId[model.hexId]!;
+            } else if (model.clientSaleId.isNotEmpty &&
+                existingByClientSaleId.containsKey(model.clientSaleId)) {
+              model.id = existingByClientSaleId[model.clientSaleId]!;
             }
           }
           isar.itemReceitModels.putAll(lv);
@@ -1270,6 +1282,7 @@ class ItemsController extends GetxController {
     return !response.hasError;
   }
 
+  /// Online checkout only — server must return a fiscalized receipt before print.
   Future<ItemReceitModel?> _purchaseOnServer(ItemReceitModel draft) async {
     final response = await Net.post(
       "/cashier/purchase",
@@ -1302,7 +1315,16 @@ class ItemsController extends GetxController {
       Toaster.showError("Server did not return a receipt");
       return null;
     }
-    return ItemReceitModel.fromJson(update as Map<String, dynamic>);
+    final map = update as Map<String, dynamic>;
+    final receipt = ItemReceitModel.fromJson(map);
+    receipt.applyZimraFiscalizationFrom(map);
+    if (!receipt.fiscalized) {
+      Toaster.showError(
+        "Server receipt was not fiscalized — check ZIMRA before printing",
+      );
+      return null;
+    }
+    return receipt;
   }
 
   Future<void> removeAllSelected() async {
@@ -1498,6 +1520,10 @@ class ItemsController extends GetxController {
     required User user,
     bool creditPayment = false,
   }) async {
+    if (checkoutInProgress.value) {
+      return false;
+    }
+    checkoutInProgress.value = true;
     try {
       final isar = IsarStatic.getInstance();
       if (isar == null) {
@@ -1508,6 +1534,7 @@ class ItemsController extends GetxController {
 
       final itemReceitModel = ItemReceitModel(
         hexId: "",
+        clientSaleId: generateClientSaleId(),
         currency: user.baseCurrence,
         cashier: "admin",
         label: Labeller.generateRecietNumber(
@@ -1614,6 +1641,9 @@ class ItemsController extends GetxController {
           return false;
         }
         serverReceipt.synced = true;
+        if (serverReceipt.clientSaleId.isEmpty) {
+          serverReceipt.clientSaleId = itemReceitModel.clientSaleId;
+        }
         receiptToStore = serverReceipt;
       }
 
@@ -1632,6 +1662,7 @@ class ItemsController extends GetxController {
       }
       user.receitsCount++;
       User.saveToStorage(user);
+
       if (!useOnlineCheckout) {
         updateReceitsInBackground(newReceitId, receiptToStore);
         if (printReceits) {
@@ -1644,6 +1675,7 @@ class ItemsController extends GetxController {
         }
       } else {
         if (printReceits) {
+          // [receiptToStore] is the fiscal server payload (QR, counters, signature).
           DevicesController.printReceitToBackround(
             receiptToStore,
             user,
@@ -1664,6 +1696,8 @@ class ItemsController extends GetxController {
     } catch (e) {
       Toaster.showError("There was error : $e");
       return false;
+    } finally {
+      checkoutInProgress.value = false;
     }
   }
 
@@ -1700,9 +1734,15 @@ class ItemsController extends GetxController {
     if (response.hasError) {
       return;
     }
-    final receivedModel = ItemReceitModel.fromJson(response.body['update']);
+    final map = response.body['update'] as Map<String, dynamic>;
+    final receivedModel = ItemReceitModel.fromJson(map);
+    receivedModel.applyZimraFiscalizationFrom(map);
     await isar.write((isar) async {
       receivedModel.id = id;
+      if (receivedModel.clientSaleId.isEmpty &&
+          itemReceitModel.clientSaleId.isNotEmpty) {
+        receivedModel.clientSaleId = itemReceitModel.clientSaleId;
+      }
       isar.itemReceitModels.put(receivedModel);
     });
     loadReceitsStatic();

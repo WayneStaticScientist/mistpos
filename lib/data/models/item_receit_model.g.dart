@@ -33,6 +33,7 @@ final ItemReceitModelSchema = IsarGeneratedSchema(
       IsarPropertySchema(name: 'synced', type: IsarType.bool),
       IsarPropertySchema(name: 'createdAt', type: IsarType.dateTime),
       IsarPropertySchema(name: 'hexId', type: IsarType.string),
+      IsarPropertySchema(name: 'clientSaleId', type: IsarType.string),
       IsarPropertySchema(name: 'currency', type: IsarType.string),
       IsarPropertySchema(name: 'customerId', type: IsarType.string),
       IsarPropertySchema(name: 'label', type: IsarType.string),
@@ -94,19 +95,20 @@ int serializeItemReceitModel(IsarWriter writer, ItemReceitModel object) {
     object.createdAt.toUtc().microsecondsSinceEpoch,
   );
   IsarCore.writeString(writer, 12, object.hexId);
-  IsarCore.writeString(writer, 13, object.currency);
+  IsarCore.writeString(writer, 13, object.clientSaleId);
+  IsarCore.writeString(writer, 14, object.currency);
   {
     final value = object.customerId;
     if (value == null) {
-      IsarCore.writeNull(writer, 14);
+      IsarCore.writeNull(writer, 15);
     } else {
-      IsarCore.writeString(writer, 14, value);
+      IsarCore.writeString(writer, 15, value);
     }
   }
-  IsarCore.writeString(writer, 15, object.label);
+  IsarCore.writeString(writer, 16, object.label);
   {
     final list = object.miniTax;
-    final listWriter = IsarCore.beginList(writer, 16, list.length);
+    final listWriter = IsarCore.beginList(writer, 17, list.length);
     for (var i = 0; i < list.length; i++) {
       {
         final value = list[i];
@@ -119,7 +121,7 @@ int serializeItemReceitModel(IsarWriter writer, ItemReceitModel object) {
   }
   {
     final list = object.items;
-    final listWriter = IsarCore.beginList(writer, 17, list.length);
+    final listWriter = IsarCore.beginList(writer, 18, list.length);
     for (var i = 0; i < list.length; i++) {
       {
         final value = list[i];
@@ -132,7 +134,7 @@ int serializeItemReceitModel(IsarWriter writer, ItemReceitModel object) {
   }
   {
     final list = object.discounts;
-    final listWriter = IsarCore.beginList(writer, 18, list.length);
+    final listWriter = IsarCore.beginList(writer, 19, list.length);
     for (var i = 0; i < list.length; i++) {
       {
         final value = list[i];
@@ -143,57 +145,57 @@ int serializeItemReceitModel(IsarWriter writer, ItemReceitModel object) {
     }
     IsarCore.endList(writer, listWriter);
   }
-  IsarCore.writeBool(writer, 19, value: object.fiscalized);
+  IsarCore.writeBool(writer, 20, value: object.fiscalized);
   {
     final value = object.zimraReceiptId;
-    if (value == null) {
-      IsarCore.writeNull(writer, 20);
-    } else {
-      IsarCore.writeString(writer, 20, value);
-    }
-  }
-  {
-    final value = object.zimraSignature;
     if (value == null) {
       IsarCore.writeNull(writer, 21);
     } else {
       IsarCore.writeString(writer, 21, value);
     }
   }
+  {
+    final value = object.zimraSignature;
+    if (value == null) {
+      IsarCore.writeNull(writer, 22);
+    } else {
+      IsarCore.writeString(writer, 22, value);
+    }
+  }
   IsarCore.writeLong(
     writer,
-    22,
+    23,
     object.zimraReceiptGlobalNo ?? -9223372036854775808,
   );
-  IsarCore.writeLong(writer, 23, object.zimraDeviceId ?? -9223372036854775808);
+  IsarCore.writeLong(writer, 24, object.zimraDeviceId ?? -9223372036854775808);
   IsarCore.writeLong(
     writer,
-    24,
+    25,
     object.zimraFiscalDayNo ?? -9223372036854775808,
   );
   {
     final value = object.zimraReceiptDateQr;
-    if (value == null) {
-      IsarCore.writeNull(writer, 25);
-    } else {
-      IsarCore.writeString(writer, 25, value);
-    }
-  }
-  {
-    final value = object.zimraQrCodeUrl;
     if (value == null) {
       IsarCore.writeNull(writer, 26);
     } else {
       IsarCore.writeString(writer, 26, value);
     }
   }
-  IsarCore.writeString(writer, 27, object.receiptType);
+  {
+    final value = object.zimraQrCodeUrl;
+    if (value == null) {
+      IsarCore.writeNull(writer, 27);
+    } else {
+      IsarCore.writeString(writer, 27, value);
+    }
+  }
+  IsarCore.writeString(writer, 28, object.receiptType);
   {
     final value = object.originalReceiptId;
     if (value == null) {
-      IsarCore.writeNull(writer, 28);
+      IsarCore.writeNull(writer, 29);
     } else {
-      IsarCore.writeString(writer, 28, value);
+      IsarCore.writeString(writer, 29, value);
     }
   }
   return object.id;
@@ -259,15 +261,17 @@ ItemReceitModel deserializeItemReceitModel(IsarReader reader) {
   }
   final String _hexId;
   _hexId = IsarCore.readString(reader, 12) ?? '';
+  final String _clientSaleId;
+  _clientSaleId = IsarCore.readString(reader, 13) ?? "";
   final String _currency;
-  _currency = IsarCore.readString(reader, 13) ?? "";
+  _currency = IsarCore.readString(reader, 14) ?? "";
   final String? _customerId;
-  _customerId = IsarCore.readString(reader, 14);
+  _customerId = IsarCore.readString(reader, 15);
   final String _label;
-  _label = IsarCore.readString(reader, 15) ?? "";
+  _label = IsarCore.readString(reader, 16) ?? "";
   final List<MiniTax> _miniTax;
   {
-    final length = IsarCore.readList(reader, 16, IsarCore.readerPtrPtr);
+    final length = IsarCore.readList(reader, 17, IsarCore.readerPtrPtr);
     {
       final reader = IsarCore.readerPtr;
       if (reader.isNull) {
@@ -293,7 +297,7 @@ ItemReceitModel deserializeItemReceitModel(IsarReader reader) {
   }
   final List<ItemReceitItem> _items;
   {
-    final length = IsarCore.readList(reader, 17, IsarCore.readerPtrPtr);
+    final length = IsarCore.readList(reader, 18, IsarCore.readerPtrPtr);
     {
       final reader = IsarCore.readerPtr;
       if (reader.isNull) {
@@ -323,7 +327,7 @@ ItemReceitModel deserializeItemReceitModel(IsarReader reader) {
   }
   final List<EmbeddedDiscountModel> _discounts;
   {
-    final length = IsarCore.readList(reader, 18, IsarCore.readerPtrPtr);
+    final length = IsarCore.readList(reader, 19, IsarCore.readerPtrPtr);
     {
       final reader = IsarCore.readerPtr;
       if (reader.isNull) {
@@ -352,14 +356,14 @@ ItemReceitModel deserializeItemReceitModel(IsarReader reader) {
     }
   }
   final bool _fiscalized;
-  _fiscalized = IsarCore.readBool(reader, 19);
+  _fiscalized = IsarCore.readBool(reader, 20);
   final String? _zimraReceiptId;
-  _zimraReceiptId = IsarCore.readString(reader, 20);
+  _zimraReceiptId = IsarCore.readString(reader, 21);
   final String? _zimraSignature;
-  _zimraSignature = IsarCore.readString(reader, 21);
+  _zimraSignature = IsarCore.readString(reader, 22);
   final int? _zimraReceiptGlobalNo;
   {
-    final value = IsarCore.readLong(reader, 22);
+    final value = IsarCore.readLong(reader, 23);
     if (value == -9223372036854775808) {
       _zimraReceiptGlobalNo = null;
     } else {
@@ -368,7 +372,7 @@ ItemReceitModel deserializeItemReceitModel(IsarReader reader) {
   }
   final int? _zimraDeviceId;
   {
-    final value = IsarCore.readLong(reader, 23);
+    final value = IsarCore.readLong(reader, 24);
     if (value == -9223372036854775808) {
       _zimraDeviceId = null;
     } else {
@@ -377,7 +381,7 @@ ItemReceitModel deserializeItemReceitModel(IsarReader reader) {
   }
   final int? _zimraFiscalDayNo;
   {
-    final value = IsarCore.readLong(reader, 24);
+    final value = IsarCore.readLong(reader, 25);
     if (value == -9223372036854775808) {
       _zimraFiscalDayNo = null;
     } else {
@@ -385,13 +389,13 @@ ItemReceitModel deserializeItemReceitModel(IsarReader reader) {
     }
   }
   final String? _zimraReceiptDateQr;
-  _zimraReceiptDateQr = IsarCore.readString(reader, 25);
+  _zimraReceiptDateQr = IsarCore.readString(reader, 26);
   final String? _zimraQrCodeUrl;
-  _zimraQrCodeUrl = IsarCore.readString(reader, 26);
+  _zimraQrCodeUrl = IsarCore.readString(reader, 27);
   final String _receiptType;
-  _receiptType = IsarCore.readString(reader, 27) ?? 'FiscalInvoice';
+  _receiptType = IsarCore.readString(reader, 28) ?? 'FiscalInvoice';
   final String? _originalReceiptId;
-  _originalReceiptId = IsarCore.readString(reader, 28);
+  _originalReceiptId = IsarCore.readString(reader, 29);
   final object = ItemReceitModel(
     cashier: _cashier,
     payment: _payment,
@@ -405,6 +409,7 @@ ItemReceitModel deserializeItemReceitModel(IsarReader reader) {
     synced: _synced,
     createdAt: _createdAt,
     hexId: _hexId,
+    clientSaleId: _clientSaleId,
     currency: _currency,
     customerId: _customerId,
     label: _label,
@@ -489,12 +494,14 @@ dynamic deserializeItemReceitModelProp(IsarReader reader, int property) {
     case 13:
       return IsarCore.readString(reader, 13) ?? "";
     case 14:
-      return IsarCore.readString(reader, 14);
+      return IsarCore.readString(reader, 14) ?? "";
     case 15:
-      return IsarCore.readString(reader, 15) ?? "";
+      return IsarCore.readString(reader, 15);
     case 16:
+      return IsarCore.readString(reader, 16) ?? "";
+    case 17:
       {
-        final length = IsarCore.readList(reader, 16, IsarCore.readerPtrPtr);
+        final length = IsarCore.readList(reader, 17, IsarCore.readerPtrPtr);
         {
           final reader = IsarCore.readerPtr;
           if (reader.isNull) {
@@ -522,9 +529,9 @@ dynamic deserializeItemReceitModelProp(IsarReader reader, int property) {
           }
         }
       }
-    case 17:
+    case 18:
       {
-        final length = IsarCore.readList(reader, 17, IsarCore.readerPtrPtr);
+        final length = IsarCore.readList(reader, 18, IsarCore.readerPtrPtr);
         {
           final reader = IsarCore.readerPtr;
           if (reader.isNull) {
@@ -552,9 +559,9 @@ dynamic deserializeItemReceitModelProp(IsarReader reader, int property) {
           }
         }
       }
-    case 18:
+    case 19:
       {
-        final length = IsarCore.readList(reader, 18, IsarCore.readerPtrPtr);
+        final length = IsarCore.readList(reader, 19, IsarCore.readerPtrPtr);
         {
           final reader = IsarCore.readerPtr;
           if (reader.isNull) {
@@ -584,21 +591,12 @@ dynamic deserializeItemReceitModelProp(IsarReader reader, int property) {
           }
         }
       }
-    case 19:
-      return IsarCore.readBool(reader, 19);
     case 20:
-      return IsarCore.readString(reader, 20);
+      return IsarCore.readBool(reader, 20);
     case 21:
       return IsarCore.readString(reader, 21);
     case 22:
-      {
-        final value = IsarCore.readLong(reader, 22);
-        if (value == -9223372036854775808) {
-          return null;
-        } else {
-          return value;
-        }
-      }
+      return IsarCore.readString(reader, 22);
     case 23:
       {
         final value = IsarCore.readLong(reader, 23);
@@ -618,13 +616,22 @@ dynamic deserializeItemReceitModelProp(IsarReader reader, int property) {
         }
       }
     case 25:
-      return IsarCore.readString(reader, 25);
+      {
+        final value = IsarCore.readLong(reader, 25);
+        if (value == -9223372036854775808) {
+          return null;
+        } else {
+          return value;
+        }
+      }
     case 26:
       return IsarCore.readString(reader, 26);
     case 27:
-      return IsarCore.readString(reader, 27) ?? 'FiscalInvoice';
+      return IsarCore.readString(reader, 27);
     case 28:
-      return IsarCore.readString(reader, 28);
+      return IsarCore.readString(reader, 28) ?? 'FiscalInvoice';
+    case 29:
+      return IsarCore.readString(reader, 29);
     default:
       throw ArgumentError('Unknown property: $property');
   }
@@ -645,6 +652,7 @@ sealed class _ItemReceitModelUpdate {
     bool? synced,
     DateTime? createdAt,
     String? hexId,
+    String? clientSaleId,
     String? currency,
     String? customerId,
     String? label,
@@ -681,6 +689,7 @@ class _ItemReceitModelUpdateImpl implements _ItemReceitModelUpdate {
     Object? synced = ignore,
     Object? createdAt = ignore,
     Object? hexId = ignore,
+    Object? clientSaleId = ignore,
     Object? currency = ignore,
     Object? customerId = ignore,
     Object? label = ignore,
@@ -710,20 +719,21 @@ class _ItemReceitModelUpdateImpl implements _ItemReceitModelUpdate {
             if (synced != ignore) 10: synced as bool?,
             if (createdAt != ignore) 11: createdAt as DateTime?,
             if (hexId != ignore) 12: hexId as String?,
-            if (currency != ignore) 13: currency as String?,
-            if (customerId != ignore) 14: customerId as String?,
-            if (label != ignore) 15: label as String?,
-            if (fiscalized != ignore) 19: fiscalized as bool?,
-            if (zimraReceiptId != ignore) 20: zimraReceiptId as String?,
-            if (zimraSignature != ignore) 21: zimraSignature as String?,
+            if (clientSaleId != ignore) 13: clientSaleId as String?,
+            if (currency != ignore) 14: currency as String?,
+            if (customerId != ignore) 15: customerId as String?,
+            if (label != ignore) 16: label as String?,
+            if (fiscalized != ignore) 20: fiscalized as bool?,
+            if (zimraReceiptId != ignore) 21: zimraReceiptId as String?,
+            if (zimraSignature != ignore) 22: zimraSignature as String?,
             if (zimraReceiptGlobalNo != ignore)
-              22: zimraReceiptGlobalNo as int?,
-            if (zimraDeviceId != ignore) 23: zimraDeviceId as int?,
-            if (zimraFiscalDayNo != ignore) 24: zimraFiscalDayNo as int?,
-            if (zimraReceiptDateQr != ignore) 25: zimraReceiptDateQr as String?,
-            if (zimraQrCodeUrl != ignore) 26: zimraQrCodeUrl as String?,
-            if (receiptType != ignore) 27: receiptType as String?,
-            if (originalReceiptId != ignore) 28: originalReceiptId as String?,
+              23: zimraReceiptGlobalNo as int?,
+            if (zimraDeviceId != ignore) 24: zimraDeviceId as int?,
+            if (zimraFiscalDayNo != ignore) 25: zimraFiscalDayNo as int?,
+            if (zimraReceiptDateQr != ignore) 26: zimraReceiptDateQr as String?,
+            if (zimraQrCodeUrl != ignore) 27: zimraQrCodeUrl as String?,
+            if (receiptType != ignore) 28: receiptType as String?,
+            if (originalReceiptId != ignore) 29: originalReceiptId as String?,
           },
         ) >
         0;
@@ -745,6 +755,7 @@ sealed class _ItemReceitModelUpdateAll {
     bool? synced,
     DateTime? createdAt,
     String? hexId,
+    String? clientSaleId,
     String? currency,
     String? customerId,
     String? label,
@@ -781,6 +792,7 @@ class _ItemReceitModelUpdateAllImpl implements _ItemReceitModelUpdateAll {
     Object? synced = ignore,
     Object? createdAt = ignore,
     Object? hexId = ignore,
+    Object? clientSaleId = ignore,
     Object? currency = ignore,
     Object? customerId = ignore,
     Object? label = ignore,
@@ -808,19 +820,20 @@ class _ItemReceitModelUpdateAllImpl implements _ItemReceitModelUpdateAll {
       if (synced != ignore) 10: synced as bool?,
       if (createdAt != ignore) 11: createdAt as DateTime?,
       if (hexId != ignore) 12: hexId as String?,
-      if (currency != ignore) 13: currency as String?,
-      if (customerId != ignore) 14: customerId as String?,
-      if (label != ignore) 15: label as String?,
-      if (fiscalized != ignore) 19: fiscalized as bool?,
-      if (zimraReceiptId != ignore) 20: zimraReceiptId as String?,
-      if (zimraSignature != ignore) 21: zimraSignature as String?,
-      if (zimraReceiptGlobalNo != ignore) 22: zimraReceiptGlobalNo as int?,
-      if (zimraDeviceId != ignore) 23: zimraDeviceId as int?,
-      if (zimraFiscalDayNo != ignore) 24: zimraFiscalDayNo as int?,
-      if (zimraReceiptDateQr != ignore) 25: zimraReceiptDateQr as String?,
-      if (zimraQrCodeUrl != ignore) 26: zimraQrCodeUrl as String?,
-      if (receiptType != ignore) 27: receiptType as String?,
-      if (originalReceiptId != ignore) 28: originalReceiptId as String?,
+      if (clientSaleId != ignore) 13: clientSaleId as String?,
+      if (currency != ignore) 14: currency as String?,
+      if (customerId != ignore) 15: customerId as String?,
+      if (label != ignore) 16: label as String?,
+      if (fiscalized != ignore) 20: fiscalized as bool?,
+      if (zimraReceiptId != ignore) 21: zimraReceiptId as String?,
+      if (zimraSignature != ignore) 22: zimraSignature as String?,
+      if (zimraReceiptGlobalNo != ignore) 23: zimraReceiptGlobalNo as int?,
+      if (zimraDeviceId != ignore) 24: zimraDeviceId as int?,
+      if (zimraFiscalDayNo != ignore) 25: zimraFiscalDayNo as int?,
+      if (zimraReceiptDateQr != ignore) 26: zimraReceiptDateQr as String?,
+      if (zimraQrCodeUrl != ignore) 27: zimraQrCodeUrl as String?,
+      if (receiptType != ignore) 28: receiptType as String?,
+      if (originalReceiptId != ignore) 29: originalReceiptId as String?,
     });
   }
 }
@@ -846,6 +859,7 @@ sealed class _ItemReceitModelQueryUpdate {
     bool? synced,
     DateTime? createdAt,
     String? hexId,
+    String? clientSaleId,
     String? currency,
     String? customerId,
     String? label,
@@ -882,6 +896,7 @@ class _ItemReceitModelQueryUpdateImpl implements _ItemReceitModelQueryUpdate {
     Object? synced = ignore,
     Object? createdAt = ignore,
     Object? hexId = ignore,
+    Object? clientSaleId = ignore,
     Object? currency = ignore,
     Object? customerId = ignore,
     Object? label = ignore,
@@ -909,19 +924,20 @@ class _ItemReceitModelQueryUpdateImpl implements _ItemReceitModelQueryUpdate {
       if (synced != ignore) 10: synced as bool?,
       if (createdAt != ignore) 11: createdAt as DateTime?,
       if (hexId != ignore) 12: hexId as String?,
-      if (currency != ignore) 13: currency as String?,
-      if (customerId != ignore) 14: customerId as String?,
-      if (label != ignore) 15: label as String?,
-      if (fiscalized != ignore) 19: fiscalized as bool?,
-      if (zimraReceiptId != ignore) 20: zimraReceiptId as String?,
-      if (zimraSignature != ignore) 21: zimraSignature as String?,
-      if (zimraReceiptGlobalNo != ignore) 22: zimraReceiptGlobalNo as int?,
-      if (zimraDeviceId != ignore) 23: zimraDeviceId as int?,
-      if (zimraFiscalDayNo != ignore) 24: zimraFiscalDayNo as int?,
-      if (zimraReceiptDateQr != ignore) 25: zimraReceiptDateQr as String?,
-      if (zimraQrCodeUrl != ignore) 26: zimraQrCodeUrl as String?,
-      if (receiptType != ignore) 27: receiptType as String?,
-      if (originalReceiptId != ignore) 28: originalReceiptId as String?,
+      if (clientSaleId != ignore) 13: clientSaleId as String?,
+      if (currency != ignore) 14: currency as String?,
+      if (customerId != ignore) 15: customerId as String?,
+      if (label != ignore) 16: label as String?,
+      if (fiscalized != ignore) 20: fiscalized as bool?,
+      if (zimraReceiptId != ignore) 21: zimraReceiptId as String?,
+      if (zimraSignature != ignore) 22: zimraSignature as String?,
+      if (zimraReceiptGlobalNo != ignore) 23: zimraReceiptGlobalNo as int?,
+      if (zimraDeviceId != ignore) 24: zimraDeviceId as int?,
+      if (zimraFiscalDayNo != ignore) 25: zimraFiscalDayNo as int?,
+      if (zimraReceiptDateQr != ignore) 26: zimraReceiptDateQr as String?,
+      if (zimraQrCodeUrl != ignore) 27: zimraQrCodeUrl as String?,
+      if (receiptType != ignore) 28: receiptType as String?,
+      if (originalReceiptId != ignore) 29: originalReceiptId as String?,
     });
   }
 }
@@ -955,6 +971,7 @@ class _ItemReceitModelQueryBuilderUpdateImpl
     Object? synced = ignore,
     Object? createdAt = ignore,
     Object? hexId = ignore,
+    Object? clientSaleId = ignore,
     Object? currency = ignore,
     Object? customerId = ignore,
     Object? label = ignore,
@@ -984,19 +1001,20 @@ class _ItemReceitModelQueryBuilderUpdateImpl
         if (synced != ignore) 10: synced as bool?,
         if (createdAt != ignore) 11: createdAt as DateTime?,
         if (hexId != ignore) 12: hexId as String?,
-        if (currency != ignore) 13: currency as String?,
-        if (customerId != ignore) 14: customerId as String?,
-        if (label != ignore) 15: label as String?,
-        if (fiscalized != ignore) 19: fiscalized as bool?,
-        if (zimraReceiptId != ignore) 20: zimraReceiptId as String?,
-        if (zimraSignature != ignore) 21: zimraSignature as String?,
-        if (zimraReceiptGlobalNo != ignore) 22: zimraReceiptGlobalNo as int?,
-        if (zimraDeviceId != ignore) 23: zimraDeviceId as int?,
-        if (zimraFiscalDayNo != ignore) 24: zimraFiscalDayNo as int?,
-        if (zimraReceiptDateQr != ignore) 25: zimraReceiptDateQr as String?,
-        if (zimraQrCodeUrl != ignore) 26: zimraQrCodeUrl as String?,
-        if (receiptType != ignore) 27: receiptType as String?,
-        if (originalReceiptId != ignore) 28: originalReceiptId as String?,
+        if (clientSaleId != ignore) 13: clientSaleId as String?,
+        if (currency != ignore) 14: currency as String?,
+        if (customerId != ignore) 15: customerId as String?,
+        if (label != ignore) 16: label as String?,
+        if (fiscalized != ignore) 20: fiscalized as bool?,
+        if (zimraReceiptId != ignore) 21: zimraReceiptId as String?,
+        if (zimraSignature != ignore) 22: zimraSignature as String?,
+        if (zimraReceiptGlobalNo != ignore) 23: zimraReceiptGlobalNo as int?,
+        if (zimraDeviceId != ignore) 24: zimraDeviceId as int?,
+        if (zimraFiscalDayNo != ignore) 25: zimraFiscalDayNo as int?,
+        if (zimraReceiptDateQr != ignore) 26: zimraReceiptDateQr as String?,
+        if (zimraQrCodeUrl != ignore) 27: zimraQrCodeUrl as String?,
+        if (receiptType != ignore) 28: receiptType as String?,
+        if (originalReceiptId != ignore) 29: originalReceiptId as String?,
       });
     } finally {
       q.close();
@@ -1947,7 +1965,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  currencyEqualTo(String value, {bool caseSensitive = true}) {
+  clientSaleIdEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(
@@ -1960,7 +1978,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  currencyGreaterThan(String value, {bool caseSensitive = true}) {
+  clientSaleIdGreaterThan(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(
@@ -1973,7 +1991,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  currencyGreaterThanOrEqualTo(String value, {bool caseSensitive = true}) {
+  clientSaleIdGreaterThanOrEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(
@@ -1986,7 +2004,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  currencyLessThan(String value, {bool caseSensitive = true}) {
+  clientSaleIdLessThan(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessCondition(property: 13, value: value, caseSensitive: caseSensitive),
@@ -1995,7 +2013,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  currencyLessThanOrEqualTo(String value, {bool caseSensitive = true}) {
+  clientSaleIdLessThanOrEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(
@@ -2008,11 +2026,156 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  currencyBetween(String lower, String upper, {bool caseSensitive = true}) {
+  clientSaleIdBetween(String lower, String upper, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
           property: 13,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  clientSaleIdStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 13,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  clientSaleIdEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 13,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  clientSaleIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 13,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  clientSaleIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 13,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  clientSaleIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const EqualCondition(property: 13, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  clientSaleIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const GreaterCondition(property: 13, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  currencyEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(
+          property: 14,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  currencyGreaterThan(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 14,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  currencyGreaterThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 14,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  currencyLessThan(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 14, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  currencyLessThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 14,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  currencyBetween(String lower, String upper, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 14,
           lower: lower,
           upper: upper,
           caseSensitive: caseSensitive,
@@ -2026,7 +2189,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         StartsWithCondition(
-          property: 13,
+          property: 14,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2039,7 +2202,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EndsWithCondition(
-          property: 13,
+          property: 14,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2052,7 +2215,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         ContainsCondition(
-          property: 13,
+          property: 14,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2065,7 +2228,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         MatchesCondition(
-          property: 13,
+          property: 14,
           wildcard: pattern,
           caseSensitive: caseSensitive,
         ),
@@ -2077,7 +2240,7 @@ extension ItemReceitModelQueryFilter
   currencyIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const EqualCondition(property: 13, value: ''),
+        const EqualCondition(property: 14, value: ''),
       );
     });
   }
@@ -2086,7 +2249,7 @@ extension ItemReceitModelQueryFilter
   currencyIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterCondition(property: 13, value: ''),
+        const GreaterCondition(property: 14, value: ''),
       );
     });
   }
@@ -2094,14 +2257,14 @@ extension ItemReceitModelQueryFilter
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   customerIdIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const IsNullCondition(property: 14));
+      return query.addFilterCondition(const IsNullCondition(property: 15));
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   customerIdIsNotNull() {
     return QueryBuilder.apply(not(), (query) {
-      return query.addFilterCondition(const IsNullCondition(property: 14));
+      return query.addFilterCondition(const IsNullCondition(property: 15));
     });
   }
 
@@ -2110,7 +2273,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(
-          property: 14,
+          property: 15,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2123,7 +2286,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(
-          property: 14,
+          property: 15,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2136,7 +2299,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(
-          property: 14,
+          property: 15,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2148,7 +2311,7 @@ extension ItemReceitModelQueryFilter
   customerIdLessThan(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessCondition(property: 14, value: value, caseSensitive: caseSensitive),
+        LessCondition(property: 15, value: value, caseSensitive: caseSensitive),
       );
     });
   }
@@ -2158,7 +2321,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(
-          property: 14,
+          property: 15,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2171,7 +2334,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
-          property: 14,
+          property: 15,
           lower: lower,
           upper: upper,
           caseSensitive: caseSensitive,
@@ -2185,7 +2348,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         StartsWithCondition(
-          property: 14,
+          property: 15,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2198,7 +2361,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EndsWithCondition(
-          property: 14,
+          property: 15,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2211,7 +2374,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         ContainsCondition(
-          property: 14,
+          property: 15,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2224,7 +2387,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         MatchesCondition(
-          property: 14,
+          property: 15,
           wildcard: pattern,
           caseSensitive: caseSensitive,
         ),
@@ -2236,7 +2399,7 @@ extension ItemReceitModelQueryFilter
   customerIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const EqualCondition(property: 14, value: ''),
+        const EqualCondition(property: 15, value: ''),
       );
     });
   }
@@ -2245,7 +2408,7 @@ extension ItemReceitModelQueryFilter
   customerIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterCondition(property: 14, value: ''),
+        const GreaterCondition(property: 15, value: ''),
       );
     });
   }
@@ -2255,7 +2418,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(
-          property: 15,
+          property: 16,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2268,7 +2431,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(
-          property: 15,
+          property: 16,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2281,7 +2444,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(
-          property: 15,
+          property: 16,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2293,7 +2456,7 @@ extension ItemReceitModelQueryFilter
   labelLessThan(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessCondition(property: 15, value: value, caseSensitive: caseSensitive),
+        LessCondition(property: 16, value: value, caseSensitive: caseSensitive),
       );
     });
   }
@@ -2303,7 +2466,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(
-          property: 15,
+          property: 16,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2316,7 +2479,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
-          property: 15,
+          property: 16,
           lower: lower,
           upper: upper,
           caseSensitive: caseSensitive,
@@ -2330,7 +2493,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         StartsWithCondition(
-          property: 15,
+          property: 16,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2343,7 +2506,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EndsWithCondition(
-          property: 15,
+          property: 16,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2356,7 +2519,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         ContainsCondition(
-          property: 15,
+          property: 16,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2369,7 +2532,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         MatchesCondition(
-          property: 15,
+          property: 16,
           wildcard: pattern,
           caseSensitive: caseSensitive,
         ),
@@ -2381,7 +2544,7 @@ extension ItemReceitModelQueryFilter
   labelIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const EqualCondition(property: 15, value: ''),
+        const EqualCondition(property: 16, value: ''),
       );
     });
   }
@@ -2390,7 +2553,7 @@ extension ItemReceitModelQueryFilter
   labelIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterCondition(property: 15, value: ''),
+        const GreaterCondition(property: 16, value: ''),
       );
     });
   }
@@ -2404,7 +2567,7 @@ extension ItemReceitModelQueryFilter
   miniTaxIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterOrEqualCondition(property: 16, value: null),
+        const GreaterOrEqualCondition(property: 17, value: null),
       );
     });
   }
@@ -2418,7 +2581,7 @@ extension ItemReceitModelQueryFilter
   itemsIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterOrEqualCondition(property: 17, value: null),
+        const GreaterOrEqualCondition(property: 18, value: null),
       );
     });
   }
@@ -2432,7 +2595,7 @@ extension ItemReceitModelQueryFilter
   discountsIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterOrEqualCondition(property: 18, value: null),
+        const GreaterOrEqualCondition(property: 19, value: null),
       );
     });
   }
@@ -2441,7 +2604,7 @@ extension ItemReceitModelQueryFilter
   fiscalizedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        EqualCondition(property: 19, value: value),
+        EqualCondition(property: 20, value: value),
       );
     });
   }
@@ -2449,14 +2612,14 @@ extension ItemReceitModelQueryFilter
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   zimraReceiptIdIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const IsNullCondition(property: 20));
+      return query.addFilterCondition(const IsNullCondition(property: 21));
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   zimraReceiptIdIsNotNull() {
     return QueryBuilder.apply(not(), (query) {
-      return query.addFilterCondition(const IsNullCondition(property: 20));
+      return query.addFilterCondition(const IsNullCondition(property: 21));
     });
   }
 
@@ -2465,7 +2628,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(
-          property: 20,
+          property: 21,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2478,7 +2641,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(
-          property: 20,
+          property: 21,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2494,7 +2657,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(
-          property: 20,
+          property: 21,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2506,7 +2669,7 @@ extension ItemReceitModelQueryFilter
   zimraReceiptIdLessThan(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessCondition(property: 20, value: value, caseSensitive: caseSensitive),
+        LessCondition(property: 21, value: value, caseSensitive: caseSensitive),
       );
     });
   }
@@ -2516,7 +2679,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(
-          property: 20,
+          property: 21,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2533,7 +2696,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
-          property: 20,
+          property: 21,
           lower: lower,
           upper: upper,
           caseSensitive: caseSensitive,
@@ -2547,7 +2710,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         StartsWithCondition(
-          property: 20,
+          property: 21,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2560,7 +2723,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EndsWithCondition(
-          property: 20,
+          property: 21,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2573,7 +2736,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         ContainsCondition(
-          property: 20,
+          property: 21,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2586,7 +2749,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         MatchesCondition(
-          property: 20,
+          property: 21,
           wildcard: pattern,
           caseSensitive: caseSensitive,
         ),
@@ -2598,7 +2761,7 @@ extension ItemReceitModelQueryFilter
   zimraReceiptIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const EqualCondition(property: 20, value: ''),
+        const EqualCondition(property: 21, value: ''),
       );
     });
   }
@@ -2607,7 +2770,7 @@ extension ItemReceitModelQueryFilter
   zimraReceiptIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterCondition(property: 20, value: ''),
+        const GreaterCondition(property: 21, value: ''),
       );
     });
   }
@@ -2615,14 +2778,14 @@ extension ItemReceitModelQueryFilter
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   zimraSignatureIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const IsNullCondition(property: 21));
+      return query.addFilterCondition(const IsNullCondition(property: 22));
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   zimraSignatureIsNotNull() {
     return QueryBuilder.apply(not(), (query) {
-      return query.addFilterCondition(const IsNullCondition(property: 21));
+      return query.addFilterCondition(const IsNullCondition(property: 22));
     });
   }
 
@@ -2631,7 +2794,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(
-          property: 21,
+          property: 22,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2644,7 +2807,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(
-          property: 21,
+          property: 22,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2660,7 +2823,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(
-          property: 21,
+          property: 22,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2672,7 +2835,7 @@ extension ItemReceitModelQueryFilter
   zimraSignatureLessThan(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessCondition(property: 21, value: value, caseSensitive: caseSensitive),
+        LessCondition(property: 22, value: value, caseSensitive: caseSensitive),
       );
     });
   }
@@ -2682,7 +2845,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(
-          property: 21,
+          property: 22,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2699,7 +2862,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
-          property: 21,
+          property: 22,
           lower: lower,
           upper: upper,
           caseSensitive: caseSensitive,
@@ -2713,7 +2876,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         StartsWithCondition(
-          property: 21,
+          property: 22,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2726,7 +2889,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EndsWithCondition(
-          property: 21,
+          property: 22,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2739,7 +2902,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         ContainsCondition(
-          property: 21,
+          property: 22,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -2752,7 +2915,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         MatchesCondition(
-          property: 21,
+          property: 22,
           wildcard: pattern,
           caseSensitive: caseSensitive,
         ),
@@ -2764,7 +2927,7 @@ extension ItemReceitModelQueryFilter
   zimraSignatureIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const EqualCondition(property: 21, value: ''),
+        const EqualCondition(property: 22, value: ''),
       );
     });
   }
@@ -2773,7 +2936,7 @@ extension ItemReceitModelQueryFilter
   zimraSignatureIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterCondition(property: 21, value: ''),
+        const GreaterCondition(property: 22, value: ''),
       );
     });
   }
@@ -2781,87 +2944,19 @@ extension ItemReceitModelQueryFilter
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   zimraReceiptGlobalNoIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const IsNullCondition(property: 22));
+      return query.addFilterCondition(const IsNullCondition(property: 23));
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   zimraReceiptGlobalNoIsNotNull() {
     return QueryBuilder.apply(not(), (query) {
-      return query.addFilterCondition(const IsNullCondition(property: 22));
+      return query.addFilterCondition(const IsNullCondition(property: 23));
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   zimraReceiptGlobalNoEqualTo(int? value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        EqualCondition(property: 22, value: value),
-      );
-    });
-  }
-
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraReceiptGlobalNoGreaterThan(int? value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        GreaterCondition(property: 22, value: value),
-      );
-    });
-  }
-
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraReceiptGlobalNoGreaterThanOrEqualTo(int? value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        GreaterOrEqualCondition(property: 22, value: value),
-      );
-    });
-  }
-
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraReceiptGlobalNoLessThan(int? value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        LessCondition(property: 22, value: value),
-      );
-    });
-  }
-
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraReceiptGlobalNoLessThanOrEqualTo(int? value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        LessOrEqualCondition(property: 22, value: value),
-      );
-    });
-  }
-
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraReceiptGlobalNoBetween(int? lower, int? upper) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        BetweenCondition(property: 22, lower: lower, upper: upper),
-      );
-    });
-  }
-
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraDeviceIdIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const IsNullCondition(property: 23));
-    });
-  }
-
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraDeviceIdIsNotNull() {
-    return QueryBuilder.apply(not(), (query) {
-      return query.addFilterCondition(const IsNullCondition(property: 23));
-    });
-  }
-
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraDeviceIdEqualTo(int? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(property: 23, value: value),
@@ -2870,7 +2965,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraDeviceIdGreaterThan(int? value) {
+  zimraReceiptGlobalNoGreaterThan(int? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(property: 23, value: value),
@@ -2879,7 +2974,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraDeviceIdGreaterThanOrEqualTo(int? value) {
+  zimraReceiptGlobalNoGreaterThanOrEqualTo(int? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(property: 23, value: value),
@@ -2888,7 +2983,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraDeviceIdLessThan(int? value) {
+  zimraReceiptGlobalNoLessThan(int? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessCondition(property: 23, value: value),
@@ -2897,7 +2992,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraDeviceIdLessThanOrEqualTo(int? value) {
+  zimraReceiptGlobalNoLessThanOrEqualTo(int? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(property: 23, value: value),
@@ -2906,7 +3001,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraDeviceIdBetween(int? lower, int? upper) {
+  zimraReceiptGlobalNoBetween(int? lower, int? upper) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(property: 23, lower: lower, upper: upper),
@@ -2915,21 +3010,21 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraFiscalDayNoIsNull() {
+  zimraDeviceIdIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const IsNullCondition(property: 24));
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraFiscalDayNoIsNotNull() {
+  zimraDeviceIdIsNotNull() {
     return QueryBuilder.apply(not(), (query) {
       return query.addFilterCondition(const IsNullCondition(property: 24));
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraFiscalDayNoEqualTo(int? value) {
+  zimraDeviceIdEqualTo(int? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(property: 24, value: value),
@@ -2938,7 +3033,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraFiscalDayNoGreaterThan(int? value) {
+  zimraDeviceIdGreaterThan(int? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(property: 24, value: value),
@@ -2947,7 +3042,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraFiscalDayNoGreaterThanOrEqualTo(int? value) {
+  zimraDeviceIdGreaterThanOrEqualTo(int? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(property: 24, value: value),
@@ -2956,7 +3051,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraFiscalDayNoLessThan(int? value) {
+  zimraDeviceIdLessThan(int? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessCondition(property: 24, value: value),
@@ -2965,7 +3060,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraFiscalDayNoLessThanOrEqualTo(int? value) {
+  zimraDeviceIdLessThanOrEqualTo(int? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(property: 24, value: value),
@@ -2974,7 +3069,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraFiscalDayNoBetween(int? lower, int? upper) {
+  zimraDeviceIdBetween(int? lower, int? upper) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(property: 24, lower: lower, upper: upper),
@@ -2983,16 +3078,84 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraReceiptDateQrIsNull() {
+  zimraFiscalDayNoIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const IsNullCondition(property: 25));
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  zimraReceiptDateQrIsNotNull() {
+  zimraFiscalDayNoIsNotNull() {
     return QueryBuilder.apply(not(), (query) {
       return query.addFilterCondition(const IsNullCondition(property: 25));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraFiscalDayNoEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 25, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraFiscalDayNoGreaterThan(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 25, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraFiscalDayNoGreaterThanOrEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 25, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraFiscalDayNoLessThan(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 25, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraFiscalDayNoLessThanOrEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 25, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraFiscalDayNoBetween(int? lower, int? upper) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(property: 25, lower: lower, upper: upper),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptDateQrIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 26));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptDateQrIsNotNull() {
+    return QueryBuilder.apply(not(), (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 26));
     });
   }
 
@@ -3001,7 +3164,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(
-          property: 25,
+          property: 26,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3014,7 +3177,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(
-          property: 25,
+          property: 26,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3030,7 +3193,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(
-          property: 25,
+          property: 26,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3042,7 +3205,7 @@ extension ItemReceitModelQueryFilter
   zimraReceiptDateQrLessThan(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessCondition(property: 25, value: value, caseSensitive: caseSensitive),
+        LessCondition(property: 26, value: value, caseSensitive: caseSensitive),
       );
     });
   }
@@ -3055,7 +3218,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(
-          property: 25,
+          property: 26,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3072,7 +3235,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
-          property: 25,
+          property: 26,
           lower: lower,
           upper: upper,
           caseSensitive: caseSensitive,
@@ -3086,7 +3249,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         StartsWithCondition(
-          property: 25,
+          property: 26,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3099,7 +3262,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EndsWithCondition(
-          property: 25,
+          property: 26,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3112,7 +3275,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         ContainsCondition(
-          property: 25,
+          property: 26,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3125,7 +3288,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         MatchesCondition(
-          property: 25,
+          property: 26,
           wildcard: pattern,
           caseSensitive: caseSensitive,
         ),
@@ -3137,7 +3300,7 @@ extension ItemReceitModelQueryFilter
   zimraReceiptDateQrIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const EqualCondition(property: 25, value: ''),
+        const EqualCondition(property: 26, value: ''),
       );
     });
   }
@@ -3146,7 +3309,7 @@ extension ItemReceitModelQueryFilter
   zimraReceiptDateQrIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterCondition(property: 25, value: ''),
+        const GreaterCondition(property: 26, value: ''),
       );
     });
   }
@@ -3154,14 +3317,14 @@ extension ItemReceitModelQueryFilter
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   zimraQrCodeUrlIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const IsNullCondition(property: 26));
+      return query.addFilterCondition(const IsNullCondition(property: 27));
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   zimraQrCodeUrlIsNotNull() {
     return QueryBuilder.apply(not(), (query) {
-      return query.addFilterCondition(const IsNullCondition(property: 26));
+      return query.addFilterCondition(const IsNullCondition(property: 27));
     });
   }
 
@@ -3170,7 +3333,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(
-          property: 26,
+          property: 27,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3183,7 +3346,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(
-          property: 26,
+          property: 27,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3199,7 +3362,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(
-          property: 26,
+          property: 27,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3211,7 +3374,7 @@ extension ItemReceitModelQueryFilter
   zimraQrCodeUrlLessThan(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessCondition(property: 26, value: value, caseSensitive: caseSensitive),
+        LessCondition(property: 27, value: value, caseSensitive: caseSensitive),
       );
     });
   }
@@ -3221,7 +3384,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(
-          property: 26,
+          property: 27,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3238,7 +3401,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
-          property: 26,
+          property: 27,
           lower: lower,
           upper: upper,
           caseSensitive: caseSensitive,
@@ -3252,7 +3415,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         StartsWithCondition(
-          property: 26,
+          property: 27,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3265,7 +3428,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EndsWithCondition(
-          property: 26,
+          property: 27,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3278,7 +3441,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         ContainsCondition(
-          property: 26,
+          property: 27,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3291,7 +3454,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         MatchesCondition(
-          property: 26,
+          property: 27,
           wildcard: pattern,
           caseSensitive: caseSensitive,
         ),
@@ -3303,7 +3466,7 @@ extension ItemReceitModelQueryFilter
   zimraQrCodeUrlIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const EqualCondition(property: 26, value: ''),
+        const EqualCondition(property: 27, value: ''),
       );
     });
   }
@@ -3312,7 +3475,7 @@ extension ItemReceitModelQueryFilter
   zimraQrCodeUrlIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterCondition(property: 26, value: ''),
+        const GreaterCondition(property: 27, value: ''),
       );
     });
   }
@@ -3322,7 +3485,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(
-          property: 27,
+          property: 28,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3335,7 +3498,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(
-          property: 27,
+          property: 28,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3348,7 +3511,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(
-          property: 27,
+          property: 28,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3360,7 +3523,7 @@ extension ItemReceitModelQueryFilter
   receiptTypeLessThan(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessCondition(property: 27, value: value, caseSensitive: caseSensitive),
+        LessCondition(property: 28, value: value, caseSensitive: caseSensitive),
       );
     });
   }
@@ -3370,7 +3533,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(
-          property: 27,
+          property: 28,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3383,7 +3546,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
-          property: 27,
+          property: 28,
           lower: lower,
           upper: upper,
           caseSensitive: caseSensitive,
@@ -3397,7 +3560,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         StartsWithCondition(
-          property: 27,
+          property: 28,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3410,7 +3573,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EndsWithCondition(
-          property: 27,
+          property: 28,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3423,7 +3586,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         ContainsCondition(
-          property: 27,
+          property: 28,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3436,7 +3599,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         MatchesCondition(
-          property: 27,
+          property: 28,
           wildcard: pattern,
           caseSensitive: caseSensitive,
         ),
@@ -3448,7 +3611,7 @@ extension ItemReceitModelQueryFilter
   receiptTypeIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const EqualCondition(property: 27, value: ''),
+        const EqualCondition(property: 28, value: ''),
       );
     });
   }
@@ -3457,7 +3620,7 @@ extension ItemReceitModelQueryFilter
   receiptTypeIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterCondition(property: 27, value: ''),
+        const GreaterCondition(property: 28, value: ''),
       );
     });
   }
@@ -3465,14 +3628,14 @@ extension ItemReceitModelQueryFilter
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   originalReceiptIdIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const IsNullCondition(property: 28));
+      return query.addFilterCondition(const IsNullCondition(property: 29));
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   originalReceiptIdIsNotNull() {
     return QueryBuilder.apply(not(), (query) {
-      return query.addFilterCondition(const IsNullCondition(property: 28));
+      return query.addFilterCondition(const IsNullCondition(property: 29));
     });
   }
 
@@ -3481,7 +3644,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(
-          property: 28,
+          property: 29,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3494,7 +3657,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(
-          property: 28,
+          property: 29,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3510,7 +3673,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(
-          property: 28,
+          property: 29,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3522,7 +3685,7 @@ extension ItemReceitModelQueryFilter
   originalReceiptIdLessThan(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessCondition(property: 28, value: value, caseSensitive: caseSensitive),
+        LessCondition(property: 29, value: value, caseSensitive: caseSensitive),
       );
     });
   }
@@ -3535,7 +3698,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(
-          property: 28,
+          property: 29,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3552,7 +3715,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
-          property: 28,
+          property: 29,
           lower: lower,
           upper: upper,
           caseSensitive: caseSensitive,
@@ -3566,7 +3729,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         StartsWithCondition(
-          property: 28,
+          property: 29,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3579,7 +3742,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EndsWithCondition(
-          property: 28,
+          property: 29,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3592,7 +3755,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         ContainsCondition(
-          property: 28,
+          property: 29,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -3605,7 +3768,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         MatchesCondition(
-          property: 28,
+          property: 29,
           wildcard: pattern,
           caseSensitive: caseSensitive,
         ),
@@ -3617,7 +3780,7 @@ extension ItemReceitModelQueryFilter
   originalReceiptIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const EqualCondition(property: 28, value: ''),
+        const EqualCondition(property: 29, value: ''),
       );
     });
   }
@@ -3626,7 +3789,7 @@ extension ItemReceitModelQueryFilter
   originalReceiptIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterCondition(property: 28, value: ''),
+        const GreaterCondition(property: 29, value: ''),
       );
     });
   }
@@ -3815,32 +3978,46 @@ extension ItemReceitModelQuerySortBy
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortByCurrency({
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByClientSaleId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(13, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  sortByCurrencyDesc({bool caseSensitive = true}) {
+  sortByClientSaleIdDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(13, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  sortByCustomerId({bool caseSensitive = true}) {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortByCurrency({
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(14, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  sortByCustomerIdDesc({bool caseSensitive = true}) {
+  sortByCurrencyDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(14, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByCustomerId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(15, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByCustomerIdDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(15, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
@@ -3848,7 +4025,7 @@ extension ItemReceitModelQuerySortBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(15, caseSensitive: caseSensitive);
+      return query.addSortBy(16, caseSensitive: caseSensitive);
     });
   }
 
@@ -3856,147 +4033,147 @@ extension ItemReceitModelQuerySortBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(15, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(16, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByFiscalized() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(19);
+      return query.addSortBy(20);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByFiscalizedDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(19, sort: Sort.desc);
+      return query.addSortBy(20, sort: Sort.desc);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByZimraReceiptId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(20, caseSensitive: caseSensitive);
+      return query.addSortBy(21, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByZimraReceiptIdDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(20, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(21, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByZimraSignature({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(21, caseSensitive: caseSensitive);
+      return query.addSortBy(22, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByZimraSignatureDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(21, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(22, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByZimraReceiptGlobalNo() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(22);
+      return query.addSortBy(23);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByZimraReceiptGlobalNoDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(22, sort: Sort.desc);
+      return query.addSortBy(23, sort: Sort.desc);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByZimraDeviceId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(23);
+      return query.addSortBy(24);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByZimraDeviceIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(23, sort: Sort.desc);
+      return query.addSortBy(24, sort: Sort.desc);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByZimraFiscalDayNo() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(24);
+      return query.addSortBy(25);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByZimraFiscalDayNoDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(24, sort: Sort.desc);
+      return query.addSortBy(25, sort: Sort.desc);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByZimraReceiptDateQr({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(25, caseSensitive: caseSensitive);
+      return query.addSortBy(26, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByZimraReceiptDateQrDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(25, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(26, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByZimraQrCodeUrl({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(26, caseSensitive: caseSensitive);
+      return query.addSortBy(27, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByZimraQrCodeUrlDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(26, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(27, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByReceiptType({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(27, caseSensitive: caseSensitive);
+      return query.addSortBy(28, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByReceiptTypeDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(27, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(28, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByOriginalReceiptId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(28, caseSensitive: caseSensitive);
+      return query.addSortBy(29, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByOriginalReceiptIdDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(28, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(29, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 }
@@ -4181,32 +4358,46 @@ extension ItemReceitModelQuerySortThenBy
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenByCurrency({
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByClientSaleId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(13, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  thenByCurrencyDesc({bool caseSensitive = true}) {
+  thenByClientSaleIdDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(13, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  thenByCustomerId({bool caseSensitive = true}) {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenByCurrency({
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(14, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  thenByCustomerIdDesc({bool caseSensitive = true}) {
+  thenByCurrencyDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(14, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByCustomerId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(15, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByCustomerIdDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(15, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
@@ -4214,7 +4405,7 @@ extension ItemReceitModelQuerySortThenBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(15, caseSensitive: caseSensitive);
+      return query.addSortBy(16, caseSensitive: caseSensitive);
     });
   }
 
@@ -4222,147 +4413,147 @@ extension ItemReceitModelQuerySortThenBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(15, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(16, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByFiscalized() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(19);
+      return query.addSortBy(20);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByFiscalizedDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(19, sort: Sort.desc);
+      return query.addSortBy(20, sort: Sort.desc);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByZimraReceiptId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(20, caseSensitive: caseSensitive);
+      return query.addSortBy(21, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByZimraReceiptIdDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(20, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(21, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByZimraSignature({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(21, caseSensitive: caseSensitive);
+      return query.addSortBy(22, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByZimraSignatureDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(21, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(22, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByZimraReceiptGlobalNo() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(22);
+      return query.addSortBy(23);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByZimraReceiptGlobalNoDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(22, sort: Sort.desc);
+      return query.addSortBy(23, sort: Sort.desc);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByZimraDeviceId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(23);
+      return query.addSortBy(24);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByZimraDeviceIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(23, sort: Sort.desc);
+      return query.addSortBy(24, sort: Sort.desc);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByZimraFiscalDayNo() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(24);
+      return query.addSortBy(25);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByZimraFiscalDayNoDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(24, sort: Sort.desc);
+      return query.addSortBy(25, sort: Sort.desc);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByZimraReceiptDateQr({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(25, caseSensitive: caseSensitive);
+      return query.addSortBy(26, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByZimraReceiptDateQrDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(25, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(26, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByZimraQrCodeUrl({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(26, caseSensitive: caseSensitive);
+      return query.addSortBy(27, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByZimraQrCodeUrlDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(26, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(27, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByReceiptType({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(27, caseSensitive: caseSensitive);
+      return query.addSortBy(28, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByReceiptTypeDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(27, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(28, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByOriginalReceiptId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(28, caseSensitive: caseSensitive);
+      return query.addSortBy(29, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByOriginalReceiptIdDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(28, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(29, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 }
@@ -4454,93 +4645,100 @@ extension ItemReceitModelQueryWhereDistinct
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
-  distinctByCurrency({bool caseSensitive = true}) {
+  distinctByClientSaleId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(13, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
-  distinctByCustomerId({bool caseSensitive = true}) {
+  distinctByCurrency({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(14, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
-  distinctByLabel({bool caseSensitive = true}) {
+  distinctByCustomerId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(15, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
+  distinctByLabel({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(16, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
   distinctByFiscalized() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(19);
+      return query.addDistinctBy(20);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
   distinctByZimraReceiptId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(20, caseSensitive: caseSensitive);
+      return query.addDistinctBy(21, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
   distinctByZimraSignature({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(21, caseSensitive: caseSensitive);
+      return query.addDistinctBy(22, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
   distinctByZimraReceiptGlobalNo() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(22);
+      return query.addDistinctBy(23);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
   distinctByZimraDeviceId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(23);
+      return query.addDistinctBy(24);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
   distinctByZimraFiscalDayNo() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(24);
+      return query.addDistinctBy(25);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
   distinctByZimraReceiptDateQr({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(25, caseSensitive: caseSensitive);
+      return query.addDistinctBy(26, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
   distinctByZimraQrCodeUrl({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(26, caseSensitive: caseSensitive);
+      return query.addDistinctBy(27, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
   distinctByReceiptType({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(27, caseSensitive: caseSensitive);
+      return query.addDistinctBy(28, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
   distinctByOriginalReceiptId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(28, caseSensitive: caseSensitive);
+      return query.addDistinctBy(29, caseSensitive: caseSensitive);
     });
   }
 }
@@ -4626,109 +4824,115 @@ extension ItemReceitModelQueryProperty1
     });
   }
 
-  QueryBuilder<ItemReceitModel, String, QAfterProperty> currencyProperty() {
+  QueryBuilder<ItemReceitModel, String, QAfterProperty> clientSaleIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(13);
     });
   }
 
-  QueryBuilder<ItemReceitModel, String?, QAfterProperty> customerIdProperty() {
+  QueryBuilder<ItemReceitModel, String, QAfterProperty> currencyProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(14);
     });
   }
 
-  QueryBuilder<ItemReceitModel, String, QAfterProperty> labelProperty() {
+  QueryBuilder<ItemReceitModel, String?, QAfterProperty> customerIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(15);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, String, QAfterProperty> labelProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(16);
     });
   }
 
   QueryBuilder<ItemReceitModel, List<MiniTax>, QAfterProperty>
   miniTaxProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(16);
+      return query.addProperty(17);
     });
   }
 
   QueryBuilder<ItemReceitModel, List<ItemReceitItem>, QAfterProperty>
   itemsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(17);
+      return query.addProperty(18);
     });
   }
 
   QueryBuilder<ItemReceitModel, List<EmbeddedDiscountModel>, QAfterProperty>
   discountsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(18);
-    });
-  }
-
-  QueryBuilder<ItemReceitModel, bool, QAfterProperty> fiscalizedProperty() {
-    return QueryBuilder.apply(this, (query) {
       return query.addProperty(19);
     });
   }
 
-  QueryBuilder<ItemReceitModel, String?, QAfterProperty>
-  zimraReceiptIdProperty() {
+  QueryBuilder<ItemReceitModel, bool, QAfterProperty> fiscalizedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(20);
     });
   }
 
   QueryBuilder<ItemReceitModel, String?, QAfterProperty>
-  zimraSignatureProperty() {
+  zimraReceiptIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(21);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, String?, QAfterProperty>
+  zimraSignatureProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(22);
     });
   }
 
   QueryBuilder<ItemReceitModel, int?, QAfterProperty>
   zimraReceiptGlobalNoProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(22);
+      return query.addProperty(23);
     });
   }
 
   QueryBuilder<ItemReceitModel, int?, QAfterProperty> zimraDeviceIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(23);
+      return query.addProperty(24);
     });
   }
 
   QueryBuilder<ItemReceitModel, int?, QAfterProperty>
   zimraFiscalDayNoProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(24);
+      return query.addProperty(25);
     });
   }
 
   QueryBuilder<ItemReceitModel, String?, QAfterProperty>
   zimraReceiptDateQrProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(25);
+      return query.addProperty(26);
     });
   }
 
   QueryBuilder<ItemReceitModel, String?, QAfterProperty>
   zimraQrCodeUrlProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(26);
+      return query.addProperty(27);
     });
   }
 
   QueryBuilder<ItemReceitModel, String, QAfterProperty> receiptTypeProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(27);
+      return query.addProperty(28);
     });
   }
 
   QueryBuilder<ItemReceitModel, String?, QAfterProperty>
   originalReceiptIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(28);
+      return query.addProperty(29);
     });
   }
 }
@@ -4818,36 +5022,43 @@ extension ItemReceitModelQueryProperty2<R>
   }
 
   QueryBuilder<ItemReceitModel, (R, String), QAfterProperty>
-  currencyProperty() {
+  clientSaleIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(13);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R, String), QAfterProperty>
+  currencyProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(14);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, String?), QAfterProperty>
   customerIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(14);
+      return query.addProperty(15);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, String), QAfterProperty> labelProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(15);
+      return query.addProperty(16);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, List<MiniTax>), QAfterProperty>
   miniTaxProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(16);
+      return query.addProperty(17);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, List<ItemReceitItem>), QAfterProperty>
   itemsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(17);
+      return query.addProperty(18);
     });
   }
 
@@ -4858,77 +5069,77 @@ extension ItemReceitModelQueryProperty2<R>
   >
   discountsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(18);
+      return query.addProperty(19);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, bool), QAfterProperty>
   fiscalizedProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(19);
+      return query.addProperty(20);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, String?), QAfterProperty>
   zimraReceiptIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(20);
+      return query.addProperty(21);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, String?), QAfterProperty>
   zimraSignatureProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(21);
+      return query.addProperty(22);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, int?), QAfterProperty>
   zimraReceiptGlobalNoProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(22);
+      return query.addProperty(23);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, int?), QAfterProperty>
   zimraDeviceIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(23);
+      return query.addProperty(24);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, int?), QAfterProperty>
   zimraFiscalDayNoProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(24);
+      return query.addProperty(25);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, String?), QAfterProperty>
   zimraReceiptDateQrProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(25);
+      return query.addProperty(26);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, String?), QAfterProperty>
   zimraQrCodeUrlProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(26);
+      return query.addProperty(27);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, String), QAfterProperty>
   receiptTypeProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(27);
+      return query.addProperty(28);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, String?), QAfterProperty>
   originalReceiptIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(28);
+      return query.addProperty(29);
     });
   }
 }
@@ -5022,36 +5233,43 @@ extension ItemReceitModelQueryProperty3<R1, R2>
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, String), QOperations>
-  currencyProperty() {
+  clientSaleIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(13);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R1, R2, String), QOperations>
+  currencyProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(14);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, String?), QOperations>
   customerIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(14);
+      return query.addProperty(15);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, String), QOperations> labelProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(15);
+      return query.addProperty(16);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, List<MiniTax>), QOperations>
   miniTaxProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(16);
+      return query.addProperty(17);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, List<ItemReceitItem>), QOperations>
   itemsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(17);
+      return query.addProperty(18);
     });
   }
 
@@ -5062,77 +5280,77 @@ extension ItemReceitModelQueryProperty3<R1, R2>
   >
   discountsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(18);
+      return query.addProperty(19);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, bool), QOperations>
   fiscalizedProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(19);
+      return query.addProperty(20);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, String?), QOperations>
   zimraReceiptIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(20);
+      return query.addProperty(21);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, String?), QOperations>
   zimraSignatureProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(21);
+      return query.addProperty(22);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, int?), QOperations>
   zimraReceiptGlobalNoProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(22);
+      return query.addProperty(23);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, int?), QOperations>
   zimraDeviceIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(23);
+      return query.addProperty(24);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, int?), QOperations>
   zimraFiscalDayNoProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(24);
+      return query.addProperty(25);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, String?), QOperations>
   zimraReceiptDateQrProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(25);
+      return query.addProperty(26);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, String?), QOperations>
   zimraQrCodeUrlProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(26);
+      return query.addProperty(27);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, String), QOperations>
   receiptTypeProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(27);
+      return query.addProperty(28);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, String?), QOperations>
   originalReceiptIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(28);
+      return query.addProperty(29);
     });
   }
 }

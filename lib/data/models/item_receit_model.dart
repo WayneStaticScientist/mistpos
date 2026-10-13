@@ -1,9 +1,19 @@
+import 'dart:math';
+
 import 'package:isar_plus/isar_plus.dart';
 import 'package:mistpos/main.dart';
 import 'package:mistpos/data/models/mini_tax.dart';
 import 'package:mistpos/data/models/item_receit_item.dart';
 import 'package:mistpos/data/models/embedded_discount_model.dart';
 part 'item_receit_model.g.dart';
+
+/// Stable idempotency key sent with POST /cashier/purchase (retries + double-tap).
+String generateClientSaleId() {
+  final r = Random.secure();
+  return List.generate(16, (_) => r.nextInt(256))
+      .map((b) => b.toRadixString(16).padLeft(2, '0'))
+      .join();
+}
 
 String _receiptMongoId(dynamic id) {
   if (id == null) return '';
@@ -27,6 +37,7 @@ class ItemReceitModel {
   bool synced = false;
   DateTime createdAt;
   String hexId = "";
+  String clientSaleId = "";
   String currency = "";
   String? customerId;
   String label;
@@ -62,6 +73,7 @@ class ItemReceitModel {
     this.currency =
         "", //currence is just way to record on which currency did the receipt was sold , althought the value will be converted to base USD currency in background , this helps us to keep track
     this.label = "",
+    this.clientSaleId = "",
     this.synced = false,
     this.creditSale = false,
     this.currentAmountPayed = 0.0,
@@ -90,6 +102,7 @@ class ItemReceitModel {
       "total": total,
       "synced": synced,
       "label": label,
+      "clientSaleId": clientSaleId,
       "tax": tax,
       "taxAmount": taxAmount,
       'miniTax': miniTax.map((e) => e.toJson()).toList(),
@@ -122,6 +135,7 @@ class ItemReceitModel {
                 .toList()
           : [],
       label: data['label'] ?? "-",
+      clientSaleId: data['clientSaleId']?.toString() ?? "",
       miniTax: data['miniTax'] != null
           ? (data['miniTax'] as List<dynamic>)
                 .map((e) => MiniTax.fromJson(e))

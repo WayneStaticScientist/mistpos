@@ -7,7 +7,7 @@ import 'package:mistpos/data/models/tax_model.dart';
 import 'package:mistpos/data/models/user_model.dart';
 import 'package:mistpos/core/utils/currence_converter.dart';
 import 'package:image/image.dart' as img;
-import 'package:pos_universal_printer/pos_universal_printer.dart';
+import 'package:mistpos/core/utils/mist_esc_pos_builder.dart';
 
 class OfflinePrinter {
   static void printLogo(AppSettingsModel model, EscPosBuilder b) {
@@ -101,6 +101,20 @@ class OfflinePrinter {
         String label = '${tax.label} - $taxString';
         b.text(label);
       }
+    } else if (itemReceitModel.miniTax.isNotEmpty) {
+      b.feed(1);
+      b.text('--- Taxes ---', align: PosAlign.center, bold: true);
+      b.feed(1);
+      for (final tax in itemReceitModel.miniTax) {
+        b.text('${tax.label} - ${tax.value}%');
+      }
+      if (itemReceitModel.taxAmount > 0) {
+        final vatStr = CurrenceConverter.getCurrenceFloatInStrings(
+          itemReceitModel.taxAmount,
+          user.baseCurrence,
+        );
+        b.text('VAT amount: $vatStr');
+      }
     }
     final totalLine =
         padRight('TOTAL DUE:', receitWidth - totalDueStr.length) + totalDueStr;
@@ -127,6 +141,17 @@ class OfflinePrinter {
     }
     b.feed(2);
     b.text('.' * receitWidth);
+  }
+
+  static void printQrCode(
+    EscPosBuilder b,
+    String data, {
+    PosAlign align = PosAlign.center,
+  }) {
+    final trimmed = data.trim();
+    if (trimmed.isEmpty) return;
+    b.setAlign(align);
+    b.qrCode(trimmed);
   }
 
   static List<int>? getRasterImage(String receitLogoPath) {

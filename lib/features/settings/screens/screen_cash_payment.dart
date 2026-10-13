@@ -556,7 +556,12 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
                 ],
               ),
               child: ElevatedButton.icon(
-                onPressed: _pay,
+                onPressed:
+                    (_savingReceit ||
+                        _itemsListController.checkoutInProgress.value ||
+                        _itemsListController.receitsLoading.value)
+                    ? null
+                    : _pay,
                 icon: _savingReceit
                     ? const SizedBox(
                         width: 24,
@@ -696,31 +701,37 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
   }
 
   void _pay({bool creditPayment = false}) async {
-    final amount = double.tryParse(_amountController.text);
-    if (amount == null) {
-      Toaster.showError("Please enter a valid amount");
+    if (_savingReceit ||
+        _itemsListController.checkoutInProgress.value ||
+        _itemsListController.receitsLoading.value) {
       return;
     }
+    _savingReceit = true;
+    if (mounted) setState(() {});
 
-    final total = CurrenceConverter.prevailingAmount(
-      _itemsListController.totalPrice.value,
-      _userController.user.value?.baseCurrence ?? '',
-    );
+    try {
+      final amount = double.tryParse(_amountController.text);
+      if (amount == null) {
+        Toaster.showError("Please enter a valid amount");
+        return;
+      }
 
-    if (amount < total && !creditPayment) {
-      Toaster.showError("Insufficient funds for cash payment");
-      return;
-    }
+      final total = CurrenceConverter.prevailingAmount(
+        _itemsListController.totalPrice.value,
+        _userController.user.value?.baseCurrence ?? '',
+      );
 
-    setState(() => _savingReceit = true);
+      if (amount < total && !creditPayment) {
+        Toaster.showError("Insufficient funds for cash payment");
+        return;
+      }
 
-    if (_userController.user.value == null) {
-      Toaster.showError("User registration needed");
-      setState(() => _savingReceit = false);
-      return;
-    }
+      if (_userController.user.value == null) {
+        Toaster.showError("User registration needed");
+        return;
+      }
 
-    final state = await _itemsListController.addReceitFromItemModel(
+      final state = await _itemsListController.addReceitFromItemModel(
       CurrenceConverter.baseCurrency(amount),
       _selectedPaymentMethod,
       creditPayment: creditPayment,
@@ -728,19 +739,21 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
           _userController.user.value?.allowOfflinePurchase ?? false,
       user: _userController.user.value!,
       printReceits: _printerController.isPrinterConnected(),
-    );
-
-    if (mounted) setState(() => _savingReceit = false);
-
-    if (state) {
-      Get.back();
-      final online =
-          _invController.company.value?.enableOnlineSales ?? false;
-      Toaster.showSuccess(
-        online
-            ? "Payment successful — server receipt ready"
-            : "Payment successful",
       );
+
+      if (state) {
+        Get.back();
+        final online =
+            _invController.company.value?.enableOnlineSales ?? false;
+        Toaster.showSuccess(
+          online
+              ? "Payment successful — server receipt ready"
+              : "Payment successful",
+        );
+      }
+    } finally {
+      _savingReceit = false;
+      if (mounted) setState(() {});
     }
   }
 }

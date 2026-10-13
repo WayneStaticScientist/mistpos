@@ -16,7 +16,9 @@ import 'package:mistpos/data/models/item_receit_model.dart';
 import 'package:mistpos/core/utils/zimra_receipt_type.dart';
 import 'package:mistpos/data/models/app_settings_model.dart';
 import 'package:mistpos/data/models/printer_device_model.dart';
-import 'package:pos_universal_printer/pos_universal_printer.dart';
+import 'package:mistpos/core/utils/mist_esc_pos_builder.dart';
+import 'package:pos_universal_printer/pos_universal_printer.dart'
+    hide EscPosBuilder, EscPosHelper, PosAlign;
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:mistpos/core/utils/printer_role_helper.dart';
 import 'package:mistpos/core/utils/zimra_helper.dart';
@@ -205,6 +207,57 @@ class DevicesController extends GetxController {
     return true;
   }
 
+  static bool receiptHasZimraQrData(ItemReceitModel r) {
+    if (!r.fiscalized) return false;
+    if (r.zimraQrCodeUrl?.trim().isNotEmpty ?? false) return true;
+    if (r.zimraSignature?.trim().isNotEmpty ?? false) return true;
+    return r.zimraReceiptGlobalNo != null && r.zimraDeviceId != null;
+  }
+
+  static CompanyModel? _companyForZimraPrint() {
+    if (Get.isRegistered<InventoryController>()) {
+      final c = Get.find<InventoryController>().company.value;
+      if (c != null) return c;
+    }
+    return CompanyModel.fromStorage();
+  }
+
+  /// FDMS verification QR + verification code (independent of receipt designer toggles).
+  static void appendZimraFiscalQrToEscPos(
+    EscPosBuilder b,
+    ItemReceitModel itemReceitModel,
+    CompanyModel? companyForQr,
+  ) {
+    if (!receiptHasZimraQrData(itemReceitModel)) return;
+    final isTest = companyForQr?.zimraIsTest ?? true;
+    b.feed(1);
+    b.text("--- QR CODE ---", align: PosAlign.center, bold: true);
+    OfflinePrinter.printQrCode(
+      b,
+      ZimraHelper.generateQrUrl(
+        itemReceitModel,
+        isTest: isTest,
+        qrUrlFromConfig: companyForQr?.zimraQrUrl,
+      ),
+    );
+    final sig = itemReceitModel.zimraSignature;
+    if (sig != null && sig.isNotEmpty) {
+      b.feed(1);
+      b.text("Verification code:", align: PosAlign.center);
+      b.text(
+        ZimraHelper.extractVerificationCode(sig),
+        align: PosAlign.center,
+      );
+    }
+    b.feed(1);
+    b.text(
+      "You can verify this receipt manually at",
+      align: PosAlign.center,
+    );
+    b.text(ZimraHelper.manualZimraUrl, align: PosAlign.center);
+    b.feed(1);
+  }
+
   static Future<void> printReceitToBackround(
     ItemReceitModel itemReceitModel,
     User user,
@@ -213,9 +266,11 @@ class DevicesController extends GetxController {
   ) async {
     final printer = PosUniversalPrinter.instance;
     final b = EscPosBuilder();
+    b.init();
     final model = AppSettingsModel.fromStorage();
     int receitWidth = model.printerRecietLength;
     bool enableQrCode = model.enableQrCode;
+    var zimraQrPrintedOnReceipt = false;
     String padRight(String text, int length) => text.padRight(length, ' ');
     for (final row in model.extras) {
       if (!row.enabled) {
@@ -244,8 +299,9 @@ class DevicesController extends GetxController {
         continue;
       }
       if (row.value == "time" && row.type == "system") {
+        final when = itemReceitModel.createdAt;
         b.text(
-          'Time: ${DateTime.now().toString().substring(0, 19)}',
+          'Time: ${when.toString().substring(0, 19)}',
           align: PosAlign.center,
         );
         continue;
@@ -295,55 +351,22 @@ class DevicesController extends GetxController {
         continue;
       }
       if (row.value == "qrcode" && row.type == "system") {
-        CompanyModel? companyForQr;
-        if (Get.isRegistered<InventoryController>()) {
-          companyForQr = Get.find<InventoryController>().company.value;
-        }
+        final companyForQr = _companyForZimraPrint();
+        final hasFiscal = receiptHasZimraQrData(itemReceitModel);
         final zimraQrOnReceipt =
-            companyForQr?.zimraQrFiscilization == true &&
-            itemReceitModel.fiscalized;
-        if (!enableQrCode && !zimraQrOnReceipt) {
+            companyForQr?.zimraQrFiscilization == true && itemReceitModel.fiscalized;
+        if (!enableQrCode && !zimraQrOnReceipt && !hasFiscal) {
           continue;
         }
-        b.feed(1);
-        b.text("--- QR CODE ---", align: PosAlign.center, bold: true);
-
-        final printZimraQr = zimraQrOnReceipt;
-
-        if (printZimraQr) {
-            b.qrCode(
-              ZimraHelper.generateQrUrl(
-                itemReceitModel,
-                isTest:
-                    Get.find<InventoryController>()
-                        .company
-                        .value
-                        ?.zimraIsTest ??
-                    true,
-                qrUrlFromConfig: companyForQr?.zimraQrUrl,
-              ),
-            );
-            if (itemReceitModel.zimraSignature != null) {
-              b.feed(1);
-              b.text("Verification code:", align: PosAlign.center);
-              b.text(
-                ZimraHelper.extractVerificationCode(
-                  itemReceitModel.zimraSignature!,
-                ),
-                align: PosAlign.center,
-              );
-            }
-            b.feed(1);
-            b.text(
-              "You can verify this receipt manually at",
-              align: PosAlign.center,
-            );
-            b.text(ZimraHelper.manualZimraUrl, align: PosAlign.center);
-        } else {
-          b.qrCode(itemReceitModel.label);
+        if (hasFiscal || zimraQrOnReceipt) {
+          appendZimraFiscalQrToEscPos(b, itemReceitModel, companyForQr);
+          zimraQrPrintedOnReceipt = true;
+        } else if (enableQrCode) {
+          b.feed(1);
+          b.text("--- QR CODE ---", align: PosAlign.center, bold: true);
+          OfflinePrinter.printQrCode(b, itemReceitModel.label);
+          b.feed(1);
         }
-
-        b.feed(1);
         continue;
       }
       if (row.value == "label" && row.type == "system") {
@@ -392,7 +415,14 @@ class DevicesController extends GetxController {
       }
     }
 
-    // --- SEPARATOR and ITEM HEADER (Manually Aligned) ---
+    // Designer may disable/remove "QR Code" row — still print FDMS QR when fiscalized.
+    if (!zimraQrPrintedOnReceipt) {
+      appendZimraFiscalQrToEscPos(
+        b,
+        itemReceitModel,
+        _companyForZimraPrint(),
+      );
+    }
 
     b.cut();
 
@@ -434,7 +464,7 @@ class DevicesController extends GetxController {
               );
 
               await Future.delayed(const Duration(milliseconds: 500));
-              printer.printEscPos(role, b);
+              printer.printRaw(role, b.build());
               printedAddresses.add(device.address);
             } catch (e) {
               print("Failed to print to device ${device.name}: $e");
@@ -460,13 +490,13 @@ class DevicesController extends GetxController {
               ),
             );
             await Future.delayed(const Duration(milliseconds: 500));
-            printer.printEscPos(role, b);
+            printer.printRaw(role, b.build());
           } else {
-            printer.printEscPos(PosPrinterRole.cashier, b);
+            printer.printRaw(PosPrinterRole.cashier, b.build());
           }
         }
       } else {
-        printer.printEscPos(PosPrinterRole.cashier, b);
+        printer.printRaw(PosPrinterRole.cashier, b.build());
       }
     } catch (e) {
       print("Failed to print: $e");
@@ -693,7 +723,7 @@ class DevicesController extends GetxController {
     if (enableQrCode) {
       b.feed(1);
       b.text("--- QR CODE ---", align: PosAlign.center, bold: true);
-      b.qrCode(shift.shiftLabel);
+      OfflinePrinter.printQrCode(b, shift.shiftLabel);
       b.feed(1);
     }
     b.feed(1);
@@ -736,7 +766,7 @@ class DevicesController extends GetxController {
               );
 
               await Future.delayed(const Duration(milliseconds: 500));
-              printer.printEscPos(role, b);
+              printer.printRaw(role, b.build());
               printedAddresses.add(device.address);
             } catch (e) {
               print("Failed to print to device ${device.name}: $e");
@@ -762,13 +792,13 @@ class DevicesController extends GetxController {
               ),
             );
             await Future.delayed(const Duration(milliseconds: 500));
-            printer.printEscPos(role, b);
+            printer.printRaw(role, b.build());
           } else {
-            printer.printEscPos(PosPrinterRole.cashier, b);
+            printer.printRaw(PosPrinterRole.cashier, b.build());
           }
         }
       } else {
-        printer.printEscPos(PosPrinterRole.cashier, b);
+        printer.printRaw(PosPrinterRole.cashier, b.build());
       }
     } catch (e) {
       print("Failed to print shift: $e");
