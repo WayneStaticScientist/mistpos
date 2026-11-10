@@ -18,10 +18,7 @@ class MistposAiController extends GetxController {
   void sendMessage(String text) async {
     if (text.trim().isEmpty) return;
 
-    messages.add({
-      "role": "user",
-      "content": text.trim(),
-    });
+    messages.add({"role": "user", "content": text.trim()});
 
     isWaiting.value = true;
     currentStreamingMessage.value = "";
@@ -29,12 +26,14 @@ class MistposAiController extends GetxController {
     try {
       final token = TokenModel.fromStorage().accessToken;
       final packageInfo = await PackageInfo.fromPlatform();
-      
+
       final isar = IsarStatic.getInstance();
       int unsyncedReceipts = 0;
       int unsyncedShifts = 0;
       if (isar != null) {
-        unsyncedReceipts = isar.itemReceitModels.where().syncedEqualTo(false).count();
+        unsyncedReceipts = GetItemReceitModelCollection(
+          isar,
+        ).itemReceitModels.where().syncedEqualTo(false).count();
         unsyncedShifts = isar.shiftsModels.where().syncedEqualTo(false).count();
       }
 
@@ -42,12 +41,12 @@ class MistposAiController extends GetxController {
       final response = await dio.post(
         '${Net.baseUrl}/ai/client-chat',
         data: {
-          "messages": messages.map((m) => {
-            "role": m['role'],
-            "content": m['content']
-          }).toList(),
+          "messages": messages
+              .map((m) => {"role": m['role'], "content": m['content']})
+              .toList(),
           "clientDate": DateTime.now().toIso8601String(),
-          "mistposAppVersion": packageInfo.version + '+' + packageInfo.buildNumber,
+          "mistposAppVersion":
+              '${packageInfo.version}+${packageInfo.buildNumber}',
           "unsyncedReceipts": unsyncedReceipts,
           "unsyncedShifts": unsyncedShifts,
         },
@@ -78,11 +77,12 @@ class MistposAiController extends GetxController {
                   _finalizeMessage();
                   return;
                 }
-                
+
                 try {
                   final data = jsonDecode(dataString);
                   if (data['error'] != null) {
-                    currentStreamingMessage.value += "\n\n**Error:** ${data['error']}";
+                    currentStreamingMessage.value +=
+                        "\n\n**Error:** ${data['error']}";
                     _finalizeMessage();
                   } else if (data['text'] != null) {
                     currentStreamingMessage.value += data['text'];
@@ -103,7 +103,6 @@ class MistposAiController extends GetxController {
             },
             cancelOnError: true,
           );
-
     } catch (e) {
       currentStreamingMessage.value = "Error connecting to AI: $e";
       _finalizeMessage();
@@ -114,7 +113,7 @@ class MistposAiController extends GetxController {
     isWaiting.value = false;
     if (currentStreamingMessage.value.isNotEmpty) {
       String finalMsg = currentStreamingMessage.value;
-      
+
       if (finalMsg.contains('[SYNC_LOCAL_DATA]')) {
         finalMsg = finalMsg.replaceAll('[SYNC_LOCAL_DATA]', '').trim();
         if (Get.isRegistered<ItemsController>()) {
@@ -124,10 +123,7 @@ class MistposAiController extends GetxController {
         }
       }
 
-      messages.add({
-        "role": "assistant",
-        "content": finalMsg,
-      });
+      messages.add({"role": "assistant", "content": finalMsg});
       currentStreamingMessage.value = "";
     }
   }

@@ -6,6 +6,7 @@ import 'package:mistpos/data/models/company_model.dart';
 import 'package:mistpos/data/models/tax_model.dart';
 import 'package:iconify_flutter/icons/carbon.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:mistpos/features/inventory/controllers/items_controller.dart';
 import 'package:mistpos/features/settings/screens/screen_add_tax.dart';
 import 'package:mistpos/features/settings/screens/screen_edit_tax.dart';
@@ -23,6 +24,8 @@ class TaxListScreens extends StatefulWidget {
 
 class _TaxListScreensState extends State<TaxListScreens> {
   final _itemsController = Get.find<ItemsController>();
+  final _invController = Get.find<InventoryController>();
+
   @override
   void initState() {
     super.initState();
@@ -43,24 +46,40 @@ class _TaxListScreensState extends State<TaxListScreens> {
         if (_itemsController.syncingTaxes.value) {
           return MistLoader1().center();
         }
-        if (_itemsController.taxes.isEmpty) {
-          return [
-                Iconify(Carbon.percentage, color: Colors.grey),
-                14.gapHeight,
-                "No taxes found".text(
-                  style: TextStyle(color: Colors.grey, fontSize: 16),
+        final zimraRates =
+            _invController.company.value?.zimraApplicableTaxes ?? [];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (zimraRates.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: Text(
+                  "ZIMRA synced rates: ${zimraRates.map((t) => t.taxPercent != null ? "${t.taxName ?? 'Tax'} ${t.taxPercent}%" : (t.taxName ?? 'Exempt')).join(', ')}. Set each tax’s rate to match; use “VAT inclusive” per tax when shelf prices already include that VAT.",
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                 ),
-              ]
-              .column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-              )
-              .center();
-        }
-        return ListView.builder(
-          itemCount: _itemsController.taxes.length,
-          itemBuilder: (context, index) =>
-              _buildItem(_itemsController.taxes[index]),
+              ),
+            Expanded(
+              child: _itemsController.taxes.isEmpty
+                  ? [
+                      Iconify(Carbon.percentage, color: Colors.grey),
+                      14.gapHeight,
+                      "No taxes found".text(
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                      ),
+                    ]
+                        .column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                        )
+                        .center()
+                  : ListView.builder(
+                      itemCount: _itemsController.taxes.length,
+                      itemBuilder: (context, index) =>
+                          _buildItem(_itemsController.taxes[index]),
+                    ),
+            ),
+          ],
         );
       }),
       floatingActionButton: FloatingActionButton(
@@ -84,6 +103,7 @@ class _TaxListScreensState extends State<TaxListScreens> {
   }
 
   ListTile _buildItem(TaxModel tax) {
+    final mode = tax.pricesIncludeTax ? "inclusive" : "added at checkout";
     return ListTile(
       onLongPress: () => _confirmDelete(tax),
       trailing: (tax.activated
@@ -102,9 +122,7 @@ class _TaxListScreensState extends State<TaxListScreens> {
         Get.to(() => ScreenEditTax(tax: tax));
       },
       subtitle:
-          (tax.selectedIds.isEmpty
-                  ? "All items"
-                  : "${tax.selectedIds.length} items")
+          ("${tax.value}% · $mode · ${tax.selectedIds.isEmpty ? "All items" : "${tax.selectedIds.length} items"}")
               .text(style: TextStyle(color: Colors.grey, fontSize: 12)),
       leading: Iconify(Carbon.percentage, color: Colors.grey, size: 16),
       title: tax.label.text(),

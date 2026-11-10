@@ -10,6 +10,7 @@ import 'package:mistpos/core/services/logs/log_service.dart';
 
 class UserController extends GetxController {
   RxBool loading = RxBool(false);
+  RxString authError = RxString("");
   Rx<User?> user = Rx<User?>(null);
   @override
   void onInit() {
@@ -37,57 +38,69 @@ class UserController extends GetxController {
     User.saveToStorage(user.value!);
   }
 
-  void registerUser(User userData) async {
+  Future<void> registerUser(User userData) async {
+    authError.value = "";
     loading.value = true;
-    final response = await Net.post("/user/register", data: userData.toMap());
-    loading.value = false;
-    if (response.hasError) {
-      Toaster.showError(response.response);
-      return;
+    try {
+      final response = await Net.post("/user/register", data: userData.toMap());
+      if (response.hasError) {
+        authError.value = response.response;
+        return;
+      }
+      if (response.body['user'] == null) {
+        authError.value = "Response send an empty response";
+        return;
+      }
+      user.value = User.fromMap(response.body['user']);
+      User.saveToStorage(user.value!);
+      final token = TokenModel.fromJson(response.body['tokens']);
+      token.saveToStorage();
+      
+      LogService.logEvent(
+        actionType: 'LOGIN',
+        description: 'User registered and logged in',
+      );
+      
+      Get.offAll(() => ScreenMain());
+    } catch (e) {
+      authError.value = e.toString();
+    } finally {
+      loading.value = false;
     }
-    if (response.body['user'] == null) {
-      Toaster.showError("Response send an empty response");
-      return;
-    }
-    user.value = User.fromMap(response.body['user']);
-    User.saveToStorage(user.value!);
-    final token = TokenModel.fromJson(response.body['tokens']);
-    token.saveToStorage();
-    
-    LogService.logEvent(
-      actionType: 'LOGIN',
-      description: 'User registered and logged in',
-    );
-    
-    Get.offAll(() => ScreenMain());
   }
 
-  void loginUser(String email, String password) async {
+  Future<void> loginUser(String email, String password) async {
+    authError.value = "";
     loading.value = true;
-    final response = await Net.post(
-      "/user/login",
-      data: {"email": email, "password": password},
-    );
-    loading.value = false;
-    if (response.hasError) {
-      Toaster.showError(response.response);
-      return;
-    }
-    if (response.body['user'] == null) {
-      Toaster.showError("Response send an empty response");
-      return;
-    }
-    user.value = User.fromMap(response.body['user']);
-    User.saveToStorage(user.value!);
-    final token = TokenModel.fromJson(response.body['tokens']);
-    token.saveToStorage();
+    try {
+      final response = await Net.post(
+        "/user/login",
+        data: {"email": email, "password": password},
+      );
+      if (response.hasError) {
+        authError.value = response.response;
+        return;
+      }
+      if (response.body['user'] == null) {
+        authError.value = "Response send an empty response";
+        return;
+      }
+      user.value = User.fromMap(response.body['user']);
+      User.saveToStorage(user.value!);
+      final token = TokenModel.fromJson(response.body['tokens']);
+      token.saveToStorage();
 
-    LogService.logEvent(
-      actionType: 'LOGIN',
-      description: 'User logged in',
-    );
-    
-    Get.offAll(() => ScreenMain());
+      LogService.logEvent(
+        actionType: 'LOGIN',
+        description: 'User logged in',
+      );
+      
+      Get.offAll(() => ScreenMain());
+    } catch (e) {
+      authError.value = e.toString();
+    } finally {
+      loading.value = false;
+    }
   }
 
   RxList<User> relatedAccounts = RxList<User>();

@@ -26,12 +26,15 @@ final ItemReceitModelSchema = IsarGeneratedSchema(
       IsarPropertySchema(name: 'change', type: IsarType.double),
       IsarPropertySchema(name: 'creditSale', type: IsarType.bool),
       IsarPropertySchema(name: 'tax', type: IsarType.double),
+      IsarPropertySchema(name: 'taxAmount', type: IsarType.double),
       IsarPropertySchema(name: 'amount', type: IsarType.double),
       IsarPropertySchema(name: 'currentAmountPayed', type: IsarType.double),
       IsarPropertySchema(name: 'total', type: IsarType.double),
       IsarPropertySchema(name: 'synced', type: IsarType.bool),
       IsarPropertySchema(name: 'createdAt', type: IsarType.dateTime),
       IsarPropertySchema(name: 'hexId', type: IsarType.string),
+      IsarPropertySchema(name: 'clientSaleId', type: IsarType.string),
+      IsarPropertySchema(name: 'currency', type: IsarType.string),
       IsarPropertySchema(name: 'customerId', type: IsarType.string),
       IsarPropertySchema(name: 'label', type: IsarType.string),
       IsarPropertySchema(
@@ -49,6 +52,16 @@ final ItemReceitModelSchema = IsarGeneratedSchema(
         type: IsarType.objectList,
         target: 'EmbeddedDiscountModel',
       ),
+      IsarPropertySchema(name: 'fiscalized', type: IsarType.bool),
+      IsarPropertySchema(name: 'zimraReceiptId', type: IsarType.string),
+      IsarPropertySchema(name: 'zimraSignature', type: IsarType.string),
+      IsarPropertySchema(name: 'zimraReceiptGlobalNo', type: IsarType.long),
+      IsarPropertySchema(name: 'zimraDeviceId', type: IsarType.long),
+      IsarPropertySchema(name: 'zimraFiscalDayNo', type: IsarType.long),
+      IsarPropertySchema(name: 'zimraReceiptDateQr', type: IsarType.string),
+      IsarPropertySchema(name: 'zimraQrCodeUrl', type: IsarType.string),
+      IsarPropertySchema(name: 'receiptType', type: IsarType.string),
+      IsarPropertySchema(name: 'originalReceiptId', type: IsarType.string),
     ],
     indexes: [],
   ),
@@ -71,28 +84,31 @@ int serializeItemReceitModel(IsarWriter writer, ItemReceitModel object) {
   IsarCore.writeDouble(writer, 3, object.change);
   IsarCore.writeBool(writer, 4, value: object.creditSale);
   IsarCore.writeDouble(writer, 5, object.tax);
-  IsarCore.writeDouble(writer, 6, object.amount);
-  IsarCore.writeDouble(writer, 7, object.currentAmountPayed);
-  IsarCore.writeDouble(writer, 8, object.total);
-  IsarCore.writeBool(writer, 9, value: object.synced);
+  IsarCore.writeDouble(writer, 6, object.taxAmount);
+  IsarCore.writeDouble(writer, 7, object.amount);
+  IsarCore.writeDouble(writer, 8, object.currentAmountPayed);
+  IsarCore.writeDouble(writer, 9, object.total);
+  IsarCore.writeBool(writer, 10, value: object.synced);
   IsarCore.writeLong(
     writer,
-    10,
+    11,
     object.createdAt.toUtc().microsecondsSinceEpoch,
   );
-  IsarCore.writeString(writer, 11, object.hexId);
+  IsarCore.writeString(writer, 12, object.hexId);
+  IsarCore.writeString(writer, 13, object.clientSaleId);
+  IsarCore.writeString(writer, 14, object.currency);
   {
     final value = object.customerId;
     if (value == null) {
-      IsarCore.writeNull(writer, 12);
+      IsarCore.writeNull(writer, 15);
     } else {
-      IsarCore.writeString(writer, 12, value);
+      IsarCore.writeString(writer, 15, value);
     }
   }
-  IsarCore.writeString(writer, 13, object.label);
+  IsarCore.writeString(writer, 16, object.label);
   {
     final list = object.miniTax;
-    final listWriter = IsarCore.beginList(writer, 14, list.length);
+    final listWriter = IsarCore.beginList(writer, 17, list.length);
     for (var i = 0; i < list.length; i++) {
       {
         final value = list[i];
@@ -105,7 +121,7 @@ int serializeItemReceitModel(IsarWriter writer, ItemReceitModel object) {
   }
   {
     final list = object.items;
-    final listWriter = IsarCore.beginList(writer, 15, list.length);
+    final listWriter = IsarCore.beginList(writer, 18, list.length);
     for (var i = 0; i < list.length; i++) {
       {
         final value = list[i];
@@ -118,7 +134,7 @@ int serializeItemReceitModel(IsarWriter writer, ItemReceitModel object) {
   }
   {
     final list = object.discounts;
-    final listWriter = IsarCore.beginList(writer, 16, list.length);
+    final listWriter = IsarCore.beginList(writer, 19, list.length);
     for (var i = 0; i < list.length; i++) {
       {
         final value = list[i];
@@ -128,6 +144,59 @@ int serializeItemReceitModel(IsarWriter writer, ItemReceitModel object) {
       }
     }
     IsarCore.endList(writer, listWriter);
+  }
+  IsarCore.writeBool(writer, 20, value: object.fiscalized);
+  {
+    final value = object.zimraReceiptId;
+    if (value == null) {
+      IsarCore.writeNull(writer, 21);
+    } else {
+      IsarCore.writeString(writer, 21, value);
+    }
+  }
+  {
+    final value = object.zimraSignature;
+    if (value == null) {
+      IsarCore.writeNull(writer, 22);
+    } else {
+      IsarCore.writeString(writer, 22, value);
+    }
+  }
+  IsarCore.writeLong(
+    writer,
+    23,
+    object.zimraReceiptGlobalNo ?? -9223372036854775808,
+  );
+  IsarCore.writeLong(writer, 24, object.zimraDeviceId ?? -9223372036854775808);
+  IsarCore.writeLong(
+    writer,
+    25,
+    object.zimraFiscalDayNo ?? -9223372036854775808,
+  );
+  {
+    final value = object.zimraReceiptDateQr;
+    if (value == null) {
+      IsarCore.writeNull(writer, 26);
+    } else {
+      IsarCore.writeString(writer, 26, value);
+    }
+  }
+  {
+    final value = object.zimraQrCodeUrl;
+    if (value == null) {
+      IsarCore.writeNull(writer, 27);
+    } else {
+      IsarCore.writeString(writer, 27, value);
+    }
+  }
+  IsarCore.writeString(writer, 28, object.receiptType);
+  {
+    final value = object.originalReceiptId;
+    if (value == null) {
+      IsarCore.writeNull(writer, 29);
+    } else {
+      IsarCore.writeString(writer, 29, value);
+    }
   }
   return object.id;
 }
@@ -151,11 +220,20 @@ ItemReceitModel deserializeItemReceitModel(IsarReader reader) {
       _tax = value;
     }
   }
+  final double _taxAmount;
+  {
+    final value = IsarCore.readDouble(reader, 6);
+    if (value.isNaN) {
+      _taxAmount = 0;
+    } else {
+      _taxAmount = value;
+    }
+  }
   final double _amount;
-  _amount = IsarCore.readDouble(reader, 6);
+  _amount = IsarCore.readDouble(reader, 7);
   final double _currentAmountPayed;
   {
-    final value = IsarCore.readDouble(reader, 7);
+    final value = IsarCore.readDouble(reader, 8);
     if (value.isNaN) {
       _currentAmountPayed = 0.0;
     } else {
@@ -163,12 +241,12 @@ ItemReceitModel deserializeItemReceitModel(IsarReader reader) {
     }
   }
   final double _total;
-  _total = IsarCore.readDouble(reader, 8);
+  _total = IsarCore.readDouble(reader, 9);
   final bool _synced;
-  _synced = IsarCore.readBool(reader, 9);
+  _synced = IsarCore.readBool(reader, 10);
   final DateTime _createdAt;
   {
-    final value = IsarCore.readLong(reader, 10);
+    final value = IsarCore.readLong(reader, 11);
     if (value == -9223372036854775808) {
       _createdAt = DateTime.fromMillisecondsSinceEpoch(
         0,
@@ -182,14 +260,18 @@ ItemReceitModel deserializeItemReceitModel(IsarReader reader) {
     }
   }
   final String _hexId;
-  _hexId = IsarCore.readString(reader, 11) ?? '';
+  _hexId = IsarCore.readString(reader, 12) ?? '';
+  final String _clientSaleId;
+  _clientSaleId = IsarCore.readString(reader, 13) ?? "";
+  final String _currency;
+  _currency = IsarCore.readString(reader, 14) ?? "";
   final String? _customerId;
-  _customerId = IsarCore.readString(reader, 12);
+  _customerId = IsarCore.readString(reader, 15);
   final String _label;
-  _label = IsarCore.readString(reader, 13) ?? "";
+  _label = IsarCore.readString(reader, 16) ?? "";
   final List<MiniTax> _miniTax;
   {
-    final length = IsarCore.readList(reader, 14, IsarCore.readerPtrPtr);
+    final length = IsarCore.readList(reader, 17, IsarCore.readerPtrPtr);
     {
       final reader = IsarCore.readerPtr;
       if (reader.isNull) {
@@ -215,7 +297,7 @@ ItemReceitModel deserializeItemReceitModel(IsarReader reader) {
   }
   final List<ItemReceitItem> _items;
   {
-    final length = IsarCore.readList(reader, 15, IsarCore.readerPtrPtr);
+    final length = IsarCore.readList(reader, 18, IsarCore.readerPtrPtr);
     {
       final reader = IsarCore.readerPtr;
       if (reader.isNull) {
@@ -245,7 +327,7 @@ ItemReceitModel deserializeItemReceitModel(IsarReader reader) {
   }
   final List<EmbeddedDiscountModel> _discounts;
   {
-    final length = IsarCore.readList(reader, 16, IsarCore.readerPtrPtr);
+    final length = IsarCore.readList(reader, 19, IsarCore.readerPtrPtr);
     {
       final reader = IsarCore.readerPtr;
       if (reader.isNull) {
@@ -273,23 +355,77 @@ ItemReceitModel deserializeItemReceitModel(IsarReader reader) {
       }
     }
   }
+  final bool _fiscalized;
+  _fiscalized = IsarCore.readBool(reader, 20);
+  final String? _zimraReceiptId;
+  _zimraReceiptId = IsarCore.readString(reader, 21);
+  final String? _zimraSignature;
+  _zimraSignature = IsarCore.readString(reader, 22);
+  final int? _zimraReceiptGlobalNo;
+  {
+    final value = IsarCore.readLong(reader, 23);
+    if (value == -9223372036854775808) {
+      _zimraReceiptGlobalNo = null;
+    } else {
+      _zimraReceiptGlobalNo = value;
+    }
+  }
+  final int? _zimraDeviceId;
+  {
+    final value = IsarCore.readLong(reader, 24);
+    if (value == -9223372036854775808) {
+      _zimraDeviceId = null;
+    } else {
+      _zimraDeviceId = value;
+    }
+  }
+  final int? _zimraFiscalDayNo;
+  {
+    final value = IsarCore.readLong(reader, 25);
+    if (value == -9223372036854775808) {
+      _zimraFiscalDayNo = null;
+    } else {
+      _zimraFiscalDayNo = value;
+    }
+  }
+  final String? _zimraReceiptDateQr;
+  _zimraReceiptDateQr = IsarCore.readString(reader, 26);
+  final String? _zimraQrCodeUrl;
+  _zimraQrCodeUrl = IsarCore.readString(reader, 27);
+  final String _receiptType;
+  _receiptType = IsarCore.readString(reader, 28) ?? 'FiscalInvoice';
+  final String? _originalReceiptId;
+  _originalReceiptId = IsarCore.readString(reader, 29);
   final object = ItemReceitModel(
     cashier: _cashier,
     payment: _payment,
     change: _change,
     creditSale: _creditSale,
     tax: _tax,
+    taxAmount: _taxAmount,
     amount: _amount,
     currentAmountPayed: _currentAmountPayed,
     total: _total,
     synced: _synced,
     createdAt: _createdAt,
     hexId: _hexId,
+    clientSaleId: _clientSaleId,
+    currency: _currency,
     customerId: _customerId,
     label: _label,
     miniTax: _miniTax,
     items: _items,
     discounts: _discounts,
+    fiscalized: _fiscalized,
+    zimraReceiptId: _zimraReceiptId,
+    zimraSignature: _zimraSignature,
+    zimraReceiptGlobalNo: _zimraReceiptGlobalNo,
+    zimraDeviceId: _zimraDeviceId,
+    zimraFiscalDayNo: _zimraFiscalDayNo,
+    zimraReceiptDateQr: _zimraReceiptDateQr,
+    zimraQrCodeUrl: _zimraQrCodeUrl,
+    receiptType: _receiptType,
+    originalReceiptId: _originalReceiptId,
   );
   object.id = IsarCore.readId(reader);
   return object;
@@ -318,23 +454,32 @@ dynamic deserializeItemReceitModelProp(IsarReader reader, int property) {
         }
       }
     case 6:
-      return IsarCore.readDouble(reader, 6);
-    case 7:
       {
-        final value = IsarCore.readDouble(reader, 7);
+        final value = IsarCore.readDouble(reader, 6);
+        if (value.isNaN) {
+          return 0;
+        } else {
+          return value;
+        }
+      }
+    case 7:
+      return IsarCore.readDouble(reader, 7);
+    case 8:
+      {
+        final value = IsarCore.readDouble(reader, 8);
         if (value.isNaN) {
           return 0.0;
         } else {
           return value;
         }
       }
-    case 8:
-      return IsarCore.readDouble(reader, 8);
     case 9:
-      return IsarCore.readBool(reader, 9);
+      return IsarCore.readDouble(reader, 9);
     case 10:
+      return IsarCore.readBool(reader, 10);
+    case 11:
       {
-        final value = IsarCore.readLong(reader, 10);
+        final value = IsarCore.readLong(reader, 11);
         if (value == -9223372036854775808) {
           return DateTime.fromMillisecondsSinceEpoch(0, isUtc: true).toLocal();
         } else {
@@ -344,15 +489,19 @@ dynamic deserializeItemReceitModelProp(IsarReader reader, int property) {
           ).toLocal();
         }
       }
-    case 11:
-      return IsarCore.readString(reader, 11) ?? '';
     case 12:
-      return IsarCore.readString(reader, 12);
+      return IsarCore.readString(reader, 12) ?? '';
     case 13:
       return IsarCore.readString(reader, 13) ?? "";
     case 14:
+      return IsarCore.readString(reader, 14) ?? "";
+    case 15:
+      return IsarCore.readString(reader, 15);
+    case 16:
+      return IsarCore.readString(reader, 16) ?? "";
+    case 17:
       {
-        final length = IsarCore.readList(reader, 14, IsarCore.readerPtrPtr);
+        final length = IsarCore.readList(reader, 17, IsarCore.readerPtrPtr);
         {
           final reader = IsarCore.readerPtr;
           if (reader.isNull) {
@@ -380,9 +529,9 @@ dynamic deserializeItemReceitModelProp(IsarReader reader, int property) {
           }
         }
       }
-    case 15:
+    case 18:
       {
-        final length = IsarCore.readList(reader, 15, IsarCore.readerPtrPtr);
+        final length = IsarCore.readList(reader, 18, IsarCore.readerPtrPtr);
         {
           final reader = IsarCore.readerPtr;
           if (reader.isNull) {
@@ -410,9 +559,9 @@ dynamic deserializeItemReceitModelProp(IsarReader reader, int property) {
           }
         }
       }
-    case 16:
+    case 19:
       {
-        final length = IsarCore.readList(reader, 16, IsarCore.readerPtrPtr);
+        final length = IsarCore.readList(reader, 19, IsarCore.readerPtrPtr);
         {
           final reader = IsarCore.readerPtr;
           if (reader.isNull) {
@@ -442,6 +591,47 @@ dynamic deserializeItemReceitModelProp(IsarReader reader, int property) {
           }
         }
       }
+    case 20:
+      return IsarCore.readBool(reader, 20);
+    case 21:
+      return IsarCore.readString(reader, 21);
+    case 22:
+      return IsarCore.readString(reader, 22);
+    case 23:
+      {
+        final value = IsarCore.readLong(reader, 23);
+        if (value == -9223372036854775808) {
+          return null;
+        } else {
+          return value;
+        }
+      }
+    case 24:
+      {
+        final value = IsarCore.readLong(reader, 24);
+        if (value == -9223372036854775808) {
+          return null;
+        } else {
+          return value;
+        }
+      }
+    case 25:
+      {
+        final value = IsarCore.readLong(reader, 25);
+        if (value == -9223372036854775808) {
+          return null;
+        } else {
+          return value;
+        }
+      }
+    case 26:
+      return IsarCore.readString(reader, 26);
+    case 27:
+      return IsarCore.readString(reader, 27);
+    case 28:
+      return IsarCore.readString(reader, 28) ?? 'FiscalInvoice';
+    case 29:
+      return IsarCore.readString(reader, 29);
     default:
       throw ArgumentError('Unknown property: $property');
   }
@@ -455,14 +645,27 @@ sealed class _ItemReceitModelUpdate {
     double? change,
     bool? creditSale,
     double? tax,
+    double? taxAmount,
     double? amount,
     double? currentAmountPayed,
     double? total,
     bool? synced,
     DateTime? createdAt,
     String? hexId,
+    String? clientSaleId,
+    String? currency,
     String? customerId,
     String? label,
+    bool? fiscalized,
+    String? zimraReceiptId,
+    String? zimraSignature,
+    int? zimraReceiptGlobalNo,
+    int? zimraDeviceId,
+    int? zimraFiscalDayNo,
+    String? zimraReceiptDateQr,
+    String? zimraQrCodeUrl,
+    String? receiptType,
+    String? originalReceiptId,
   });
 }
 
@@ -479,14 +682,27 @@ class _ItemReceitModelUpdateImpl implements _ItemReceitModelUpdate {
     Object? change = ignore,
     Object? creditSale = ignore,
     Object? tax = ignore,
+    Object? taxAmount = ignore,
     Object? amount = ignore,
     Object? currentAmountPayed = ignore,
     Object? total = ignore,
     Object? synced = ignore,
     Object? createdAt = ignore,
     Object? hexId = ignore,
+    Object? clientSaleId = ignore,
+    Object? currency = ignore,
     Object? customerId = ignore,
     Object? label = ignore,
+    Object? fiscalized = ignore,
+    Object? zimraReceiptId = ignore,
+    Object? zimraSignature = ignore,
+    Object? zimraReceiptGlobalNo = ignore,
+    Object? zimraDeviceId = ignore,
+    Object? zimraFiscalDayNo = ignore,
+    Object? zimraReceiptDateQr = ignore,
+    Object? zimraQrCodeUrl = ignore,
+    Object? receiptType = ignore,
+    Object? originalReceiptId = ignore,
   }) {
     return collection.updateProperties(
           [id],
@@ -496,14 +712,28 @@ class _ItemReceitModelUpdateImpl implements _ItemReceitModelUpdate {
             if (change != ignore) 3: change as double?,
             if (creditSale != ignore) 4: creditSale as bool?,
             if (tax != ignore) 5: tax as double?,
-            if (amount != ignore) 6: amount as double?,
-            if (currentAmountPayed != ignore) 7: currentAmountPayed as double?,
-            if (total != ignore) 8: total as double?,
-            if (synced != ignore) 9: synced as bool?,
-            if (createdAt != ignore) 10: createdAt as DateTime?,
-            if (hexId != ignore) 11: hexId as String?,
-            if (customerId != ignore) 12: customerId as String?,
-            if (label != ignore) 13: label as String?,
+            if (taxAmount != ignore) 6: taxAmount as double?,
+            if (amount != ignore) 7: amount as double?,
+            if (currentAmountPayed != ignore) 8: currentAmountPayed as double?,
+            if (total != ignore) 9: total as double?,
+            if (synced != ignore) 10: synced as bool?,
+            if (createdAt != ignore) 11: createdAt as DateTime?,
+            if (hexId != ignore) 12: hexId as String?,
+            if (clientSaleId != ignore) 13: clientSaleId as String?,
+            if (currency != ignore) 14: currency as String?,
+            if (customerId != ignore) 15: customerId as String?,
+            if (label != ignore) 16: label as String?,
+            if (fiscalized != ignore) 20: fiscalized as bool?,
+            if (zimraReceiptId != ignore) 21: zimraReceiptId as String?,
+            if (zimraSignature != ignore) 22: zimraSignature as String?,
+            if (zimraReceiptGlobalNo != ignore)
+              23: zimraReceiptGlobalNo as int?,
+            if (zimraDeviceId != ignore) 24: zimraDeviceId as int?,
+            if (zimraFiscalDayNo != ignore) 25: zimraFiscalDayNo as int?,
+            if (zimraReceiptDateQr != ignore) 26: zimraReceiptDateQr as String?,
+            if (zimraQrCodeUrl != ignore) 27: zimraQrCodeUrl as String?,
+            if (receiptType != ignore) 28: receiptType as String?,
+            if (originalReceiptId != ignore) 29: originalReceiptId as String?,
           },
         ) >
         0;
@@ -518,14 +748,27 @@ sealed class _ItemReceitModelUpdateAll {
     double? change,
     bool? creditSale,
     double? tax,
+    double? taxAmount,
     double? amount,
     double? currentAmountPayed,
     double? total,
     bool? synced,
     DateTime? createdAt,
     String? hexId,
+    String? clientSaleId,
+    String? currency,
     String? customerId,
     String? label,
+    bool? fiscalized,
+    String? zimraReceiptId,
+    String? zimraSignature,
+    int? zimraReceiptGlobalNo,
+    int? zimraDeviceId,
+    int? zimraFiscalDayNo,
+    String? zimraReceiptDateQr,
+    String? zimraQrCodeUrl,
+    String? receiptType,
+    String? originalReceiptId,
   });
 }
 
@@ -542,14 +785,27 @@ class _ItemReceitModelUpdateAllImpl implements _ItemReceitModelUpdateAll {
     Object? change = ignore,
     Object? creditSale = ignore,
     Object? tax = ignore,
+    Object? taxAmount = ignore,
     Object? amount = ignore,
     Object? currentAmountPayed = ignore,
     Object? total = ignore,
     Object? synced = ignore,
     Object? createdAt = ignore,
     Object? hexId = ignore,
+    Object? clientSaleId = ignore,
+    Object? currency = ignore,
     Object? customerId = ignore,
     Object? label = ignore,
+    Object? fiscalized = ignore,
+    Object? zimraReceiptId = ignore,
+    Object? zimraSignature = ignore,
+    Object? zimraReceiptGlobalNo = ignore,
+    Object? zimraDeviceId = ignore,
+    Object? zimraFiscalDayNo = ignore,
+    Object? zimraReceiptDateQr = ignore,
+    Object? zimraQrCodeUrl = ignore,
+    Object? receiptType = ignore,
+    Object? originalReceiptId = ignore,
   }) {
     return collection.updateProperties(id, {
       if (cashier != ignore) 1: cashier as String?,
@@ -557,14 +813,27 @@ class _ItemReceitModelUpdateAllImpl implements _ItemReceitModelUpdateAll {
       if (change != ignore) 3: change as double?,
       if (creditSale != ignore) 4: creditSale as bool?,
       if (tax != ignore) 5: tax as double?,
-      if (amount != ignore) 6: amount as double?,
-      if (currentAmountPayed != ignore) 7: currentAmountPayed as double?,
-      if (total != ignore) 8: total as double?,
-      if (synced != ignore) 9: synced as bool?,
-      if (createdAt != ignore) 10: createdAt as DateTime?,
-      if (hexId != ignore) 11: hexId as String?,
-      if (customerId != ignore) 12: customerId as String?,
-      if (label != ignore) 13: label as String?,
+      if (taxAmount != ignore) 6: taxAmount as double?,
+      if (amount != ignore) 7: amount as double?,
+      if (currentAmountPayed != ignore) 8: currentAmountPayed as double?,
+      if (total != ignore) 9: total as double?,
+      if (synced != ignore) 10: synced as bool?,
+      if (createdAt != ignore) 11: createdAt as DateTime?,
+      if (hexId != ignore) 12: hexId as String?,
+      if (clientSaleId != ignore) 13: clientSaleId as String?,
+      if (currency != ignore) 14: currency as String?,
+      if (customerId != ignore) 15: customerId as String?,
+      if (label != ignore) 16: label as String?,
+      if (fiscalized != ignore) 20: fiscalized as bool?,
+      if (zimraReceiptId != ignore) 21: zimraReceiptId as String?,
+      if (zimraSignature != ignore) 22: zimraSignature as String?,
+      if (zimraReceiptGlobalNo != ignore) 23: zimraReceiptGlobalNo as int?,
+      if (zimraDeviceId != ignore) 24: zimraDeviceId as int?,
+      if (zimraFiscalDayNo != ignore) 25: zimraFiscalDayNo as int?,
+      if (zimraReceiptDateQr != ignore) 26: zimraReceiptDateQr as String?,
+      if (zimraQrCodeUrl != ignore) 27: zimraQrCodeUrl as String?,
+      if (receiptType != ignore) 28: receiptType as String?,
+      if (originalReceiptId != ignore) 29: originalReceiptId as String?,
     });
   }
 }
@@ -583,14 +852,27 @@ sealed class _ItemReceitModelQueryUpdate {
     double? change,
     bool? creditSale,
     double? tax,
+    double? taxAmount,
     double? amount,
     double? currentAmountPayed,
     double? total,
     bool? synced,
     DateTime? createdAt,
     String? hexId,
+    String? clientSaleId,
+    String? currency,
     String? customerId,
     String? label,
+    bool? fiscalized,
+    String? zimraReceiptId,
+    String? zimraSignature,
+    int? zimraReceiptGlobalNo,
+    int? zimraDeviceId,
+    int? zimraFiscalDayNo,
+    String? zimraReceiptDateQr,
+    String? zimraQrCodeUrl,
+    String? receiptType,
+    String? originalReceiptId,
   });
 }
 
@@ -607,14 +889,27 @@ class _ItemReceitModelQueryUpdateImpl implements _ItemReceitModelQueryUpdate {
     Object? change = ignore,
     Object? creditSale = ignore,
     Object? tax = ignore,
+    Object? taxAmount = ignore,
     Object? amount = ignore,
     Object? currentAmountPayed = ignore,
     Object? total = ignore,
     Object? synced = ignore,
     Object? createdAt = ignore,
     Object? hexId = ignore,
+    Object? clientSaleId = ignore,
+    Object? currency = ignore,
     Object? customerId = ignore,
     Object? label = ignore,
+    Object? fiscalized = ignore,
+    Object? zimraReceiptId = ignore,
+    Object? zimraSignature = ignore,
+    Object? zimraReceiptGlobalNo = ignore,
+    Object? zimraDeviceId = ignore,
+    Object? zimraFiscalDayNo = ignore,
+    Object? zimraReceiptDateQr = ignore,
+    Object? zimraQrCodeUrl = ignore,
+    Object? receiptType = ignore,
+    Object? originalReceiptId = ignore,
   }) {
     return query.updateProperties(limit: limit, {
       if (cashier != ignore) 1: cashier as String?,
@@ -622,14 +917,27 @@ class _ItemReceitModelQueryUpdateImpl implements _ItemReceitModelQueryUpdate {
       if (change != ignore) 3: change as double?,
       if (creditSale != ignore) 4: creditSale as bool?,
       if (tax != ignore) 5: tax as double?,
-      if (amount != ignore) 6: amount as double?,
-      if (currentAmountPayed != ignore) 7: currentAmountPayed as double?,
-      if (total != ignore) 8: total as double?,
-      if (synced != ignore) 9: synced as bool?,
-      if (createdAt != ignore) 10: createdAt as DateTime?,
-      if (hexId != ignore) 11: hexId as String?,
-      if (customerId != ignore) 12: customerId as String?,
-      if (label != ignore) 13: label as String?,
+      if (taxAmount != ignore) 6: taxAmount as double?,
+      if (amount != ignore) 7: amount as double?,
+      if (currentAmountPayed != ignore) 8: currentAmountPayed as double?,
+      if (total != ignore) 9: total as double?,
+      if (synced != ignore) 10: synced as bool?,
+      if (createdAt != ignore) 11: createdAt as DateTime?,
+      if (hexId != ignore) 12: hexId as String?,
+      if (clientSaleId != ignore) 13: clientSaleId as String?,
+      if (currency != ignore) 14: currency as String?,
+      if (customerId != ignore) 15: customerId as String?,
+      if (label != ignore) 16: label as String?,
+      if (fiscalized != ignore) 20: fiscalized as bool?,
+      if (zimraReceiptId != ignore) 21: zimraReceiptId as String?,
+      if (zimraSignature != ignore) 22: zimraSignature as String?,
+      if (zimraReceiptGlobalNo != ignore) 23: zimraReceiptGlobalNo as int?,
+      if (zimraDeviceId != ignore) 24: zimraDeviceId as int?,
+      if (zimraFiscalDayNo != ignore) 25: zimraFiscalDayNo as int?,
+      if (zimraReceiptDateQr != ignore) 26: zimraReceiptDateQr as String?,
+      if (zimraQrCodeUrl != ignore) 27: zimraQrCodeUrl as String?,
+      if (receiptType != ignore) 28: receiptType as String?,
+      if (originalReceiptId != ignore) 29: originalReceiptId as String?,
     });
   }
 }
@@ -656,14 +964,27 @@ class _ItemReceitModelQueryBuilderUpdateImpl
     Object? change = ignore,
     Object? creditSale = ignore,
     Object? tax = ignore,
+    Object? taxAmount = ignore,
     Object? amount = ignore,
     Object? currentAmountPayed = ignore,
     Object? total = ignore,
     Object? synced = ignore,
     Object? createdAt = ignore,
     Object? hexId = ignore,
+    Object? clientSaleId = ignore,
+    Object? currency = ignore,
     Object? customerId = ignore,
     Object? label = ignore,
+    Object? fiscalized = ignore,
+    Object? zimraReceiptId = ignore,
+    Object? zimraSignature = ignore,
+    Object? zimraReceiptGlobalNo = ignore,
+    Object? zimraDeviceId = ignore,
+    Object? zimraFiscalDayNo = ignore,
+    Object? zimraReceiptDateQr = ignore,
+    Object? zimraQrCodeUrl = ignore,
+    Object? receiptType = ignore,
+    Object? originalReceiptId = ignore,
   }) {
     final q = query.build();
     try {
@@ -673,14 +994,27 @@ class _ItemReceitModelQueryBuilderUpdateImpl
         if (change != ignore) 3: change as double?,
         if (creditSale != ignore) 4: creditSale as bool?,
         if (tax != ignore) 5: tax as double?,
-        if (amount != ignore) 6: amount as double?,
-        if (currentAmountPayed != ignore) 7: currentAmountPayed as double?,
-        if (total != ignore) 8: total as double?,
-        if (synced != ignore) 9: synced as bool?,
-        if (createdAt != ignore) 10: createdAt as DateTime?,
-        if (hexId != ignore) 11: hexId as String?,
-        if (customerId != ignore) 12: customerId as String?,
-        if (label != ignore) 13: label as String?,
+        if (taxAmount != ignore) 6: taxAmount as double?,
+        if (amount != ignore) 7: amount as double?,
+        if (currentAmountPayed != ignore) 8: currentAmountPayed as double?,
+        if (total != ignore) 9: total as double?,
+        if (synced != ignore) 10: synced as bool?,
+        if (createdAt != ignore) 11: createdAt as DateTime?,
+        if (hexId != ignore) 12: hexId as String?,
+        if (clientSaleId != ignore) 13: clientSaleId as String?,
+        if (currency != ignore) 14: currency as String?,
+        if (customerId != ignore) 15: customerId as String?,
+        if (label != ignore) 16: label as String?,
+        if (fiscalized != ignore) 20: fiscalized as bool?,
+        if (zimraReceiptId != ignore) 21: zimraReceiptId as String?,
+        if (zimraSignature != ignore) 22: zimraSignature as String?,
+        if (zimraReceiptGlobalNo != ignore) 23: zimraReceiptGlobalNo as int?,
+        if (zimraDeviceId != ignore) 24: zimraDeviceId as int?,
+        if (zimraFiscalDayNo != ignore) 25: zimraFiscalDayNo as int?,
+        if (zimraReceiptDateQr != ignore) 26: zimraReceiptDateQr as String?,
+        if (zimraQrCodeUrl != ignore) 27: zimraQrCodeUrl as String?,
+        if (receiptType != ignore) 28: receiptType as String?,
+        if (originalReceiptId != ignore) 29: originalReceiptId as String?,
       });
     } finally {
       q.close();
@@ -1163,7 +1497,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  amountEqualTo(double value, {double epsilon = Filter.epsilon}) {
+  taxAmountEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(property: 6, value: value, epsilon: epsilon),
@@ -1172,7 +1506,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  amountGreaterThan(double value, {double epsilon = Filter.epsilon}) {
+  taxAmountGreaterThan(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(property: 6, value: value, epsilon: epsilon),
@@ -1181,7 +1515,10 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  amountGreaterThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+  taxAmountGreaterThanOrEqualTo(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(property: 6, value: value, epsilon: epsilon),
@@ -1190,7 +1527,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  amountLessThan(double value, {double epsilon = Filter.epsilon}) {
+  taxAmountLessThan(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessCondition(property: 6, value: value, epsilon: epsilon),
@@ -1199,7 +1536,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  amountLessThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+  taxAmountLessThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(property: 6, value: value, epsilon: epsilon),
@@ -1208,7 +1545,11 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  amountBetween(double lower, double upper, {double epsilon = Filter.epsilon}) {
+  taxAmountBetween(
+    double lower,
+    double upper, {
+    double epsilon = Filter.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
@@ -1223,7 +1564,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  currentAmountPayedEqualTo(double value, {double epsilon = Filter.epsilon}) {
+  amountEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(property: 7, value: value, epsilon: epsilon),
@@ -1232,10 +1573,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  currentAmountPayedGreaterThan(
-    double value, {
-    double epsilon = Filter.epsilon,
-  }) {
+  amountGreaterThan(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(property: 7, value: value, epsilon: epsilon),
@@ -1244,10 +1582,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  currentAmountPayedGreaterThanOrEqualTo(
-    double value, {
-    double epsilon = Filter.epsilon,
-  }) {
+  amountGreaterThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(property: 7, value: value, epsilon: epsilon),
@@ -1256,7 +1591,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  currentAmountPayedLessThan(double value, {double epsilon = Filter.epsilon}) {
+  amountLessThan(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessCondition(property: 7, value: value, epsilon: epsilon),
@@ -1265,10 +1600,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  currentAmountPayedLessThanOrEqualTo(
-    double value, {
-    double epsilon = Filter.epsilon,
-  }) {
+  amountLessThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(property: 7, value: value, epsilon: epsilon),
@@ -1277,11 +1609,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  currentAmountPayedBetween(
-    double lower,
-    double upper, {
-    double epsilon = Filter.epsilon,
-  }) {
+  amountBetween(double lower, double upper, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
@@ -1296,7 +1624,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  totalEqualTo(double value, {double epsilon = Filter.epsilon}) {
+  currentAmountPayedEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(property: 8, value: value, epsilon: epsilon),
@@ -1305,7 +1633,10 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  totalGreaterThan(double value, {double epsilon = Filter.epsilon}) {
+  currentAmountPayedGreaterThan(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(property: 8, value: value, epsilon: epsilon),
@@ -1314,7 +1645,10 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  totalGreaterThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+  currentAmountPayedGreaterThanOrEqualTo(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(property: 8, value: value, epsilon: epsilon),
@@ -1323,7 +1657,7 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  totalLessThan(double value, {double epsilon = Filter.epsilon}) {
+  currentAmountPayedLessThan(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessCondition(property: 8, value: value, epsilon: epsilon),
@@ -1332,7 +1666,10 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  totalLessThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+  currentAmountPayedLessThanOrEqualTo(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(property: 8, value: value, epsilon: epsilon),
@@ -1341,7 +1678,11 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  totalBetween(double lower, double upper, {double epsilon = Filter.epsilon}) {
+  currentAmountPayedBetween(
+    double lower,
+    double upper, {
+    double epsilon = Filter.epsilon,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
@@ -1356,16 +1697,67 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  syncedEqualTo(bool value) {
+  totalEqualTo(double value, {double epsilon = Filter.epsilon}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        EqualCondition(property: 9, value: value),
+        EqualCondition(property: 9, value: value, epsilon: epsilon),
       );
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
-  createdAtEqualTo(DateTime value) {
+  totalGreaterThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 9, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  totalGreaterThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 9, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  totalLessThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 9, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  totalLessThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 9, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  totalBetween(double lower, double upper, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 9,
+          lower: lower,
+          upper: upper,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  syncedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(property: 10, value: value),
@@ -1374,10 +1766,19 @@ extension ItemReceitModelQueryFilter
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  createdAtEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 11, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   createdAtGreaterThan(DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        GreaterCondition(property: 10, value: value),
+        GreaterCondition(property: 11, value: value),
       );
     });
   }
@@ -1386,7 +1787,7 @@ extension ItemReceitModelQueryFilter
   createdAtGreaterThanOrEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        GreaterOrEqualCondition(property: 10, value: value),
+        GreaterOrEqualCondition(property: 11, value: value),
       );
     });
   }
@@ -1395,7 +1796,7 @@ extension ItemReceitModelQueryFilter
   createdAtLessThan(DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessCondition(property: 10, value: value),
+        LessCondition(property: 11, value: value),
       );
     });
   }
@@ -1404,7 +1805,7 @@ extension ItemReceitModelQueryFilter
   createdAtLessThanOrEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessOrEqualCondition(property: 10, value: value),
+        LessOrEqualCondition(property: 11, value: value),
       );
     });
   }
@@ -1413,7 +1814,7 @@ extension ItemReceitModelQueryFilter
   createdAtBetween(DateTime lower, DateTime upper) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        BetweenCondition(property: 10, lower: lower, upper: upper),
+        BetweenCondition(property: 11, lower: lower, upper: upper),
       );
     });
   }
@@ -1423,7 +1824,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(
-          property: 11,
+          property: 12,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1436,7 +1837,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(
-          property: 11,
+          property: 12,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1449,7 +1850,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(
-          property: 11,
+          property: 12,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1461,7 +1862,7 @@ extension ItemReceitModelQueryFilter
   hexIdLessThan(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessCondition(property: 11, value: value, caseSensitive: caseSensitive),
+        LessCondition(property: 12, value: value, caseSensitive: caseSensitive),
       );
     });
   }
@@ -1471,7 +1872,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(
-          property: 11,
+          property: 12,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1484,7 +1885,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
-          property: 11,
+          property: 12,
           lower: lower,
           upper: upper,
           caseSensitive: caseSensitive,
@@ -1498,7 +1899,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         StartsWithCondition(
-          property: 11,
+          property: 12,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1511,7 +1912,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EndsWithCondition(
-          property: 11,
+          property: 12,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1524,7 +1925,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         ContainsCondition(
-          property: 11,
+          property: 12,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1537,7 +1938,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         MatchesCondition(
-          property: 11,
+          property: 12,
           wildcard: pattern,
           caseSensitive: caseSensitive,
         ),
@@ -1549,7 +1950,7 @@ extension ItemReceitModelQueryFilter
   hexIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const EqualCondition(property: 11, value: ''),
+        const EqualCondition(property: 12, value: ''),
       );
     });
   }
@@ -1558,7 +1959,297 @@ extension ItemReceitModelQueryFilter
   hexIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterCondition(property: 11, value: ''),
+        const GreaterCondition(property: 12, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  clientSaleIdEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(
+          property: 13,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  clientSaleIdGreaterThan(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 13,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  clientSaleIdGreaterThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 13,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  clientSaleIdLessThan(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 13, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  clientSaleIdLessThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 13,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  clientSaleIdBetween(String lower, String upper, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 13,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  clientSaleIdStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 13,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  clientSaleIdEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 13,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  clientSaleIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 13,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  clientSaleIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 13,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  clientSaleIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const EqualCondition(property: 13, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  clientSaleIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const GreaterCondition(property: 13, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  currencyEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(
+          property: 14,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  currencyGreaterThan(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 14,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  currencyGreaterThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 14,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  currencyLessThan(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 14, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  currencyLessThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 14,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  currencyBetween(String lower, String upper, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 14,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  currencyStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 14,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  currencyEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 14,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  currencyContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 14,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  currencyMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 14,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  currencyIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const EqualCondition(property: 14, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  currencyIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const GreaterCondition(property: 14, value: ''),
       );
     });
   }
@@ -1566,14 +2257,14 @@ extension ItemReceitModelQueryFilter
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   customerIdIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const IsNullCondition(property: 12));
+      return query.addFilterCondition(const IsNullCondition(property: 15));
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
   customerIdIsNotNull() {
     return QueryBuilder.apply(not(), (query) {
-      return query.addFilterCondition(const IsNullCondition(property: 12));
+      return query.addFilterCondition(const IsNullCondition(property: 15));
     });
   }
 
@@ -1582,7 +2273,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(
-          property: 12,
+          property: 15,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1595,7 +2286,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(
-          property: 12,
+          property: 15,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1608,7 +2299,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(
-          property: 12,
+          property: 15,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1620,7 +2311,7 @@ extension ItemReceitModelQueryFilter
   customerIdLessThan(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessCondition(property: 12, value: value, caseSensitive: caseSensitive),
+        LessCondition(property: 15, value: value, caseSensitive: caseSensitive),
       );
     });
   }
@@ -1630,7 +2321,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(
-          property: 12,
+          property: 15,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1643,7 +2334,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
-          property: 12,
+          property: 15,
           lower: lower,
           upper: upper,
           caseSensitive: caseSensitive,
@@ -1657,7 +2348,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         StartsWithCondition(
-          property: 12,
+          property: 15,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1670,7 +2361,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EndsWithCondition(
-          property: 12,
+          property: 15,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1683,7 +2374,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         ContainsCondition(
-          property: 12,
+          property: 15,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1696,7 +2387,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         MatchesCondition(
-          property: 12,
+          property: 15,
           wildcard: pattern,
           caseSensitive: caseSensitive,
         ),
@@ -1708,7 +2399,7 @@ extension ItemReceitModelQueryFilter
   customerIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const EqualCondition(property: 12, value: ''),
+        const EqualCondition(property: 15, value: ''),
       );
     });
   }
@@ -1717,7 +2408,7 @@ extension ItemReceitModelQueryFilter
   customerIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterCondition(property: 12, value: ''),
+        const GreaterCondition(property: 15, value: ''),
       );
     });
   }
@@ -1727,7 +2418,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EqualCondition(
-          property: 13,
+          property: 16,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1740,7 +2431,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterCondition(
-          property: 13,
+          property: 16,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1753,7 +2444,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         GreaterOrEqualCondition(
-          property: 13,
+          property: 16,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1765,7 +2456,7 @@ extension ItemReceitModelQueryFilter
   labelLessThan(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessCondition(property: 13, value: value, caseSensitive: caseSensitive),
+        LessCondition(property: 16, value: value, caseSensitive: caseSensitive),
       );
     });
   }
@@ -1775,7 +2466,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         LessOrEqualCondition(
-          property: 13,
+          property: 16,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1788,7 +2479,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(
-          property: 13,
+          property: 16,
           lower: lower,
           upper: upper,
           caseSensitive: caseSensitive,
@@ -1802,7 +2493,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         StartsWithCondition(
-          property: 13,
+          property: 16,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1815,7 +2506,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         EndsWithCondition(
-          property: 13,
+          property: 16,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1828,7 +2519,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         ContainsCondition(
-          property: 13,
+          property: 16,
           value: value,
           caseSensitive: caseSensitive,
         ),
@@ -1841,7 +2532,7 @@ extension ItemReceitModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         MatchesCondition(
-          property: 13,
+          property: 16,
           wildcard: pattern,
           caseSensitive: caseSensitive,
         ),
@@ -1853,7 +2544,7 @@ extension ItemReceitModelQueryFilter
   labelIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const EqualCondition(property: 13, value: ''),
+        const EqualCondition(property: 16, value: ''),
       );
     });
   }
@@ -1862,7 +2553,7 @@ extension ItemReceitModelQueryFilter
   labelIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterCondition(property: 13, value: ''),
+        const GreaterCondition(property: 16, value: ''),
       );
     });
   }
@@ -1876,7 +2567,7 @@ extension ItemReceitModelQueryFilter
   miniTaxIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterOrEqualCondition(property: 14, value: null),
+        const GreaterOrEqualCondition(property: 17, value: null),
       );
     });
   }
@@ -1890,7 +2581,7 @@ extension ItemReceitModelQueryFilter
   itemsIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterOrEqualCondition(property: 15, value: null),
+        const GreaterOrEqualCondition(property: 18, value: null),
       );
     });
   }
@@ -1904,7 +2595,1201 @@ extension ItemReceitModelQueryFilter
   discountsIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        const GreaterOrEqualCondition(property: 16, value: null),
+        const GreaterOrEqualCondition(property: 19, value: null),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  fiscalizedEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 20, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 21));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptIdIsNotNull() {
+    return QueryBuilder.apply(not(), (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 21));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptIdEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(
+          property: 21,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptIdGreaterThan(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 21,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptIdGreaterThanOrEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 21,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptIdLessThan(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 21, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptIdLessThanOrEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 21,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptIdBetween(
+    String? lower,
+    String? upper, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 21,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptIdStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 21,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptIdEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 21,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 21,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 21,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const EqualCondition(property: 21, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const GreaterCondition(property: 21, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraSignatureIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 22));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraSignatureIsNotNull() {
+    return QueryBuilder.apply(not(), (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 22));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraSignatureEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(
+          property: 22,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraSignatureGreaterThan(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 22,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraSignatureGreaterThanOrEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 22,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraSignatureLessThan(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 22, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraSignatureLessThanOrEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 22,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraSignatureBetween(
+    String? lower,
+    String? upper, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 22,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraSignatureStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 22,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraSignatureEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 22,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraSignatureContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 22,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraSignatureMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 22,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraSignatureIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const EqualCondition(property: 22, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraSignatureIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const GreaterCondition(property: 22, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptGlobalNoIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 23));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptGlobalNoIsNotNull() {
+    return QueryBuilder.apply(not(), (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 23));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptGlobalNoEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 23, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptGlobalNoGreaterThan(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 23, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptGlobalNoGreaterThanOrEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 23, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptGlobalNoLessThan(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 23, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptGlobalNoLessThanOrEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 23, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptGlobalNoBetween(int? lower, int? upper) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(property: 23, lower: lower, upper: upper),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraDeviceIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 24));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraDeviceIdIsNotNull() {
+    return QueryBuilder.apply(not(), (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 24));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraDeviceIdEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 24, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraDeviceIdGreaterThan(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 24, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraDeviceIdGreaterThanOrEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 24, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraDeviceIdLessThan(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 24, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraDeviceIdLessThanOrEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 24, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraDeviceIdBetween(int? lower, int? upper) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(property: 24, lower: lower, upper: upper),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraFiscalDayNoIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 25));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraFiscalDayNoIsNotNull() {
+    return QueryBuilder.apply(not(), (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 25));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraFiscalDayNoEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 25, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraFiscalDayNoGreaterThan(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 25, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraFiscalDayNoGreaterThanOrEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 25, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraFiscalDayNoLessThan(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 25, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraFiscalDayNoLessThanOrEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 25, value: value),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraFiscalDayNoBetween(int? lower, int? upper) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(property: 25, lower: lower, upper: upper),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptDateQrIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 26));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptDateQrIsNotNull() {
+    return QueryBuilder.apply(not(), (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 26));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptDateQrEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(
+          property: 26,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptDateQrGreaterThan(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 26,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptDateQrGreaterThanOrEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 26,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptDateQrLessThan(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 26, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptDateQrLessThanOrEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 26,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptDateQrBetween(
+    String? lower,
+    String? upper, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 26,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptDateQrStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 26,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptDateQrEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 26,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptDateQrContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 26,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptDateQrMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 26,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptDateQrIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const EqualCondition(property: 26, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraReceiptDateQrIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const GreaterCondition(property: 26, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraQrCodeUrlIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 27));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraQrCodeUrlIsNotNull() {
+    return QueryBuilder.apply(not(), (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 27));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraQrCodeUrlEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(
+          property: 27,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraQrCodeUrlGreaterThan(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 27,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraQrCodeUrlGreaterThanOrEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 27,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraQrCodeUrlLessThan(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 27, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraQrCodeUrlLessThanOrEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 27,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraQrCodeUrlBetween(
+    String? lower,
+    String? upper, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 27,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraQrCodeUrlStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 27,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraQrCodeUrlEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 27,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraQrCodeUrlContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 27,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraQrCodeUrlMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 27,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraQrCodeUrlIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const EqualCondition(property: 27, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  zimraQrCodeUrlIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const GreaterCondition(property: 27, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  receiptTypeEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(
+          property: 28,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  receiptTypeGreaterThan(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 28,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  receiptTypeGreaterThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 28,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  receiptTypeLessThan(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 28, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  receiptTypeLessThanOrEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 28,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  receiptTypeBetween(String lower, String upper, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 28,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  receiptTypeStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 28,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  receiptTypeEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 28,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  receiptTypeContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 28,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  receiptTypeMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 28,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  receiptTypeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const EqualCondition(property: 28, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  receiptTypeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const GreaterCondition(property: 28, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  originalReceiptIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 29));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  originalReceiptIdIsNotNull() {
+    return QueryBuilder.apply(not(), (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 29));
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  originalReceiptIdEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(
+          property: 29,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  originalReceiptIdGreaterThan(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 29,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  originalReceiptIdGreaterThanOrEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 29,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  originalReceiptIdLessThan(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 29, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  originalReceiptIdLessThanOrEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 29,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  originalReceiptIdBetween(
+    String? lower,
+    String? upper, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 29,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  originalReceiptIdStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 29,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  originalReceiptIdEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 29,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  originalReceiptIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 29,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  originalReceiptIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 29,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  originalReceiptIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const EqualCondition(property: 29, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterFilterCondition>
+  originalReceiptIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const GreaterCondition(property: 29, value: ''),
       );
     });
   }
@@ -1996,70 +3881,84 @@ extension ItemReceitModelQuerySortBy
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortByAmount() {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByTaxAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(6);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  sortByAmountDesc() {
+  sortByTaxAmountDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(6, sort: Sort.desc);
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  sortByCurrentAmountPayed() {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortByAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(7);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  sortByCurrentAmountPayedDesc() {
+  sortByAmountDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(7, sort: Sort.desc);
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortByTotal() {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByCurrentAmountPayed() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(8);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  sortByTotalDesc() {
+  sortByCurrentAmountPayedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(8, sort: Sort.desc);
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortBySynced() {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortByTotal() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(9);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  sortBySyncedDesc() {
+  sortByTotalDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(9, sort: Sort.desc);
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  sortByCreatedAt() {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortBySynced() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(10);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  sortByCreatedAtDesc() {
+  sortBySyncedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(10, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByCreatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(11);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByCreatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(11, sort: Sort.desc);
     });
   }
 
@@ -2067,7 +3966,7 @@ extension ItemReceitModelQuerySortBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(11, caseSensitive: caseSensitive);
+      return query.addSortBy(12, caseSensitive: caseSensitive);
     });
   }
 
@@ -2075,21 +3974,50 @@ extension ItemReceitModelQuerySortBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(11, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(12, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByClientSaleId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(13, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByClientSaleIdDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(13, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> sortByCurrency({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(14, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByCurrencyDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(14, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByCustomerId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(12, caseSensitive: caseSensitive);
+      return query.addSortBy(15, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   sortByCustomerIdDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(12, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(15, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
@@ -2097,7 +4025,7 @@ extension ItemReceitModelQuerySortBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(13, caseSensitive: caseSensitive);
+      return query.addSortBy(16, caseSensitive: caseSensitive);
     });
   }
 
@@ -2105,7 +4033,147 @@ extension ItemReceitModelQuerySortBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(13, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(16, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByFiscalized() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(20);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByFiscalizedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(20, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByZimraReceiptId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(21, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByZimraReceiptIdDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(21, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByZimraSignature({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(22, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByZimraSignatureDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(22, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByZimraReceiptGlobalNo() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(23);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByZimraReceiptGlobalNoDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(23, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByZimraDeviceId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(24);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByZimraDeviceIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(24, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByZimraFiscalDayNo() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(25);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByZimraFiscalDayNoDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(25, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByZimraReceiptDateQr({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(26, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByZimraReceiptDateQrDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(26, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByZimraQrCodeUrl({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(27, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByZimraQrCodeUrlDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(27, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByReceiptType({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(28, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByReceiptTypeDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(28, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByOriginalReceiptId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(29, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  sortByOriginalReceiptIdDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(29, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 }
@@ -2193,70 +4261,84 @@ extension ItemReceitModelQuerySortThenBy
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenByAmount() {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByTaxAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(6);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  thenByAmountDesc() {
+  thenByTaxAmountDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(6, sort: Sort.desc);
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  thenByCurrentAmountPayed() {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenByAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(7);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  thenByCurrentAmountPayedDesc() {
+  thenByAmountDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(7, sort: Sort.desc);
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenByTotal() {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByCurrentAmountPayed() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(8);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  thenByTotalDesc() {
+  thenByCurrentAmountPayedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(8, sort: Sort.desc);
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenBySynced() {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenByTotal() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(9);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  thenBySyncedDesc() {
+  thenByTotalDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(9, sort: Sort.desc);
     });
   }
 
-  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  thenByCreatedAt() {
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenBySynced() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(10);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
-  thenByCreatedAtDesc() {
+  thenBySyncedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(10, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByCreatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(11);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByCreatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(11, sort: Sort.desc);
     });
   }
 
@@ -2264,7 +4346,7 @@ extension ItemReceitModelQuerySortThenBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(11, caseSensitive: caseSensitive);
+      return query.addSortBy(12, caseSensitive: caseSensitive);
     });
   }
 
@@ -2272,21 +4354,50 @@ extension ItemReceitModelQuerySortThenBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(11, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(12, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByClientSaleId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(13, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByClientSaleIdDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(13, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy> thenByCurrency({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(14, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByCurrencyDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(14, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByCustomerId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(12, caseSensitive: caseSensitive);
+      return query.addSortBy(15, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
   thenByCustomerIdDesc({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(12, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(15, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 
@@ -2294,7 +4405,7 @@ extension ItemReceitModelQuerySortThenBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(13, caseSensitive: caseSensitive);
+      return query.addSortBy(16, caseSensitive: caseSensitive);
     });
   }
 
@@ -2302,7 +4413,147 @@ extension ItemReceitModelQuerySortThenBy
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(13, sort: Sort.desc, caseSensitive: caseSensitive);
+      return query.addSortBy(16, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByFiscalized() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(20);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByFiscalizedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(20, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByZimraReceiptId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(21, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByZimraReceiptIdDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(21, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByZimraSignature({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(22, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByZimraSignatureDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(22, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByZimraReceiptGlobalNo() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(23);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByZimraReceiptGlobalNoDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(23, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByZimraDeviceId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(24);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByZimraDeviceIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(24, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByZimraFiscalDayNo() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(25);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByZimraFiscalDayNoDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(25, sort: Sort.desc);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByZimraReceiptDateQr({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(26, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByZimraReceiptDateQrDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(26, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByZimraQrCodeUrl({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(27, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByZimraQrCodeUrlDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(27, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByReceiptType({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(28, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByReceiptTypeDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(28, sort: Sort.desc, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByOriginalReceiptId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(29, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterSortBy>
+  thenByOriginalReceiptIdDesc({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(29, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
 }
@@ -2345,58 +4596,149 @@ extension ItemReceitModelQueryWhereDistinct
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
-  distinctByAmount() {
+  distinctByTaxAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(6);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
-  distinctByCurrentAmountPayed() {
+  distinctByAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(7);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
-  distinctByTotal() {
+  distinctByCurrentAmountPayed() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(8);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
-  distinctBySynced() {
+  distinctByTotal() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(9);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
-  distinctByCreatedAt() {
+  distinctBySynced() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(10);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
-  distinctByHexId({bool caseSensitive = true}) {
+  distinctByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(11, caseSensitive: caseSensitive);
+      return query.addDistinctBy(11);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
-  distinctByCustomerId({bool caseSensitive = true}) {
+  distinctByHexId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(12, caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
-  distinctByLabel({bool caseSensitive = true}) {
+  distinctByClientSaleId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(13, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
+  distinctByCurrency({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(14, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
+  distinctByCustomerId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(15, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
+  distinctByLabel({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(16, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
+  distinctByFiscalized() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(20);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
+  distinctByZimraReceiptId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(21, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
+  distinctByZimraSignature({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(22, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
+  distinctByZimraReceiptGlobalNo() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(23);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
+  distinctByZimraDeviceId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(24);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
+  distinctByZimraFiscalDayNo() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(25);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
+  distinctByZimraReceiptDateQr({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(26, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
+  distinctByZimraQrCodeUrl({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(27, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
+  distinctByReceiptType({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(28, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, ItemReceitModel, QAfterDistinct>
+  distinctByOriginalReceiptId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(29, caseSensitive: caseSensitive);
     });
   }
 }
@@ -2439,73 +4781,158 @@ extension ItemReceitModelQueryProperty1
     });
   }
 
-  QueryBuilder<ItemReceitModel, double, QAfterProperty> amountProperty() {
+  QueryBuilder<ItemReceitModel, double, QAfterProperty> taxAmountProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(6);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, double, QAfterProperty> amountProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(7);
     });
   }
 
   QueryBuilder<ItemReceitModel, double, QAfterProperty>
   currentAmountPayedProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(7);
+      return query.addProperty(8);
     });
   }
 
   QueryBuilder<ItemReceitModel, double, QAfterProperty> totalProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(8);
+      return query.addProperty(9);
     });
   }
 
   QueryBuilder<ItemReceitModel, bool, QAfterProperty> syncedProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(9);
+      return query.addProperty(10);
     });
   }
 
   QueryBuilder<ItemReceitModel, DateTime, QAfterProperty> createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(10);
+      return query.addProperty(11);
     });
   }
 
   QueryBuilder<ItemReceitModel, String, QAfterProperty> hexIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(11);
+      return query.addProperty(12);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, String, QAfterProperty> clientSaleIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(13);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, String, QAfterProperty> currencyProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(14);
     });
   }
 
   QueryBuilder<ItemReceitModel, String?, QAfterProperty> customerIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(12);
+      return query.addProperty(15);
     });
   }
 
   QueryBuilder<ItemReceitModel, String, QAfterProperty> labelProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(13);
+      return query.addProperty(16);
     });
   }
 
   QueryBuilder<ItemReceitModel, List<MiniTax>, QAfterProperty>
   miniTaxProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(14);
+      return query.addProperty(17);
     });
   }
 
   QueryBuilder<ItemReceitModel, List<ItemReceitItem>, QAfterProperty>
   itemsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(15);
+      return query.addProperty(18);
     });
   }
 
   QueryBuilder<ItemReceitModel, List<EmbeddedDiscountModel>, QAfterProperty>
   discountsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(16);
+      return query.addProperty(19);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, bool, QAfterProperty> fiscalizedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(20);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, String?, QAfterProperty>
+  zimraReceiptIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(21);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, String?, QAfterProperty>
+  zimraSignatureProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(22);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, int?, QAfterProperty>
+  zimraReceiptGlobalNoProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(23);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, int?, QAfterProperty> zimraDeviceIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(24);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, int?, QAfterProperty>
+  zimraFiscalDayNoProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(25);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, String?, QAfterProperty>
+  zimraReceiptDateQrProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(26);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, String?, QAfterProperty>
+  zimraQrCodeUrlProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(27);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, String, QAfterProperty> receiptTypeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(28);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, String?, QAfterProperty>
+  originalReceiptIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(29);
     });
   }
 }
@@ -2549,68 +4976,89 @@ extension ItemReceitModelQueryProperty2<R>
     });
   }
 
-  QueryBuilder<ItemReceitModel, (R, double), QAfterProperty> amountProperty() {
+  QueryBuilder<ItemReceitModel, (R, double), QAfterProperty>
+  taxAmountProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(6);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R, double), QAfterProperty> amountProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(7);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, double), QAfterProperty>
   currentAmountPayedProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(7);
+      return query.addProperty(8);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, double), QAfterProperty> totalProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(8);
+      return query.addProperty(9);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, bool), QAfterProperty> syncedProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(9);
+      return query.addProperty(10);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, DateTime), QAfterProperty>
   createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(10);
+      return query.addProperty(11);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, String), QAfterProperty> hexIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(11);
+      return query.addProperty(12);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R, String), QAfterProperty>
+  clientSaleIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(13);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R, String), QAfterProperty>
+  currencyProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(14);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, String?), QAfterProperty>
   customerIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(12);
+      return query.addProperty(15);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, String), QAfterProperty> labelProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(13);
+      return query.addProperty(16);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, List<MiniTax>), QAfterProperty>
   miniTaxProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(14);
+      return query.addProperty(17);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R, List<ItemReceitItem>), QAfterProperty>
   itemsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(15);
+      return query.addProperty(18);
     });
   }
 
@@ -2621,7 +5069,77 @@ extension ItemReceitModelQueryProperty2<R>
   >
   discountsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(16);
+      return query.addProperty(19);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R, bool), QAfterProperty>
+  fiscalizedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(20);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R, String?), QAfterProperty>
+  zimraReceiptIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(21);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R, String?), QAfterProperty>
+  zimraSignatureProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(22);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R, int?), QAfterProperty>
+  zimraReceiptGlobalNoProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(23);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R, int?), QAfterProperty>
+  zimraDeviceIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(24);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R, int?), QAfterProperty>
+  zimraFiscalDayNoProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(25);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R, String?), QAfterProperty>
+  zimraReceiptDateQrProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(26);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R, String?), QAfterProperty>
+  zimraQrCodeUrlProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(27);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R, String), QAfterProperty>
+  receiptTypeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(28);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R, String?), QAfterProperty>
+  originalReceiptIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(29);
     });
   }
 }
@@ -2669,68 +5187,89 @@ extension ItemReceitModelQueryProperty3<R1, R2>
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, double), QOperations>
-  amountProperty() {
+  taxAmountProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(6);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, double), QOperations>
-  currentAmountPayedProperty() {
+  amountProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(7);
     });
   }
 
-  QueryBuilder<ItemReceitModel, (R1, R2, double), QOperations> totalProperty() {
+  QueryBuilder<ItemReceitModel, (R1, R2, double), QOperations>
+  currentAmountPayedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(8);
     });
   }
 
-  QueryBuilder<ItemReceitModel, (R1, R2, bool), QOperations> syncedProperty() {
+  QueryBuilder<ItemReceitModel, (R1, R2, double), QOperations> totalProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(9);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R1, R2, bool), QOperations> syncedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(10);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, DateTime), QOperations>
   createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(10);
+      return query.addProperty(11);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, String), QOperations> hexIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(11);
+      return query.addProperty(12);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R1, R2, String), QOperations>
+  clientSaleIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(13);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R1, R2, String), QOperations>
+  currencyProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(14);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, String?), QOperations>
   customerIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(12);
+      return query.addProperty(15);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, String), QOperations> labelProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(13);
+      return query.addProperty(16);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, List<MiniTax>), QOperations>
   miniTaxProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(14);
+      return query.addProperty(17);
     });
   }
 
   QueryBuilder<ItemReceitModel, (R1, R2, List<ItemReceitItem>), QOperations>
   itemsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(15);
+      return query.addProperty(18);
     });
   }
 
@@ -2741,7 +5280,77 @@ extension ItemReceitModelQueryProperty3<R1, R2>
   >
   discountsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addProperty(16);
+      return query.addProperty(19);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R1, R2, bool), QOperations>
+  fiscalizedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(20);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R1, R2, String?), QOperations>
+  zimraReceiptIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(21);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R1, R2, String?), QOperations>
+  zimraSignatureProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(22);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R1, R2, int?), QOperations>
+  zimraReceiptGlobalNoProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(23);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R1, R2, int?), QOperations>
+  zimraDeviceIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(24);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R1, R2, int?), QOperations>
+  zimraFiscalDayNoProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(25);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R1, R2, String?), QOperations>
+  zimraReceiptDateQrProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(26);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R1, R2, String?), QOperations>
+  zimraQrCodeUrlProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(27);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R1, R2, String), QOperations>
+  receiptTypeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(28);
+    });
+  }
+
+  QueryBuilder<ItemReceitModel, (R1, R2, String?), QOperations>
+  originalReceiptIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(29);
     });
   }
 }

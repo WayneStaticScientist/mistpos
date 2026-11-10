@@ -116,12 +116,52 @@ class ResellerPropsModel {
   }
 }
 
+DateTime? _parseMongoDate(dynamic value) {
+  if (value == null) return null;
+  if (value is String) return DateTime.tryParse(value);
+  if (value is Map) {
+    final inner = value[r'$date'];
+    if (inner is String) return DateTime.tryParse(inner);
+    if (inner is num) {
+      return DateTime.fromMillisecondsSinceEpoch(inner.toInt(), isUtc: true);
+    }
+  }
+  return null;
+}
+
+class ZimraApplicableTaxModel {
+  final String? taxName;
+  final double? taxPercent;
+  final int? taxID;
+
+  const ZimraApplicableTaxModel({
+    this.taxName,
+    this.taxPercent,
+    this.taxID,
+  });
+
+  factory ZimraApplicableTaxModel.fromJson(Map<String, dynamic> json) {
+    return ZimraApplicableTaxModel(
+      taxName: json['taxName'] as String?,
+      taxPercent: (json['taxPercent'] as num?)?.toDouble(),
+      taxID: json['taxID'] as int?,
+    );
+  }
+}
+
 class CompanyModel {
   String owner;
   String email;
   String name;
   bool enableCreditSale;
   bool shiftBasedSales;
+  bool enableOnlineSales;
+  bool onlineSalesStrictStock;
+  bool onlineSalesSyncBeforeCheckout;
+  bool onlineSalesWaitForFiscalization;
+  /// Shelf prices include VAT; checkout total does not add tax on top.
+  bool pricesIncludeTax;
+  List<ZimraApplicableTaxModel> zimraApplicableTaxes;
   bool verified;
   bool showSalesCount;
   ExchangeRateModel exchangeRates;
@@ -132,14 +172,38 @@ class CompanyModel {
   final AutomatedSyncModel weeklyAutomatedSync;
   AiSubscriptionsModel aiSubscriptions;
   List<ReceitExtrasModel> receitExtras;
+  Map<String, dynamic>? receiptDesignV2;
   final String? reseller;
   final ResellerPropsModel resellerProps;
+  
+  // Zimra integration fields
+  int? zimraDeviceId;
+  String? zimraDeviceSerialNo;
+  String? zimraActivationKey;
+  String? zimraCertificate;
+  DateTime? zimraCertificateValidTill;
+  bool? zimraIsTest;
+  int? zimraFiscalDayNo;
+  String? zimraFiscalDayStatus;
+  String? zimraFiscalDayClosingErrorCode;
+  DateTime? zimraLastFiscalDayOpened;
+  int? zimraReceiptGlobalNo;
+  int? zimraReceiptCounter;
+  bool? zimraAutoOpenFiscalDay;
+  bool? zimraAllowOfflineReceipts;
+  bool? zimraQrFiscilization;
+  String? zimraQrUrl;
+  bool? zimraHasSubscription;
+  DateTime? zimraSubscriptionValidUntil;
+  bool? zimraSubscriptionNotified7Days;
+  bool? zimraSubscriptionNotified3Days;
 
   CompanyModel({
     required this.owner,
     required this.email,
     required this.name,
     this.receitExtras = const [],
+    this.receiptDesignV2,
     required this.hexId,
     this.verified = false,
     required this.exchangeRates,
@@ -147,40 +211,120 @@ class CompanyModel {
     required this.subscriptionType,
     required this.enableCreditSale,
     this.shiftBasedSales = false,
+    this.enableOnlineSales = false,
+    this.onlineSalesStrictStock = true,
+    this.onlineSalesSyncBeforeCheckout = true,
+    this.onlineSalesWaitForFiscalization = true,
+    this.pricesIncludeTax = false,
+    this.zimraApplicableTaxes = const [],
     this.autoApproveAllExpenses = false,
     required this.automatedSync,
     required this.weeklyAutomatedSync,
     required this.aiSubscriptions,
     this.reseller,
     required this.resellerProps,
+    this.zimraDeviceId,
+    this.zimraDeviceSerialNo,
+    this.zimraActivationKey,
+    this.zimraCertificate,
+    this.zimraCertificateValidTill,
+    this.zimraIsTest,
+    this.zimraFiscalDayNo,
+    this.zimraFiscalDayStatus,
+    this.zimraFiscalDayClosingErrorCode,
+    this.zimraLastFiscalDayOpened,
+    this.zimraReceiptGlobalNo,
+    this.zimraReceiptCounter,
+    this.zimraAutoOpenFiscalDay,
+    this.zimraAllowOfflineReceipts,
+    this.zimraQrFiscilization,
+    this.zimraQrUrl,
+    this.zimraHasSubscription,
+    this.zimraSubscriptionValidUntil,
+    this.zimraSubscriptionNotified7Days,
+    this.zimraSubscriptionNotified3Days,
   });
   factory CompanyModel.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic>? toMap(dynamic val) {
+      if (val is Map) return Map<String, dynamic>.from(val);
+      return null;
+    }
+
     return CompanyModel(
-      automatedSync: AutomatedSyncModel.fromJson(json['automatedSync']),
+      automatedSync: AutomatedSyncModel.fromJson(toMap(json['automatedSync'])),
       weeklyAutomatedSync: AutomatedSyncModel.fromJson(
-        json['weeklyAutomatedSync'],
+        toMap(json['weeklyAutomatedSync']),
       ),
-      aiSubscriptions: AiSubscriptionsModel.fromJson(json['aiSubscriptions']),
+      aiSubscriptions: AiSubscriptionsModel.fromJson(toMap(json['aiSubscriptions'])),
       autoApproveAllExpenses: json['autoApproveAllExpenses'] ?? false,
       enableCreditSale: json['enableCreditSale'] ?? true,
       shiftBasedSales: json['shiftBasedSales'] ?? false,
-      owner: json['owner'],
-      email: json['email'],
-      hexId: json['_id'] ?? "",
+      enableOnlineSales: json['enableOnlineSales'] ?? false,
+      onlineSalesStrictStock: json['onlineSalesStrictStock'] ?? true,
+      onlineSalesSyncBeforeCheckout:
+          json['onlineSalesSyncBeforeCheckout'] ?? true,
+      onlineSalesWaitForFiscalization:
+          json['onlineSalesWaitForFiscalization'] ?? true,
+      pricesIncludeTax: json['pricesIncludeTax'] ?? false,
+      zimraApplicableTaxes: json['zimra'] != null &&
+              json['zimra']['applicableTaxes'] is List
+          ? (json['zimra']['applicableTaxes'] as List<dynamic>)
+              .map((e) => ZimraApplicableTaxModel.fromJson(
+                    e is Map ? Map<String, dynamic>.from(e) : <String, dynamic>{},
+                  ))
+              .toList()
+          : const [],
+      owner: json['owner'] ?? '',
+      email: json['email'] ?? '',
+      hexId: json['_id'] ?? json['hexId'] ?? "",
       receitExtras:
           (json['receitExtras'] as List<dynamic>?)
-               ?.map((e) => ReceitExtrasModel.fromJSON(e))
+               ?.map((e) => ReceitExtrasModel.fromJSON(e is Map ? Map<String, dynamic>.from(e) : e))
                .toList() ??
           [],
+      receiptDesignV2: toMap(json['receiptDesignV2']),
       name: json['name'] ?? "-",
       verified: json['verified'] ?? false,
       showSalesCount: json['showSalesCount'] ?? false,
-      subscriptionType: json['subscriptionType'] != null
-          ? SubscriptionModel.fromJson(json['subscriptionType'])
+      subscriptionType: json['subscriptionType'] is Map
+          ? SubscriptionModel.fromJson(Map<String, dynamic>.from(json['subscriptionType']))
           : SubscriptionModel(),
-      exchangeRates: ExchangeRateModel.fromJson(json['exchangeRates']),
+      exchangeRates: json['exchangeRates'] is Map
+          ? ExchangeRateModel.fromJson(Map<String, dynamic>.from(json['exchangeRates']))
+          : ExchangeRateModel(name: 'USD', rates: {'USD': 1.0}),
       reseller: json['reseller'] as String?,
-      resellerProps: ResellerPropsModel.fromJson(json['resellerProps']),
+      resellerProps: ResellerPropsModel.fromJson(toMap(json['resellerProps'])),
+      zimraDeviceId: json['zimra'] != null ? json['zimra']['deviceId'] as int? : json['zimraDeviceId'] as int?,
+      zimraDeviceSerialNo: json['zimra'] != null ? json['zimra']['deviceSerialNo'] as String? : json['zimraDeviceSerialNo'] as String?,
+      zimraActivationKey: json['zimra'] != null ? json['zimra']['activationKey'] as String? : json['zimraActivationKey'] as String?,
+      zimraCertificate: json['zimra'] != null ? json['zimra']['certificate'] as String? : json['zimraCertificate'] as String?,
+      zimraCertificateValidTill: json['zimra'] != null
+          ? (json['zimra']['certificateValidTill'] != null ? DateTime.parse(json['zimra']['certificateValidTill']) : null)
+          : (json['zimraCertificateValidTill'] != null ? DateTime.parse(json['zimraCertificateValidTill']) : null),
+      zimraIsTest: json['zimra'] != null ? (json['zimra']['isTest'] as bool? ?? true) : (json['zimraIsTest'] as bool? ?? true),
+      zimraFiscalDayNo: json['zimra'] != null ? json['zimra']['fiscalDayNo'] as int? : json['zimraFiscalDayNo'] as int?,
+      zimraFiscalDayStatus: json['zimra'] != null ? json['zimra']['fiscalDayStatus'] as String? : json['zimraFiscalDayStatus'] as String?,
+      zimraFiscalDayClosingErrorCode: json['zimra'] != null
+          ? json['zimra']['fiscalDayClosingErrorCode'] as String?
+          : json['zimraFiscalDayClosingErrorCode'] as String?,
+      zimraLastFiscalDayOpened: json['zimra'] != null
+          ? (json['zimra']['lastFiscalDayOpened'] != null ? DateTime.parse(json['zimra']['lastFiscalDayOpened']) : null)
+          : (json['zimraLastFiscalDayOpened'] != null ? DateTime.parse(json['zimraLastFiscalDayOpened']) : null),
+      zimraReceiptGlobalNo: json['zimra'] != null ? json['zimra']['receiptGlobalNo'] as int? : json['zimraReceiptGlobalNo'] as int?,
+      zimraReceiptCounter: json['zimra'] != null ? json['zimra']['receiptCounter'] as int? : json['zimraReceiptCounter'] as int?,
+      zimraAutoOpenFiscalDay: json['zimra'] != null ? (json['zimra']['autoOpenFiscalDay'] as bool? ?? false) : (json['zimraAutoOpenFiscalDay'] as bool? ?? false),
+      zimraAllowOfflineReceipts: json['zimra'] != null ? (json['zimra']['allowOfflineReceipts'] as bool? ?? false) : (json['zimraAllowOfflineReceipts'] as bool? ?? false),
+      zimraQrFiscilization: json['zimra'] != null ? (json['zimra']['qrFiscilization'] as bool? ?? false) : (json['zimraQrFiscilization'] as bool? ?? false),
+      zimraQrUrl: json['zimra'] != null
+          ? json['zimra']['qrUrl'] as String?
+          : json['zimraQrUrl'] as String?,
+      zimraHasSubscription: json['zimra'] != null && json['zimra']['subscription'] != null ? (json['zimra']['subscription']['hasSubscription'] as bool? ?? false) : (json['zimraHasSubscription'] as bool? ?? false),
+      zimraSubscriptionValidUntil: json['zimra'] != null &&
+              json['zimra']['subscription'] != null
+          ? _parseMongoDate(json['zimra']['subscription']['validUntil'])
+          : _parseMongoDate(json['zimraSubscriptionValidUntil']),
+      zimraSubscriptionNotified7Days: json['zimra'] != null && json['zimra']['subscription'] != null ? (json['zimra']['subscription']['notified7Days'] as bool? ?? false) : (json['zimraSubscriptionNotified7Days'] as bool? ?? false),
+      zimraSubscriptionNotified3Days: json['zimra'] != null && json['zimra']['subscription'] != null ? (json['zimra']['subscription']['notified3Days'] as bool? ?? false) : (json['zimraSubscriptionNotified3Days'] as bool? ?? false),
     );
   }
   Map<String, dynamic> toJson() {
@@ -196,13 +340,49 @@ class CompanyModel {
       "showSalesCount": showSalesCount,
       'enableCreditSale': enableCreditSale,
       'shiftBasedSales': shiftBasedSales,
+      'enableOnlineSales': enableOnlineSales,
+      'onlineSalesStrictStock': onlineSalesStrictStock,
+      'onlineSalesSyncBeforeCheckout': onlineSalesSyncBeforeCheckout,
+      'onlineSalesWaitForFiscalization': onlineSalesWaitForFiscalization,
+      'pricesIncludeTax': pricesIncludeTax,
       "exchangeRates": exchangeRates.toJson(),
       "subscriptionType": subscriptionType.toJson(),
       'autoApproveAllExpenses': autoApproveAllExpenses,
       "receitExtras": receitExtras.map((e) => e.toJson()).toList(),
+      if (receiptDesignV2 != null) 'receiptDesignV2': receiptDesignV2,
       'reseller': reseller,
       'resellerProps': resellerProps.toJson(),
+      'zimraDeviceId': zimraDeviceId,
+      'zimraDeviceSerialNo': zimraDeviceSerialNo,
+      'zimraActivationKey': zimraActivationKey,
+      'zimraCertificate': zimraCertificate,
+      'zimraCertificateValidTill': zimraCertificateValidTill?.toIso8601String(),
+      'zimraIsTest': zimraIsTest,
+      'zimraFiscalDayNo': zimraFiscalDayNo,
+      'zimraFiscalDayStatus': zimraFiscalDayStatus,
+      'zimraFiscalDayClosingErrorCode': zimraFiscalDayClosingErrorCode,
+      'zimraLastFiscalDayOpened': zimraLastFiscalDayOpened?.toIso8601String(),
+      'zimraReceiptGlobalNo': zimraReceiptGlobalNo,
+      'zimraReceiptCounter': zimraReceiptCounter,
+      'zimraAutoOpenFiscalDay': zimraAutoOpenFiscalDay,
+      'zimraAllowOfflineReceipts': zimraAllowOfflineReceipts,
+      'zimraQrFiscilization': zimraQrFiscilization,
+      'zimraHasSubscription': zimraHasSubscription,
+      'zimraSubscriptionValidUntil': zimraSubscriptionValidUntil?.toIso8601String(),
+      'zimraSubscriptionNotified7Days': zimraSubscriptionNotified7Days,
+      'zimraSubscriptionNotified3Days': zimraSubscriptionNotified3Days,
     };
+  }
+
+  /// FDMS day still active (sales allowed; close may need retry).
+  bool get isZimraFiscalDayOpen =>
+      zimraFiscalDayStatus == 'FiscalDayOpened' ||
+      zimraFiscalDayStatus == 'FiscalDayCloseFailed';
+
+  /// ZIMRA billing active when [zimraSubscriptionValidUntil] is in the future.
+  bool get isZimraSubscriptionActive {
+    final until = zimraSubscriptionValidUntil;
+    return until != null && until.isAfter(DateTime.now());
   }
 
   void saveToStorage() {
@@ -213,6 +393,10 @@ class CompanyModel {
   static CompanyModel? fromStorage() {
     GetStorage storage = GetStorage();
     if (!storage.hasData("company")) return null;
-    return CompanyModel.fromJson(storage.read("company"));
+    final data = storage.read("company");
+    if (data is Map) {
+      return CompanyModel.fromJson(Map<String, dynamic>.from(data));
+    }
+    return null;
   }
 }

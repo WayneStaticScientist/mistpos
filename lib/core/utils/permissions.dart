@@ -1,3 +1,5 @@
+import 'package:mistpos/data/models/user_model.dart';
+
 class PermissionStructure {
   final String name;
   final String value;
@@ -5,12 +7,38 @@ class PermissionStructure {
 }
 
 class UserPermissions {
+  static bool hasPermission(User? user, String permission) {
+    if (user == null) return false;
+    if (user.role == 'admin') return true;
+    return user.permissions.contains(permission);
+  }
+
+  static bool canAddProduct(User? user) =>
+      hasPermission(user, 'product') || hasPermission(user, 'product-add');
+
+  static bool canUpdateProduct(User? user) =>
+      hasPermission(user, 'product') || hasPermission(user, 'product-update');
+
+  static bool canAddStock(User? user) =>
+      hasPermission(user, 'product') ||
+      hasPermission(user, 'product-update') ||
+      hasPermission(user, 'stock-add');
+
+  static bool canDeleteProduct(User? user) =>
+      hasPermission(user, 'product');
+
+  static bool canEditOrDeleteProduct(User? user) =>
+      canAddStock(user) || canUpdateProduct(user) || canDeleteProduct(user);
+
   static const List<PermissionStructure> permissions = [
     PermissionStructure(name: "Add Inventory Items", value: "inventory-add"),
     PermissionStructure(
       name: "Add/Approve Inventory Items",
       value: "inventory-*",
     ),
+    PermissionStructure(name: "Add products only", value: "product-add"),
+    PermissionStructure(name: "Update products only", value: "product-update"),
+    PermissionStructure(name: "Add stock only", value: "stock-add"),
     PermissionStructure(name: "Add/Update/Delete products", value: "product"),
     PermissionStructure(
       name: "Add/Update/Delete categories",

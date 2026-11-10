@@ -29,6 +29,9 @@ final ItemReceitItemSchema = IsarGeneratedSchema(
       IsarPropertySchema(name: 'discountId', type: IsarType.string),
       IsarPropertySchema(name: 'percentageDiscount', type: IsarType.bool),
       IsarPropertySchema(name: 'baseId', type: IsarType.long),
+      IsarPropertySchema(name: 'taxPercentage', type: IsarType.double),
+      IsarPropertySchema(name: 'taxAmount', type: IsarType.double),
+      IsarPropertySchema(name: 'taxName', type: IsarType.string),
     ],
     indexes: [],
   ),
@@ -60,6 +63,16 @@ int serializeItemReceitItem(IsarWriter writer, ItemReceitItem object) {
   }
   IsarCore.writeBool(writer, 12, value: object.percentageDiscount);
   IsarCore.writeLong(writer, 13, object.baseId);
+  IsarCore.writeDouble(writer, 14, object.taxPercentage);
+  IsarCore.writeDouble(writer, 15, object.taxAmount);
+  {
+    final value = object.taxName;
+    if (value == null) {
+      IsarCore.writeNull(writer, 16);
+    } else {
+      IsarCore.writeString(writer, 16, value);
+    }
+  }
   return 0;
 }
 
@@ -79,6 +92,9 @@ ItemReceitItem deserializeItemReceitItem(IsarReader reader) {
   object.discountId = IsarCore.readString(reader, 11);
   object.percentageDiscount = IsarCore.readBool(reader, 12);
   object.baseId = IsarCore.readLong(reader, 13);
+  object.taxPercentage = IsarCore.readDouble(reader, 14);
+  object.taxAmount = IsarCore.readDouble(reader, 15);
+  object.taxName = IsarCore.readString(reader, 16);
   return object;
 }
 
@@ -1122,6 +1138,302 @@ extension ItemReceitItemQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         BetweenCondition(property: 13, lower: lower, upper: upper),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxPercentageEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 14, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxPercentageGreaterThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 14, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxPercentageGreaterThanOrEqualTo(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 14, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxPercentageLessThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 14, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxPercentageLessThanOrEqualTo(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 14, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxPercentageBetween(
+    double lower,
+    double upper, {
+    double epsilon = Filter.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 14,
+          lower: lower,
+          upper: upper,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxAmountEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(property: 15, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxAmountGreaterThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(property: 15, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxAmountGreaterThanOrEqualTo(
+    double value, {
+    double epsilon = Filter.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(property: 15, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxAmountLessThan(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 15, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxAmountLessThanOrEqualTo(double value, {double epsilon = Filter.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(property: 15, value: value, epsilon: epsilon),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxAmountBetween(
+    double lower,
+    double upper, {
+    double epsilon = Filter.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 15,
+          lower: lower,
+          upper: upper,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxNameIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 16));
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxNameIsNotNull() {
+    return QueryBuilder.apply(not(), (query) {
+      return query.addFilterCondition(const IsNullCondition(property: 16));
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxNameEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(
+          property: 16,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxNameGreaterThan(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 16,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxNameGreaterThanOrEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 16,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxNameLessThan(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(property: 16, value: value, caseSensitive: caseSensitive),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxNameLessThanOrEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 16,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxNameBetween(String? lower, String? upper, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 16,
+          lower: lower,
+          upper: upper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxNameStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        StartsWithCondition(
+          property: 16,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxNameEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EndsWithCondition(
+          property: 16,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxNameContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        ContainsCondition(
+          property: 16,
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxNameMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        MatchesCondition(
+          property: 16,
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxNameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const EqualCondition(property: 16, value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ItemReceitItem, ItemReceitItem, QAfterFilterCondition>
+  taxNameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const GreaterCondition(property: 16, value: ''),
       );
     });
   }

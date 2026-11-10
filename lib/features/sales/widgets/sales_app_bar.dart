@@ -50,7 +50,7 @@ class _SalesAppBarState extends State<SalesAppBar> {
           ),
         ),
       ),
-      title: Text(
+      title: const Text(
         "MistPos",
         style: TextStyle(
           fontWeight: FontWeight.bold,
@@ -59,32 +59,15 @@ class _SalesAppBarState extends State<SalesAppBar> {
         ),
       ),
       backgroundColor: Get.theme.scaffoldBackgroundColor,
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(4.0),
+        child: Obx(
+          () => _itemsListController.syncingItems.value
+              ? const LinearProgressIndicator(minHeight: 4)
+              : const SizedBox(height: 4.0),
+        ),
+      ),
       actions: [
-        Obx(
-          () => (_itemsListController.syncingItems.value)
-              ? IconButton(
-                  onPressed: () {},
-                  icon: const CircularProgressIndicator(
-                    strokeWidth: 3,
-                  ).sizedBox(height: 16, width: 16),
-                )
-              : SizedBox.shrink(),
-        ),
-        Obx(
-          () => (_itemsListController.syncingItemsFailed.value.isNotEmpty)
-              ? IconButton(
-                  onPressed: _displayError,
-                  icon: Container(
-                    padding: EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withAlpha(30),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Iconify(Bx.error, color: Colors.red),
-                  ),
-                )
-              : SizedBox.shrink(),
-        ),
         Obx(() {
           bool selected = _itemsListController.selectedCustomer.value != null;
           return IconButton(
@@ -161,9 +144,5 @@ class _SalesAppBarState extends State<SalesAppBar> {
         12.gapWidth,
       ],
     );
-  }
-
-  void _displayError() {
-    Toaster.showError(_itemsListController.syncingItemsFailed.value);
   }
 }

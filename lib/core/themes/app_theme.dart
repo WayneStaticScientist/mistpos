@@ -8,15 +8,26 @@ class AppTheme {
       secondary: Colors.orange,
       surface: Color.fromARGB(255, 245, 245, 245),
     ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color.fromARGB(255, 20, 89, 180),
+        foregroundColor: Colors.white,
+      ),
+    ),
   );
 
   static final ThemeData darkTheme = ThemeData(
     useMaterial3: true,
-
     colorScheme: const ColorScheme.dark(
       primary: Color.fromARGB(255, 20, 89, 180),
       secondary: Colors.orange,
       surface: Color.fromARGB(255, 16, 16, 16),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color.fromARGB(255, 20, 89, 180),
+        foregroundColor: Colors.white,
+      ),
     ),
   );
 

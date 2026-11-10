@@ -8,6 +8,7 @@ class TaxModel {
   String label;
   bool activated;
   double value;
+  bool pricesIncludeTax;
   List<String> selectedIds;
   String hexId;
   TaxModel({
@@ -15,6 +16,7 @@ class TaxModel {
     required this.label,
     required this.value,
     required this.activated,
+    this.pricesIncludeTax = false,
     required this.selectedIds,
   });
   factory TaxModel.fromJson(Map<String, dynamic> json) {
@@ -28,6 +30,7 @@ class TaxModel {
               .toList() ??
           [],
       activated: json['activated'] ?? true,
+      pricesIncludeTax: json['pricesIncludeTax'] ?? false,
     );
   }
   Map<String, dynamic> toJson() {
@@ -35,6 +38,7 @@ class TaxModel {
       'label': label,
       'value': value,
       'activated': activated,
+      'pricesIncludeTax': pricesIncludeTax,
       'selectedIds': selectedIds,
     };
   }

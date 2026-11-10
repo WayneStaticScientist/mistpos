@@ -8,6 +8,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:mistpos/data/models/user_model.dart';
 import 'package:mistpos/data/models/employee_model.dart';
 import 'package:mistpos/data/models/company_model.dart';
+import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:mistpos/data/models/dialy_sale_model.dart';
 import 'package:mistpos/data/models/sales_by_payment.dart';
 import 'package:mistpos/core/services/api/network_wrapper.dart';
@@ -229,8 +230,48 @@ class AdminController extends GetxController {
       return false;
     }
 
+    if (result.body != null && result.body['update'] != null) {
+      final updated = CompanyModel.fromJson(
+        result.body['update'] as Map<String, dynamic>,
+      );
+      if (Get.isRegistered<InventoryController>()) {
+        final inv = Get.find<InventoryController>();
+        inv.company.value = updated;
+        inv.company.refresh();
+        updated.saveToStorage();
+      }
+    }
+
     loadCompanies();
     return true;
+  }
+
+  Future<Map<String, dynamic>?> testZimraConnection(Map<String, dynamic> data, String id) async {
+    if (companyLoading.value) return null;
+    companyLoading.value = true;
+    final result = await Net.post("/admin/company/$id/zimra/test-connection", data: data);
+    companyLoading.value = false;
+    
+    if (result.hasError) {
+      Toaster.showError(result.response);
+      return null;
+    }
+
+    return result.body;
+  }
+
+  Future<Map<String, dynamic>?> testZimraDiagnostic(Map<String, dynamic> data, String id) async {
+    if (companyLoading.value) return null;
+    companyLoading.value = true;
+    final result = await Net.post("/admin/company/$id/zimra/diagnostic", data: data);
+    companyLoading.value = false;
+    
+    if (result.hasError) {
+      Toaster.showError(result.response);
+      return null;
+    }
+
+    return result.body;
   }
 
   RxBool loadingDailySales = RxBool(false);

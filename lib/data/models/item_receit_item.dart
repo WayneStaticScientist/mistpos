@@ -16,6 +16,10 @@ class ItemReceitItem {
   String? discountId;
   bool percentageDiscount = true;
   int baseId = 0;
+  double taxPercentage = 0;
+  double taxAmount = 0;
+  String? taxName;
+
   ItemReceitItem();
   Map<String, dynamic> toJson() {
     return {
@@ -32,6 +36,9 @@ class ItemReceitItem {
       "discount": discount,
       "discountId": discountId,
       "percentageDiscount": percentageDiscount,
+      "taxPercentage": taxPercentage,
+      "taxAmount": taxAmount,
+      "taxName": taxName,
     };
   }
 
@@ -49,6 +56,9 @@ class ItemReceitItem {
       ..discountId = data['discountId'] ?? ''
       ..percentageDiscount = data['percentageDiscount'] ?? true
       ..rejectedReason = data['rejectedReason'] ?? ""
-      ..originalCount = (data['originalCount'] as num?)?.toDouble() ?? 0;
+      ..originalCount = (data['originalCount'] as num?)?.toDouble() ?? 0
+      ..taxPercentage = (data['taxPercentage'] as num?)?.toDouble() ?? 0.0
+      ..taxAmount = (data['taxAmount'] as num?)?.toDouble() ?? 0.0
+      ..taxName = data['taxName'];
   }
 }

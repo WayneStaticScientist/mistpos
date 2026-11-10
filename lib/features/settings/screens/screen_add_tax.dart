@@ -3,6 +3,7 @@ import 'package:exui/exui.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/core/utils/toast.dart';
 import 'package:iconify_flutter/icons/bx.dart';
+import 'package:mistpos/data/models/company_model.dart';
 import 'package:mistpos/data/models/tax_model.dart';
 import 'package:mistpos/core/responsive/screen_sizes.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
@@ -23,6 +24,7 @@ class ScreenAddTax extends StatefulWidget {
 class _ScreenAddTaxState extends State<ScreenAddTax> {
   bool _isLoading = false;
   bool _activated = true;
+  bool _pricesIncludeTax = false;
   final _formKey = GlobalKey<FormState>();
   final _itemNameController = TextEditingController();
   final _itemsController = Get.find<ItemsController>();
@@ -83,6 +85,20 @@ class _ScreenAddTaxState extends State<ScreenAddTax> {
                       },
                     ),
                   ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text("VAT inclusive for this tax"),
+                    subtitle: Text(
+                      "When on, item prices already include this rate (e.g. \$5 stays \$5). When off, this rate is added at checkout.",
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                    leading: Checkbox(
+                      value: _pricesIncludeTax,
+                      onChanged: (v) => setState(() {
+                        _pricesIncludeTax = v ?? false;
+                      }),
+                    ),
+                  ),
                   14.gapHeight,
                   MistFormInput(
                     validateString: "Tax Value is required",
@@ -94,6 +110,8 @@ class _ScreenAddTaxState extends State<ScreenAddTax> {
                     underLineColor: Colors.grey.withAlpha(200),
                     controller: _itemValueController,
                   ),
+                  14.gapHeight,
+                  _buildZimraRateChips(),
                   14.gapHeight,
                 ]
                 .column(
@@ -150,6 +168,40 @@ class _ScreenAddTaxState extends State<ScreenAddTax> {
     );
   }
 
+  Widget _buildZimraRateChips() {
+    final company = _invenController.company.value ??
+        CompanyModel.fromStorage();
+    final rates = company?.zimraApplicableTaxes ?? [];
+    if (rates.isEmpty) {
+      return Text(
+        "No ZIMRA tax list on this device yet. Sync config under ZIMRA settings before adding rates, or add 0% exempt taxes only.",
+        style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+      );
+    }
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      children: rates.map((t) {
+        final label = t.taxPercent != null
+            ? "${t.taxName ?? 'Tax'} ${t.taxPercent}%"
+            : (t.taxName ?? 'Exempt');
+        return ActionChip(
+          label: Text(label, style: const TextStyle(fontSize: 12)),
+          onPressed: t.taxPercent == null
+              ? null
+              : () {
+                  _itemValueController.text = t.taxPercent!.toString();
+                  if (_itemNameController.text.trim().isEmpty &&
+                      t.taxName != null) {
+                    _itemNameController.text = t.taxName!;
+                  }
+                  setState(() {});
+                },
+        );
+      }).toList(),
+    );
+  }
+
   void _saveItem() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -168,6 +220,7 @@ class _ScreenAddTaxState extends State<ScreenAddTax> {
         label: _itemNameController.text.trim(),
         value: amount,
         activated: _activated,
+        pricesIncludeTax: _pricesIncludeTax,
         selectedIds: _invenController.selectedInvItems
             .map((e) => e.id)
             .toList(),

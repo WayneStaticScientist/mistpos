@@ -16,18 +16,26 @@ class MistChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Get.theme.colorScheme.primary;
     return Chip(
-      avatar: icon,
-      side: BorderSide.none,
+      avatar: selected
+          ? const Icon(Icons.check, size: 16, color: Colors.white)
+          : icon,
+      side: selected
+          ? BorderSide(color: primary, width: 1.5)
+          : BorderSide(color: Colors.grey.withAlpha(50)),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadiusGeometry.circular(20),
       ),
       label: label.text(
-        style: TextStyle(color: selected ? Colors.white : null),
+        style: TextStyle(
+          color: selected ? Colors.white : null,
+          fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+        ),
       ),
       backgroundColor: selected
-          ? Get.theme.colorScheme.primary
+          ? primary
           : AppTheme.surface(context),
-    ).paddingZero.padding(EdgeInsets.all(5));
+    ).paddingZero.padding(const EdgeInsets.all(5));
   }
 }
