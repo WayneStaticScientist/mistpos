@@ -1258,7 +1258,7 @@ class _ScreenReceitViewState extends State<ScreenReceitView> {
     DevicesController.printReceitToBackround(
       widget.receitModel,
       _userController.user.value!,
-      null,
+      _customer,
       widget.receitModel.miniTax
           .map(
             (e) => TaxModel(

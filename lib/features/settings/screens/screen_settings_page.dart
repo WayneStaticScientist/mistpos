@@ -22,6 +22,7 @@ import 'package:mistpos/core/widgets/loaders/small_loader.dart';
 import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:mistpos/features/auth/screens/screen_user_profile.dart';
 import 'package:mistpos/features/settings/screens/screen_receit_designer.dart';
+import 'package:mistpos/features/receipt_design_v2/screens/screen_receipt_designer_v2.dart';
 import 'package:mistpos/features/settings/screens/screen_online_sales_settings.dart';
 import 'package:mistpos/features/inventory/controllers/items_controller.dart';
 
@@ -40,10 +41,7 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
   Widget build(BuildContext context) {
     final model = AppSettingsModel.fromStorage();
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Settings"),
-        scrolledUnderElevation: 0,
-      ),
+      appBar: AppBar(title: const Text("Settings"), scrolledUnderElevation: 0),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -59,602 +57,842 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                     28,
                   ),
                   children: [
-          16.gapColumn,
-          MistMordernLayout(
-            label: "User",
-            children: [
-              ListTile(
-                onTap: () => Get.to(() => ScreenUserProfile()),
-                contentPadding: EdgeInsets.all(0),
-                title: Text("My Profile"),
-                subtitle: "view your profile".text(
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-                leading: Iconify(Bx.user, color: AppTheme.color(context)),
-              ),
-            ],
-          ),
-          24.gapColumn,
-          MistMordernLayout(
-            label: "Theme Settings",
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.all(0),
-                trailing: Switch(
-                  value: model.useSystemDarkMode,
-                  onChanged: (c) {
-                    model.useSystemDarkMode = c;
-                    model.saveToStorage();
-                    setState(() {});
-                    _changeTheme();
-                  },
-                ),
-                leading: Iconify(Bx.adjust, color: AppTheme.color(context)),
-                title: "System Theme Mode".text(),
-                subtitle: "select type of theme mode you want".text(
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.all(0),
-                onTap: () {
-                  model.darkMode = !model.darkMode;
-                  model.saveToStorage();
-                  setState(() {});
-                  _changeTheme();
-                },
-                enabled: !model.useSystemDarkMode,
-                trailing: Switch(
-                  activeThumbColor: !model.useSystemDarkMode
-                      ? null
-                      : Colors.grey,
-                  inactiveThumbColor: !model.useSystemDarkMode
-                      ? null
-                      : Colors.grey,
-                  value: model.darkMode,
-                  onChanged: (c) {
-                    if (model.useSystemDarkMode) return;
-                    model.darkMode = c;
-                    model.saveToStorage();
-                    setState(() {});
-                    _changeTheme();
-                  },
-                ),
-                leading: Iconify(
-                  Bx.moon,
-                  color: !model.useSystemDarkMode
-                      ? AppTheme.color(context)
-                      : Colors.grey,
-                ),
-                title: "Enable dark mode".text(),
-              ),
-            ],
-          ),
-          24.gapColumn,
-          MistMordernLayout(
-            label: "Receipts",
-            children: [
-              ListTile(
-                onTap: () => _changeSize(model.printerRecietLength),
-                contentPadding: EdgeInsets.all(0),
-                title: Text("Printer Receipt Length"),
-                subtitle: "${model.printerRecietLength} units".text(
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-                leading: Iconify(Bx.receipt, color: AppTheme.color(context)),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.all(0),
-                onTap: () {
-                  model.enableQrCode = !model.enableQrCode;
-                  model.saveToStorage();
-                  setState(() {});
-                },
-                trailing: Switch(
-                  value: model.enableQrCode,
-                  onChanged: (c) {
-                    model.enableQrCode = c;
-                    model.saveToStorage();
-                    setState(() {});
-                  },
-                ),
-                leading: Iconify(Bx.qr_scan, color: AppTheme.color(context)),
-                title: "Print Receipt Qr Code".text(),
-                subtitle: "enable qrcode scanning of receipts".text(
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-              ),
-              ListTile(
-                onTap: _pickImage,
-                title: "Receipt Logo".text(),
-                contentPadding: EdgeInsets.all(0),
-                leading: Iconify(Bx.camera, color: AppTheme.color(context)),
-                trailing: model.receitLogoPath.isEmpty
-                    ? null
-                    : IconButton(
-                        onPressed: _removeLogo,
-                        icon: Iconify(Bx.x, color: Colors.red),
-                      ),
-                subtitle:
-                    (model.receitLogoPath.isEmpty
-                            ? "not selected"
-                            : model.receitLogoPath)
-                        .text(
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
-                        ),
-              ),
-              ListTile(
-                onTap: () => Get.to(() => ScreenReceiptDesigner()),
-                title: "Receipt Design".text(),
-                contentPadding: EdgeInsets.all(0),
-                leading: Iconify(Bx.receipt, color: AppTheme.color(context)),
-              ).visibleIf(
-                _user.user.value?.role == 'admin' ||
-                    _user.user.value?.role == 'manager',
-              ),
-            ],
-          ),
-          24.gapColumn,
-          MistMordernLayout(
-            label: "Numbers",
-            children: [
-              ListTile(
-                onTap: () => _changeDecimalPlaces(model.decimalPlaces),
-                contentPadding: EdgeInsets.all(0),
-                title: Text("Decimal Places"),
-                subtitle: "${model.decimalPlaces} places".text(
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-                leading: Iconify(Bx.font_size, color: AppTheme.color(context)),
-              ),
-            ],
-          ),
-          Obx(
-            () => 24.gapColumn.visibleIf(
-              _user.user.value?.role == 'admin' ||
-                  _user.user.value?.role == 'manager',
-            ),
-          ),
-          Obx(
-            () =>
-                MistMordernLayout(
-                  label: "Item",
-                  children: [
-                    ListTile(
-                      trailing: Obx(
-                        () => _adminController.companyLoading.value
-                            ? CircularProgressIndicator()
-                            : Switch(
-                                value:
-                                    _invController
-                                        .company
-                                        .value
-                                        ?.showSalesCount ??
-                                    false,
-                                onChanged: (c) {
-                                  _updateCompanyModel(
-                                    c,
-                                    enableCreditSale:
-                                        _invController
-                                            .company
-                                            .value
-                                            ?.enableCreditSale ??
-                                        true,
-                                    autoApproveAllExpenses:
-                                        _invController
-                                            .company
-                                            .value
-                                            ?.autoApproveAllExpenses ??
-                                        false,
-                                    shiftBasedSales:
-                                        _invController
-                                            .company
-                                            .value
-                                            ?.shiftBasedSales ??
-                                        false,
-                                  );
-                                },
-                              ),
-                      ),
-                      onTap: () => _updateCompanyModel(
-                        !(_invController.company.value?.showSalesCount ??
-                            false),
-                        enableCreditSale:
-                            _invController.company.value?.enableCreditSale ??
-                            true,
-                        autoApproveAllExpenses:
-                            _invController
-                                .company
-                                .value
-                                ?.autoApproveAllExpenses ??
-                            false,
-                        shiftBasedSales:
-                            _invController.company.value?.shiftBasedSales ??
-                            false,
-                      ),
-                      contentPadding: EdgeInsets.all(0),
-                      title: Text("Show Sales Item Quantitiess"),
-                      subtitle: "show quantities of items left in sales screen"
-                          .text(
+                    16.gapColumn,
+                    MistMordernLayout(
+                      label: "User",
+                      children: [
+                        ListTile(
+                          onTap: () => Get.to(() => ScreenUserProfile()),
+                          contentPadding: EdgeInsets.all(0),
+                          title: Text("My Profile"),
+                          subtitle: "view your profile".text(
                             style: TextStyle(color: Colors.grey, fontSize: 12),
                           ),
-                      leading: Iconify(
-                        Bx.font_size,
-                        color: AppTheme.color(context),
+                          leading: Iconify(
+                            Bx.user,
+                            color: AppTheme.color(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                    24.gapColumn,
+                    MistMordernLayout(
+                      label: "Theme Settings",
+                      children: [
+                        ListTile(
+                          contentPadding: EdgeInsets.all(0),
+                          trailing: Switch(
+                            value: model.useSystemDarkMode,
+                            onChanged: (c) {
+                              model.useSystemDarkMode = c;
+                              model.saveToStorage();
+                              setState(() {});
+                              _changeTheme();
+                            },
+                          ),
+                          leading: Iconify(
+                            Bx.adjust,
+                            color: AppTheme.color(context),
+                          ),
+                          title: "System Theme Mode".text(),
+                          subtitle: "select type of theme mode you want".text(
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          ),
+                        ),
+                        ListTile(
+                          contentPadding: EdgeInsets.all(0),
+                          onTap: () {
+                            model.darkMode = !model.darkMode;
+                            model.saveToStorage();
+                            setState(() {});
+                            _changeTheme();
+                          },
+                          enabled: !model.useSystemDarkMode,
+                          trailing: Switch(
+                            activeThumbColor: !model.useSystemDarkMode
+                                ? null
+                                : Colors.grey,
+                            inactiveThumbColor: !model.useSystemDarkMode
+                                ? null
+                                : Colors.grey,
+                            value: model.darkMode,
+                            onChanged: (c) {
+                              if (model.useSystemDarkMode) return;
+                              model.darkMode = c;
+                              model.saveToStorage();
+                              setState(() {});
+                              _changeTheme();
+                            },
+                          ),
+                          leading: Iconify(
+                            Bx.moon,
+                            color: !model.useSystemDarkMode
+                                ? AppTheme.color(context)
+                                : Colors.grey,
+                          ),
+                          title: "Enable dark mode".text(),
+                        ),
+                      ],
+                    ),
+                    24.gapColumn,
+                    MistMordernLayout(
+                      label: "Receipts",
+                      children: [
+                        ListTile(
+                          onTap: () => _changeSize(model.printerRecietLength),
+                          contentPadding: EdgeInsets.all(0),
+                          title: Text("Printer Receipt Length"),
+                          subtitle: "${model.printerRecietLength} units".text(
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          ),
+                          leading: Iconify(
+                            Bx.receipt,
+                            color: AppTheme.color(context),
+                          ),
+                        ),
+                        ListTile(
+                          contentPadding: EdgeInsets.all(0),
+                          onTap: () {
+                            model.enableQrCode = !model.enableQrCode;
+                            model.saveToStorage();
+                            setState(() {});
+                          },
+                          trailing: Switch(
+                            value: model.enableQrCode,
+                            onChanged: (c) {
+                              model.enableQrCode = c;
+                              model.saveToStorage();
+                              setState(() {});
+                            },
+                          ),
+                          leading: Iconify(
+                            Bx.qr_scan,
+                            color: AppTheme.color(context),
+                          ),
+                          title: "Print Receipt Qr Code".text(),
+                          subtitle: "enable qrcode scanning of receipts".text(
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          ),
+                        ),
+                        ListTile(
+                          onTap: _pickImage,
+                          title: "Receipt Logo".text(),
+                          contentPadding: EdgeInsets.all(0),
+                          leading: Iconify(
+                            Bx.camera,
+                            color: AppTheme.color(context),
+                          ),
+                          trailing: model.receitLogoPath.isEmpty
+                              ? null
+                              : IconButton(
+                                  onPressed: _removeLogo,
+                                  icon: Iconify(Bx.x, color: Colors.red),
+                                ),
+                          subtitle:
+                              (model.receitLogoPath.isEmpty
+                                      ? "not selected"
+                                      : model.receitLogoPath)
+                                  .text(
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                        ),
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text("Use Receipt Engine V2"),
+                          subtitle: Text(
+                            model.useReceiptDesignV2
+                                ? "Active: dynamic V2 templates, variables & cloud sharing"
+                                : "Active: classic V1 block layout",
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12,
+                            ),
+                          ),
+                          value: model.useReceiptDesignV2,
+                          activeThumbColor: AppTheme.color(context),
+                          onChanged: (v) {
+                            setState(() {
+                              model.useReceiptDesignV2 = v;
+                              model.saveToStorage();
+                            });
+                          },
+                        ).visibleIf(
+                          _user.user.value?.role == 'admin' ||
+                              _user.user.value?.role == 'manager',
+                        ),
+                        ListTile(
+                          onTap: () =>
+                              Get.to(() => const ScreenReceiptDesignerV2()),
+                          title: Row(
+                            children: [
+                              const Text("Receipt Design V2"),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 5,
+                                  vertical: 1,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withAlpha(35),
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                    color: Colors.green.withAlpha(80),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "NEXT-GEN",
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          subtitle: const Text(
+                            "Templates, variables, {list}, cloud marketplace, ZIMRA QR",
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 11.5,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.all(0),
+                          leading: Iconify(
+                            Bx.receipt,
+                            color: AppTheme.color(context),
+                          ),
+                        ).visibleIf(
+                          _user.user.value?.role == 'admin' ||
+                              _user.user.value?.role == 'manager',
+                        ),
+                        ListTile(
+                          onTap: () =>
+                              Get.to(() => const ScreenReceiptDesigner()),
+                          title: "Receipt Design (Classic V1)".text(),
+                          subtitle:
+                              "Legacy drag-and-drop designer for backward compatibility"
+                                  .text(
+                                    style: const TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                          contentPadding: const EdgeInsets.all(0),
+                          leading: const Iconify(
+                            Bx.history,
+                            color: Colors.grey,
+                          ),
+                        ).visibleIf(
+                          _user.user.value?.role == 'admin' ||
+                              _user.user.value?.role == 'manager',
+                        ),
+                      ],
+                    ),
+                    24.gapColumn,
+                    MistMordernLayout(
+                      label: "Numbers",
+                      children: [
+                        ListTile(
+                          onTap: () =>
+                              _changeDecimalPlaces(model.decimalPlaces),
+                          contentPadding: EdgeInsets.all(0),
+                          title: Text("Decimal Places"),
+                          subtitle: "${model.decimalPlaces} places".text(
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          ),
+                          leading: Iconify(
+                            Bx.font_size,
+                            color: AppTheme.color(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Obx(
+                      () => 24.gapColumn.visibleIf(
+                        _user.user.value?.role == 'admin' ||
+                            _user.user.value?.role == 'manager',
                       ),
+                    ),
+                    Obx(
+                      () =>
+                          MistMordernLayout(
+                            label: "Item",
+                            children: [
+                              ListTile(
+                                trailing: Obx(
+                                  () => _adminController.companyLoading.value
+                                      ? CircularProgressIndicator()
+                                      : Switch(
+                                          value:
+                                              _invController
+                                                  .company
+                                                  .value
+                                                  ?.showSalesCount ??
+                                              false,
+                                          onChanged: (c) {
+                                            _updateCompanyModel(
+                                              c,
+                                              enableCreditSale:
+                                                  _invController
+                                                      .company
+                                                      .value
+                                                      ?.enableCreditSale ??
+                                                  true,
+                                              autoApproveAllExpenses:
+                                                  _invController
+                                                      .company
+                                                      .value
+                                                      ?.autoApproveAllExpenses ??
+                                                  false,
+                                              shiftBasedSales:
+                                                  _invController
+                                                      .company
+                                                      .value
+                                                      ?.shiftBasedSales ??
+                                                  false,
+                                            );
+                                          },
+                                        ),
+                                ),
+                                onTap: () => _updateCompanyModel(
+                                  !(_invController
+                                          .company
+                                          .value
+                                          ?.showSalesCount ??
+                                      false),
+                                  enableCreditSale:
+                                      _invController
+                                          .company
+                                          .value
+                                          ?.enableCreditSale ??
+                                      true,
+                                  autoApproveAllExpenses:
+                                      _invController
+                                          .company
+                                          .value
+                                          ?.autoApproveAllExpenses ??
+                                      false,
+                                  shiftBasedSales:
+                                      _invController
+                                          .company
+                                          .value
+                                          ?.shiftBasedSales ??
+                                      false,
+                                ),
+                                contentPadding: EdgeInsets.all(0),
+                                title: Text("Show Sales Item Quantitiess"),
+                                subtitle:
+                                    "show quantities of items left in sales screen"
+                                        .text(
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                leading: Iconify(
+                                  Bx.font_size,
+                                  color: AppTheme.color(context),
+                                ),
+                              ),
+                            ],
+                          ).visibleIf(
+                            _user.user.value?.role == 'admin' ||
+                                _user.user.value?.role == 'manager',
+                          ),
+                    ),
+                    24.gapColumn,
+                    MistMordernLayout(
+                      label: "Display Settings",
+                      children: [
+                        ListTile(
+                          contentPadding: EdgeInsets.all(0),
+                          onTap: () {
+                            model.useGridViewForItems =
+                                !model.useGridViewForItems;
+                            model.saveToStorage();
+                            setState(() {});
+                          },
+                          trailing: Switch(
+                            value: model.useGridViewForItems,
+                            onChanged: (c) {
+                              model.useGridViewForItems = c;
+                              model.saveToStorage();
+                              setState(() {});
+                            },
+                          ),
+                          leading: Iconify(
+                            Bx.grid,
+                            color: AppTheme.color(context),
+                          ),
+                          title: "Use Grid View for Items".text(),
+                          subtitle:
+                              "Toggle between grid and list view for products in sales screen"
+                                  .text(
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                        ),
+                      ],
+                    ),
+                    24.gapColumn,
+                    MistMordernLayout(
+                      label: "Data & Synchronization",
+                      children: [
+                        ListTile(
+                          contentPadding: EdgeInsets.all(0),
+                          onTap: () {
+                            Get.defaultDialog(
+                              title: "Force Sync",
+                              content:
+                                  "This will clear your local offline cache and download all items, categories, and settings from the server. Are you sure?"
+                                      .text(textAlign: TextAlign.center),
+                              actions: [
+                                "Cancel".text().textButton(
+                                  onPressed: () => Get.back(),
+                                ),
+                                "Sync Now".text().textButton(
+                                  onPressed: () {
+                                    Get.back();
+                                    if (Get.isRegistered<ItemsController>()) {
+                                      Get.find<ItemsController>()
+                                          .clearAndResyncData();
+                                      Toaster.showSuccess(
+                                        "Cache cleared. Syncing started in background.",
+                                      );
+                                    } else {
+                                      Toaster.showError(
+                                        "Failed to access items controller.",
+                                      );
+                                    }
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                          leading: Iconify(
+                            Bx.cloud_download,
+                            color: AppTheme.color(context),
+                          ),
+                          title: "Force Sync / Clear Cache".text(),
+                          subtitle:
+                              "Manually clear offline cache and re-download store data"
+                                  .text(
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                        ),
+                      ],
+                    ),
+                    24.gapColumn,
+                    Obx(
+                      () =>
+                          MistMordernLayout(
+                            label: "Company",
+                            children: [
+                              ListTile(
+                                trailing: Obx(
+                                  () => _adminController.companyLoading.value
+                                      ? CircularProgressIndicator()
+                                      : Switch(
+                                          value:
+                                              _invController
+                                                  .company
+                                                  .value
+                                                  ?.enableCreditSale ??
+                                              true,
+                                          onChanged: (c) {
+                                            _updateCompanyModel(
+                                              _invController
+                                                      .company
+                                                      .value
+                                                      ?.showSalesCount ??
+                                                  false,
+                                              enableCreditSale: c,
+                                              autoApproveAllExpenses:
+                                                  _invController
+                                                      .company
+                                                      .value
+                                                      ?.autoApproveAllExpenses ??
+                                                  false,
+                                              shiftBasedSales:
+                                                  _invController
+                                                      .company
+                                                      .value
+                                                      ?.shiftBasedSales ??
+                                                  false,
+                                            );
+                                          },
+                                        ),
+                                ),
+                                onTap: () => _updateCompanyModel(
+                                  _invController
+                                          .company
+                                          .value
+                                          ?.showSalesCount ??
+                                      false,
+                                  enableCreditSale:
+                                      !(_invController
+                                              .company
+                                              .value
+                                              ?.enableCreditSale ??
+                                          true),
+                                  autoApproveAllExpenses:
+                                      (_invController
+                                          .company
+                                          .value
+                                          ?.autoApproveAllExpenses ??
+                                      false),
+                                  shiftBasedSales:
+                                      _invController
+                                          .company
+                                          .value
+                                          ?.shiftBasedSales ??
+                                      false,
+                                ),
+                                contentPadding: EdgeInsets.all(0),
+                                title: "Enable Credit Sale".text(),
+                                subtitle: "enable cashiers to sell on credit"
+                                    .text(
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                leading: Iconify(
+                                  Bx.credit_card,
+                                  color: AppTheme.color(context),
+                                ),
+                              ),
+                              ListTile(
+                                trailing: Obx(
+                                  () => _adminController.companyLoading.value
+                                      ? CircularProgressIndicator()
+                                      : Switch(
+                                          value:
+                                              _invController
+                                                  .company
+                                                  .value
+                                                  ?.zimraQrFiscilization ??
+                                              false,
+                                          onChanged: (c) {
+                                            _updateCompanyModel(
+                                              _invController
+                                                      .company
+                                                      .value
+                                                      ?.showSalesCount ??
+                                                  false,
+                                              enableCreditSale:
+                                                  _invController
+                                                      .company
+                                                      .value
+                                                      ?.enableCreditSale ??
+                                                  true,
+                                              autoApproveAllExpenses:
+                                                  _invController
+                                                      .company
+                                                      .value
+                                                      ?.autoApproveAllExpenses ??
+                                                  false,
+                                              shiftBasedSales:
+                                                  _invController
+                                                      .company
+                                                      .value
+                                                      ?.shiftBasedSales ??
+                                                  false,
+                                              qrFiscilization: c,
+                                            );
+                                          },
+                                        ),
+                                ),
+                                onTap: () => _updateCompanyModel(
+                                  _invController
+                                          .company
+                                          .value
+                                          ?.showSalesCount ??
+                                      false,
+                                  enableCreditSale:
+                                      _invController
+                                          .company
+                                          .value
+                                          ?.enableCreditSale ??
+                                      true,
+                                  autoApproveAllExpenses:
+                                      _invController
+                                          .company
+                                          .value
+                                          ?.autoApproveAllExpenses ??
+                                      false,
+                                  shiftBasedSales:
+                                      _invController
+                                          .company
+                                          .value
+                                          ?.shiftBasedSales ??
+                                      false,
+                                  qrFiscilization:
+                                      !(_invController
+                                              .company
+                                              .value
+                                              ?.zimraQrFiscilization ??
+                                          false),
+                                ),
+                                contentPadding: EdgeInsets.all(0),
+                                title: "QR Fiscalization".text(),
+                                subtitle:
+                                    "Show QR code on receipt printing for ZIMRA fiscalization check"
+                                        .text(
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                leading: Iconify(
+                                  Bx.qr_scan,
+                                  color: AppTheme.color(context),
+                                ),
+                              ),
+                              ListTile(
+                                trailing: Obx(
+                                  () => _adminController.companyLoading.value
+                                      ? CircularProgressIndicator()
+                                      : Switch(
+                                          value:
+                                              _invController
+                                                  .company
+                                                  .value
+                                                  ?.autoApproveAllExpenses ??
+                                              true,
+                                          onChanged: (c) {
+                                            _updateCompanyModel(
+                                              _invController
+                                                      .company
+                                                      .value
+                                                      ?.showSalesCount ??
+                                                  false,
+                                              enableCreditSale:
+                                                  (_invController
+                                                      .company
+                                                      .value
+                                                      ?.enableCreditSale ??
+                                                  true),
+                                              autoApproveAllExpenses: c,
+                                              shiftBasedSales:
+                                                  _invController
+                                                      .company
+                                                      .value
+                                                      ?.shiftBasedSales ??
+                                                  false,
+                                            );
+                                          },
+                                        ),
+                                ),
+                                onTap: () => _updateCompanyModel(
+                                  _invController
+                                          .company
+                                          .value
+                                          ?.showSalesCount ??
+                                      false,
+                                  enableCreditSale:
+                                      (_invController
+                                          .company
+                                          .value
+                                          ?.enableCreditSale ??
+                                      true),
+                                  autoApproveAllExpenses:
+                                      !(_invController
+                                              .company
+                                              .value
+                                              ?.autoApproveAllExpenses ??
+                                          true),
+                                  shiftBasedSales:
+                                      _invController
+                                          .company
+                                          .value
+                                          ?.shiftBasedSales ??
+                                      false,
+                                ),
+                                contentPadding: EdgeInsets.all(0),
+                                title: "AutoApprove All Expenses".text(),
+                                subtitle:
+                                    "enable expenses to be added without approval"
+                                        .text(
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                leading: Iconify(
+                                  Bx.credit_card,
+                                  color: AppTheme.color(context),
+                                ),
+                              ),
+                              ListTile(
+                                trailing: Obx(
+                                  () => _adminController.companyLoading.value
+                                      ? CircularProgressIndicator()
+                                      : Switch(
+                                          value:
+                                              _invController
+                                                  .company
+                                                  .value
+                                                  ?.shiftBasedSales ??
+                                              false,
+                                          onChanged: (c) {
+                                            _updateCompanyModel(
+                                              _invController
+                                                      .company
+                                                      .value
+                                                      ?.showSalesCount ??
+                                                  false,
+                                              enableCreditSale:
+                                                  (_invController
+                                                      .company
+                                                      .value
+                                                      ?.enableCreditSale ??
+                                                  true),
+                                              autoApproveAllExpenses:
+                                                  _invController
+                                                      .company
+                                                      .value
+                                                      ?.autoApproveAllExpenses ??
+                                                  false,
+                                              shiftBasedSales: c,
+                                            );
+                                          },
+                                        ),
+                                ),
+                                onTap: () => _updateCompanyModel(
+                                  _invController
+                                          .company
+                                          .value
+                                          ?.showSalesCount ??
+                                      false,
+                                  enableCreditSale:
+                                      (_invController
+                                          .company
+                                          .value
+                                          ?.enableCreditSale ??
+                                      true),
+                                  autoApproveAllExpenses:
+                                      (_invController
+                                          .company
+                                          .value
+                                          ?.autoApproveAllExpenses ??
+                                      false),
+                                  shiftBasedSales:
+                                      !(_invController
+                                              .company
+                                              .value
+                                              ?.shiftBasedSales ??
+                                          false),
+                                ),
+                                contentPadding: EdgeInsets.all(0),
+                                title: "Enable Shift Based Sales".text(),
+                                subtitle: "enforce opening shifts to sell items"
+                                    .text(
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                leading: Iconify(
+                                  Bx.time,
+                                  color: AppTheme.color(context),
+                                ),
+                              ),
+                              ListTile(
+                                onTap: () => Get.to(
+                                  () => const ScreenOnlineSalesSettings(),
+                                ),
+                                contentPadding: EdgeInsets.zero,
+                                title: "Online sales".text(),
+                                subtitle: Obx(() {
+                                  final on =
+                                      _invController
+                                          .company
+                                          .value
+                                          ?.enableOnlineSales ??
+                                      false;
+                                  return (on
+                                          ? "Active — server-first checkout & stock rules"
+                                          : "Off — standard offline POS")
+                                      .text(
+                                        style: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 12,
+                                        ),
+                                      );
+                                }),
+                                trailing: Iconify(
+                                  Bx.chevron_right,
+                                  color: Colors.grey.shade500,
+                                ),
+                                leading: Iconify(
+                                  Bx.cloud,
+                                  color: AppTheme.color(context),
+                                ),
+                              ),
+                              ListTile(
+                                subtitle: "send daily reports to whatsapp".text(
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                onTap: () => {
+                                  Get.to(
+                                    () => AutomatedSyncScreen(
+                                      company: _invController.company.value!,
+                                    ),
+                                  ),
+                                },
+                                title: "Whatsapp reports".text(),
+                                leading: Iconify(
+                                  Bx.bxl_whatsapp,
+                                  color: AppTheme.color(context),
+                                ),
+                              ),
+                            ],
+                          ).visibleIf(
+                            _user.user.value?.role == 'admin' ||
+                                _user.user.value?.role == 'manager',
+                          ),
+                    ),
+                    24.gapColumn,
+                    MistMordernLayout(
+                      label: "Heath Status",
+                      children: [
+                        FutureBuilder(
+                          future: getAndroidSdkInt(),
+                          builder: (context, snapnshot) {
+                            if (snapnshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return MistLoader1();
+                            }
+                            if (snapnshot.hasError) {
+                              return "Error : ${snapnshot.error}".text();
+                            }
+                            return ListTile(
+                              contentPadding: EdgeInsets.all(0),
+                              textColor: snapnshot.data! < 24
+                                  ? Colors.red
+                                  : Colors.green,
+                              title: snapnshot.data! < 24
+                                  ? 'Old Http Client'.text()
+                                  : 'New Http Client'.text(),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ],
-                ).visibleIf(
-                  _user.user.value?.role == 'admin' ||
-                      _user.user.value?.role == 'manager',
-                ),
-          ),
-          24.gapColumn,
-          MistMordernLayout(
-            label: "Display Settings",
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.all(0),
-                onTap: () {
-                  model.useGridViewForItems = !model.useGridViewForItems;
-                  model.saveToStorage();
-                  setState(() {});
-                },
-                trailing: Switch(
-                  value: model.useGridViewForItems,
-                  onChanged: (c) {
-                    model.useGridViewForItems = c;
-                    model.saveToStorage();
-                    setState(() {});
-                  },
-                ),
-                leading: Iconify(Bx.grid, color: AppTheme.color(context)),
-                title: "Use Grid View for Items".text(),
-                subtitle:
-                    "Toggle between grid and list view for products in sales screen"
-                        .text(
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
-                        ),
-              ),
-            ],
-          ),
-          24.gapColumn,
-          MistMordernLayout(
-            label: "Data & Synchronization",
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.all(0),
-                onTap: () {
-                  Get.defaultDialog(
-                    title: "Force Sync",
-                    content:
-                        "This will clear your local offline cache and download all items, categories, and settings from the server. Are you sure?"
-                            .text(textAlign: TextAlign.center),
-                    actions: [
-                      "Cancel".text().textButton(onPressed: () => Get.back()),
-                      "Sync Now".text().textButton(
-                        onPressed: () {
-                          Get.back();
-                          if (Get.isRegistered<ItemsController>()) {
-                            Get.find<ItemsController>().clearAndResyncData();
-                            Toaster.showSuccess(
-                              "Cache cleared. Syncing started in background.",
-                            );
-                          } else {
-                            Toaster.showError(
-                              "Failed to access items controller.",
-                            );
-                          }
-                        },
-                      ),
-                    ],
-                  );
-                },
-                leading: Iconify(
-                  Bx.cloud_download,
-                  color: AppTheme.color(context),
-                ),
-                title: "Force Sync / Clear Cache".text(),
-                subtitle:
-                    "Manually clear offline cache and re-download store data"
-                        .text(
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
-                        ),
-              ),
-            ],
-          ),
-          24.gapColumn,
-          Obx(
-            () =>
-                MistMordernLayout(
-                  label: "Company",
-                  children: [
-                    ListTile(
-                      trailing: Obx(
-                        () => _adminController.companyLoading.value
-                            ? CircularProgressIndicator()
-                            : Switch(
-                                value:
-                                    _invController
-                                        .company
-                                        .value
-                                        ?.enableCreditSale ??
-                                    true,
-                                onChanged: (c) {
-                                  _updateCompanyModel(
-                                    _invController
-                                            .company
-                                            .value
-                                            ?.showSalesCount ??
-                                        false,
-                                    enableCreditSale: c,
-                                    autoApproveAllExpenses:
-                                        _invController
-                                            .company
-                                            .value
-                                            ?.autoApproveAllExpenses ??
-                                        false,
-                                    shiftBasedSales:
-                                        _invController
-                                            .company
-                                            .value
-                                            ?.shiftBasedSales ??
-                                        false,
-                                  );
-                                },
-                              ),
-                      ),
-                      onTap: () => _updateCompanyModel(
-                        _invController.company.value?.showSalesCount ?? false,
-                        enableCreditSale:
-                            !(_invController.company.value?.enableCreditSale ??
-                                true),
-                        autoApproveAllExpenses:
-                            (_invController
-                                .company
-                                .value
-                                ?.autoApproveAllExpenses ??
-                            false),
-                        shiftBasedSales:
-                            _invController.company.value?.shiftBasedSales ??
-                            false,
-                      ),
-                      contentPadding: EdgeInsets.all(0),
-                      title: "Enable Credit Sale".text(),
-                      subtitle: "enable cashiers to sell on credit".text(
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
-                      ),
-                      leading: Iconify(
-                        Bx.credit_card,
-                        color: AppTheme.color(context),
-                      ),
-                    ),
-                    ListTile(
-                      trailing: Obx(
-                        () => _adminController.companyLoading.value
-                            ? CircularProgressIndicator()
-                            : Switch(
-                                value: _invController.company.value?.zimraQrFiscilization ?? false,
-                                onChanged: (c) {
-                                  _updateCompanyModel(
-                                    _invController.company.value?.showSalesCount ?? false,
-                                    enableCreditSale: _invController.company.value?.enableCreditSale ?? true,
-                                    autoApproveAllExpenses: _invController.company.value?.autoApproveAllExpenses ?? false,
-                                    shiftBasedSales: _invController.company.value?.shiftBasedSales ?? false,
-                                    qrFiscilization: c,
-                                  );
-                                },
-                              ),
-                      ),
-                      onTap: () => _updateCompanyModel(
-                        _invController.company.value?.showSalesCount ?? false,
-                        enableCreditSale: _invController.company.value?.enableCreditSale ?? true,
-                        autoApproveAllExpenses: _invController.company.value?.autoApproveAllExpenses ?? false,
-                        shiftBasedSales: _invController.company.value?.shiftBasedSales ?? false,
-                        qrFiscilization: !(_invController.company.value?.zimraQrFiscilization ?? false),
-                      ),
-                      contentPadding: EdgeInsets.all(0),
-                      title: "QR Fiscalization".text(),
-                      subtitle: "Show QR code on receipt printing for ZIMRA fiscalization check".text(
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
-                      ),
-                      leading: Iconify(
-                        Bx.qr_scan,
-                        color: AppTheme.color(context),
-                      ),
-                    ),
-                    ListTile(
-                      trailing: Obx(
-                        () => _adminController.companyLoading.value
-                            ? CircularProgressIndicator()
-                            : Switch(
-                                value:
-                                    _invController
-                                        .company
-                                        .value
-                                        ?.autoApproveAllExpenses ??
-                                    true,
-                                onChanged: (c) {
-                                  _updateCompanyModel(
-                                    _invController
-                                            .company
-                                            .value
-                                            ?.showSalesCount ??
-                                        false,
-                                    enableCreditSale:
-                                        (_invController
-                                            .company
-                                            .value
-                                            ?.enableCreditSale ??
-                                        true),
-                                    autoApproveAllExpenses: c,
-                                    shiftBasedSales:
-                                        _invController
-                                            .company
-                                            .value
-                                            ?.shiftBasedSales ??
-                                        false,
-                                  );
-                                },
-                              ),
-                      ),
-                      onTap: () => _updateCompanyModel(
-                        _invController.company.value?.showSalesCount ?? false,
-                        enableCreditSale:
-                            (_invController.company.value?.enableCreditSale ??
-                            true),
-                        autoApproveAllExpenses:
-                            !(_invController
-                                    .company
-                                    .value
-                                    ?.autoApproveAllExpenses ??
-                                true),
-                        shiftBasedSales:
-                            _invController.company.value?.shiftBasedSales ??
-                            false,
-                      ),
-                      contentPadding: EdgeInsets.all(0),
-                      title: "AutoApprove All Expenses".text(),
-                      subtitle: "enable expenses to be added without approval"
-                          .text(
-                            style: TextStyle(color: Colors.grey, fontSize: 12),
-                          ),
-                      leading: Iconify(
-                        Bx.credit_card,
-                        color: AppTheme.color(context),
-                      ),
-                    ),
-                    ListTile(
-                      trailing: Obx(
-                        () => _adminController.companyLoading.value
-                            ? CircularProgressIndicator()
-                            : Switch(
-                                value:
-                                    _invController
-                                        .company
-                                        .value
-                                        ?.shiftBasedSales ??
-                                    false,
-                                onChanged: (c) {
-                                  _updateCompanyModel(
-                                    _invController
-                                            .company
-                                            .value
-                                            ?.showSalesCount ??
-                                        false,
-                                    enableCreditSale:
-                                        (_invController
-                                            .company
-                                            .value
-                                            ?.enableCreditSale ??
-                                        true),
-                                    autoApproveAllExpenses:
-                                        _invController
-                                            .company
-                                            .value
-                                            ?.autoApproveAllExpenses ??
-                                        false,
-                                    shiftBasedSales: c,
-                                  );
-                                },
-                              ),
-                      ),
-                      onTap: () => _updateCompanyModel(
-                        _invController.company.value?.showSalesCount ?? false,
-                        enableCreditSale:
-                            (_invController.company.value?.enableCreditSale ??
-                            true),
-                        autoApproveAllExpenses:
-                            (_invController
-                                .company
-                                .value
-                                ?.autoApproveAllExpenses ??
-                            false),
-                        shiftBasedSales:
-                            !(_invController.company.value?.shiftBasedSales ??
-                                false),
-                      ),
-                      contentPadding: EdgeInsets.all(0),
-                      title: "Enable Shift Based Sales".text(),
-                      subtitle: "enforce opening shifts to sell items".text(
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
-                      ),
-                      leading: Iconify(Bx.time, color: AppTheme.color(context)),
-                    ),
-                    ListTile(
-                      onTap: () => Get.to(() => const ScreenOnlineSalesSettings()),
-                      contentPadding: EdgeInsets.zero,
-                      title: "Online sales".text(),
-                      subtitle: Obx(
-                        () {
-                          final on =
-                              _invController.company.value?.enableOnlineSales ??
-                                  false;
-                          return (on
-                                  ? "Active — server-first checkout & stock rules"
-                                  : "Off — standard offline POS")
-                              .text(
-                            style: TextStyle(color: Colors.grey, fontSize: 12),
-                          );
-                        },
-                      ),
-                      trailing: Iconify(
-                        Bx.chevron_right,
-                        color: Colors.grey.shade500,
-                      ),
-                      leading: Iconify(
-                        Bx.cloud,
-                        color: AppTheme.color(context),
-                      ),
-                    ),
-                    ListTile(
-                      subtitle: "send daily reports to whatsapp".text(
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
-                      ),
-                      onTap: () => {
-                        Get.to(
-                          () => AutomatedSyncScreen(
-                            company: _invController.company.value!,
-                          ),
-                        ),
-                      },
-                      title: "Whatsapp reports".text(),
-                      leading: Iconify(
-                        Bx.bxl_whatsapp,
-                        color: AppTheme.color(context),
-                      ),
-                    ),
-                  ],
-                ).visibleIf(
-                  _user.user.value?.role == 'admin' ||
-                      _user.user.value?.role == 'manager',
-                ),
-          ),
-          24.gapColumn,
-          MistMordernLayout(
-            label: "Heath Status",
-            children: [
-              FutureBuilder(
-                future: getAndroidSdkInt(),
-                builder: (context, snapnshot) {
-                  if (snapnshot.connectionState == ConnectionState.waiting) {
-                    return MistLoader1();
-                  }
-                  if (snapnshot.hasError) {
-                    return "Error : ${snapnshot.error}".text();
-                  }
-                  return ListTile(
-                    contentPadding: EdgeInsets.all(0),
-                    textColor: snapnshot.data! < 24 ? Colors.red : Colors.green,
-                    title: snapnshot.data! < 24
-                        ? 'Old Http Client'.text()
-                        : 'New Http Client'.text(),
-                  );
-                },
-              ),
-            ],
-          ),
-        ],
                 ),
               ),
             );

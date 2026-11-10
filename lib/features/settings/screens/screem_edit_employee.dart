@@ -36,7 +36,8 @@ class _ScreenEditEmployeeState extends State<ScreenEditEmployee> {
   late final _tillNumberController = TextEditingController(
     text: widget.employeeModel.till.toString(),
   );
-  late final _selectedPermissions = widget.employeeModel.permissions;
+  late final _selectedPermissions =
+      List<String>.from(widget.employeeModel.permissions);
 
   @override
   Widget build(BuildContext context) {

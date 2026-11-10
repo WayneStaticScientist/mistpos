@@ -43,18 +43,24 @@ class EscPosBuilder {
     _bytes.addAll([0x1D, 0x56, 0x42, 0x00]);
   }
 
-  void barcode(String data) {
+  void barcode(String data, {PosAlign align = PosAlign.center}) {
+    setAlign(align);
     final bytes = utf8.encode(data);
     _bytes.addAll([0x1D, 0x68, 0x50]);
     _bytes.addAll([0x1D, 0x6B, 0x49, bytes.length]);
     _bytes.addAll(bytes);
+    _bytes.add(0x0A);
+    setAlign(PosAlign.left);
   }
 
   /// Native thermal QR (ESC/POS model 2) via esc_pos_utils_plus command order.
-  void qrCode(String data) {
+  void qrCode(String data, {PosAlign align = PosAlign.center}) {
     if (data.isEmpty) return;
+    setAlign(align);
     final qr = QRCode(data, QRSize.size4, QRCorrection.M);
     _bytes.addAll(qr.bytes);
+    _bytes.add(0x0A);
+    setAlign(PosAlign.left);
   }
 
   void raster(List<int> bitmap) {

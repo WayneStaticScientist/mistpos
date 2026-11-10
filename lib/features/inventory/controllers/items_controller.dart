@@ -32,8 +32,10 @@ import 'package:mistpos/core/utils/sales_tax_calculator.dart';
 
 class ItemsController extends GetxController {
   RxDouble totalPrice = RxDouble(0);
+
   /// VAT amount for current cart (inclusive or exclusive mode).
   RxDouble checkoutTaxAmount = RxDouble(0);
+
   /// Line subtotal after discounts, before tax (same base as [SalesTaxCalculator]).
   RxDouble checkoutSubtotal = RxDouble(0);
   RxString selectedCategory = ''.obs;
@@ -1132,8 +1134,7 @@ class ItemsController extends GetxController {
     _calculatedTotalPrice();
   }
 
-  CompanyModel? get _company =>
-      Get.find<InventoryController>().company.value;
+  CompanyModel? get _company => Get.find<InventoryController>().company.value;
 
   bool get onlineSalesEnabled => _company?.enableOnlineSales ?? false;
 
@@ -1220,7 +1221,10 @@ class ItemsController extends GetxController {
     }
     final response = await Net.post(
       "/cashier/products/range",
-      data: {"filter": "", "ids": [model.hexId]},
+      data: {
+        "filter": "",
+        "ids": [model.hexId],
+      },
     );
     if (response.hasError) {
       return _freshCatalogItem(model);
@@ -1257,7 +1261,10 @@ class ItemsController extends GetxController {
     return "${live.name}: only ${available.toStringAsFixed(available == available.roundToDouble() ? 0 : 2)} available";
   }
 
-  Future<String?> _stockErrorForSale(ItemModel model, double requestedCount) async {
+  Future<String?> _stockErrorForSale(
+    ItemModel model,
+    double requestedCount,
+  ) async {
     if (!onlineSalesStrictStockEnabled) return null;
     if (!_isCatalogStockTracked(model)) return null;
     final live = await _catalogItemForStockRules(model);
@@ -1284,10 +1291,7 @@ class ItemsController extends GetxController {
 
   /// Online checkout only — server must return a fiscalized receipt before print.
   Future<ItemReceitModel?> _purchaseOnServer(ItemReceitModel draft) async {
-    final response = await Net.post(
-      "/cashier/purchase",
-      data: draft.toJson(),
-    );
+    final response = await Net.post("/cashier/purchase", data: draft.toJson());
     if (response.hasError) {
       if (response.statusCode == 503) {
         Toaster.showError(
@@ -1575,9 +1579,10 @@ class ItemsController extends GetxController {
             }
             itemTaxPercentage = tax.value;
             itemTaxName = tax.label;
-            itemTaxAmount = (itemTaxAmount +
-                    SalesTaxCalculator.lineTaxForRow(cartRow: e, tax: tax))
-                .toPrecision;
+            itemTaxAmount =
+                (itemTaxAmount +
+                        SalesTaxCalculator.lineTaxForRow(cartRow: e, tax: tax))
+                    .toPrecision;
           }
 
           final receit = ItemReceitItem()
@@ -1610,8 +1615,9 @@ class ItemsController extends GetxController {
         taxes: salesTaxes,
         subtotalAfterDiscounts: checkoutSubtotal.value,
       ).totalTaxAmount;
-      itemReceitModel.tax =
-          SalesTaxCalculator.primaryTaxRatePercent(salesTaxes);
+      itemReceitModel.tax = SalesTaxCalculator.primaryTaxRatePercent(
+        salesTaxes,
+      );
       itemReceitModel.taxAmount = totalTax.toPrecision;
       final company = Get.find<InventoryController>().company.value;
       final useOnlineCheckout = company?.enableOnlineSales ?? false;
@@ -1984,5 +1990,8 @@ class ItemsController extends GetxController {
     loadCustomers();
     loadShifts();
     loadMofiers();
+    if (Get.isRegistered<InventoryController>()) {
+      Get.find<InventoryController>().loadCompany();
+    }
   }
 }

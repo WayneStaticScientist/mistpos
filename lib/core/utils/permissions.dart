@@ -16,8 +16,19 @@ class UserPermissions {
   static bool canAddProduct(User? user) =>
       hasPermission(user, 'product') || hasPermission(user, 'product-add');
 
-  static bool canEditOrDeleteProduct(User? user) =>
+  static bool canUpdateProduct(User? user) =>
+      hasPermission(user, 'product') || hasPermission(user, 'product-update');
+
+  static bool canAddStock(User? user) =>
+      hasPermission(user, 'product') ||
+      hasPermission(user, 'product-update') ||
+      hasPermission(user, 'stock-add');
+
+  static bool canDeleteProduct(User? user) =>
       hasPermission(user, 'product');
+
+  static bool canEditOrDeleteProduct(User? user) =>
+      canAddStock(user) || canUpdateProduct(user) || canDeleteProduct(user);
 
   static const List<PermissionStructure> permissions = [
     PermissionStructure(name: "Add Inventory Items", value: "inventory-add"),
@@ -26,6 +37,8 @@ class UserPermissions {
       value: "inventory-*",
     ),
     PermissionStructure(name: "Add products only", value: "product-add"),
+    PermissionStructure(name: "Update products only", value: "product-update"),
+    PermissionStructure(name: "Add stock only", value: "stock-add"),
     PermissionStructure(name: "Add/Update/Delete products", value: "product"),
     PermissionStructure(
       name: "Add/Update/Delete categories",

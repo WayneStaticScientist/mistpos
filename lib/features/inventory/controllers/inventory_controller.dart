@@ -24,6 +24,7 @@ import 'package:mistpos/data/models/inventory_child_count.dart';
 import 'package:mistpos/data/models/inventory_count_model.dart';
 import 'package:mistpos/data/models/stock_adjustment_model.dart';
 import 'package:mistpos/data/models/inventory_history_model.dart';
+import 'package:mistpos/features/receipt_design_v2/controllers/receipt_design_v2_controller.dart';
 
 class InventoryController extends GetxController {
   RxList<SupplierModel> suppliers = RxList<SupplierModel>();
@@ -495,6 +496,11 @@ class InventoryController extends GetxController {
       setingsStorage.extras = company.value!.receitExtras;
       setingsStorage.saveToStorage();
     }
+    if (company.value!.receiptDesignV2 != null) {
+      ReceiptDesignV2Controller.applyRemoteReceiptDesignMap(
+        company.value!.receiptDesignV2,
+      );
+    }
     company.value?.saveToStorage();
   }
 
@@ -944,6 +950,11 @@ class InventoryController extends GetxController {
     if (company.value!.receitExtras.isNotEmpty) {
       setingsStorage.extras = company.value!.receitExtras;
       setingsStorage.saveToStorage();
+    }
+    if (company.value!.receiptDesignV2 != null) {
+      ReceiptDesignV2Controller.applyRemoteReceiptDesignMap(
+        company.value!.receiptDesignV2,
+      );
     }
     company.value?.saveToStorage();
     Toaster.showSuccess("receits visuals updated");

@@ -9,17 +9,15 @@ extension PosRoleHelper on PosPrinterRole {
   /// Convert a role identifier (e.g. "cashier", "customer", "label") to the
   /// corresponding [PosPrinterRole] instance.
   static PosPrinterRole fromString(String role) {
-    switch (role) {
+    switch (role.toLowerCase().trim()) {
+      case 'kitchen':
+        return PosPrinterRole.kitchen;
+      case 'sticker':
+      case 'label':
+        return PosPrinterRole.sticker;
       case 'cashier':
-        return PosPrinterRole.cashier;
       default:
-        // For any non‑cashier role the library provides a custom role.
-        // If the custom constructor is unavailable, fall back to cashier.
-        try {
-          return PosPrinterRole.kitchen;
-        } catch (_) {
-          return PosPrinterRole.cashier;
-        }
+        return PosPrinterRole.cashier;
     }
   }
 }

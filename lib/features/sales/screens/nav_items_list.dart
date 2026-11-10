@@ -77,7 +77,7 @@ class _NavItemsListState extends State<NavItemsList> {
                   )
                   ? () => _openEditor(_itemsUnsavedController.cartItems[index])
                   : null,
-              onLongPress: UserPermissions.canEditOrDeleteProduct(
+              onLongPress: UserPermissions.canDeleteProduct(
                     _userController.user.value,
                   )
                   ? () => _openDeleteDialog(
@@ -104,6 +104,19 @@ class _NavItemsListState extends State<NavItemsList> {
       return;
     }
 
+    final canStock = UserPermissions.canAddStock(_userController.user.value);
+    final canEdit = UserPermissions.canUpdateProduct(_userController.user.value);
+
+    if (canStock && !canEdit) {
+      _openEditDialog(model);
+      return;
+    }
+
+    if (canEdit && !canStock) {
+      Get.to(() => ScreenEditItem(model: model));
+      return;
+    }
+
     Get.bottomSheet(
       [
         CardButtons(
@@ -121,7 +134,7 @@ class _NavItemsListState extends State<NavItemsList> {
             Get.to(() => ScreenEditItem(model: model));
           },
         ).expanded1,
-      ].row().padding(EdgeInsets.only(top: 18)).safeArea(),
+      ].row().padding(const EdgeInsets.only(top: 18)).safeArea(),
       backgroundColor: Get.theme.colorScheme.surface,
     );
   }

@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:flutter/widgets.dart';
 
 import 'package:mistpos/main.dart';
 import 'package:isar_plus/isar_plus.dart';
@@ -10,7 +11,6 @@ import 'package:mistpos/data/models/shifts_model.dart';
 import 'package:mistpos/core/utils/offline_printer.dart';
 import 'package:mistpos/data/models/customer_model.dart';
 import 'package:mistpos/data/models/company_model.dart';
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:mistpos/core/utils/currence_converter.dart';
 import 'package:mistpos/data/models/item_receit_model.dart';
 import 'package:mistpos/core/utils/zimra_receipt_type.dart';
@@ -19,21 +19,34 @@ import 'package:mistpos/data/models/printer_device_model.dart';
 import 'package:mistpos/core/utils/mist_esc_pos_builder.dart';
 import 'package:pos_universal_printer/pos_universal_printer.dart'
     hide EscPosBuilder, EscPosHelper, PosAlign;
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:mistpos/core/utils/printer_role_helper.dart';
 import 'package:mistpos/core/utils/zimra_helper.dart';
 import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:mistpos/features/receipt_design_v2/models/receipt_template_v2_model.dart';
+import 'package:mistpos/features/receipt_design_v2/data/default_v2_templates.dart';
+import 'package:mistpos/core/services/api/network_wrapper.dart';
+import 'package:mistpos/features/receipt_design_v2/engine/receipt_template_engine.dart';
 
 class DevicesController extends GetxController {
   RxBool hasPrinterConnections = RxBool(false);
   @override
   void onInit() {
     super.onInit();
-    hasPrinterConnections.value = printer.isRoleConnected(
-      PosPrinterRole.cashier,
-    );
-    connectLastDevice();
+    try {
+      hasPrinterConnections.value = printer.isRoleConnected(
+        PosPrinterRole.cashier,
+      );
+    } catch (_) {}
+
+    // Reconnect to saved printer non-blockingly after the initial frame has rendered
+    // Eliminates the ~10s startup freeze caused by native Bluetooth socket connect
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        connectLastDevice();
+      });
+    });
   }
 
   bool isPrinterConnected() {
@@ -43,9 +56,16 @@ class DevicesController extends GetxController {
   final PosUniversalPrinter printer = PosUniversalPrinter.instance;
   RxBool cashierConnected = false.obs;
   RxBool connectingToDevice = false.obs;
+  RxnString reconnectingDeviceAddress = RxnString();
   RxList<PrinterDeviceModel> printerDevices = RxList<PrinterDeviceModel>([]);
 
-  Future<void> connectToNetwork(String ipAddress, int port, User? user) async {
+  Future<void> connectToNetwork(
+    String ipAddress,
+    int port,
+    User? user, {
+    String? deviceName,
+    String role = 'cashier',
+  }) async {
     final isar = IsarStatic.getInstance();
     if (isar == null) {
       Toaster.showError("Database was not initialized");
@@ -55,17 +75,25 @@ class DevicesController extends GetxController {
       Toaster.showError("User should be register first");
       return;
     }
-    // Use the generic registerPrinter method (defaults to 'cashier' role)
+    final effectiveName = (deviceName != null && deviceName.trim().isNotEmpty)
+        ? deviceName.trim()
+        : ipAddress;
+
+    // Use the generic registerPrinter method
     await registerPrinter(
-      role: 'cashier',
-      name: user.fullName,
+      role: role,
+      name: effectiveName,
       address: ipAddress,
       port: port,
       user: user,
     );
     // Update connection flag
-    cashierConnected.value = printer.isRoleConnected(PosPrinterRole.cashier);
-    if (!cashierConnected.value) {
+    final posRole = PosRoleHelper.fromString(role);
+    final isConn = printer.isRoleConnected(posRole);
+    if (role.toLowerCase() == 'cashier') {
+      cashierConnected.value = isConn;
+    }
+    if (!isConn) {
       Toaster.showError(
         "Failed to connect to device | check ip address and port from the device",
       );
@@ -77,22 +105,25 @@ class DevicesController extends GetxController {
           .addressEqualTo(ipAddress)
           .findFirst();
       if (existingDevice != null) {
-        existingDevice.isConnected = cashierConnected.value;
+        existingDevice.isConnected = isConn;
         existingDevice.port = port;
-        existingDevice.name = ipAddress;
+        existingDevice.name = effectiveName;
+        existingDevice.role = role;
         isar.printerDeviceModels.put(existingDevice);
       } else {
         isar.printerDeviceModels.put(
           PrinterDeviceModel(
-            name: ipAddress,
+            name: effectiveName,
             address: ipAddress,
-            isConnected: cashierConnected.value,
+            isConnected: isConn,
             port: port,
+            role: role,
           ),
         );
       }
     });
     getConnectedDevices();
+    Toaster.showSuccess("Network printer connected successfully");
   }
 
   Future<bool> connectToBluetooth(
@@ -179,7 +210,7 @@ class DevicesController extends GetxController {
     final role = printerDevic.role;
     await printer.unregisterDevice(PosRoleHelper.fromString(role));
     await isar.write((isar) async {
-      await isar.printerDeviceModels.delete(printerDevic.id);
+      isar.printerDeviceModels.delete(printerDevic.id);
     });
     Toaster.showError(
       "Printer device disconnected , you might wanna connect from devices",
@@ -205,6 +236,140 @@ class DevicesController extends GetxController {
       ),
     );
     return true;
+  }
+
+  Future<bool> reconnectDevice(PrinterDeviceModel device) async {
+    reconnectingDeviceAddress.value = device.address;
+    try {
+      final role = PosRoleHelper.fromString(device.role);
+
+      try {
+        await printer.unregisterDevice(role).timeout(const Duration(seconds: 2));
+      } catch (_) {}
+
+      final isBt = device.port == 0;
+      await printer.registerDevice(
+        role,
+        PrinterDevice(
+          id: device.address,
+          name: device.name,
+          type: isBt ? PrinterType.bluetooth : PrinterType.tcp,
+          address: device.address,
+          port: device.port,
+        ),
+      ).timeout(const Duration(seconds: 5));
+
+      bool connected = false;
+      for (int i = 0; i < 6; i++) {
+        if (printer.isRoleConnected(role)) {
+          connected = true;
+          break;
+        }
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+
+      final isar = IsarStatic.getInstance();
+      if (isar != null) {
+        await isar.write((isar) async {
+          final existing = isar.printerDeviceModels
+              .where()
+              .addressEqualTo(device.address)
+              .findFirst();
+          if (existing != null) {
+            existing.isConnected = connected;
+            isar.printerDeviceModels.put(existing);
+          }
+        });
+      }
+
+      hasPrinterConnections.value = printer.isRoleConnected(PosPrinterRole.cashier);
+      cashierConnected.value = hasPrinterConnections.value;
+      getConnectedDevices();
+      reconnectingDeviceAddress.value = null;
+
+      if (connected) {
+        Toaster.showSuccess("Connected to ${device.name} successfully!");
+        return true;
+      } else {
+        Toaster.showError("Could not connect to ${device.name}. Check power/range.");
+        return false;
+      }
+    } catch (e) {
+      reconnectingDeviceAddress.value = null;
+      Toaster.showError("Connection failed: $e");
+      return false;
+    }
+  }
+
+  Future<void> reconnectAllDevices() async {
+    connectingToDevice.value = true;
+    try {
+      final isar = IsarStatic.getInstance();
+      if (isar == null) return;
+      final devices = isar.printerDeviceModels.where().findAll();
+      for (final device in devices) {
+        try {
+          final role = PosRoleHelper.fromString(device.role);
+          await printer.registerDevice(
+            role,
+            PrinterDevice(
+              id: device.address,
+              name: device.name,
+              type: device.port == 0 ? PrinterType.bluetooth : PrinterType.tcp,
+              address: device.address,
+              port: device.port,
+            ),
+          ).timeout(const Duration(seconds: 3));
+        } catch (_) {}
+      }
+      hasPrinterConnections.value = printer.isRoleConnected(PosPrinterRole.cashier);
+      cashierConnected.value = hasPrinterConnections.value;
+      getConnectedDevices();
+      Toaster.showSuccess("Refreshed all printer connections");
+    } finally {
+      connectingToDevice.value = false;
+    }
+  }
+
+  Future<void> testPrintDevice(PrinterDeviceModel device) async {
+    try {
+      final b = EscPosBuilder();
+      b.init();
+      b.text("================================", align: PosAlign.center);
+      b.text("MISTPOS PRINTER TEST", align: PosAlign.center, bold: true);
+      b.feed(1);
+      b.text("Device: ${device.name}", align: PosAlign.center);
+      b.text("Type: ${device.port == 0 ? 'Bluetooth' : 'Network/TCP'}", align: PosAlign.center);
+      b.text("Address: ${device.address}", align: PosAlign.center);
+      b.text("Port: ${device.port == 0 ? 'Bluetooth SPP' : device.port.toString()}", align: PosAlign.center);
+      b.text("Role: ${device.role.toUpperCase()}", align: PosAlign.center);
+      b.text("Status: Connected & Operational", align: PosAlign.center);
+      b.text("Time: ${DateTime.now().toString().substring(0, 19)}", align: PosAlign.center);
+      b.feed(1);
+      b.text("================================", align: PosAlign.center);
+      b.feed(3);
+      b.cut();
+
+      final role = PosRoleHelper.fromString(device.role);
+      printer.printRaw(role, b.build());
+      Toaster.showSuccess("Test print sent to ${device.name}!");
+    } catch (e) {
+      Toaster.showError("Test print failed: $e");
+    }
+  }
+
+  Future<void> updateDeviceRole(PrinterDeviceModel device, String newRole) async {
+    final isar = IsarStatic.getInstance();
+    if (isar == null) return;
+    await isar.write((isar) async {
+      final existing = isar.printerDeviceModels.where().addressEqualTo(device.address).findFirst();
+      if (existing != null) {
+        existing.role = newRole;
+        isar.printerDeviceModels.put(existing);
+      }
+    });
+    getConnectedDevices();
+    Toaster.showSuccess("Role updated to ${newRole.toUpperCase()}");
   }
 
   static bool receiptHasZimraQrData(ItemReceitModel r) {
@@ -264,15 +429,53 @@ class DevicesController extends GetxController {
     CustomerModel? customer,
     List<TaxModel> salesTaxes,
   ) async {
+    CustomerModel? effectiveCustomer = customer;
+    if (effectiveCustomer == null &&
+        itemReceitModel.customerId != null &&
+        itemReceitModel.customerId!.isNotEmpty) {
+      try {
+        final response = await Net.get(
+          "/cashier/customer/${itemReceitModel.customerId}",
+        );
+        if (!response.hasError && response.body['customer'] != null) {
+          effectiveCustomer = CustomerModel.fromJson(response.body['customer']);
+        }
+      } catch (_) {}
+    }
+
     final printer = PosUniversalPrinter.instance;
     final b = EscPosBuilder();
     b.init();
     final model = AppSettingsModel.fromStorage();
-    int receitWidth = model.printerRecietLength;
-    bool enableQrCode = model.enableQrCode;
-    var zimraQrPrintedOnReceipt = false;
-    String padRight(String text, int length) => text.padRight(length, ' ');
-    for (final row in model.extras) {
+    if (model.useReceiptDesignV2) {
+      ReceiptTemplateV2Model activeV2;
+      final activeJson = GetStorage().read<Map>('active_receipt_template_v2');
+      if (activeJson != null) {
+        try {
+          activeV2 = ReceiptTemplateV2Model.fromJson(Map<String, dynamic>.from(activeJson));
+        } catch (_) {
+          activeV2 = DefaultV2Templates.zimraFiscal;
+        }
+      } else {
+        activeV2 = DefaultV2Templates.zimraFiscal;
+      }
+
+      ReceiptTemplateV2Engine.printToEscPosBuilder(
+        b: b,
+        template: activeV2,
+        itemReceitModel: itemReceitModel,
+        user: user,
+        customer: effectiveCustomer,
+        company: _companyForZimraPrint(),
+        salesTaxes: salesTaxes,
+        appSettings: model,
+      );
+    } else {
+      int receitWidth = model.printerRecietLength;
+      bool enableQrCode = model.enableQrCode;
+      var zimraQrPrintedOnReceipt = false;
+      String padRight(String text, int length) => text.padRight(length, ' ');
+      for (final row in model.extras) {
       if (!row.enabled) {
         continue;
       }
@@ -425,6 +628,7 @@ class DevicesController extends GetxController {
     }
 
     b.cut();
+    }
 
     try {
       final isar = IsarStatic.getInstance();
@@ -504,44 +708,56 @@ class DevicesController extends GetxController {
   }
 
   void connectLastDevice() async {
-    final isar = IsarStatic.getInstance();
-    final user = User.fromStorage();
-    if (isar == null || user == null) {
-      return;
-    }
-    final model = AppSettingsModel.fromStorage();
-    if (model.printToMultiplePrinters) {
-      final devices = isar.printerDeviceModels.where().findAll();
-      for (final device in devices) {
-        await printer.registerDevice(
-          PosRoleHelper.fromString(device.role),
-          PrinterDevice(
-            id: device.address,
-            name: device.name,
-            type: device.port == 0 ? PrinterType.bluetooth : PrinterType.tcp,
-            address: device.address,
-            port: device.port,
-          ),
-        );
+    try {
+      final isar = IsarStatic.getInstance();
+      final user = User.fromStorage();
+      if (isar == null || user == null) {
+        return;
       }
-    } else {
-      final device = isar.printerDeviceModels
-          .where()
-          .sortByIsConnected()
-          .findFirst();
-      if (device != null) {
-        await printer.registerDevice(
-          PosPrinterRole.cashier,
-          PrinterDevice(
-            id: device.address,
-            name: user.fullName,
-            type: device.port == 0 ? PrinterType.bluetooth : PrinterType.tcp,
-            address: device.address,
-            port: device.port,
-          ),
-        );
+      final model = AppSettingsModel.fromStorage();
+      if (model.printToMultiplePrinters) {
+        final devices = isar.printerDeviceModels.where().findAll();
+        for (final device in devices) {
+          try {
+            await printer.registerDevice(
+              PosRoleHelper.fromString(device.role),
+              PrinterDevice(
+                id: device.address,
+                name: device.name,
+                type: device.port == 0 ? PrinterType.bluetooth : PrinterType.tcp,
+                address: device.address,
+                port: device.port,
+              ),
+            ).timeout(const Duration(seconds: 3));
+          } catch (_) {
+            // Silently skip offline printer during auto-reconnect
+          }
+        }
+      } else {
+        final device = isar.printerDeviceModels
+            .where()
+            .sortByIsConnected()
+            .findFirst();
+        if (device != null) {
+          try {
+            await printer.registerDevice(
+              PosPrinterRole.cashier,
+              PrinterDevice(
+                id: device.address,
+                name: user.fullName,
+                type: device.port == 0 ? PrinterType.bluetooth : PrinterType.tcp,
+                address: device.address,
+                port: device.port,
+              ),
+            ).timeout(const Duration(seconds: 3));
+          } catch (_) {
+            // Silently skip offline printer during auto-reconnect
+          }
+        }
       }
-    }
+      hasPrinterConnections.value = printer.isRoleConnected(PosPrinterRole.cashier);
+      cashierConnected.value = hasPrinterConnections.value;
+    } catch (_) {}
   }
 
   static Future<void> printShift(ShiftsModel shift, User user) async {

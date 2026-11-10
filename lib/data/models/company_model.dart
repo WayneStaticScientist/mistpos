@@ -172,6 +172,7 @@ class CompanyModel {
   final AutomatedSyncModel weeklyAutomatedSync;
   AiSubscriptionsModel aiSubscriptions;
   List<ReceitExtrasModel> receitExtras;
+  Map<String, dynamic>? receiptDesignV2;
   final String? reseller;
   final ResellerPropsModel resellerProps;
   
@@ -202,6 +203,7 @@ class CompanyModel {
     required this.email,
     required this.name,
     this.receitExtras = const [],
+    this.receiptDesignV2,
     required this.hexId,
     this.verified = false,
     required this.exchangeRates,
@@ -243,12 +245,17 @@ class CompanyModel {
     this.zimraSubscriptionNotified3Days,
   });
   factory CompanyModel.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic>? toMap(dynamic val) {
+      if (val is Map) return Map<String, dynamic>.from(val);
+      return null;
+    }
+
     return CompanyModel(
-      automatedSync: AutomatedSyncModel.fromJson(json['automatedSync']),
+      automatedSync: AutomatedSyncModel.fromJson(toMap(json['automatedSync'])),
       weeklyAutomatedSync: AutomatedSyncModel.fromJson(
-        json['weeklyAutomatedSync'],
+        toMap(json['weeklyAutomatedSync']),
       ),
-      aiSubscriptions: AiSubscriptionsModel.fromJson(json['aiSubscriptions']),
+      aiSubscriptions: AiSubscriptionsModel.fromJson(toMap(json['aiSubscriptions'])),
       autoApproveAllExpenses: json['autoApproveAllExpenses'] ?? false,
       enableCreditSale: json['enableCreditSale'] ?? true,
       shiftBasedSales: json['shiftBasedSales'] ?? false,
@@ -263,27 +270,30 @@ class CompanyModel {
               json['zimra']['applicableTaxes'] is List
           ? (json['zimra']['applicableTaxes'] as List<dynamic>)
               .map((e) => ZimraApplicableTaxModel.fromJson(
-                    e as Map<String, dynamic>,
+                    e is Map ? Map<String, dynamic>.from(e) : <String, dynamic>{},
                   ))
               .toList()
           : const [],
-      owner: json['owner'],
-      email: json['email'],
-      hexId: json['_id'] ?? "",
+      owner: json['owner'] ?? '',
+      email: json['email'] ?? '',
+      hexId: json['_id'] ?? json['hexId'] ?? "",
       receitExtras:
           (json['receitExtras'] as List<dynamic>?)
-               ?.map((e) => ReceitExtrasModel.fromJSON(e))
+               ?.map((e) => ReceitExtrasModel.fromJSON(e is Map ? Map<String, dynamic>.from(e) : e))
                .toList() ??
           [],
+      receiptDesignV2: toMap(json['receiptDesignV2']),
       name: json['name'] ?? "-",
       verified: json['verified'] ?? false,
       showSalesCount: json['showSalesCount'] ?? false,
-      subscriptionType: json['subscriptionType'] != null
-          ? SubscriptionModel.fromJson(json['subscriptionType'])
+      subscriptionType: json['subscriptionType'] is Map
+          ? SubscriptionModel.fromJson(Map<String, dynamic>.from(json['subscriptionType']))
           : SubscriptionModel(),
-      exchangeRates: ExchangeRateModel.fromJson(json['exchangeRates']),
+      exchangeRates: json['exchangeRates'] is Map
+          ? ExchangeRateModel.fromJson(Map<String, dynamic>.from(json['exchangeRates']))
+          : ExchangeRateModel(name: 'USD', rates: {'USD': 1.0}),
       reseller: json['reseller'] as String?,
-      resellerProps: ResellerPropsModel.fromJson(json['resellerProps']),
+      resellerProps: ResellerPropsModel.fromJson(toMap(json['resellerProps'])),
       zimraDeviceId: json['zimra'] != null ? json['zimra']['deviceId'] as int? : json['zimraDeviceId'] as int?,
       zimraDeviceSerialNo: json['zimra'] != null ? json['zimra']['deviceSerialNo'] as String? : json['zimraDeviceSerialNo'] as String?,
       zimraActivationKey: json['zimra'] != null ? json['zimra']['activationKey'] as String? : json['zimraActivationKey'] as String?,
@@ -339,6 +349,7 @@ class CompanyModel {
       "subscriptionType": subscriptionType.toJson(),
       'autoApproveAllExpenses': autoApproveAllExpenses,
       "receitExtras": receitExtras.map((e) => e.toJson()).toList(),
+      if (receiptDesignV2 != null) 'receiptDesignV2': receiptDesignV2,
       'reseller': reseller,
       'resellerProps': resellerProps.toJson(),
       'zimraDeviceId': zimraDeviceId,
@@ -382,6 +393,10 @@ class CompanyModel {
   static CompanyModel? fromStorage() {
     GetStorage storage = GetStorage();
     if (!storage.hasData("company")) return null;
-    return CompanyModel.fromJson(storage.read("company"));
+    final data = storage.read("company");
+    if (data is Map) {
+      return CompanyModel.fromJson(Map<String, dynamic>.from(data));
+    }
+    return null;
   }
 }

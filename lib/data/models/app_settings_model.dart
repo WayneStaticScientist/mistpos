@@ -16,6 +16,7 @@ class AppSettingsModel {
   bool printToMultiplePrinters = false;
   int lastItemsSyncTime = 0;
   String syncedCompanyId;
+  bool useReceiptDesignV2;
   AppSettingsModel({
     required this.externalBarCodeEnabled,
     required this.useSystemDarkMode,
@@ -31,6 +32,7 @@ class AppSettingsModel {
     this.printToMultiplePrinters = false,
     this.lastItemsSyncTime = 0,
     this.syncedCompanyId = "",
+    this.useReceiptDesignV2 = true,
   });
   factory AppSettingsModel.fromJson(Map<String, dynamic> json) =>
       AppSettingsModel(
@@ -52,6 +54,7 @@ class AppSettingsModel {
         printToMultiplePrinters: json["printToMultiplePrinters"] ?? false,
         lastItemsSyncTime: json["lastItemsSyncTime"] ?? 0,
         syncedCompanyId: json["syncedCompanyId"] ?? "",
+        useReceiptDesignV2: json["useReceiptDesignV2"] ?? true,
       );
   Map<String, dynamic> toJson() => {
     "darkMode": darkMode,
@@ -68,6 +71,7 @@ class AppSettingsModel {
     "printToMultiplePrinters": printToMultiplePrinters,
     "lastItemsSyncTime": lastItemsSyncTime,
     "syncedCompanyId": syncedCompanyId,
+    "useReceiptDesignV2": useReceiptDesignV2,
   };
   static AppSettingsModel fromStorage() {
     GetStorage box = GetStorage();
