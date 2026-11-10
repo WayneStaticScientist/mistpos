@@ -6,8 +6,7 @@ import 'package:mistpos/core/services/api/network_wrapper.dart';
 import 'package:mistpos/core/utils/mist_esc_pos_builder.dart';
 import 'package:mistpos/core/utils/toast.dart';
 import 'package:mistpos/data/models/app_settings_model.dart';
-import 'package:pos_universal_printer/pos_universal_printer.dart'
-    hide EscPosBuilder, EscPosHelper, PosAlign;
+import 'package:mistpos/features/devices/controllers/devices_controller.dart';
 import '../data/default_v2_templates.dart';
 import '../engine/receipt_template_engine.dart';
 import '../models/receipt_template_v2_model.dart';
@@ -731,8 +730,8 @@ class ReceiptDesignV2Controller extends GetxController {
   /// Print test receipt to connected thermal printer
   Future<void> printTestReceipt() async {
     try {
-      final printer = PosUniversalPrinter.instance;
       final b = EscPosBuilder();
+      b.init();
 
       final mockReceipt = ReceiptTemplateV2Engine.getMockReceipt();
       final mockUser = ReceiptTemplateV2Engine.getMockUser();
@@ -748,7 +747,7 @@ class ReceiptDesignV2Controller extends GetxController {
         company: mockCompany,
       );
 
-      printer.printRaw(PosPrinterRole.cashier, b.build());
+      await DevicesController.dispatchPrint(b);
       Toaster.showSuccess("Test print sent to printer!");
     } catch (e) {
       Toaster.showError("Print failed: $e (Make sure printer is connected)");

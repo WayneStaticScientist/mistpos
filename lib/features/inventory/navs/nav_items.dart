@@ -16,6 +16,8 @@ import 'package:mistpos/features/settings/screens/screen_add_discounts.dart';
 import 'package:mistpos/features/sales/screens/nav_modifiers_list.dart';
 import 'package:mistpos/features/sales/screens/nav_discounts_list.dart';
 import 'package:mistpos/features/settings/screens/screen_subscription.dart';
+import 'package:mistpos/core/utils/permissions.dart';
+import 'package:mistpos/features/auth/controllers/user_controller.dart';
 
 class NavItems extends StatefulWidget {
   final GlobalKey<ScaffoldState>? scaffoldKey;
@@ -35,6 +37,24 @@ class _NavItemsState extends State<NavItems> {
     NavDiscountsList(),
   ];
   final _itemsController = Get.find<ItemsController>();
+  final _userController = Get.find<UserController>();
+
+  bool _canUseFab() {
+    final user = _userController.user.value;
+    switch (_selectedIndex) {
+      case 0:
+        return UserPermissions.canAddProduct(user);
+      case 1:
+        return UserPermissions.hasPermission(user, 'categories');
+      case 2:
+        return UserPermissions.hasPermission(user, 'modifiers');
+      case 3:
+        return UserPermissions.hasPermission(user, 'discounts');
+      default:
+        return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,11 +112,13 @@ class _NavItemsState extends State<NavItems> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _add,
-        elevation: 0,
-        child: Icon(Icons.add, color: Colors.white),
-      ),
+      floatingActionButton: _canUseFab()
+          ? FloatingActionButton(
+              onPressed: _add,
+              elevation: 0,
+              child: Icon(Icons.add, color: Colors.white),
+            )
+          : null,
     );
   }
 
@@ -152,6 +174,11 @@ class _NavItemsState extends State<NavItems> {
   }
 
   void _add() {
+    final user = _userController.user.value;
+    if (_selectedIndex == 0 && !UserPermissions.canAddProduct(user)) {
+      Toaster.showError("You don't have permission to add products");
+      return;
+    }
     final company = CompanyModel.fromStorage();
     if (company?.subscriptionType.type == MistSubscriptionUtils.freePlan ||
         company?.subscriptionType.type == null) {

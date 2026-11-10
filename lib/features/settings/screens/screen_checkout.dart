@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:mistpos/core/utils/toast.dart';
 import 'package:mistpos/core/utils/currence_converter.dart';
 import 'package:mistpos/features/auth/controllers/user_controller.dart';
+import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:mistpos/features/inventory/controllers/items_controller.dart';
 import 'package:mistpos/features/settings/screens/screen_cash_payment.dart';
 import 'package:mistpos/features/settings/screens_gateways/paynow/screen_paynow_payment.dart';
@@ -19,6 +20,7 @@ class ScreenCheckout extends StatefulWidget {
 class _ScreenCheckoutState extends State<ScreenCheckout> {
   final _userController = Get.find<UserController>();
   final _itemsListController = Get.find<ItemsController>();
+  final _invController = Get.find<InventoryController>();
 
   double _calculateLineTotal(Map<String, dynamic> item) {
     final count = item['count'] as num? ?? 0;
@@ -93,27 +95,68 @@ class _ScreenCheckoutState extends State<ScreenCheckout> {
         child: Center(
           child: Container(
             constraints: const BoxConstraints(maxWidth: 1200),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                if (constraints.maxWidth > 850) {
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(flex: 3, child: _buildReceiptPreview(isDark)),
-                      const SizedBox(width: 24),
-                      Expanded(flex: 2, child: _buildPaymentSidebar(isDark)),
-                    ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Obx(() {
+                  final online =
+                      _invController.company.value?.enableOnlineSales ?? false;
+                  if (!online) return const SizedBox.shrink();
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50.withAlpha(
+                        isDark ? 30 : 255,
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.blue.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.cloud_done_outlined,
+                          color: Colors.blue.shade700,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            "Online sales: checkout waits for the server receipt (and fiscalization when configured) before printing.",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: isDark
+                                  ? Colors.blue.shade100
+                                  : Colors.blue.shade900,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   );
-                } else {
-                  return Column(
-                    children: [
-                      _buildPaymentSidebar(isDark),
-                      const SizedBox(height: 24),
-                      _buildReceiptPreview(isDark),
-                    ],
-                  );
-                }
-              },
+                }),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    if (constraints.maxWidth > 850) {
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(flex: 3, child: _buildReceiptPreview(isDark)),
+                          const SizedBox(width: 24),
+                          Expanded(flex: 2, child: _buildPaymentSidebar(isDark)),
+                        ],
+                      );
+                    } else {
+                      return Column(
+                        children: [
+                          _buildPaymentSidebar(isDark),
+                          const SizedBox(height: 24),
+                          _buildReceiptPreview(isDark),
+                        ],
+                      );
+                    }
+                  },
+                ),
+              ],
             ),
           ),
         ),
@@ -487,6 +530,42 @@ class _ScreenCheckoutState extends State<ScreenCheckout> {
                     ),
                   ),
                 ),
+                Obx(() {
+                  final taxAmt = _itemsListController.checkoutTaxAmount.value;
+                  if (taxAmt <= 0 || _itemsListController.salesTaxes.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  final cur = _userController.user.value?.baseCurrence ?? '';
+                  final taxStr = CurrenceConverter.getCurrenceFloatInStrings(
+                    taxAmt,
+                    cur,
+                  );
+                  final taxes = _itemsListController.salesTaxes;
+                  final anyInclusive = taxes.any(
+                    (t) => t.activated && t.pricesIncludeTax,
+                  );
+                  final anyExclusive = taxes.any(
+                    (t) => t.activated && !t.pricesIncludeTax,
+                  );
+                  final label = anyInclusive && anyExclusive
+                      ? "VAT (mixed): $taxStr"
+                      : anyInclusive
+                      ? "Includes VAT: $taxStr"
+                      : "VAT: $taxStr";
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
+                      ),
+                    ),
+                  );
+                }),
               ],
             ),
           ),

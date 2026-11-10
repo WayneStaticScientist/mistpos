@@ -9,8 +9,16 @@ enum PosAlign { left, center, right }
 class EscPosBuilder {
   final List<int> _bytes = <int>[];
 
+  EscPosBuilder([dynamic _]);
+
+  List<int> get bytes => _bytes;
+
   void init() {
     _bytes.addAll([0x1B, 0x40]);
+  }
+
+  void openCashDrawer({dynamic pin}) {
+    _bytes.addAll(EscPosHelper.openDrawer());
   }
 
   void text(String text, {PosAlign align = PosAlign.left, bool bold = false}) {

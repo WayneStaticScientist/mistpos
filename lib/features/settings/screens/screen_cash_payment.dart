@@ -151,59 +151,99 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
           const SizedBox(width: 8),
         ],
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1200),
-            child: isDesktop
-                ? Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Left Column: Payment method and summary
-                      Expanded(
-                        flex: 6,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _buildPaymentMethodsCard(isDark, isDesktop: true),
-                          ],
-                        ),
+      body: Stack(
+        children: [
+          Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: isDesktop
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Left Column: Payment method and summary
+                          Expanded(
+                            flex: 6,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _buildPaymentMethodsCard(
+                                  isDark,
+                                  isDesktop: true,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 24),
+                          // Right Column: Summary, Tendered input, presets, and balance
+                          Expanded(
+                            flex: 5,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _buildTotalSummaryCard(isDark),
+                                const SizedBox(height: 20),
+                                _buildTenderedCard(isDark, isDesktop: true),
+                                const SizedBox(height: 20),
+                                _buildBalanceDisplay(),
+                              ],
+                            ),
+                          ),
+                        ],
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildTotalSummaryCard(isDark),
+                          const SizedBox(height: 24),
+                          _buildPaymentMethodsCard(isDark, isDesktop: false),
+                          const SizedBox(height: 24),
+                          _buildTenderedCard(isDark, isDesktop: false),
+                          const SizedBox(height: 24),
+                          _buildBalanceDisplay(),
+                        ],
                       ),
-                      const SizedBox(width: 24),
-                      // Right Column: Summary, Tendered input, presets, and balance
-                      Expanded(
-                        flex: 5,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _buildTotalSummaryCard(isDark),
-                            const SizedBox(height: 20),
-                            _buildTenderedCard(isDark, isDesktop: true),
-                            const SizedBox(height: 20),
-                            _buildBalanceDisplay(),
-                          ],
-                        ),
-                      ),
-                    ],
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+              ),
+            ),
+          ),
+          Obx(() {
+            if (!_itemsListController.receitsLoading.value) {
+              return const SizedBox.shrink();
+            }
+            return Container(
+              color: Colors.black54,
+              alignment: Alignment.center,
+              child: Card(
+                margin: const EdgeInsets.all(32),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _buildTotalSummaryCard(isDark),
-                      const SizedBox(height: 24),
-                      _buildPaymentMethodsCard(isDark, isDesktop: false),
-                      const SizedBox(height: 24),
-                      _buildTenderedCard(isDark, isDesktop: false),
-                      const SizedBox(height: 24),
-                      _buildBalanceDisplay(),
+                      const CircularProgressIndicator(),
+                      16.gapHeight,
+                      "Processing sale on server…".text(
+                        textAlign: TextAlign.center,
+                      ),
+                      8.gapHeight,
+                      "Waiting for server receipt and ZIMRA SubmitReceipt".text(
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 13,
+                        ),
+                      ),
                     ],
                   ),
-          ),
-        ),
+                ),
+              ),
+            );
+          }),
+        ],
       ),
       bottomNavigationBar: _buildBottomActions(),
     );
@@ -751,7 +791,12 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
                     ],
                   ),
                   child: ElevatedButton.icon(
-                    onPressed: _pay,
+                    onPressed:
+                        (_savingReceit ||
+                            _itemsListController.checkoutInProgress.value ||
+                            _itemsListController.receitsLoading.value)
+                        ? null
+                        : _pay,
                     icon: _savingReceit
                         ? const SizedBox(
                             width: 20,
@@ -902,45 +947,59 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
   }
 
   void _pay({bool creditPayment = false}) async {
-    final amount = double.tryParse(_amountController.text);
-    if (amount == null) {
-      Toaster.showError("Please enter a valid amount");
+    if (_savingReceit ||
+        _itemsListController.checkoutInProgress.value ||
+        _itemsListController.receitsLoading.value) {
       return;
     }
+    _savingReceit = true;
+    if (mounted) setState(() {});
 
-    final total = CurrenceConverter.prevailingAmount(
-      _itemsListController.totalPrice.value,
-      _userController.user.value?.baseCurrence ?? '',
-    );
+    try {
+      final amount = double.tryParse(_amountController.text);
+      if (amount == null) {
+        Toaster.showError("Please enter a valid amount");
+        return;
+      }
 
-    if (amount < total && !creditPayment) {
-      Toaster.showError("Insufficient funds for cash payment");
-      return;
-    }
+      final total = CurrenceConverter.prevailingAmount(
+        _itemsListController.totalPrice.value,
+        _userController.user.value?.baseCurrence ?? '',
+      );
 
-    setState(() => _savingReceit = true);
+      if (amount < total && !creditPayment) {
+        Toaster.showError("Insufficient funds for cash payment");
+        return;
+      }
 
-    if (_userController.user.value == null) {
-      Toaster.showError("User registration needed");
-      setState(() => _savingReceit = false);
-      return;
-    }
+      if (_userController.user.value == null) {
+        Toaster.showError("User registration needed");
+        return;
+      }
 
-    final state = await _itemsListController.addReceitFromItemModel(
-      CurrenceConverter.baseCurrency(amount),
-      _selectedPaymentMethod,
-      creditPayment: creditPayment,
-      allowOfflinePurchase:
-          _userController.user.value?.allowOfflinePurchase ?? false,
-      user: _userController.user.value!,
-      printReceits: _printerController.isPrinterConnected(),
-    );
+      final state = await _itemsListController.addReceitFromItemModel(
+        CurrenceConverter.baseCurrency(amount),
+        _selectedPaymentMethod,
+        creditPayment: creditPayment,
+        allowOfflinePurchase:
+            _userController.user.value?.allowOfflinePurchase ?? false,
+        user: _userController.user.value!,
+        printReceits: _printerController.isPrinterConnected(),
+      );
 
-    if (mounted) setState(() => _savingReceit = false);
-
-    if (state) {
-      Get.back();
-      Toaster.showSuccess("Payment successful");
+      if (state) {
+        Get.back();
+        final online =
+            _invController.company.value?.enableOnlineSales ?? false;
+        Toaster.showSuccess(
+          online
+              ? "Payment successful — server receipt ready"
+              : "Payment successful",
+        );
+      }
+    } finally {
+      _savingReceit = false;
+      if (mounted) setState(() {});
     }
   }
 }

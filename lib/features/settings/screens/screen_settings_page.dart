@@ -21,6 +21,9 @@ import 'package:mistpos/core/widgets/loaders/small_loader.dart';
 import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:mistpos/features/auth/screens/screen_user_profile.dart';
 import 'package:mistpos/features/settings/screens/screen_receit_designer.dart';
+import 'package:mistpos/features/receipt_design_v2/screens/screen_receipt_designer_v2.dart';
+import 'package:mistpos/features/settings/screens/screen_online_sales_settings.dart';
+import 'package:mistpos/features/settings/screens_zimra/screen_zimra_services.dart';
 import 'package:mistpos/features/inventory/controllers/items_controller.dart';
 import 'package:mistpos/features/settings/screens_gateways/automated_screen.dart';
 
@@ -446,14 +449,65 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                 if (_user.user.value?.role == 'admin' ||
                     _user.user.value?.role == 'manager') ...[
                   const Divider(height: 24),
-                  ListTile(
-                    onTap: () => Get.to(() => ScreenReceiptDesigner()),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
                     title: const Text(
-                      "Receipt Visual Designer",
+                      "Use Receipt Engine V2",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(
-                      "Customize and design printed slips layout dynamically",
+                      model.useReceiptDesignV2
+                          ? "Active: dynamic V2 templates, variables & cloud sharing"
+                          : "Active: classic V1 block layout",
+                      style: TextStyle(
+                        color: Colors.grey.shade500,
+                        fontSize: 12,
+                      ),
+                    ),
+                    value: model.useReceiptDesignV2,
+                    activeThumbColor: AppTheme.color(context),
+                    onChanged: (v) {
+                      setState(() {
+                        model.useReceiptDesignV2 = v;
+                        model.saveToStorage();
+                      });
+                    },
+                  ),
+                  const Divider(height: 24),
+                  ListTile(
+                    onTap: () => Get.to(() => const ScreenReceiptDesignerV2()),
+                    title: Row(
+                      children: [
+                        const Text(
+                          "Receipt Design V2",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withAlpha(35),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: Colors.green.withAlpha(80),
+                            ),
+                          ),
+                          child: const Text(
+                            "NEXT-GEN",
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    subtitle: Text(
+                      "Templates, variables, {list}, cloud marketplace, ZIMRA QR",
                       style: TextStyle(
                         color: Colors.grey.shade500,
                         fontSize: 12,
@@ -463,6 +517,31 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                     leading: Iconify(
                       Bx.receipt,
                       color: AppTheme.color(context),
+                    ),
+                    trailing: const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const Divider(height: 24),
+                  ListTile(
+                    onTap: () => Get.to(() => const ScreenReceiptDesigner()),
+                    title: const Text(
+                      "Receipt Design (Classic V1)",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      "Legacy drag-and-drop designer for backward compatibility",
+                      style: TextStyle(
+                        color: Colors.grey.shade500,
+                        fontSize: 12,
+                      ),
+                    ),
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Iconify(
+                      Bx.history,
+                      color: Colors.grey,
                     ),
                     trailing: const Icon(
                       Icons.arrow_forward_ios_rounded,
@@ -851,6 +930,64 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                       ),
                       const Divider(height: 24),
                       ListTile(
+                        onTap: () =>
+                            Get.to(() => const ScreenOnlineSalesSettings()),
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text(
+                          "Online Sales",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Obx(() {
+                          final on =
+                              _invController.company.value?.enableOnlineSales ??
+                              false;
+                          return Text(
+                            on
+                                ? "Active — server-first checkout & stock rules"
+                                : "Off — standard offline POS",
+                            style: TextStyle(
+                              color: Colors.grey.shade500,
+                              fontSize: 12,
+                            ),
+                          );
+                        }),
+                        leading: Iconify(
+                          Bx.cloud,
+                          color: AppTheme.color(context),
+                        ),
+                        trailing: const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const Divider(height: 24),
+                      ListTile(
+                        onTap: () => Get.to(() => const ScreenZimraServices()),
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text(
+                          "ZIMRA Fiscalization",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          "Configure FDMS fiscal device, fiscal day & receipt submission",
+                          style: TextStyle(
+                            color: Colors.grey.shade500,
+                            fontSize: 12,
+                          ),
+                        ),
+                        leading: Iconify(
+                          Bx.receipt,
+                          color: AppTheme.color(context),
+                        ),
+                        trailing: const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const Divider(height: 24),
+                      ListTile(
                         subtitle: Text(
                           "Configure and schedule daily WhatsApp digest reports",
                           style: TextStyle(
@@ -1112,11 +1249,79 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                         ),
                       ),
             ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text("Use Receipt Engine V2"),
+              subtitle: Text(
+                model.useReceiptDesignV2
+                    ? "Active: dynamic V2 templates, variables & cloud sharing"
+                    : "Active: classic V1 block layout",
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+              value: model.useReceiptDesignV2,
+              activeThumbColor: AppTheme.color(context),
+              onChanged: (v) {
+                setState(() {
+                  model.useReceiptDesignV2 = v;
+                  model.saveToStorage();
+                });
+              },
+            ).visibleIf(
+              _user.user.value?.role == 'admin' ||
+                  _user.user.value?.role == 'manager',
+            ),
             ListTile(
-              onTap: () => Get.to(() => ScreenReceiptDesigner()),
-              title: "Receipt Design".text(),
+              onTap: () => Get.to(() => const ScreenReceiptDesignerV2()),
+              title: Row(
+                children: [
+                  const Text("Receipt Design V2"),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 1,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withAlpha(35),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: Colors.green.withAlpha(80),
+                      ),
+                    ),
+                    child: const Text(
+                      "NEXT-GEN",
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              subtitle: const Text(
+                "Templates, variables, {list}, cloud marketplace, ZIMRA QR",
+                style: TextStyle(color: Colors.grey, fontSize: 11.5),
+              ),
               contentPadding: EdgeInsets.zero,
               leading: Iconify(Bx.receipt, color: AppTheme.color(context)),
+            ).visibleIf(
+              _user.user.value?.role == 'admin' ||
+                  _user.user.value?.role == 'manager',
+            ),
+            ListTile(
+              onTap: () => Get.to(() => const ScreenReceiptDesigner()),
+              title: "Receipt Design (Classic V1)".text(),
+              subtitle:
+                  "Legacy drag-and-drop designer for backward compatibility"
+                      .text(
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 11,
+                        ),
+                      ),
+              contentPadding: EdgeInsets.zero,
+              leading: const Iconify(Bx.history, color: Colors.grey),
             ).visibleIf(
               _user.user.value?.role == 'admin' ||
                   _user.user.value?.role == 'manager',
@@ -1488,6 +1693,46 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
                     leading: Iconify(Bx.time, color: AppTheme.color(context)),
                   ),
                   ListTile(
+                    onTap: () => Get.to(() => const ScreenOnlineSalesSettings()),
+                    contentPadding: EdgeInsets.zero,
+                    title: "Online sales".text(),
+                    subtitle: Obx(() {
+                      final on =
+                          _invController.company.value?.enableOnlineSales ??
+                          false;
+                      return (on
+                              ? "Active — server-first checkout & stock rules"
+                              : "Off — standard offline POS")
+                          .text(
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12,
+                            ),
+                          );
+                    }),
+                    trailing: Iconify(
+                      Bx.chevron_right,
+                      color: Colors.grey.shade500,
+                    ),
+                    leading: Iconify(Bx.cloud, color: AppTheme.color(context)),
+                  ),
+                  ListTile(
+                    onTap: () => Get.to(() => const ScreenZimraServices()),
+                    contentPadding: EdgeInsets.zero,
+                    title: "ZIMRA Fiscalization".text(),
+                    subtitle: "Configure FDMS fiscal device & receipts".text(
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                    trailing: Iconify(
+                      Bx.chevron_right,
+                      color: Colors.grey.shade500,
+                    ),
+                    leading: Iconify(
+                      Bx.receipt,
+                      color: AppTheme.color(context),
+                    ),
+                  ),
+                  ListTile(
                     subtitle: "send daily reports to whatsapp".text(
                       style: const TextStyle(color: Colors.grey, fontSize: 12),
                     ),
@@ -1663,6 +1908,7 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
     required bool enableCreditSale,
     required bool autoApproveAllExpenses,
     required bool shiftBasedSales,
+    bool? qrFiscilization,
   }) async {
     final company = _invController.company.value;
     if (company == null) {
@@ -1673,6 +1919,9 @@ class _ScreenSettingsPageState extends State<ScreenSettingsPage> {
     company.enableCreditSale = enableCreditSale;
     company.autoApproveAllExpenses = autoApproveAllExpenses;
     company.shiftBasedSales = shiftBasedSales;
+    if (qrFiscilization != null) {
+      company.zimraQrFiscilization = qrFiscilization;
+    }
     final response = await _adminController.updateCompany(
       company.toJson(),
       company.hexId,

@@ -12,6 +12,7 @@ import 'package:mistpos/features/settings/screens/screen_settings_page.dart';
 import 'package:mistpos/features/settings/screens/screen_shifts_screen.dart';
 import 'package:mistpos/features/settings/screens_currency/screen_currency.dart';
 import 'package:mistpos/features/settings/screens_gateways/automated_screen.dart';
+import 'package:mistpos/features/settings/screens_zimra/screen_zimra_services.dart';
 
 class MistMainNavigationSidebar extends StatelessWidget {
   final Function(String value) onTap;
@@ -138,6 +139,15 @@ class MistMainNavigationSidebar extends StatelessWidget {
                     );
                   },
                 ),
+                if (isAdmin) ...[
+                  _SidebarItem(
+                    icon: Bx.receipt,
+                    label: 'Zimra Fiscalization',
+                    isSelected: false,
+                    isExtended: isExtended,
+                    onTap: () => Get.to(() => const ScreenZimraServices()),
+                  ),
+                ],
                 _SidebarItem(
                   icon: Bx.cog,
                   label: 'Settings',

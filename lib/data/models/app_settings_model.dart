@@ -20,6 +20,7 @@ class AppSettingsModel {
   String cashDrawerTriggerMode;
   int lastItemsSyncTime = 0;
   String syncedCompanyId;
+  bool useReceiptDesignV2;
   
   bool get printToMultiplePrinters => printingMode == "multi";
   set printToMultiplePrinters(bool value) {
@@ -43,6 +44,7 @@ class AppSettingsModel {
     this.cashDrawerTriggerMode = "all",
     this.lastItemsSyncTime = 0,
     this.syncedCompanyId = "",
+    this.useReceiptDesignV2 = true,
   });
   factory AppSettingsModel.fromJson(Map<String, dynamic> json) =>
       AppSettingsModel(
@@ -66,6 +68,7 @@ class AppSettingsModel {
         cashDrawerTriggerMode: json["cashDrawerTriggerMode"] ?? "all",
         lastItemsSyncTime: json["lastItemsSyncTime"] ?? 0,
         syncedCompanyId: json["syncedCompanyId"] ?? "",
+        useReceiptDesignV2: json["useReceiptDesignV2"] ?? true,
       );
   Map<String, dynamic> toJson() => {
     "darkMode": darkMode,
@@ -84,6 +87,7 @@ class AppSettingsModel {
     "cashDrawerTriggerMode": cashDrawerTriggerMode,
     "lastItemsSyncTime": lastItemsSyncTime,
     "syncedCompanyId": syncedCompanyId,
+    "useReceiptDesignV2": useReceiptDesignV2,
   };
   static AppSettingsModel fromStorage() {
     GetStorage box = GetStorage();

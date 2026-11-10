@@ -481,27 +481,54 @@ class InventoryController extends GetxController {
   Rx<CompanyModel?> company = Rx<CompanyModel?>(null);
   Future<void> loadCompany() async {
     GetStorage storage = GetStorage();
-    company.value = CompanyModel.fromStorage();
-    companyError.value = "";
-    final response = await Net.get("/company");
-    loadingCompany.value = false;
-    if (response.hasError) {
-      companyError.value = response.response;
+    final userMap = storage.read("user");
+    if (userMap == null) {
+      company.value = null;
+      loadingCompany.value = false;
       return;
     }
-    company.value = CompanyModel.fromJson(response.body['update']);
-    storage.write("company", company.value!.toJson());
-    final setingsStorage = AppSettingsModel.fromStorage();
-    if (company.value!.receitExtras.isNotEmpty) {
-      setingsStorage.extras = company.value!.receitExtras;
-      setingsStorage.saveToStorage();
+    final activeCompanyId =
+        userMap is Map ? userMap['company']?.toString() : null;
+    final cached = company.value ?? CompanyModel.fromStorage();
+    if (cached != null &&
+        (activeCompanyId == null ||
+            activeCompanyId.isEmpty ||
+            cached.hexId == activeCompanyId)) {
+      company.value = cached;
+    } else {
+      company.value = null;
+      CompanyModel.clearStorage();
     }
-    if (company.value!.receiptDesignV2 != null) {
-      ReceiptDesignV2Controller.applyRemoteReceiptDesignMap(
-        company.value!.receiptDesignV2,
-      );
+    companyError.value = "";
+    if (company.value == null) {
+      loadingCompany.value = true;
     }
-    company.value?.saveToStorage();
+    try {
+      final response = await Net.get("/company");
+      if (response.hasError) {
+        if (company.value == null) {
+          companyError.value = response.response;
+        }
+        return;
+      }
+      if (response.body != null && response.body['update'] != null) {
+        company.value = CompanyModel.fromJson(response.body['update']);
+        storage.write("company", company.value!.toJson());
+        final setingsStorage = AppSettingsModel.fromStorage();
+        if (company.value!.receitExtras.isNotEmpty) {
+          setingsStorage.extras = company.value!.receitExtras;
+          setingsStorage.saveToStorage();
+        }
+        if (company.value!.receiptDesignV2 != null) {
+          ReceiptDesignV2Controller.applyRemoteReceiptDesignMap(
+            company.value!.receiptDesignV2,
+          );
+        }
+        company.value?.saveToStorage();
+      }
+    } finally {
+      loadingCompany.value = false;
+    }
   }
 
   Future<bool> updateCurrency(ExchangeRateModel model) async {

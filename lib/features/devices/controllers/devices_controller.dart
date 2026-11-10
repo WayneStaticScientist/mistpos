@@ -13,10 +13,18 @@ import 'package:mistpos/data/models/customer_model.dart';
 import 'package:mistpos/core/utils/currence_converter.dart';
 import 'package:mistpos/data/models/item_receit_model.dart';
 import 'package:mistpos/data/models/app_settings_model.dart';
+import 'package:mistpos/data/models/company_model.dart';
 import 'package:mistpos/data/models/printer_device_model.dart';
+import 'package:mistpos/core/services/api/network_wrapper.dart';
 import 'package:mistpos/core/utils/esc_pos_builder.dart';
+import 'package:mistpos/core/utils/zimra_helper.dart';
+import 'package:mistpos/core/utils/zimra_receipt_type.dart';
+import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
+import 'package:mistpos/features/receipt_design_v2/data/default_v2_templates.dart';
+import 'package:mistpos/features/receipt_design_v2/engine/receipt_template_engine.dart';
+import 'package:mistpos/features/receipt_design_v2/models/receipt_template_v2_model.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:flutter_pos_printer_platform_image_3/flutter_pos_printer_platform_image_3.dart';
-import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
 
 class DevicesController extends GetxController {
   RxBool hasPrinterConnections = RxBool(false);
@@ -324,6 +332,8 @@ class DevicesController extends GetxController {
   /// Dispatches the ESC/POS payload to printers based on current mode.
   /// Single mode: sends to the currently registered cashier printer.
   /// Multi mode: iterates over all selected printers sequentially.
+  static Future<void> dispatchPrint(EscPosBuilder b) => _dispatchPrint(b);
+
   static Future<void> _dispatchPrint(EscPosBuilder b) async {
     final model = AppSettingsModel.fromStorage();
 
@@ -355,146 +365,279 @@ class DevicesController extends GetxController {
 
   // ─── Receipt Printing ──────────────────────────────────────
 
+  static bool receiptHasZimraQrData(ItemReceitModel r) {
+    if (!r.fiscalized) return false;
+    if (r.zimraQrCodeUrl?.trim().isNotEmpty ?? false) return true;
+    if (r.zimraSignature?.trim().isNotEmpty ?? false) return true;
+    return r.zimraReceiptGlobalNo != null && r.zimraDeviceId != null;
+  }
+
+  static CompanyModel? _companyForZimraPrint() {
+    if (Get.isRegistered<InventoryController>()) {
+      final c = Get.find<InventoryController>().company.value;
+      if (c != null) return c;
+    }
+    return CompanyModel.fromStorage();
+  }
+
+  /// FDMS verification QR + verification code (independent of receipt designer toggles).
+  static void appendZimraFiscalQrToEscPos(
+    EscPosBuilder b,
+    ItemReceitModel itemReceitModel,
+    CompanyModel? companyForQr,
+  ) {
+    if (!receiptHasZimraQrData(itemReceitModel)) return;
+    final isTest = companyForQr?.zimraIsTest ?? true;
+    b.feed(1);
+    b.text("--- QR CODE ---", align: PosAlign.center, bold: true);
+    OfflinePrinter.printQrCode(
+      b,
+      ZimraHelper.generateQrUrl(
+        itemReceitModel,
+        isTest: isTest,
+        qrUrlFromConfig: companyForQr?.zimraQrUrl,
+      ),
+    );
+    final sig = itemReceitModel.zimraSignature;
+    if (sig != null && sig.isNotEmpty) {
+      b.feed(1);
+      b.text("Verification code:", align: PosAlign.center);
+      b.text(
+        ZimraHelper.extractVerificationCode(sig),
+        align: PosAlign.center,
+      );
+    }
+    b.feed(1);
+    b.text(
+      "You can verify this receipt manually at",
+      align: PosAlign.center,
+    );
+    b.text(ZimraHelper.manualZimraUrl, align: PosAlign.center);
+    b.feed(1);
+  }
+
   static Future<void> printReceitToBackround(
     ItemReceitModel itemReceitModel,
     User user,
     CustomerModel? customer,
     List<TaxModel> salesTaxes,
   ) async {
-    final profile = await CapabilityProfile.load();
-    final b = EscPosBuilder(Generator(PaperSize.mm58, profile));
+    CustomerModel? effectiveCustomer = customer;
+    if (effectiveCustomer == null &&
+        itemReceitModel.customerId != null &&
+        itemReceitModel.customerId!.isNotEmpty) {
+      try {
+        final response = await Net.get(
+          "/cashier/customer/${itemReceitModel.customerId}",
+        );
+        if (!response.hasError && response.body['customer'] != null) {
+          effectiveCustomer = CustomerModel.fromJson(response.body['customer']);
+        }
+      } catch (_) {}
+    }
+
+    final b = EscPosBuilder();
+    b.init();
     final model = AppSettingsModel.fromStorage();
     if (model.enableCashDrawer) {
       if (model.cashDrawerTriggerMode == "all" ||
           (model.cashDrawerTriggerMode == "cash" &&
-              itemReceitModel.payment == "cash")) {
+              itemReceitModel.payment.toLowerCase() == "cash")) {
         b.openCashDrawer();
       }
     }
-    int receitWidth = model.printerRecietLength;
-    bool enableQrCode = model.enableQrCode;
-    String padRight(String text, int length) => text.padRight(length, ' ');
-    for (final row in model.extras) {
-      if (!row.enabled) {
-        continue;
-      }
-      if (row.key == "Company Logo" && row.type == "system") {
-        await OfflinePrinter.printLogo(model, b);
-        continue;
-      }
-      if (row.value == "company" && row.type == "system") {
-        b.text(
-          user.companyName.toUpperCase().toString(),
-          align: PosAlign.center,
-          bold: true,
-        );
-        b.feed(2);
-        b.text(
-          'Company: ${user.companyName.toString()}',
-          align: PosAlign.center,
-        );
-        continue;
-      }
-      if (row.value == "seller" && row.type == "system") {
-        b.text('Role: ${user.role.toString()}');
-        b.text('Pos: ${user.till.toString()}');
-        continue;
-      }
-      if (row.value == "time" && row.type == "system") {
-        b.text(
-          'Time: ${DateTime.now().toString().substring(0, 19)}',
-          align: PosAlign.center,
-        );
-        continue;
-      }
-      if (row.value == "fiscal" && row.type == "system") {
-        b.feed(1);
-        b.text('*** FISCAL RECEIPT ***', align: PosAlign.center, bold: true);
-        b.feed(1);
-        b.text('.' * receitWidth);
-        continue;
+
+    if (model.useReceiptDesignV2) {
+      ReceiptTemplateV2Model activeV2;
+      final storage = GetStorage();
+      final activeJson =
+          storage.read<Map>('v2_active_receipt_template') ??
+          storage.read<Map>('active_receipt_template_v2');
+      if (activeJson != null) {
+        try {
+          activeV2 = ReceiptTemplateV2Model.fromJson(
+            Map<String, dynamic>.from(activeJson),
+          );
+        } catch (_) {
+          activeV2 = DefaultV2Templates.zimraFiscal;
+        }
+      } else {
+        activeV2 = DefaultV2Templates.zimraFiscal;
       }
 
-      if (row.value == "items" && row.type == "system") {
-        OfflinePrinter.printReceitItems(
-          model: model,
-          b: b,
-          itemReceitModel: itemReceitModel,
-          user: user,
-          salesTaxes: salesTaxes,
-        );
-      }
-      if (row.value == "customer" && row.type == "system") {
-        if (customer != null) {
-          b.feed(1);
-          b.text("--- CUSTOMER INFO ---", align: PosAlign.center, bold: true);
-          b.feed(1);
-          b.text('Customer: ${customer.fullName}');
-          b.text('Phone: ${customer.phoneNumber}');
-          b.text('Email: ${customer.email}');
-          b.text('Address: ${customer.address}');
-          b.feed(1);
+      ReceiptTemplateV2Engine.printToEscPosBuilder(
+        b: b,
+        template: activeV2,
+        itemReceitModel: itemReceitModel,
+        user: user,
+        customer: effectiveCustomer,
+        company: _companyForZimraPrint(),
+        salesTaxes: salesTaxes,
+        appSettings: model,
+      );
+    } else {
+      int receitWidth = model.printerRecietLength;
+      bool enableQrCode = model.enableQrCode;
+      bool zimraQrPrintedOnReceipt = false;
+      String padRight(String text, int length) => text.padRight(length, ' ');
+      for (final row in model.extras) {
+        if (!row.enabled) {
+          continue;
         }
-        continue;
-      }
-      if (row.value == "qrcode" && row.type == "system") {
-        if (enableQrCode) {
-          b.feed(1);
-          b.text("--- QR CODE ---", align: PosAlign.center, bold: true);
-          b.qrCode(itemReceitModel.label);
-          b.feed(1);
+        if (row.key == "Company Logo" && row.type == "system") {
+          OfflinePrinter.printLogo(model, b);
+          continue;
         }
-        continue;
+        if (row.value == "company" && row.type == "system") {
+          b.text(
+            user.companyName.toUpperCase().toString(),
+            align: PosAlign.center,
+            bold: true,
+          );
+          b.feed(2);
+          b.text(
+            'Company: ${user.companyName.toString()}',
+            align: PosAlign.center,
+          );
+          continue;
+        }
+        if (row.value == "seller" && row.type == "system") {
+          b.text('Role: ${user.role.toString()}');
+          b.text('Pos: ${user.till.toString()}');
+          continue;
+        }
+        if (row.value == "time" && row.type == "system") {
+          b.text(
+            'Time: ${DateTime.now().toString().substring(0, 19)}',
+            align: PosAlign.center,
+          );
+          continue;
+        }
+        if (row.value == "fiscal" && row.type == "system") {
+          b.feed(1);
+          b.text(
+            ZimraReceiptDisplay.printHeader(itemReceitModel),
+            align: PosAlign.center,
+            bold: true,
+          );
+          if (itemReceitModel.fiscalized) {
+            b.text(
+              'Receipt counter: ${itemReceitModel.zimraFiscalDayNo ?? ""}/${itemReceitModel.zimraReceiptGlobalNo ?? ""}',
+              align: PosAlign.center,
+            );
+            b.text(
+              'Fiscal Device Id: ${itemReceitModel.zimraDeviceId ?? ""}',
+              align: PosAlign.center,
+            );
+          }
+          b.feed(1);
+          b.text('.' * receitWidth);
+          continue;
+        }
+
+        if (row.value == "items" && row.type == "system") {
+          OfflinePrinter.printReceitItems(
+            model: model,
+            b: b,
+            itemReceitModel: itemReceitModel,
+            user: user,
+            salesTaxes: salesTaxes,
+          );
+        }
+        if (row.value == "customer" && row.type == "system") {
+          if (effectiveCustomer != null) {
+            b.feed(1);
+            b.text(
+              "--- CUSTOMER INFO ---",
+              align: PosAlign.center,
+              bold: true,
+            );
+            b.feed(1);
+            b.text('Customer: ${effectiveCustomer.fullName}');
+            b.text('Phone: ${effectiveCustomer.phoneNumber}');
+            b.text('Email: ${effectiveCustomer.email}');
+            b.text('Address: ${effectiveCustomer.address}');
+            b.feed(1);
+          }
+          continue;
+        }
+        if (row.value == "qrcode" && row.type == "system") {
+          final companyForQr = _companyForZimraPrint();
+          final hasFiscal = receiptHasZimraQrData(itemReceitModel);
+          final zimraQrOnReceipt =
+              companyForQr?.zimraQrFiscilization == true &&
+              itemReceitModel.fiscalized;
+          if (!enableQrCode && !zimraQrOnReceipt && !hasFiscal) {
+            continue;
+          }
+          if (hasFiscal || zimraQrOnReceipt) {
+            appendZimraFiscalQrToEscPos(b, itemReceitModel, companyForQr);
+            zimraQrPrintedOnReceipt = true;
+          } else if (enableQrCode) {
+            b.feed(1);
+            b.text("--- QR CODE ---", align: PosAlign.center, bold: true);
+            OfflinePrinter.printQrCode(b, itemReceitModel.label);
+            b.feed(1);
+          }
+          continue;
+        }
+        if (row.value == "label" && row.type == "system") {
+          b.text('--- END ---', align: PosAlign.center);
+          b.feed(1);
+          b.text(itemReceitModel.label, align: PosAlign.center);
+          b.feed(1);
+          continue;
+        }
+        if (row.type == "normal-spaced") {
+          String value = sanitizeInput(
+            row.value,
+            user,
+            effectiveCustomer,
+            itemReceitModel,
+          );
+          String label = padRight(row.key, receitWidth - value.length) + value;
+          b.text(label, bold: row.isBold);
+          continue;
+        }
+        if (row.type == "normal") {
+          b.text(
+            "${row.key} : ${sanitizeInput(row.value, user, effectiveCustomer, itemReceitModel)}",
+            bold: row.isBold,
+          );
+          continue;
+        }
+        if (row.type == "space") {
+          b.feed(1);
+          continue;
+        }
+        if (row.type == "repeat") {
+          String value = row.value * receitWidth;
+          b.text(value);
+          continue;
+        }
+        if (row.type == "comment") {
+          b.text(
+            sanitizeInput(row.value, user, effectiveCustomer, itemReceitModel),
+            align: row.align == "center"
+                ? PosAlign.center
+                : (row.align == "left" ? PosAlign.left : PosAlign.right),
+            bold: row.isBold,
+          );
+          continue;
+        }
       }
-      if (row.value == "label" && row.type == "system") {
-        b.text('--- END ---', align: PosAlign.center);
-        b.feed(1);
-        b.text(itemReceitModel.label, align: PosAlign.center);
-        b.feed(1);
-        continue;
-      }
-      if (row.type == "normal-spaced") {
-        String value = sanitizeInput(
-          row.value,
-          user,
-          customer,
+
+      if (!zimraQrPrintedOnReceipt) {
+        appendZimraFiscalQrToEscPos(
+          b,
           itemReceitModel,
+          _companyForZimraPrint(),
         );
-        String label = padRight(row.key, receitWidth - value.length) + value;
-        b.text(label, bold: row.isBold);
-        continue;
       }
-      if (row.type == "normal") {
-        b.text(
-          "${row.key} : ${sanitizeInput(row.value, user, customer, itemReceitModel)}",
-          bold: row.isBold,
-        );
-        continue;
-      }
-      if (row.type == "space") {
-        b.feed(1);
-        continue;
-      }
-      if (row.type == "repeat") {
-        String value = row.value * receitWidth;
-        b.text(value);
-        continue;
-      }
-      if (row.type == "comment") {
-        b.text(
-          sanitizeInput(row.value, user, customer, itemReceitModel),
-          align: row.align == "center"
-              ? PosAlign.center
-              : (row.align == "left" ? PosAlign.left : PosAlign.right),
-          bold: row.isBold,
-        );
-        continue;
-      }
+
+      b.cut();
     }
 
-    // --- SEPARATOR and ITEM HEADER (Manually Aligned) ---
-
-    b.cut();
     _dispatchPrint(b);
   }
 
@@ -547,14 +690,14 @@ class DevicesController extends GetxController {
   // ─── Shift Printing ──────────────────────────────────────
 
   static Future<void> printShift(ShiftsModel shift, User user) async {
-    final profile = await CapabilityProfile.load();
-    final b = EscPosBuilder(Generator(PaperSize.mm58, profile));
+    final b = EscPosBuilder();
+    b.init();
     final model = AppSettingsModel.fromStorage();
     int receitWidth = model.printerRecietLength;
     bool enableQrCode = model.enableQrCode;
     String padRight(String text, int length) => text.padRight(length, ' ');
     if (model.receitLogoPath.isNotEmpty) {
-      await OfflinePrinter.printLogo(model, b);
+      OfflinePrinter.printLogo(model, b);
     }
     b.text(
       user.companyName.toUpperCase().toString(),

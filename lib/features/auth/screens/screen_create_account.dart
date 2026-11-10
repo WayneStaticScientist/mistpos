@@ -28,6 +28,14 @@ class _ScreenCreateAccountState extends State<ScreenCreateAccount> {
   bool _passwordVisible = false;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _userController.authError.value = "";
+    });
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _countryController.dispose();
@@ -240,6 +248,47 @@ class _ScreenCreateAccountState extends State<ScreenCreateAccount> {
                   primary: primary,
                 ).animate(delay: 380.ms).fadeIn().slideY(begin: 0.2, end: 0),
                 const SizedBox(height: 36),
+
+                // Error message
+                Obx(() {
+                  if (_userController.authError.value.isNotEmpty) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 24),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent.withAlpha(20),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.redAccent.withAlpha(50),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.error_outline_rounded,
+                            color: Colors.redAccent,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              _userController.authError.value,
+                              style: const TextStyle(
+                                color: Colors.redAccent,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ).animate().fadeIn().slideY(begin: -0.2, end: 0);
+                  }
+                  return const SizedBox.shrink();
+                }),
 
                 // Create Account button
                 Obx(

@@ -53,11 +53,38 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
         if (_inventoryController.loadingCompany.value) {
           return const Center(child: MistLoader1());
         }
-        if (_inventoryController.companyError.value.isNotEmpty) {
-          return Center(child: Text(_inventoryController.companyError.value));
+        if (_inventoryController.companyError.value.isNotEmpty &&
+            _inventoryController.company.value == null) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(_inventoryController.companyError.value),
+                const SizedBox(height: 12),
+                TextButton.icon(
+                  onPressed: () => _inventoryController.loadCompany(),
+                  icon: const Icon(Icons.refresh),
+                  label: const Text("Retry"),
+                ),
+              ],
+            ),
+          );
         }
         if (_inventoryController.company.value == null) {
-          return const Center(child: Text("No company found"));
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text("No company found"),
+                const SizedBox(height: 12),
+                TextButton.icon(
+                  onPressed: () => _inventoryController.loadCompany(),
+                  icon: const Icon(Icons.refresh),
+                  label: const Text("Reload"),
+                ),
+              ],
+            ),
+          );
         }
 
         final company = _inventoryController.company.value!;
@@ -366,7 +393,7 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      validUntil != null
+                      validUntil != null && validUntil.year > 1970
                           ? "Valid until ${DateFormat('dd MMM yyyy').format(validUntil)}"
                           : "No active subscription",
                       style: TextStyle(
@@ -1064,9 +1091,12 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
       );
       if (mounted) setState(() {});
     } else {
-      Toaster.showError(
-        response.body?['error']?.toString() ?? response.response,
-      );
+      final rawErr =
+          response.body?['error']?.toString() ?? response.response;
+      final friendlyErr = rawErr.contains("pem.replace")
+          ? "Device private key is missing on the server. Open Device Registration and click 'Register & Pair Device' (or 'Unlink Device' if this company doesn't use ZIMRA)."
+          : rawErr;
+      Toaster.showError(friendlyErr);
     }
   }
 
@@ -1078,11 +1108,15 @@ class _ScreenZimraServicesState extends State<ScreenZimraServices> {
       Toaster.showSuccess(msg);
       _inventoryController.loadCompany();
     } else {
-      final errMsg =
-          response.body?['error'] ??
-          response.body?['message'] ??
-          'Unknown error';
-      Toaster.showError("Open day failed: $errMsg");
+      final rawErr = (response.body?['error'] ??
+              response.body?['message'] ??
+              response.response ??
+              'Unknown error')
+          .toString();
+      final friendlyErr = rawErr.contains("pem.replace")
+          ? "Device private key is missing on the server. Open Device Registration and click 'Register & Pair Device' (or 'Unlink Device' if this company doesn't use ZIMRA)."
+          : "Open day failed: $rawErr";
+      Toaster.showError(friendlyErr);
     }
   }
 
@@ -1286,7 +1320,12 @@ class _ScreenZimraRegistrationState extends State<ScreenZimraRegistration> {
       return;
     }
 
-    final certificate = response["certificate"] ?? "MOCK_CERTIFICATE_DATA";
+    final certificate = response["certificate"];
+    if (certificate == null || certificate.toString().isEmpty) {
+      setState(() => _isLoading = false);
+      Toaster.showError("ZIMRA registration did not return a certificate.");
+      return;
+    }
     DateTime validTill;
     try {
       validTill = response["certificateValidTill"] != null
@@ -1297,17 +1336,20 @@ class _ScreenZimraRegistrationState extends State<ScreenZimraRegistration> {
     }
     final privateKey = response["privateKey"];
 
+    final zimraMap = <String, dynamic>{
+      "deviceId": deviceId,
+      "deviceSerialNo": _serialNoController.text,
+      "activationKey": _activationKeyController.text,
+      "certificate": certificate,
+      "certificateValidTill": validTill.toIso8601String(),
+      "isTest": widget.company.zimraIsTest ?? true,
+      if (privateKey != null && privateKey.toString().isNotEmpty)
+        "privateKey": privateKey,
+    };
+
     final updateData = {
       "name": widget.company.name,
-      "zimra": {
-        "deviceId": deviceId,
-        "deviceSerialNo": _serialNoController.text,
-        "activationKey": _activationKeyController.text,
-        "certificate": certificate,
-        "certificateValidTill": validTill.toIso8601String(),
-        "privateKey": privateKey,
-        "isTest": widget.company.zimraIsTest ?? true,
-      },
+      "zimra": zimraMap,
     };
 
     final updateSuccess = await _adminController.updateCompany(
@@ -1349,6 +1391,63 @@ class _ScreenZimraRegistrationState extends State<ScreenZimraRegistration> {
               "Registered with ZIMRA; run Connectivity Diagnostics to confirm mTLS.",
         );
       }
+    }
+  }
+
+  Future<void> _handleUnlinkDevice() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Unlink Fiscal Device?"),
+        content: const Text(
+          "This will remove the ZIMRA Device ID, Serial Number, and Certificate from this company.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text("Unlink Device"),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+
+    setState(() => _isLoading = true);
+    final updateData = {
+      "name": widget.company.name,
+      "zimra": {
+        "deviceId": null,
+        "deviceSerialNo": null,
+        "activationKey": null,
+        "certificate": null,
+        "certificateValidTill": null,
+        "privateKey": null,
+        "fiscalDayStatus": "FiscalDayClosed",
+      },
+    };
+    final ok = await _adminController.updateCompany(
+      updateData,
+      widget.company.hexId,
+    );
+    setState(() => _isLoading = false);
+    if (ok) {
+      widget.company.zimraDeviceId = null;
+      widget.company.zimraDeviceSerialNo = null;
+      widget.company.zimraActivationKey = null;
+      widget.company.zimraCertificate = null;
+      widget.company.zimraCertificateValidTill = null;
+      widget.company.saveToStorage();
+      await Get.find<InventoryController>().loadCompany();
+      Toaster.showSuccess("ZIMRA device unlinked from this company");
+      Get.back();
     }
   }
 
@@ -1436,11 +1535,39 @@ class _ScreenZimraRegistrationState extends State<ScreenZimraRegistration> {
 
                 if (_isLoading)
                   const Center(child: MistLoader1())
-                else
+                else ...[
                   MistFormButton(
                     label: "Register & Pair Device",
                     onTap: _handleRegisterDevice,
                   ),
+                  if (widget.company.zimraDeviceId != null ||
+                      widget.company.zimraCertificate != null) ...[
+                    16.gapHeight,
+                    OutlinedButton.icon(
+                      onPressed: _handleUnlinkDevice,
+                      icon: const Icon(
+                        Icons.link_off_rounded,
+                        color: Colors.redAccent,
+                      ),
+                      label: const Text(
+                        "Unlink / Remove Device from this Company",
+                        style: TextStyle(
+                          color: Colors.redAccent,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                        side: BorderSide(
+                          color: Colors.redAccent.withAlpha(120),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ],
             ),
           ),
@@ -2385,15 +2512,15 @@ class _ScreenZimraPreferencesState extends State<ScreenZimraPreferences> {
   void _savePreferences() async {
     setState(() => isSaving = true);
     final response = await _adminController.updateCompany({
+      "name": widget.company.name,
       "zimra": {
-        ...widget.company.toJson()['zimra'] ?? {},
         "autoOpenFiscalDay": autoOpenFiscalDay,
         "allowOfflineReceipts": allowOfflineReceipts,
       },
     }, widget.company.hexId);
 
     setState(() => isSaving = false);
-    if (!response) {
+    if (response) {
       Toaster.showSuccess("Preferences saved successfully");
       widget.company.zimraAutoOpenFiscalDay = autoOpenFiscalDay;
       widget.company.zimraAllowOfflineReceipts = allowOfflineReceipts;

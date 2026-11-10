@@ -390,6 +390,11 @@ class CompanyModel {
     storage.write("company", toJson());
   }
 
+  static void clearStorage() {
+    GetStorage storage = GetStorage();
+    storage.remove("company");
+  }
+
   static CompanyModel? fromStorage() {
     GetStorage storage = GetStorage();
     if (!storage.hasData("company")) return null;

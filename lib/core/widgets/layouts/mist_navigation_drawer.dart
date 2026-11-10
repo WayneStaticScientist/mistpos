@@ -21,6 +21,7 @@ import 'package:mistpos/features/settings/screens/tax_list_screens.dart';
 import 'package:mistpos/features/settings/screens_currency/screen_currency.dart';
 import 'package:mistpos/features/settings/screens_gateways/automated_screen.dart';
 import 'package:mistpos/features/settings/screens_gateways/payment_gateway.dart';
+import 'package:mistpos/features/settings/screens_zimra/screen_zimra_services.dart';
 import 'package:mistpos/features/support/screens/sales_help.dart';
 import 'package:mistpos/features/inventory/navs/nav_items.dart';
 import 'package:mistpos/features/support/screens/screen_about.dart';
@@ -267,6 +268,14 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
                           },
                         ),
                         _DrawerItem(
+                          icon: Bx.receipt,
+                          label: 'Zimra Fiscalization',
+                          onTap: () {
+                            Get.back();
+                            Get.to(() => const ScreenZimraServices());
+                          },
+                        ),
+                        _DrawerItem(
                           icon: Bx.money,
                           label: 'Currencies',
                           onTap: () {
@@ -341,6 +350,7 @@ class _MistMainNavigationViewState extends State<MistMainNavigationView> {
       {'icon': Bx.network_chart, 'label': 'Online Dashboard', 'onTap': () { Get.back(); Net.lauchDashboardUrl(); }, 'admin': true},
       {'icon': Bx.analyse, 'label': 'Subscriptions', 'onTap': () { Get.back(); Get.to(() => ScreenSubscription()); }, 'admin': true},
       {'icon': Bx.bxl_visa, 'label': 'Payment Gateways', 'onTap': () { Get.back(); Get.to(() => ScreenPaymentGetway()); }, 'admin': true},
+      {'icon': Bx.receipt, 'label': 'Zimra Fiscalization', 'onTap': () { Get.back(); Get.to(() => const ScreenZimraServices()); }, 'admin': true},
       {'icon': Bx.money, 'label': 'Currencies', 'onTap': () { Get.back(); Get.to(() => ScreenCurrency()); }, 'admin': true},
       {'icon': Carbon.information, 'label': 'Sales Help', 'onTap': () { Get.back(); Get.to(() => SalesHelp()); }, 'admin': false},
       {'icon': Bx.help_circle, 'label': 'Help & Support', 'onTap': () { Get.back(); Net.launchSupport(); }, 'admin': false},

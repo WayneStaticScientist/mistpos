@@ -2,11 +2,13 @@ import 'package:get/get.dart';
 import 'package:mistpos/core/utils/toast.dart';
 import 'package:mistpos/data/models/user_model.dart';
 import 'package:mistpos/data/models/token_model.dart';
+import 'package:mistpos/data/models/company_model.dart';
 import 'package:mistpos/core/services/api/network_wrapper.dart';
 import 'package:mistpos/features/settings/screens/screen_main.dart';
 import 'package:mistpos/core/services/api/auth_interceptor.dart';
 import 'package:mistpos/features/auth/screens/screen_splash.dart';
 import 'package:mistpos/core/services/logs/log_service.dart';
+import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 
 class UserController extends GetxController {
   RxBool loading = RxBool(false);
@@ -29,6 +31,7 @@ class UserController extends GetxController {
     if (response.hasError) {
       if (response.statusCode == 401) {
         User.clearStorage();
+        CompanyModel.clearStorage();
         TokenModel.fromStorage();
         user.value = null;
       }
@@ -45,16 +48,21 @@ class UserController extends GetxController {
       final response = await Net.post("/user/register", data: userData.toMap());
       if (response.hasError) {
         authError.value = response.response;
+        Toaster.showError(response.response);
         return;
       }
       if (response.body['user'] == null) {
         authError.value = "Response send an empty response";
+        Toaster.showError(authError.value);
         return;
       }
       user.value = User.fromMap(response.body['user']);
       User.saveToStorage(user.value!);
       final token = TokenModel.fromJson(response.body['tokens']);
       token.saveToStorage();
+      if (Get.isRegistered<InventoryController>()) {
+        Get.find<InventoryController>().loadCompany();
+      }
       
       LogService.logEvent(
         actionType: 'LOGIN',
@@ -64,6 +72,7 @@ class UserController extends GetxController {
       Get.offAll(() => ScreenMain());
     } catch (e) {
       authError.value = e.toString();
+      Toaster.showError(authError.value);
     } finally {
       loading.value = false;
     }
@@ -79,16 +88,21 @@ class UserController extends GetxController {
       );
       if (response.hasError) {
         authError.value = response.response;
+        Toaster.showError(response.response);
         return;
       }
       if (response.body['user'] == null) {
         authError.value = "Response send an empty response";
+        Toaster.showError(authError.value);
         return;
       }
       user.value = User.fromMap(response.body['user']);
       User.saveToStorage(user.value!);
       final token = TokenModel.fromJson(response.body['tokens']);
       token.saveToStorage();
+      if (Get.isRegistered<InventoryController>()) {
+        Get.find<InventoryController>().loadCompany();
+      }
 
       LogService.logEvent(
         actionType: 'LOGIN',
@@ -98,6 +112,7 @@ class UserController extends GetxController {
       Get.offAll(() => ScreenMain());
     } catch (e) {
       authError.value = e.toString();
+      Toaster.showError(authError.value);
     } finally {
       loading.value = false;
     }
@@ -163,7 +178,11 @@ class UserController extends GetxController {
 
     Get.offAll(() => ScreenSplash());
     User.clearStorage();
+    CompanyModel.clearStorage();
     TokenModel.clearStorage();
+    if (Get.isRegistered<InventoryController>()) {
+      Get.find<InventoryController>().company.value = null;
+    }
     user.value = null;
   }
 
@@ -202,7 +221,12 @@ class UserController extends GetxController {
     }
     user.value = User.fromMap(response.body['update']);
     User.saveToStorage(user.value!);
-    Toaster.showSuccess("Currency switched successfully");
+    CompanyModel.clearStorage();
+    if (Get.isRegistered<InventoryController>()) {
+      Get.find<InventoryController>().company.value = null;
+      await Get.find<InventoryController>().loadCompany();
+    }
+    Toaster.showSuccess("Store switched successfully");
     return true;
   }
 
