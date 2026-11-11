@@ -74,7 +74,7 @@ msix_config:
   publisher_display_name: Openchains Technologies
   publisher: CN=3B4EF811-A7D0-426F-AA75-9680E311EFC6
   identity_name: Adchains.Mistpos
-  msix_version: 1.0.1.0
+  msix_version: 1.0.2.0
   logo_path: assets/launcher.png
   capabilities: internetClient, location, bluetooth
   install_certificate: true

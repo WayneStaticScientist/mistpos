@@ -1322,7 +1322,14 @@ class ItemsController extends GetxController {
     final map = update as Map<String, dynamic>;
     final receipt = ItemReceitModel.fromJson(map);
     receipt.applyZimraFiscalizationFrom(map);
-    if (!receipt.fiscalized) {
+    final company = Get.find<InventoryController>().company.value;
+    final requiresZimra = (company?.enableOnlineSales ?? false) &&
+        (company?.onlineSalesWaitForFiscalization ?? true) &&
+        (company?.zimraCertificate != null &&
+            company!.zimraCertificate!.isNotEmpty) &&
+        company.isZimraSubscriptionActive;
+
+    if (requiresZimra && !receipt.fiscalized) {
       Toaster.showError(
         "Server receipt was not fiscalized — check ZIMRA before printing",
       );

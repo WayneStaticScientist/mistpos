@@ -2,13 +2,9 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 import 'package:exui/exui.dart';
-import 'package:exui/material.dart';
 import 'package:flutter/material.dart';
 import 'package:mistpos/features/inventory/controllers/inventory_controller.dart';
 import 'package:mistpos/core/utils/toast.dart';
-import 'package:mistpos/core/themes/app_theme.dart';
-import 'package:iconify_flutter/icons/carbon.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:mistpos/core/utils/currence_converter.dart';
 import 'package:mistpos/core/widgets/inputs/input_form.dart';
 import 'package:mistpos/features/auth/controllers/user_controller.dart';
@@ -230,13 +226,23 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
                         textAlign: TextAlign.center,
                       ),
                       8.gapHeight,
-                      "Waiting for server receipt and ZIMRA SubmitReceipt".text(
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 13,
-                        ),
-                      ),
+                      Builder(builder: (context) {
+                        final company = _invController.company.value;
+                        final hasZimra = (company?.zimraCertificate != null &&
+                                company!.zimraCertificate!.isNotEmpty) &&
+                            company.isZimraSubscriptionActive &&
+                            company.onlineSalesWaitForFiscalization;
+                        return (hasZimra
+                                ? "Waiting for server receipt and ZIMRA SubmitReceipt"
+                                : "Waiting for server receipt…")
+                            .text(
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 13,
+                          ),
+                        );
+                      }),
                     ],
                   ),
                 ),
@@ -625,7 +631,6 @@ class _ScreenCashPaymentState extends State<ScreenCashPayment> {
   }
 
   Widget _buildBalanceDisplay() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     if (change < 0.0) {
       return Container(
         width: double.infinity,

@@ -130,21 +130,35 @@ class _ScreenOnlineSalesSettingsState extends State<ScreenOnlineSalesSettings> {
                     MistMordernLayout(
                       label: "Receipts & fiscalization",
                       children: [
-                        _noteTile(
-                          context,
-                          enabled: _onlineOn,
-                          icon: Bx.receipt,
-                          title: "Synchronous ZIMRA (SubmitReceipt)",
-                          subtitle:
-                              "With online sales on, the server calls FDMS SubmitReceipt during checkout and returns the fiscal receipt in the same response—no polling.",
-                        ),
+                        Obx(() {
+                          final company = _invController.company.value;
+                          final hasZimra = company?.zimraCertificate != null &&
+                              company!.zimraCertificate!.isNotEmpty;
+                          return _switchTile(
+                            context,
+                            enabled: _onlineOn && hasZimra,
+                            icon: Bx.receipt,
+                            title: "Wait for ZIMRA fiscalization",
+                            subtitle: hasZimra
+                                ? "When on, checkout blocks until ZIMRA FDMS accepts the receipt. When off, checkout completes on the server and fiscalization proceeds in background."
+                                : "ZIMRA device is not configured for this company. Receipts are created online without ZIMRA fiscalization.",
+                            value: hasZimra
+                                ? (company.onlineSalesWaitForFiscalization)
+                                : false,
+                            loading: _adminController.companyLoading.value,
+                            onChanged: (v) => _persistCompany(() {
+                              _invController.company.value!
+                                  .onlineSalesWaitForFiscalization = v;
+                            }),
+                          );
+                        }),
                         _noteTile(
                           context,
                           enabled: _onlineOn,
                           icon: Bx.wifi,
                           title: "Internet required",
                           subtitle:
-                              "Online sales and ZIMRA fiscalization both require an active connection.",
+                              "Online sales requires an active internet connection to communicate with the server during checkout.",
                         ),
                       ],
                     ),

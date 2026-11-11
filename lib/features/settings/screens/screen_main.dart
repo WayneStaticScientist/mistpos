@@ -473,7 +473,8 @@ class _ScreenMainState extends State<ScreenMain> {
     final difference = validUntil.difference(DateTime.now()).inDays;
 
     if (isExpired) {
-      final hasNotifiedExpired = storage.read('zimra_notified_expired') ?? false;
+      final hasNotifiedExpired =
+          storage.read('zimra_notified_expired') ?? false;
       if (!hasNotifiedExpired) {
         storage.write('zimra_notified_expired', true);
         Get.defaultDialog(
